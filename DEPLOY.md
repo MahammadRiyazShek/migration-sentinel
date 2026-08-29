@@ -14,7 +14,7 @@ python3 -m http.server 8000 --directory site
 ```
 
 Paths inside the page are relative, so it works from a subdirectory
-(`https://you.github.io/migration-sentinel/`) as well as from a domain root.
+(`https://migration-sentinel-frvo.vercel.app/`) as well as from a domain root.
 
 ---
 
@@ -34,7 +34,7 @@ git commit -m "Migration Sentinel: agentic migration review + review desk"
 gh repo create migration-sentinel --public --source=. --remote=origin --push
 
 # or by hand
-git remote add origin https://github.com/OWNER/migration-sentinel.git
+git remote add origin https://github.com/MahammadRiyazShek/migration-sentinel.git
 git push -u origin main
 ```
 
@@ -45,13 +45,13 @@ Then, once:
 3. Push anything (or **Actions → verify and deploy → Run workflow**)
 
 The URL appears in the workflow summary and under Settings → Pages, in the form
-`https://OWNER.github.io/migration-sentinel/`. First run takes about a minute, nearly all
+`https://migration-sentinel-frvo.vercel.app/`. First run takes about a minute, nearly all
 of it Actions setup: the evaluation itself is under a second.
 
 With the CLI, the same thing without opening the browser:
 
 ```bash
-gh api -X POST repos/OWNER/migration-sentinel/pages -f build_type=workflow
+gh api -X POST repos/MahammadRiyazShek/migration-sentinel/pages -f build_type=workflow
 gh workflow run "verify and deploy"
 gh run watch
 ```

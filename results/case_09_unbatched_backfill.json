@@ -210,7 +210,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.6,
+   "ms": 0.67,
    "result_summary": "Schema"
   },
   {
@@ -219,7 +219,7 @@
    "args": {
     "sql": "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL;\nALTER TABLE invoices ALTER COLUMN currency SET NOT NULL;\n"
    },
-   "ms": 0.05,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "dml_update",
@@ -269,7 +269,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -361,7 +361,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.1,
+   "ms": 0.15,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -707,7 +707,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.15,
+   "ms": 2.79,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -728,7 +728,7 @@
     "hazard_code": "NOT_NULL_NO_DEFAULT",
     "table": "invoices"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -753,7 +753,7 @@
    "args": {
     "sql": "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE currency IS NULL LIMIT 5000);"
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "dml_update",
@@ -787,7 +787,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1015,7 +1015,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.19,
+   "ms": 2.61,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1038,7 +1038,7 @@
   "tokens_out": 166,
   "cost_usd": 0.0
  },
- "wall_ms": 5.9,
+ "wall_ms": 7.3,
  "severity_order": [
   "low",
   "medium",

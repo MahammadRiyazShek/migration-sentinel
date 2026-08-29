@@ -4,7 +4,7 @@
 
 Do not ship this as written. 1 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_08_narrowing_country_code` · case `case_08_narrowing_country_code` · owning service `web` · 5.9 ms · model scripted-v1 (4 calls, $0.0000)
+`run eval-case_08_narrowing_country_code` · case `case_08_narrowing_country_code` · owning service `web` · 7.3 ms · model scripted-v1 (4 calls, $0.0000)
 
 ## Hazards
 

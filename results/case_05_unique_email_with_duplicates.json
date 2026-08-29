@@ -254,7 +254,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.53,
+   "ms": 0.73,
    "result_summary": "Schema"
   },
   {
@@ -263,7 +263,7 @@
    "args": {
     "sql": "CREATE UNIQUE INDEX idx_customers_email ON customers (email);\n"
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": [
     {
      "kind": "create_index",
@@ -305,7 +305,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -393,7 +393,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.1,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -759,7 +759,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.3,
+   "ms": 2.78,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -882,7 +882,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1114,7 +1114,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.16,
+   "ms": 2.66,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1137,7 +1137,7 @@
   "tokens_out": 221,
   "cost_usd": 0.0
  },
- "wall_ms": 5.8,
+ "wall_ms": 7.2,
  "severity_order": [
   "low",
   "medium",

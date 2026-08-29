@@ -4,7 +4,7 @@
 
 Do not ship this as written. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_03_index_on_hot_table` · case `case_03_index_on_hot_table` · owning service `billing-api` · 5.8 ms · model scripted-v1 (3 calls, $0.0000)
+`run eval-case_03_index_on_hot_table` · case `case_03_index_on_hot_table` · owning service `billing-api` · 7.4 ms · model scripted-v1 (3 calls, $0.0000)
 
 ## Hazards
 

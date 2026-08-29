@@ -6,7 +6,7 @@ proves the first phase breaks nothing.**
 
 Offline, deterministic, zero dependencies, sub-second for all 12 evaluation cases.
 
-**Live review desk:** <https://OWNER.github.io/migration-sentinel/> (every recorded packet, plus a
+**Live review desk:** <https://migration-sentinel-frvo.vercel.app/> (every recorded packet, plus a
 button that boots the pipeline inside your browser and runs it on your own SQL). Nothing is uploaded:
 the runtime is a WebAssembly CPython in the tab. Deploy your own copy in about two minutes with
 [`DEPLOY.md`](DEPLOY.md).
@@ -111,7 +111,7 @@ Full table: [`results/comparison.md`](results/comparison.md). Raw scores:
 | Findings backed by machine evidence | 0/19 | 0/29 | **34/34** |
 | Verified rollout plans produced | 0/12 | 0/12 | **12/12** |
 | Modelled reviewer minutes per case | 29.7 | 34.7 | **8.5** |
-| Wall clock per case (measured) | 0.2 ms | 0.1 ms | 8.5 ms |
+| Wall clock per case (measured) | 0.2 ms | 0.1 ms | ~8 ms |
 | Model tokens, all 12 cases | 5,837 | 11,577 | 25,380 |
 
 Reviewer minutes are **modelled** from stated assumptions in `eval/scoring.py`, not measured with a
