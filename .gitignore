@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.venv/
+memory/learned.jsonl
+cassettes/
+.DS_Store

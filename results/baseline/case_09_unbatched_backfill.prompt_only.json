@@ -1,0 +1,33 @@
+{
+ "case_id": "case_09_unbatched_backfill",
+ "variant": "prompt_only",
+ "verdict": "REQUEST_CHANGES",
+ "hazards": [
+  {
+   "code": "NOT_NULL_NO_DEFAULT",
+   "severity": "blocker",
+   "note": "NOT NULL without a default will reject existing rows and in-flight inserts.",
+   "evidence": [],
+   "source": "model"
+  },
+  {
+   "code": "UNBATCHED_BACKFILL",
+   "severity": "high",
+   "note": "The backfill is one unbounded UPDATE; it will hold locks for its whole duration.",
+   "evidence": [],
+   "source": "model"
+  }
+ ],
+ "review_text": "Verdict: REQUEST_CHANGES\n\n- [BLOCKER] NOT_NULL_NO_DEFAULT: NOT NULL without a default will reject existing rows and in-flight inserts.\n- [HIGH] UNBATCHED_BACKFILL: The backfill is one unbounded UPDATE; it will hold locks for its whole duration.",
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 1,
+  "tokens_in": 443,
+  "tokens_out": 61,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 0.2,
+ "plan": null,
+ "plan_verified": false
+}

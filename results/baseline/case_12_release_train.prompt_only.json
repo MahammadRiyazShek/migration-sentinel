@@ -1,0 +1,54 @@
+{
+ "case_id": "case_12_release_train",
+ "variant": "prompt_only",
+ "verdict": "REQUEST_CHANGES",
+ "hazards": [
+  {
+   "code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+   "severity": "high",
+   "note": "The diff drops a column or table in a single step; old application code will break.",
+   "evidence": [],
+   "source": "model"
+  },
+  {
+   "code": "INDEX_LOCK_NO_CONCURRENT",
+   "severity": "high",
+   "note": "CREATE INDEX without CONCURRENTLY takes a lock that blocks writes.",
+   "evidence": [],
+   "source": "model"
+  },
+  {
+   "code": "UNIQUE_VIOLATION_EXISTING_DATA",
+   "severity": "high",
+   "note": "Adding uniqueness may fail if duplicates already exist - please check first.",
+   "evidence": [],
+   "source": "model"
+  },
+  {
+   "code": "UNBATCHED_BACKFILL",
+   "severity": "high",
+   "note": "The backfill is one unbounded UPDATE; it will hold locks for its whole duration.",
+   "evidence": [],
+   "source": "model"
+  },
+  {
+   "code": "MISSING_ROLLBACK",
+   "severity": "medium",
+   "note": "No rollback statements are included in the file.",
+   "evidence": [],
+   "source": "model"
+  }
+ ],
+ "review_text": "Verdict: REQUEST_CHANGES\n\n- [HIGH] DESTRUCTIVE_NO_EXPAND_CONTRACT: The diff drops a column or table in a single step; old application code will break.\n- [HIGH] INDEX_LOCK_NO_CONCURRENT: CREATE INDEX without CONCURRENTLY takes a lock that blocks writes.\n- [HIGH] UNIQUE_VIOLATION_EXISTING_DATA: Adding uniqueness may fail if duplicates already exist - please check first.\n- [HIGH] UNBATCHED_BACKFILL: The backfill is one unbounded UPDATE; it will hold locks for its whole duration.\n- [MEDIUM] MISSING_ROLLBACK: No rollback statements are included in the file.",
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 1,
+  "tokens_in": 508,
+  "tokens_out": 139,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 0.1,
+ "plan": null,
+ "plan_verified": false
+}

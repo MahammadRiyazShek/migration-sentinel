@@ -1,0 +1,1225 @@
+{
+ "run_id": "eval-case_02_drop_column_still_read",
+ "case_id": "case_02_drop_column_still_read",
+ "title": "Drop customers.company_name after the product decision to remove it",
+ "owner_service": "web",
+ "verdict": "BLOCK",
+ "summary": "Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 1 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "counts": {
+  "low": 0,
+  "medium": 1,
+  "high": 3,
+  "blocker": 1
+ },
+ "hazards": [
+  {
+   "code": "BREAKING_QUERY",
+   "severity": "blocker",
+   "summary": "q_support_lookup fails after the migration: OperationalError: no such column: company_name",
+   "evidence": [
+    "shadow replay: `SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'` -> OperationalError: no such column: company_name"
+   ],
+   "objects": [
+    "q_support_lookup"
+   ],
+   "services": [
+    "support-admin"
+   ],
+   "source": "replay",
+   "memory_refs": [],
+   "remediation": "",
+   "title": "Live query breaks after migration"
+  },
+  {
+   "code": "CROSS_SERVICE_UNCOORDINATED",
+   "severity": "high",
+   "summary": "the migration is owned by `web` but breakage lands in bi, support-admin",
+   "evidence": [
+    "corpus ownership of failing statements: ['bi', 'support-admin']"
+   ],
+   "objects": [],
+   "services": [
+    "bi",
+    "support-admin"
+   ],
+   "source": "static",
+   "memory_refs": [],
+   "remediation": "",
+   "title": "Impact lands on a service owned by another team"
+  },
+  {
+   "code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+   "severity": "high",
+   "summary": "drop column on customers.company_name lands in a single deploy",
+   "evidence": [
+    "statement 0: `ALTER TABLE customers DROP COLUMN company_name`"
+   ],
+   "objects": [
+    "customers.company_name"
+   ],
+   "services": [],
+   "source": "static",
+   "memory_refs": [
+    "INC-2023-09"
+   ],
+   "remediation": "",
+   "title": "Destructive change shipped in a single step"
+  },
+  {
+   "code": "SELECT_STAR_DRIFT",
+   "severity": "high",
+   "summary": "q_bi_summary still runs but its column set changes (removed ['company_name'], added none)",
+   "evidence": [
+    "shadow replay columns before=['id', 'email', 'full_name', 'company_name', 'country_code', 'plan', 'mrr_cents', 'signed_up_at'] after=['id', 'email', 'full_name', 'country_code', 'plan', 'mrr_cents', 'signed_up_at']"
+   ],
+   "objects": [
+    "q_bi_summary"
+   ],
+   "services": [
+    "bi"
+   ],
+   "source": "replay",
+   "memory_refs": [
+    "INC-2025-02"
+   ],
+   "remediation": "",
+   "title": "SELECT * consumer receives a different column set"
+  },
+  {
+   "code": "MISSING_ROLLBACK",
+   "severity": "medium",
+   "summary": "the change ships without a rollback script",
+   "evidence": [
+    "case field `rollback_sql` is empty"
+   ],
+   "objects": [],
+   "services": [],
+   "source": "static",
+   "memory_refs": [],
+   "remediation": "",
+   "title": "No rollback path supplied"
+  }
+ ],
+ "blast_radius": {
+  "dependent_queries": [
+   {
+    "query_id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "matched": [
+     "customers"
+    ],
+    "uses_select_star": false,
+    "label": "customer profile page"
+   },
+   {
+    "query_id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "matched": [
+     "customers"
+    ],
+    "uses_select_star": false,
+    "label": "signup insert"
+   },
+   {
+    "query_id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "high",
+    "matched": [
+     "company_name",
+     "customers"
+    ],
+    "uses_select_star": false,
+    "label": "support customer lookup"
+   },
+   {
+    "query_id": "q_bi_summary",
+    "service": "bi",
+    "criticality": "high",
+    "matched": [
+     "customer_billing_summary"
+    ],
+    "uses_select_star": true,
+    "label": "dbt model stg_customers"
+   },
+   {
+    "query_id": "q_bi_mrr",
+    "service": "bi",
+    "criticality": "medium",
+    "matched": [
+     "customers"
+    ],
+    "uses_select_star": false,
+    "label": "MRR by plan"
+   },
+   {
+    "query_id": "q_bi_country",
+    "service": "bi",
+    "criticality": "low",
+    "matched": [
+     "customers"
+    ],
+    "uses_select_star": false,
+    "label": "customers by country"
+   }
+  ],
+  "blast_score": 17,
+  "replay": {
+   "materialised": true,
+   "schema_errors": [],
+   "data_errors": [],
+   "broken": [
+    {
+     "query_id": "q_support_lookup",
+     "service": "support-admin",
+     "criticality": "high",
+     "label": "support customer lookup",
+     "error": "OperationalError: no such column: company_name",
+     "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+    }
+   ],
+   "column_drift": [
+    {
+     "query_id": "q_bi_summary",
+     "service": "bi",
+     "criticality": "high",
+     "before": [
+      "id",
+      "email",
+      "full_name",
+      "company_name",
+      "country_code",
+      "plan",
+      "mrr_cents",
+      "signed_up_at"
+     ],
+     "after": [
+      "id",
+      "email",
+      "full_name",
+      "country_code",
+      "plan",
+      "mrr_cents",
+      "signed_up_at"
+     ],
+     "removed": [
+      "company_name"
+     ],
+     "added": [],
+     "sql": "SELECT * FROM customer_billing_summary"
+    },
+    {
+     "query_id": "__view__customer_billing_summary",
+     "service": "database",
+     "criticality": "high",
+     "before": [
+      "id",
+      "email",
+      "full_name",
+      "company_name",
+      "country_code",
+      "plan",
+      "mrr_cents",
+      "signed_up_at"
+     ],
+     "after": [
+      "id",
+      "email",
+      "full_name",
+      "country_code",
+      "plan",
+      "mrr_cents",
+      "signed_up_at"
+     ],
+     "removed": [
+      "company_name"
+     ],
+     "added": [],
+     "sql": "SELECT * FROM \"customer_billing_summary\" LIMIT 1"
+    }
+   ],
+   "rowcount_drift": [],
+   "data_loss": [],
+   "queries_run": 16,
+   "queries_ok_before": 16,
+   "queries_ok_after": 15
+  }
+ },
+ "plan": {
+  "attempt": 1,
+  "phase1_sql": [],
+  "phase2_sql": [
+   "ALTER TABLE \"customers\" DROP COLUMN \"company_name\";"
+  ],
+  "rollback_sql": [],
+  "code_steps": [
+   "remove every read and write of customers.company_name, then wait one full deploy cycle"
+  ],
+  "human_gates": [
+   "confirm customers.company_name has had zero reads for the agreed observation window before phase 2",
+   "no rollback could be generated automatically; write one before shipping"
+  ],
+  "questions": [
+   "Which deploy lands first: the query change or the schema change?",
+   "Has the owning team agreed to the deploy order?",
+   "What is the accepted risk for DESTRUCTIVE_NO_EXPAND_CONTRACT?",
+   "What is the accepted risk for MISSING_ROLLBACK?",
+   "Do any consumers read this result set positionally or serialise it whole?"
+  ],
+  "policy": {
+   "include_view_changes": true,
+   "expand_contract_type_change": true,
+   "minimal_phase1": false,
+   "notes": []
+  }
+ },
+ "plan_verification": {
+  "verified": true,
+  "problems": [],
+  "replay": {
+   "materialised": true,
+   "schema_errors": [],
+   "data_errors": [],
+   "broken": [],
+   "column_drift": [],
+   "rowcount_drift": [],
+   "data_loss": [],
+   "queries_run": 16,
+   "queries_ok_before": 16,
+   "queries_ok_after": 16
+  },
+  "unmodelled": []
+ },
+ "escalated_to_human": false,
+ "coverage_gaps": [],
+ "change_set": {
+  "ops": [
+   {
+    "kind": "drop_column",
+    "table": "customers",
+    "column": "company_name",
+    "detail": {},
+    "sql": "ALTER TABLE customers DROP COLUMN company_name",
+    "index": 0
+   }
+  ],
+  "op_kinds": [
+   "drop_column"
+  ],
+  "tables_touched": [
+   "customers"
+  ],
+  "columns_touched": [
+   "customers.company_name"
+  ],
+  "unmodelled": []
+ },
+ "attempts": 1,
+ "features": {
+  "replay": true,
+  "static": true,
+  "memory": true,
+  "verify": true
+ },
+ "tool_calls": [
+  {
+   "agent": "cartographer",
+   "tool": "schema.parse",
+   "args": {
+    "sql": "CREATE TABLE customers (\n  id SERIAL PRIMARY KEY,\n  email TEXT NOT NULL,\n  full_name TEXT,\n  company_name TEXT,\n  country_code TEXT NOT NULL DEFAULT 'US',\n  plan TEXT NOT NULL DEFAULT 'free',\n  mrr_cents INTEGER NOT NULL DEFAULT 0,\n  signed_up_at TIMESTAMPTZ NOT NULL,\n  CONSTRAINT customers_plan_chk CHECK (plan IN ('free','team','business','enterprise'))\n);\n\nCREATE TABLE subscriptions (\n  id SERIA...",
+    "row_estimates": {
+     "customers": 2400000,
+     "subscriptions": 2600000,
+     "invoices": 48000000,
+     "invoice_lines": 190000000,
+     "usage_events": 900000000
+    }
+   },
+   "ms": 0.52,
+   "result_summary": "Schema"
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.parse",
+   "args": {
+    "sql": "ALTER TABLE customers DROP COLUMN company_name;\n"
+   },
+   "ms": 0.02,
+   "result_summary": [
+    {
+     "kind": "drop_column",
+     "table": "customers",
+     "column": "company_name",
+     "detail": {},
+     "sql": "ALTER TABLE customers DROP COLUMN company_name",
+     "index": 0
+    }
+   ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "schema.apply_ops",
+   "args": {
+    "schema": "Schema",
+    "ops": [
+     {
+      "kind": "drop_column",
+      "table": "customers",
+      "column": "company_name",
+      "detail": {},
+      "sql": "ALTER TABLE customers DROP COLUMN company_name",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.09,
+   "result_summary": [
+    "Schema",
+    []
+   ]
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "corpus.dependents",
+   "args": {
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+6 more"
+    ],
+    "ops": [
+     {
+      "kind": "drop_column",
+      "table": "customers",
+      "column": "company_name",
+      "detail": {},
+      "sql": "ALTER TABLE customers DROP COLUMN company_name",
+      "index": 0
+     }
+    ],
+    "schema": "Schema"
+   },
+   "ms": 0.1,
+   "result_summary": [
+    {
+     "query_id": "q_web_profile",
+     "service": "web",
+     "criticality": "critical",
+     "matched": [
+      "customers"
+     ],
+     "uses_select_star": false,
+     "label": "customer profile page"
+    },
+    {
+     "query_id": "q_web_signup",
+     "service": "web",
+     "criticality": "critical",
+     "matched": [
+      "customers"
+     ],
+     "uses_select_star": false,
+     "label": "signup insert"
+    },
+    {
+     "query_id": "q_support_lookup",
+     "service": "support-admin",
+     "criticality": "high",
+     "matched": [
+      "company_name",
+      "customers"
+     ],
+     "uses_select_star": false,
+     "label": "support customer lookup"
+    },
+    {
+     "query_id": "q_bi_summary",
+     "service": "bi",
+     "criticality": "high",
+     "matched": [
+      "customer_billing_summary"
+     ],
+     "uses_select_star": true,
+     "label": "dbt model stg_customers"
+    },
+    {
+     "query_id": "q_bi_mrr",
+     "service": "bi",
+     "criticality": "medium",
+     "matched": [
+      "customers"
+     ],
+     "uses_select_star": false,
+     "label": "MRR by plan"
+    },
+    {
+     "query_id": "q_bi_country",
+     "service": "bi",
+     "criticality": "low",
+     "matched": [
+      "customers"
+     ],
+     "uses_select_star": false,
+     "label": "customers by country"
+    }
+   ]
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "corpus.blast_score",
+   "args": {
+    "hits": [
+     {
+      "query_id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "matched": [
+       "customers"
+      ],
+      "uses_select_star": false,
+      "label": "customer profile page"
+     },
+     {
+      "query_id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "matched": [
+       "customers"
+      ],
+      "uses_select_star": false,
+      "label": "signup insert"
+     },
+     {
+      "query_id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "matched": [
+       "company_name",
+       "customers"
+      ],
+      "uses_select_star": false,
+      "label": "support customer lookup"
+     },
+     {
+      "query_id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "matched": [
+       "customer_billing_summary"
+      ],
+      "uses_select_star": true,
+      "label": "dbt model stg_customers"
+     },
+     {
+      "query_id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "matched": [
+       "customers"
+      ],
+      "uses_select_star": false,
+      "label": "MRR by plan"
+     },
+     {
+      "query_id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "matched": [
+       "customers"
+      ],
+      "uses_select_star": false,
+      "label": "customers by country"
+     }
+    ]
+   },
+   "ms": 0.02,
+   "result_summary": 17
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "shadow.replay",
+   "args": {
+    "pre_schema": "Schema",
+    "post_schema": "Schema",
+    "ops": [
+     {
+      "kind": "drop_column",
+      "table": "customers",
+      "column": "company_name",
+      "detail": {},
+      "sql": "ALTER TABLE customers DROP COLUMN company_name",
+      "index": 0
+     }
+    ],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+6 more"
+    ]
+   },
+   "ms": 2.16,
+   "result_summary": {
+    "materialised": true,
+    "schema_errors": [],
+    "data_errors": [],
+    "broken": [
+     {
+      "query_id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "error": "OperationalError: no such column: company_name",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     }
+    ],
+    "column_drift": [
+     {
+      "query_id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "before": [
+       "id",
+       "email",
+       "full_name",
+       "company_name",
+       "country_code",
+       "plan",
+       "mrr_cents",
+       "signed_up_at"
+      ],
+      "after": [
+       "id",
+       "email",
+       "full_name",
+       "country_code",
+       "plan",
+       "mrr_cents",
+       "signed_up_at"
+      ],
+      "removed": [
+       "company_name"
+      ],
+      "added": [],
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "query_id": "__view__customer_billing_summary",
+      "service": "database",
+      "criticality": "high",
+      "before": [
+       "id",
+       "email",
+       "full_name",
+       "company_name",
+       "country_code",
+       "plan",
+       "mrr_cents",
+       "signed_up_at"
+      ],
+      "after": [
+       "id",
+       "email",
+       "full_name",
+       "country_code",
+       "plan",
+       "mrr_cents",
+       "signed_up_at"
+      ],
+      "removed": [
+       "company_name"
+      ],
+      "added": [],
+      "sql": "SELECT * FROM \"customer_billing_summary\" LIMIT 1"
+     }
+    ],
+    "rowcount_drift": [],
+    "data_loss": [],
+    "queries_run": 16,
+    "queries_ok_before": 16,
+    "queries_ok_after": 15
+   }
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "BREAKING_QUERY",
+    "table": "q_support_lookup"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    []
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "CROSS_SERVICE_UNCOORDINATED",
+    "table": null
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    []
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+    "table": "customers"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    [
+     "INC-2023-09"
+    ]
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "SELECT_STAR_DRIFT",
+    "table": "q_bi_summary"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    [
+     "INC-2025-02"
+    ]
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "MISSING_ROLLBACK",
+    "table": null
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    []
+   ]
+  },
+  {
+   "agent": "verifier",
+   "tool": "migration.parse",
+   "args": {
+    "sql": ""
+   },
+   "ms": 0.01,
+   "result_summary": []
+  },
+  {
+   "agent": "verifier",
+   "tool": "schema.apply_ops",
+   "args": {
+    "schema": "Schema",
+    "ops": []
+   },
+   "ms": 0.04,
+   "result_summary": [
+    "Schema",
+    []
+   ]
+  },
+  {
+   "agent": "verifier",
+   "tool": "shadow.replay",
+   "args": {
+    "pre_schema": "Schema",
+    "post_schema": "Schema",
+    "ops": [],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+6 more"
+    ]
+   },
+   "ms": 2.15,
+   "result_summary": {
+    "materialised": true,
+    "schema_errors": [],
+    "data_errors": [],
+    "broken": [],
+    "column_drift": [],
+    "rowcount_drift": [],
+    "data_loss": [],
+    "queries_run": 16,
+    "queries_ok_before": 16,
+    "queries_ok_after": 16
+   }
+  }
+ ],
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 7,
+  "tokens_in": 2749,
+  "tokens_out": 471,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 5.8,
+ "severity_order": [
+  "low",
+  "medium",
+  "high",
+  "blocker"
+ ]
+}
