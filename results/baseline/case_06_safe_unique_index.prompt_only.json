@@ -1,0 +1,26 @@
+{
+ "case_id": "case_06_safe_unique_index",
+ "variant": "prompt_only",
+ "verdict": "REQUEST_CHANGES",
+ "hazards": [
+  {
+   "code": "UNIQUE_VIOLATION_EXISTING_DATA",
+   "severity": "high",
+   "note": "Adding uniqueness may fail if duplicates already exist - please check first.",
+   "evidence": [],
+   "source": "model"
+  }
+ ],
+ "review_text": "Verdict: REQUEST_CHANGES\n\n- [HIGH] UNIQUE_VIOLATION_EXISTING_DATA: Adding uniqueness may fail if duplicates already exist - please check first.",
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 1,
+  "tokens_in": 431,
+  "tokens_out": 35,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 0.0,
+ "plan": null,
+ "plan_verified": false
+}

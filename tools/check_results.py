@@ -1,0 +1,74 @@
+"""Fail the build if the numbers the README claims are no longer true.
+
+    python3 tools/check_results.py      # after eval/run_eval.py --ablations
+
+Every assertion below is a sentence somewhere in README.md or on the site. If an
+edit to the pipeline moves one of them, CI stops instead of quietly publishing a
+page that disagrees with its own evidence.
+"""
+from __future__ import annotations
+
+import json
+import pathlib
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+CLAIMS: list[tuple[str, bool, str]] = []
+
+
+def claim(text: str, ok: bool, got: object) -> None:
+    CLAIMS.append((text, bool(ok), str(got)))
+
+
+def main() -> int:
+    ev = json.loads((ROOT / "results" / "evaluation.json").read_text())
+    ab = json.loads((ROOT / "results" / "ablation.json").read_text())
+    arms = ev["arms"]
+    S = arms["agent_pipeline"]["aggregate"]
+    A = arms["baseline_prompt_only"]["aggregate"]
+    B = arms["baseline_prompt_with_schema"]["aggregate"]
+
+    claim("12 evaluation cases in every arm",
+          S["cases"] == A["cases"] == B["cases"] == 12, S["cases"])
+    claim("pipeline makes no unsafe approval", S["unsafe_approvals"] == 0, S["unsafe_approvals"])
+    claim("both baselines make exactly one unsafe approval",
+          A["unsafe_approvals"] == 1 and B["unsafe_approvals"] == 1,
+          f"{A['unsafe_approvals']}, {B['unsafe_approvals']}")
+    claim("pipeline strict F1 at least 0.95", S["strict"]["f1"] >= 0.95, S["strict"]["f1"])
+    claim("pipeline beats both baselines on strict recall",
+          S["strict"]["recall"] > max(A["strict"]["recall"], B["strict"]["recall"]),
+          S["strict"]["recall"])
+    claim("every pipeline finding cites machine evidence",
+          S["findings_with_evidence"] == S["findings_total"],
+          f"{S['findings_with_evidence']}/{S['findings_total']}")
+    claim("no baseline finding cites machine evidence",
+          A["findings_with_evidence"] == 0 and B["findings_with_evidence"] == 0,
+          f"{A['findings_with_evidence']}, {B['findings_with_evidence']}")
+    claim("12/12 verified expand/contract plans", S["verified_plans"] == 12, S["verified_plans"])
+    claim("no false alarm on the clean case", S["false_alarms_on_clean_cases"] == 0,
+          S["false_alarms_on_clean_cases"])
+    claim("modelled reviewer minutes cut by at least half",
+          S["modelled_reviewer_minutes_per_case"] <= B["modelled_reviewer_minutes_per_case"] / 2,
+          S["modelled_reviewer_minutes_per_case"])
+    claim("offline run costs nothing", S["cost_usd_total"] == 0, S["cost_usd_total"])
+
+    if ab:
+        replay_only = ab["no_static"]["aggregate"]["unsafe_approvals"]
+        rules_only = ab["no_replay"]["aggregate"]["unsafe_approvals"]
+        claim("replay only is worse than rules only on the primary metric",
+              replay_only > rules_only, f"replay-only {replay_only} vs rules-only {rules_only}")
+        claim("removing either layer costs at least one unsafe approval",
+              min(replay_only, rules_only) > S["unsafe_approvals"],
+              f"{replay_only}, {rules_only}")
+
+    width = max(len(c[0]) for c in CLAIMS)
+    bad = 0
+    for text, ok, got in CLAIMS:
+        bad += not ok
+        print(f"{'PASS' if ok else 'FAIL'}  {text.ljust(width)}  {got}")
+    print(f"\n{len(CLAIMS) - bad}/{len(CLAIMS)} claims hold")
+    return 1 if bad else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

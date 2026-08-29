@@ -1,0 +1,33 @@
+{
+ "case_id": "case_02_drop_column_still_read",
+ "variant": "prompt_only",
+ "verdict": "REQUEST_CHANGES",
+ "hazards": [
+  {
+   "code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+   "severity": "high",
+   "note": "The diff drops a column or table in a single step; old application code will break.",
+   "evidence": [],
+   "source": "model"
+  },
+  {
+   "code": "MISSING_ROLLBACK",
+   "severity": "medium",
+   "note": "No rollback statements are included in the file.",
+   "evidence": [],
+   "source": "model"
+  }
+ ],
+ "review_text": "Verdict: REQUEST_CHANGES\n\n- [HIGH] DESTRUCTIVE_NO_EXPAND_CONTRACT: The diff drops a column or table in a single step; old application code will break.\n- [MEDIUM] MISSING_ROLLBACK: No rollback statements are included in the file.",
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 1,
+  "tokens_in": 406,
+  "tokens_out": 57,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 0.0,
+ "plan": null,
+ "plan_verified": false
+}

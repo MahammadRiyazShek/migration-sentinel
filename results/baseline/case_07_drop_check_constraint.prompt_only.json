@@ -1,0 +1,18 @@
+{
+ "case_id": "case_07_drop_check_constraint",
+ "variant": "prompt_only",
+ "verdict": "APPROVE",
+ "hazards": [],
+ "review_text": "Verdict: APPROVE\n\n- No problems found in the migration as written. Looks safe to ship.",
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 1,
+  "tokens_in": 442,
+  "tokens_out": 21,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 0.0,
+ "plan": null,
+ "plan_verified": false
+}
