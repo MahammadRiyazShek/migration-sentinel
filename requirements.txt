@@ -1,2 +1,0 @@
-# Intentionally empty: Migration Sentinel runs on the Python 3.11+ standard library.
-# Optional hosted-model providers use urllib, so there is still nothing to install.
