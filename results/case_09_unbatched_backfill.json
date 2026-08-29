@@ -210,7 +210,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.67,
+   "ms": 0.68,
    "result_summary": "Schema"
   },
   {
@@ -361,7 +361,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.15,
+   "ms": 0.11,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -707,7 +707,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.79,
+   "ms": 2.89,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1015,7 +1015,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.61,
+   "ms": 2.7,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1038,7 +1038,7 @@
   "tokens_out": 166,
   "cost_usd": 0.0
  },
- "wall_ms": 7.3,
+ "wall_ms": 7.6,
  "severity_order": [
   "low",
   "medium",

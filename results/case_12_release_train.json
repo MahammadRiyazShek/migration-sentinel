@@ -453,7 +453,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.64,
+   "ms": 0.71,
    "result_summary": "Schema"
   },
   {
@@ -462,7 +462,7 @@
    "args": {
     "sql": "ALTER TABLE subscriptions ADD COLUMN billing_interval TEXT NOT NULL DEFAULT 'monthly';\nCREATE UNIQUE INDEX idx_subscriptions_customer ON subscriptions (customer_id);\nALTER TABLE invoices DROP COLUMN tax_rate;\nCREATE INDEX idx_usage_events_name ON usage_events (event_name);\nALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk;\nUPDATE invoices SET status = 'open' WHERE status = 'draft';..."
    },
-   "ms": 0.4,
+   "ms": 0.42,
    "result_summary": [
     {
      "kind": "add_column",
@@ -634,7 +634,7 @@
      }
     ]
    },
-   "ms": 0.09,
+   "ms": 0.1,
    "result_summary": [
     "Schema",
     [
@@ -1242,7 +1242,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.88,
+   "ms": 3.05,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1513,7 +1513,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -1784,7 +1784,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.99,
+   "ms": 2.86,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1807,7 +1807,7 @@
   "tokens_out": 641,
   "cost_usd": 0.0
  },
- "wall_ms": 8.6,
+ "wall_ms": 8.8,
  "severity_order": [
   "low",
   "medium",

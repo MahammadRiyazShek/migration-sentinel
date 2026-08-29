@@ -198,7 +198,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.72,
+   "ms": 0.74,
    "result_summary": "Schema"
   },
   {
@@ -249,7 +249,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -337,7 +337,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.13,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -734,7 +734,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_invoices_status\" ON \"invoices\" (\"status\");"
    },
-   "ms": 0.04,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "create_index",
@@ -1008,7 +1008,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.68,
+   "ms": 2.62,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],

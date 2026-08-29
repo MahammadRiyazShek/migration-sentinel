@@ -336,7 +336,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.68,
+   "ms": 0.69,
    "result_summary": "Schema"
   },
   {
@@ -587,7 +587,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.02,
    "result_summary": 17
   },
   {
@@ -809,7 +809,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.91,
+   "ms": 2.73,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1192,7 +1192,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.68,
+   "ms": 2.74,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],

@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.68 ms)
+**tool** `schema.parse` (0.69 ms)
 
 ```json
 {
@@ -257,7 +257,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -330,7 +330,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.91 ms)
+**tool** `shadow.replay` (2.73 ms)
 
 ```json
 {
@@ -866,7 +866,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.68 ms)
+**tool** `shadow.replay` (2.74 ms)
 
 ```json
 {

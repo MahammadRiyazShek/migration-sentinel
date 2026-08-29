@@ -197,7 +197,7 @@
    "args": {
     "sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id);\n"
    },
-   "ms": 0.18,
+   "ms": 0.16,
    "result_summary": [
     {
      "kind": "add_constraint",
@@ -663,7 +663,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.77,
+   "ms": 2.97,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -698,7 +698,7 @@
    "args": {
     "sql": "ALTER TABLE \"invoices\" ADD CONSTRAINT \"invoices_customer_fk\" FOREIGN KEY (customer_id) REFERENCES customers (id) NOT VALID;"
    },
-   "ms": 0.09,
+   "ms": 0.08,
    "result_summary": [
     {
      "kind": "add_constraint",
@@ -969,7 +969,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.6,
+   "ms": 2.61,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -992,7 +992,7 @@
   "tokens_out": 120,
   "cost_usd": 0.0
  },
- "wall_ms": 7.1,
+ "wall_ms": 7.4,
  "severity_order": [
   "low",
   "medium",

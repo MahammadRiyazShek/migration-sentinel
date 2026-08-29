@@ -4,7 +4,7 @@
 
 Shippable, but only as the staged plan below. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_09_unbatched_backfill` · case `case_09_unbatched_backfill` · owning service `billing-api` · 7.3 ms · model scripted-v1 (4 calls, $0.0000)
+`run eval-case_09_unbatched_backfill` · case `case_09_unbatched_backfill` · owning service `billing-api` · 7.6 ms · model scripted-v1 (4 calls, $0.0000)
 
 ## Hazards
 

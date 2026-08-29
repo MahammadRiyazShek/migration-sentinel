@@ -97,6 +97,9 @@ command required.
 
 * The docket and all 12 recorded review packets render immediately, from
   `data/bundle.json`.
+* The engine also loads Pyodide's `sqlite3` package (the stdlib module is unvendored in the
+  Pyodide distribution). The shadow database is real SQLite, so `sentinel` cannot be imported
+  without it; the loader pulls it in before mounting the package.
 * **Boot the engine in this browser** downloads Pyodide 0.26.4 from jsDelivr (about 12 MB,
   browser-cached), mounts the ~38 files listed in `py/manifest.json` into its virtual
   filesystem and imports `sentinel` from there.

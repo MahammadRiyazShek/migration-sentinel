@@ -190,7 +190,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.66,
+   "ms": 0.69,
    "result_summary": "Schema"
   },
   {
@@ -199,7 +199,7 @@
    "args": {
     "sql": "ALTER TABLE customers DROP CONSTRAINT customers_plan_chk;\n"
    },
-   "ms": 0.62,
+   "ms": 0.6,
    "result_summary": [
     {
      "kind": "drop_constraint",
@@ -231,7 +231,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.09,
    "result_summary": [
     "Schema",
     []
@@ -314,7 +314,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -669,7 +669,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.57,
+   "ms": 2.7,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -928,7 +928,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.71,
+   "ms": 2.83,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -951,7 +951,7 @@
   "tokens_out": 104,
   "cost_usd": 0.0
  },
- "wall_ms": 7.4,
+ "wall_ms": 7.8,
  "severity_order": [
   "low",
   "medium",

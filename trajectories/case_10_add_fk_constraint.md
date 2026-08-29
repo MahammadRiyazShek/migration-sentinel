@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.18 ms)
+**tool** `migration.parse` (0.16 ms)
 
 ```json
 {
@@ -325,7 +325,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (2.77 ms)
+**tool** `shadow.replay` (2.97 ms)
 
 ```json
 {
@@ -547,7 +547,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.09 ms)
+**tool** `migration.parse` (0.08 ms)
 
 ```json
 {
@@ -613,7 +613,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.6 ms)
+**tool** `shadow.replay` (2.61 ms)
 
 ```json
 {

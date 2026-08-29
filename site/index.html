@@ -608,7 +608,7 @@ def _plain(o):
 def run_case_json(payload_json):
     """Same call the CLI makes. Returns the packet, the trajectory and the baseline."""
     payload = json.loads(payload_json)
-    case = payload["case"]
+    case = payload.get("case", payload)
     out = review(case, get_llm("scripted"), incidents_path="/app/memory/incidents.jsonl",
                  learned_path=None, max_attempts=3, trace=True,
                  run_id="browser-" + case["id"])
@@ -642,6 +642,16 @@ async function bootOnce() {
   progress(0.08);
   await loadScript(PYODIDE + "pyodide.js");
   const py = await loadPyodide({ indexURL: PYODIDE, stdout: () => {}, stderr: () => {} });
+  progress(0.35);
+  /* Pyodide unvendors parts of the stdlib. The shadow database is real SQLite, so the
+     sqlite3 package has to be pulled in before `sentinel` can be imported at all. */
+  $("#bootMsg").textContent = "Loading the SQLite extension the shadow database runs on.";
+  try {
+    await py.loadPackage("sqlite3");
+  } catch (e) {
+    throw new Error("could not load the sqlite3 package from the Pyodide CDN: " + e.message);
+  }
+  await py.runPythonAsync("import sqlite3");
   progress(0.55);
   setEngine("booting", "mounting sentinel…");
   $("#bootMsg").textContent = "Mounting the sentinel package into the sandbox filesystem.";
@@ -683,7 +693,7 @@ async function runLive(caseId) {
   const t0 = performance.now();
   let out;
   try {
-    out = JSON.parse(await py.globals.get("run_case_json")(JSON.stringify(caseIn)));
+    out = JSON.parse(await py.globals.get("run_case_json")(JSON.stringify({ case: caseIn })));
   } catch (e) {
     setEngine("ready", "engine ready");
     state.live[caseId] = { error: String(e).split("\n").slice(-6).join("\n"), dirty };
