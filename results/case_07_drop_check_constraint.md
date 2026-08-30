@@ -4,7 +4,7 @@
 
 Shippable, but only as the staged plan below. 0 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_07_drop_check_constraint` · case `case_07_drop_check_constraint` · owning service `billing-api` · 6.9 ms · model scripted-v1 (3 calls, $0.0000)
+`run eval-case_07_drop_check_constraint` · case `case_07_drop_check_constraint` · owning service `billing-api` · 6.5 ms · model scripted-v1 (3 calls, $0.0000)
 
 ## Hazards
 

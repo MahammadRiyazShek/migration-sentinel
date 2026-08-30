@@ -230,7 +230,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.66,
+   "ms": 0.54,
    "result_summary": "Schema"
   },
   {
@@ -271,7 +271,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -354,7 +354,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.17,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -487,7 +487,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.02,
    "result_summary": 17
   },
   {
@@ -711,7 +711,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.79,
+   "ms": 2.68,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -744,7 +744,7 @@
     "hazard_code": "TYPE_NARROWING_DATA_LOSS",
     "table": "customers"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     []
@@ -841,7 +841,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.11,
+   "ms": 0.14,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -866,7 +866,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -1082,7 +1082,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.56,
+   "ms": 2.12,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1105,7 +1105,7 @@
   "tokens_out": 155,
   "cost_usd": 0.0
  },
- "wall_ms": 7.1,
+ "wall_ms": 6.3,
  "severity_order": [
   "low",
   "medium",

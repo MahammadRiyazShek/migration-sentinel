@@ -15,6 +15,8 @@ different thing and their runtime traces are separate: [`trajectories/`](traject
 | Claude Opus 5, second session, supervisor role | `claude-opus-5` | separate context, given only the built repository and the challenge rules | An adversarial review pass over the finished submission: unzip, run, try to falsify the claims. It produced `eval/report_components.py`, `eval/time_sensitivity.py`, `tools/collect_agent_traces.py` and the first draft of this file. It did not touch pipeline code. |
 | Claude Opus 5, third session, supervisor role | `claude-opus-5` | separate context, given the finished v1 submission text and the shipped repository, with one instruction: find the assumptions this submission does not know it is making and try to make the headline numbers false | Produced the critique in [`docs/CRITIQUE_LOG.md`](docs/CRITIQUE_LOG.md), the two rejected alternative designs written up there, and the implementation of v2: `sentinel/coverage.py`, the verdict cap, the whole-relation maintenance rule, the `no_coverage` ablation arm, the new scorer fields and the five `TestCoverageLedger` tests. Its sharpest finding lowered nothing and *raised* a published cost: the reviewer-minute claim got worse and two adversarial constant sets went from collapsing to reversing. |
 
+| Final packaging audit, fourth session | not disclosed to participant (Genspark AI assistant) | separate context, given the v2 source archive and the submission form text | Found that `agent_traces/INDEX.md` was referenced but absent; populated `agent_traces/` from real session artefacts only, regenerated the index with `tools/collect_agent_traces.py --write`, and re-ran the eval, tests and claim audit. It did not touch pipeline code, cases, ground truth or the scorer. |
+
 No other coding agent, autocomplete or code-generation tool was used. No agent had shell access to a
 machine of mine, a network credential, or write access to a repository; every change arrived as text I
 read, applied and ran.
@@ -135,7 +137,9 @@ check.
 * **Anything not listed in `agent_traces/INDEX.md` was not captured.** The index is generated from disk,
   so that sentence is checkable rather than rhetorical. Early exploratory turns and anything in a
   context that was cleared are gone. I have not reconstructed a transcript after the fact: a rebuilt
-  trace is worse than a missing one, because it looks like evidence.
+  trace is worse than a missing one, because it looks like evidence. Sessions one and two predate the
+  trace-capture decision, so their committed artefacts stand where transcripts would, and the
+  index says so per file.
 * **The in-product trajectories under `trajectories/` are recorded by the harness**
   (`sentinel/trace.py`) during `python eval/run_eval.py` and regenerate byte-identically from a clean
   clone. They are machine output, not edited narrative.

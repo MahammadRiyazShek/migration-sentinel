@@ -199,7 +199,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.66,
+   "ms": 0.65,
    "result_summary": "Schema"
   },
   {
@@ -323,7 +323,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.1,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -678,7 +678,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.56,
+   "ms": 2.5,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1024,7 +1024,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.67,
+   "ms": 2.42,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1047,7 +1047,7 @@
   "tokens_out": 104,
   "cost_usd": 0.0
  },
- "wall_ms": 6.9,
+ "wall_ms": 6.5,
  "severity_order": [
   "low",
   "medium",
