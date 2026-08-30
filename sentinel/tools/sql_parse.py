@@ -314,6 +314,18 @@ class Op:
         }
 
 
+# PostgreSQL maintenance commands that rewrite or exclusively lock a whole
+# relation.  Documented family, not a per-case special case: every one of these
+# takes ACCESS EXCLUSIVE for the duration and none of them is expressible as a
+# structural schema change, which is why they get an op kind of their own.
+MAINTENANCE_REWRITE = (
+    r"(?P<cmd>cluster|vacuum\s+full|reindex(\s+(table|index|schema|database))?|"
+    r"refresh\s+materialized\s+view)"
+    r"(\s+(concurrently|verbose|analyze))*"
+    r"(\s+(?P<table>\"?[\w$.]+\"?))?"
+)
+
+
 def _alter_actions(body: str) -> list[str]:
     return _split_top_level_commas(body)
 
@@ -423,6 +435,14 @@ def parse_migration(sql: str) -> list[Op]:
             continue
         if m := re.match(r"insert\s+into\s+(?P<table>\"?[\w$.]+\"?)", stmt, flags=re.I):
             ops.append(Op("dml_insert", stmt, i, ident(m.group("table")), None, {}))
+            continue
+        if m := re.match(MAINTENANCE_REWRITE, stmt, flags=re.I):
+            # Recognised by name, still not modelled structurally.  The op carries a
+            # table so the lock rules can price it; apply_ops still records it as
+            # unmodelled, so the coverage ledger keeps reporting it as a blind spot.
+            ops.append(Op("maintenance_rewrite", stmt, i,
+                          ident(m.group("table")) if m.group("table") else None, None,
+                          {"command": re.sub(r"\s+", " ", m.group("cmd")).upper()}))
             continue
         ops.append(Op("unsupported", stmt, i, None, None, {}))
     return ops

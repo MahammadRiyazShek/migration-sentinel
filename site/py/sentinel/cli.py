@@ -61,6 +61,14 @@ def cmd_execute(args: argparse.Namespace) -> int:
         print("REFUSED: the review verdict is BLOCK. Re-run with --override-block if a qualified "
               "reviewer has accepted the hazards, and say so in the deploy record.")
         return 3
+    if report["verdict"] == "NEEDS_COVERAGE_SIGNOFF" and not args.override_block:
+        gaps = (report.get("coverage_ledger") or {}).get("gaps", [])
+        print("REFUSED: the review is not cleared - it declares "
+              f"{len(gaps)} coverage gap(s) on objects this migration touches:")
+        for g in gaps:
+            print(f"  - {g['object']} ({g['kind']}): {g['closes_with']}")
+        print("Close them, or re-run with --override-block and record who accepted the gap.")
+        return 4
     case = load_case(args.case)
     schema = sql_parse.parse_schema(case["schema_sql"], case.get("row_estimates", {}))
     script = "\n".join(s for s in report["plan"]["phase1_sql"] if not s.strip().startswith("--"))

@@ -104,15 +104,25 @@ Full table: [`results/comparison.md`](results/comparison.md). Raw scores:
 | metric | Baseline A (one prompt) | Baseline B (prompt + schema) | Migration Sentinel |
 |---|---|---|---|
 | **Unsafe approvals** (primary) | 1/12 | 1/12 | **0/12** |
-| Hazard recall (exact code) | 0.545 | 0.606 | **0.939** |
-| Hazard precision (exact code) | 0.947 | 0.690 | **0.969** |
-| Severity agreement | 0.611 | 0.550 | **0.968** |
+| **Coverage-gap cases cleared without a sign-off** (primary) | 0/2 | 0/2 | **0/2** |
+| Hazard recall (exact code) | 0.545 | 0.606 | **0.970** |
+| Hazard precision (exact code) | 0.947 | 0.690 | **0.970** |
+| Severity agreement | 0.611 | 0.550 | **0.969** |
 | False alarms on the clean case | 1 | 1 | **0** |
-| Findings backed by machine evidence | 0/19 | 0/29 | **34/34** |
+| Findings backed by machine evidence | 0/19 | 0/29 | **35/35** |
+| Blind spots named in the packet, with the object | 0 | 0 | **3** |
 | Verified rollout plans produced | 0/12 | 0/12 | **12/12** |
-| Modelled reviewer minutes per case | 29.7 | 34.7 | **8.5** |
-| Wall clock per case (measured) | 0.2 ms | 0.1 ms | ~8 ms |
-| Model tokens, all 12 cases | 5,837 | 11,577 | 25,380 |
+| Modelled reviewer minutes per case | 29.7 | 34.7 | **9.2** |
+| Wall clock per case (measured) | 0.1 ms | 0.1 ms | ~8 ms |
+| Model tokens, all 12 cases | 5,837 | 11,577 | 25,967 |
+
+There are **two** primary metrics, and the second one is new in v2. Unsafe approvals is the outcome
+the on-call engineer cares about. Coverage-gap cases cleared without a sign-off is the outcome that
+metric cannot see: a review that says "ship as plan" directly above its own declared blind spot has
+not made an unsafe approval by the letter of the scorer, and has still told a reviewer the wrong
+thing. Both baselines score 0 on it, and that is not a virtue - they score 0 because they request
+changes on 12 of 12 cases, so they never clear anything. They also name **zero** blind spots, which
+is the row underneath. `results/comparison.md` reports all of it.
 
 Reviewer minutes are **modelled** from four stated constants in `eval/scoring.py`
 (`read_review=5`, `verify_unevidenced_claim=4`, `write_expand_contract_plan=20`,
@@ -122,12 +132,20 @@ Because `tools/check_results.py` re-asserts that claim from the same constants t
 audit cannot fail, so the claim is also reported as a band:
 [`results/time_sensitivity.md`](results/time_sensitivity.md), regenerated with
 `python eval/time_sensitivity.py`. The reduction holds at 71-72% under any uniform rescaling of the
-constants and at 66% when checking an unevidenced claim is priced at one minute. It **collapses to
-about 1%** under one specific ratio: pricing a hand-written expand/contract plan at 6 minutes against
-6 minutes to approve a generated one. So the load-bearing assumption is not that reviewers are slow,
-it is that writing a staged plan from scratch costs several times more than approving one that has
-already been replayed. That is a belief about reviewers, not a measurement, and it is the one I would
-attack first.
+constants and at 63% when checking an unevidenced claim is priced at one minute. It **reverses**,
+to -12% and -5%, under one specific ratio: pricing a hand-written expand/contract plan at 6 minutes
+against 6 minutes to approve a generated one. So the load-bearing assumption is not that reviewers
+are slow, it is that writing a staged plan from scratch costs several times more than approving one
+that has already been replayed. That is a belief about reviewers, not a measurement, and it is the
+one I would attack first.
+
+In v1 those two adversarial rows collapsed the advantage to about 1%. In v2 they reverse its sign,
+and the reason is the coverage gate: every blind spot it opens becomes a human gate, so it buys
+reliability in exactly the currency this table measures. The first instinct was to reprice
+`decide_human_gate_minutes` and make the reversal go away. That would have been hiding a result in
+the one file whose entire purpose is to stop me hiding results, so the number is published as it
+fell out and `tools/check_results.py` now asserts that the coverage gate costs reviewer minutes
+rather than saving them.
 
 The primary metric is deliberately **unsafe approvals**, not F1: the reviewer's real failure is
 saying "ship it" to something that breaks production.
@@ -136,18 +154,19 @@ saying "ship it" to something that breaks production.
 
 From [`results/ablation.md`](results/ablation.md), same cases, one component removed at a time:
 
-| configuration | unsafe approvals | recall | precision | severity agreement | verified plans | modelled min/case |
-|---|---|---|---|---|---|---|
-| full | **0/12** | 0.939 | 0.969 | 0.968 | 12/12 | 8.5 |
-| no shadow replay (rules only) | 1/12 | 0.545 | 1.000 | 0.944 | 0/12 | 23.3 |
-| no static rules (replay only) | 2/12 | 0.333 | 1.000 | 1.000 | 12/12 | 8.0 |
-| no incident memory | 0/12 | 0.939 | 0.969 | 0.935 | 12/12 | 8.5 |
-| no plan verification | 0/12 | 0.939 | 0.969 | 0.968 | 0/12 | 23.3 |
+| configuration | unsafe approvals | recall | precision | severity | verified plans | gaps cleared | min/case |
+|---|---|---|---|---|---|---|---|
+| full | **0/12** | 0.970 | 0.970 | 0.969 | 12/12 | **0/2** | 9.2 |
+| no shadow replay (rules only) | 1/12 | 0.576 | 1.000 | 0.947 | 0/12 | 0/2 | 23.3 |
+| no static rules (replay only) | **2/12** | 0.333 | 1.000 | 1.000 | 12/12 | 0/2 | 8.8 |
+| no incident memory | 0/12 | 0.970 | 0.970 | 0.938 | 12/12 | 0/2 | 9.2 |
+| no plan verification | 0/12 | 0.970 | 0.970 | 0.969 | **0/12** | 0/2 | 23.3 |
+| no coverage gate (= v1) | 0/12 | 0.970 | 0.970 | 0.969 | 12/12 | **1/2** | 8.5 |
 
 Oriented as the cost of removing each component, with the same table generated from raw scores by
 `python eval/report_components.py --write`: [`results/components.md`](results/components.md).
 
-Three readings, including the two that do not flatter the design.
+Four readings, including the three that do not flatter the design.
 
 **Execution alone is worse than rules alone** on the primary metric (2 unsafe approvals vs 1),
 because a lock hazard produces no failing query, so a replay-only reviewer says "nothing broke, ship
@@ -158,11 +177,36 @@ contribution in the changelog.
 identical with it removed; verified plans go 12/12 -> 0/12 and modelled reviewer minutes go 8.5 ->
 23.3. Judged on detection alone it looks decorative. It is the change a reviewer notices most.
 
-**Incident memory is the thinnest component here.** It moves severity agreement 0.935 -> 0.968 and
+**Incident memory is the thinnest component here.** It moves severity agreement 0.938 -> 0.969 and
 nothing else: exactly one severity, on the one case in twelve that is a recurrence. That is a
 statement about the case set as much as about the component, because one recurrence in twelve cases
 is all it can possibly move. It is reported rather than folded into "orchestration" and left for
 someone else to discover.
+
+**The coverage gate is the only component that makes the pipeline look worse on a published
+number.** It moves no detection metric at all - recall, precision, severity and unsafe approvals are
+byte-identical with it removed - and it *adds* 0.7 modelled reviewer minutes per case, because every
+blind spot it opens is a decision a person has to make. What it buys is the one thing the other four
+cannot: `case_09` stops coming back "ship as plan" above its own declared gap. Removing the gate is
+the v1 behaviour, and the v1 behaviour clears one.
+
+### Where the agency actually is
+
+Worth stating plainly, because "the primary metric is invariant to the model by construction" is a
+boast and an indictment in the same sentence. If no published number can be moved by changing the
+model, then no published number is evidence about a model.
+
+The facts here are deterministic on purpose: a review that gates a production deploy should not have
+a nondeterministic verdict, so hazards, severities, plans and verdicts come from tools under
+`sentinel/tools/` and never from the model. What the model does is write prose and reviewer
+questions, and swapping `--provider scripted` for `--provider anthropic` changes that prose and
+nothing else.
+
+The agency is in the loop, and the loop is what the ablations measure: which tool each agent reaches
+for, the Verifier replaying the plan the Rollout Engineer just wrote, the policy tightening between
+attempts, the retry budget, and the escalation to a human when the budget runs out. `case_01` needs
+exactly two attempts and the retry is triggered by a real regression the first plan introduced. That
+is the part of this system that is an agent. The narrator is labelled as a narrator.
 
 ## Architecture
 
@@ -173,8 +217,9 @@ Five agents, fixed order, one feedback loop. Instructions for each are in
                     +-------------------------------------------------+
  migration + DDL -> | 1 Cartographer      parse -> exact change set   |
  query corpus       | 2 Blast Radius      dependents + shadow replay  |
- row estimates      | 3 Risk Officer      locks, volume, intent, memory
- incident log       | 4 Rollout Engineer  expand/contract plan in SQL |
+ row estimates      | 3 Risk Officer      locks, volume, intent, memory,
+ incident log       |                     coverage ledger -> verdict cap
+                    | 4 Rollout Engineer  expand/contract plan in SQL |
                     | 5 Verifier          replay the plan  <--retry---+
                     +-------------------------------------------------+
                                    |
@@ -202,10 +247,18 @@ Design choices that mattered, and why:
   parser and replays it. If phase 1 still breaks something, the failure text goes back to the
   Rollout Engineer, which tightens its policy and regenerates. After three attempts it escalates to
   a human instead of shipping a plan it cannot prove.
+* **A declared blind spot caps the verdict.** `sentinel/coverage.py` computes, per affected object,
+  what this review structurally could not observe: statements the parser never modelled, rows
+  rewritten in place (replay proves a statement still *runs*, never that it still returns the same
+  *answer*), a value class erased in a way the rollback does not restore, and pre-existing columns no
+  corpus statement touches. Any open gap caps `SAFE`/`SAFE_WITH_PLAN` at `NEEDS_COVERAGE_SIGNOFF`,
+  which is not an approval in the scorer and not executable in the CLI. `BLOCK` is left alone; the
+  cap can only stop a verdict from being clean, never make one safer. It invents no hazard: absence
+  of evidence becomes a named human decision, not a finding with a severity.
 * **Nothing consequential happens without a person.** `sentinel review` never touches a database.
   `sentinel execute` runs phase 1 against an in-memory sandbox copy only, refuses without
-  `--i-approve --reviewer "name"`, and refuses a `BLOCK` verdict unless a named reviewer overrides
-  it on the record.
+  `--i-approve --reviewer "name"`, refuses a `BLOCK` verdict unless a named reviewer overrides it on
+  the record, and refuses an uncleared coverage gap the same way.
 
 ## Quickstart
 
@@ -216,7 +269,7 @@ python eval/build_cases.py                                    # regenerate the 1
 python -m sentinel cases                                      # list them
 python -m sentinel review --case eval/cases/case_12_release_train.json --print-report
 python eval/run_eval.py --ablations                           # everything, ~1 second
-python -m unittest discover -s tests -v                       # 15 tests
+python -m unittest discover -s tests -v                       # 22 tests
 make serve                                                    # the review desk, locally
 ```
 
@@ -269,6 +322,12 @@ in [`trajectories/`](trajectories/) and [`docs/AGENT_TRAJECTORIES.md`](docs/AGEN
 Every row's evidence is an arm in `results/evaluation.json` or `results/ablation.json` and can be
 reproduced with the commands in `REPRODUCTION.md`. Same 12 cases and same scorer throughout.
 
+Iterations 7 and 8 came out of a hostile re-read of the finished v1 submission, logged in
+[`docs/CRITIQUE_LOG.md`](docs/CRITIQUE_LOG.md) with the two alternative designs I rejected and the
+three mistakes I caught in the first version of the fix. The ground truth, the hazard vocabulary and
+the scorer were **not** touched in v2; only the pipeline and the metric set changed, so every v1 and
+v2 number in this file is comparable.
+
 | stage | what I tried and why | evidence | decision / learning |
 |---|---|---|---|
 | **Baseline A** | One model call. Migration file plus its rollback, the shared hazard vocabulary, "be exhaustive". This is what "let's use AI for migration review" means in most teams. | unsafe approvals **1/12**, recall **0.545**, precision 0.947, severity agreement 0.611, evidence 0/19 findings, plans 0/12 | Starting point. It catches everything visible in the diff text and nothing that requires a lookup. It approved a `DROP VIEW` that a worker reads every minute. |
@@ -282,7 +341,11 @@ reproduced with the commands in `REPRODUCTION.md`. Same 12 cases and same scorer
 | **Removed: separate view-probe hazards** | Views bind lazily in SQLite, so I probe each view directly. Those probes emitted their own hazards. | case_11 reported both `VIEW_BREAKAGE` (probe) and `BREAKING_QUERY` (the worker that reads the view): strict precision 0.939 | Removed by folding the probe into the corpus statement that reads the view: precision 0.939 -> **0.969**. Same failure, one owner, one line. |
 | **Fixed after a near miss** | The first column parser used a greedy `[\w ]+` for types, which swallowed `NOT NULL UNIQUE` into the type name of the column. | `ADD COLUMN x TEXT NOT NULL` parsed as nullable, so the `NOT_NULL_NO_DEFAULT` hazard silently disappeared | Rewrote the type pattern explicitly and pinned it with `tests/test_all.py::TestParser`. Worth logging because it is the scariest class of bug here: a parser that fails silently makes the whole pipeline confidently wrong, and no metric would have moved much. |
 | **Iteration 6: put it where the reviewer is** | The packet was a markdown file in a repository, which means it is read by whoever already cloned the repository. Shipped the same pipeline as a static review desk that boots CPython on WebAssembly and runs the real package in the reader's tab. | detection metrics unchanged by construction (same code path, `orchestrator.review`); `tools/test_browser_driver.py` runs the page's own driver string under CPython against site/py/ and reproduces **12/12** recorded packets (verdict, hazard codes with severities, phase-1 SQL, verification); the page repeats that diff at runtime for whatever it just ran; deploy is gated on `tools/check_results.py`, 13/13 claims | Kept. No new dependency in the pipeline and no fork of the logic: a second implementation in JavaScript was the obvious alternative and would have been a second thing to keep correct. The failure mode I care about here is a demo that quietly disagrees with its own repository, so the page diffs itself instead of asserting it matches. |
-| **Final** | Full pipeline: replay + rules + memory + verified plan + human gates. | unsafe **0/12**, recall 0.939, precision 0.969, F1 0.954, severity 0.968, 34/34 findings evidenced, 12/12 plans verified, 8.5 ms and $0 per case | Main contribution: pairing execution with static rules (iterations 1-3). Biggest change in perceived usefulness: the verified plan (iteration 5). |
+| **Iteration 7: the gap has to constrain the verdict** | v1's own stated limitation, and the sharpest finding of the hostile re-read (`docs/CRITIQUE_LOG.md`, C1). `case_09` returned `SAFE_WITH_PLAN` - which the packet renders as "SHIP AS PLAN" - directly above a declared blind spot, and scored a clean 0 on the primary metric while missing a real hazard. The metric could not see it, because the verdict ladder had no rung for *I did not see enough to say*. Added a machine-computed coverage ledger (`sentinel/coverage.py`) over four gap classes, a `NEEDS_COVERAGE_SIGNOFF` verdict that caps `SAFE`/`SAFE_WITH_PLAN` and can never be an approval, one human gate per gap, and a new metric that is a property of the *case* rather than of the arm. (`no_coverage` arm reproduces v1 exactly) | gap cases cleared without a sign-off **1/2 -> 0/2**; every detection metric byte-identical (recall 0.970, precision 0.970, severity 0.969, unsafe 0/12); modelled reviewer minutes **8.5 -> 9.2**; `case_09` verdict `SAFE_WITH_PLAN` -> `NEEDS_COVERAGE_SIGNOFF` with `invoices.currency` named as irreversible; `case_06` still `SAFE` with zero gaps; `sentinel execute` now refuses an uncleared review with exit code 4 | Kept. It is the only component in the ablation that makes the pipeline look **worse** on a published number, and it is the change I would defend hardest: absence of evidence is recorded as a decision for a person, never as a finding with a severity, so the cap invents no hazard and costs no precision. The cost is real and published - see the sensitivity note above, where two adversarial constant sets now reverse the time claim's sign instead of merely collapsing it. |
+| **Iteration 8: name the whole-relation rewrites** | `case_12` hid `CLUSTER invoices USING idx_invoices_customer` outside the parser's model, and v1 missed `TABLE_REWRITE_LOCK` there by construction. `CLUSTER`, `VACUUM FULL`, `REINDEX` and `REFRESH MATERIALIZED VIEW` are a documented family that all take `ACCESS EXCLUSIVE` for the duration, so this is a rule about a class and not a patch for one case. | strict recall **0.939 -> 0.970** (32/33), F1 0.954 -> 0.970, `case_12` goes from one missed hazard to none, evidenced findings 34 -> 35; rules-only arm also improves, 0.545 -> 0.576 | Kept, with the trap logged in `docs/CRITIQUE_LOG.md` (M2). The tempting implementation gives these statements a real op kind, which quietly removes them from the unmodelled list and trades a truthfully reported blind spot for a detection point. `maintenance_rewrite` is a member of `UNMODELLED_KINDS` instead: the hazard is reported *and* the statement stays in the coverage ledger, because being able to name a statement is not being able to model it. Pinned by a test. |
+| **Rejected: counterexample search instead of review** | Attack the migration rather than review it: generate a row set plus a statement that is valid before and fails after, then shrink it to a minimal reproduction. It never needs a declared consumer, so it attacks *the corpus is the world* at the root instead of reporting around it. | not run - it changes the primary metric from "unsafe approvals" to "counterexamples found", for which there is no fair baseline, and it needs a real PostgreSQL, which breaks reproduction from a clean clone with no API key | Rejected for this submission, kept as the design I would build next. Written up in full in `docs/CRITIQUE_LOG.md` (V1) rather than left as a hallway opinion. A witness that *could* exist is also a weaker artifact for a reviewer than a failure in a statement their own service issues today. |
+| **Rejected: deploy-time interceptor, no review at all** | Delete the judgment layer. Wrap the migration runner with `lock_timeout` and `statement_timeout`, run it against a branched copy of production first, and replay live traffic sampled from `pg_stat_statements`. The output is a migration that physically cannot hold a lock for longer than N ms. | not run - needs production access and a branchable database, cannot be compared against a prompt on equal terms, and a judge cannot reproduce it in a clean environment | Rejected, and it taught me the most about the problem: it makes lock hazards impossible by construction and does **nothing** for the hazards that break nothing today. Dropping a `CHECK` constraint sails straight through a lock-timeout interceptor. Migration review is partly a workaround for deploy tooling that does not exist yet, and partly irreducible judgement. |
+| **Final** | Full pipeline: replay + rules + memory + verified plan + coverage gate + human gates. | unsafe **0/12**, gaps cleared **0/2**, recall 0.970, precision 0.970, F1 0.970, severity 0.969, 35/35 findings evidenced, 3 blind spots named with their object, 12/12 plans verified, ~8 ms and $0 per case | Main contribution: pairing execution with static rules (iterations 1-3). Biggest change in perceived usefulness: the verified plan (iteration 5). Change I would defend hardest under questioning: the coverage gate (iteration 7), because it is the only one that costs me a published number. |
 
 Two ground-truth hazards are still missed, on purpose (see below), and one finding the scorer counts
 as a false alarm is arguably correct: on `case_04` the pipeline flags
@@ -296,15 +359,32 @@ the target after seeing the result.
 given. Two of the 12 cases are built to expose it:
 
 * `case_09`: the risky consumer is a dbt model that reads `currency IS NULL` as "legacy" and is not
-  in the corpus. No amount of replay finds it. Missed, by construction.
-* `case_12`: `CLUSTER invoices USING idx_invoices_customer` is outside the parser's model. It
-  rewrites a 48M-row table under an exclusive lock, and the pipeline does not flag it as a hazard.
+  in the corpus. No amount of replay finds it. **Still missed, by construction** - and no longer
+  cleared. The coverage ledger sees the shape of the hole even though it cannot see what is in it:
+  the migration erases every `NULL` from `invoices.currency` and then makes `NULL` unreachable, so
+  any consumer that reads `NULL` as a state changes behaviour silently, and the supplied rollback
+  restores the column's nullability but not its values. The verdict is capped at
+  `NEEDS_COVERAGE_SIGNOFF`, the object is named, the gap is marked irreversible, and
+  `sentinel execute` refuses to run it.
+* `case_12`: `CLUSTER invoices USING idx_invoices_customer` was outside the parser's model, so v1
+  missed `TABLE_REWRITE_LOCK`. v2 recognises the whole-relation maintenance family by name and
+  reports the hazard, **and keeps the statement in the coverage ledger anyway**, because naming a
+  statement is not modelling it.
 
-The mitigation is the part I would defend: an unparsed statement never becomes "safe". It travels
-through as an explicit unknown and lands in the "What this review did not check" section of the
-packet, so the reviewer sees `unmodelled statement: CLUSTER ...` in the same document that tells them
-everything else passed. A tool that quietly narrows its own scope is worse than no tool, because it
-launders a gap into a green check.
+The mitigation is the part I would defend, in two halves. The first half was in v1: an unparsed
+statement never becomes "safe", it travels through as an explicit unknown and lands in the packet's
+*What this review did not check* section. The second half is v2, and it exists because the first half
+was not enough: **a stated gap now constrains the verdict.** v1 printed
+`unmodelled statement: CLUSTER ...` in an appendix underneath a badge that said the change was
+shippable, and reviewers read badges. A tool that quietly narrows its own scope launders a gap into a
+green check; a tool that states the gap and then clears the change anyway has only moved the laundry
+to a footnote.
+
+What is *still* not solved: the ledger reasons about the shape of a blind spot, never its contents.
+It knows that rewriting `invoices.currency` in place is unobservable to replay. It does not and
+cannot know that the consumer at risk is a dbt model in another repository. Every gap class here is a
+structural argument about the tool's own reach, which is the only kind of argument it is entitled to
+make.
 
 ## Hot take
 
@@ -319,9 +399,18 @@ well enough to put a second, differently-shaped sensor next to it.
 
 The corollary I did not expect: the most valuable output was not the hazard list, it was the
 *verified plan*. Detection metrics did not move at all when I added plan generation and verification.
-Modelled reviewer minutes fell by two thirds at the published constants, and by 66-72% across every
-uniform rescaling of them (`results/time_sensitivity.md`). Being right is table stakes; the tool earns its place by doing
-the tedious thing the human would otherwise do at 3am.
+Modelled reviewer minutes fell by roughly two thirds at the published constants, and by 63-69% across
+every uniform rescaling of them (`results/time_sensitivity.md`). Being right is table stakes; the tool
+earns its place by doing the tedious thing the human would otherwise do at 3am.
+
+The one that took a second pass to see, and the reason v2 exists: **a sensor that reports its own
+blind spot has not finished the job until the blind spot can change the answer.** v1 did the hard
+engineering part - it computed what it could not see and printed it honestly - and then let the
+verdict ignore it. Every reliability property in an agent lives at the point where evidence becomes a
+decision, and "we told the user in the appendix" is the most comfortable place in the entire system to
+hide a failure. The version of this that costs you something is the one worth trusting: the coverage
+gate moves no detection metric, adds reviewer minutes, and reverses the sign of my nicest number
+under adversarial constants. It is still the change I would defend first.
 
 ## Repo map
 
@@ -329,6 +418,7 @@ the tedious thing the human would otherwise do at 3am.
 sentinel/            the pipeline
   agents/prompts/    the instructions that shape each agent (read these first)
   agents/            cartographer, blast_radius, risk_officer, rollout_engineer, verifier
+  coverage.py        the coverage ledger + verdict cap (v2)
   tools/             sql_parse, shadow_db, query_corpus, incident_memory, registry
   llm/               scripted stand-in, hosted providers, cassette record/replay
   orchestrator.py    fixed pipeline + feedback loop + ablation switches
@@ -346,8 +436,9 @@ tools/               build_site.py, build_artifact.py, check_results.py
 agent_traces/        development-agent sessions (see AGENT_USE.md)
 AGENT_USE.md         coding-agent disclosure required by the challenge
 .github/workflows/   verify the claims, then publish the desk to GitHub Pages
-docs/                DESIGN_LOG.md, AGENT_TRAJECTORIES.md, VIDEO_SCRIPT.md
-tests/               15 stdlib tests
+docs/                CRITIQUE_LOG.md (read first), DESIGN_LOG.md, AGENT_TRAJECTORIES.md,
+                     VIDEO_SCRIPT.md, SUBMISSION.md
+tests/               22 stdlib tests
 ```
 
 ## Limitations, stated plainly
@@ -362,6 +453,17 @@ tests/               15 stdlib tests
 * The offline default model is a scripted stand-in, documented in `sentinel/llm/scripted.py`, so the
   numbers above are byte-reproducible with no API key. The same prompts run against a hosted model
   with `--provider openai`; because the model does not decide hazards, that changes the prose and the
-  token cost, not the primary metric.
+  token cost, not the primary metric. That is a deliberate trade and it costs something: see
+  *Where the agency actually is*.
+* **Twelve cases, one schema, one 14-statement corpus, and I wrote the ground truth as well as the
+  rules.** Every detection number in this file is bounded by that. `0.970` recall means agreement
+  with my own taxonomy on a closed world, not coverage of real migration hazards, and the tell is
+  already published: on `case_04` the pipeline emits a `CROSS_SERVICE_UNCOORDINATED` that the scorer
+  counts against it and that is arguably correct, which means the ground truth is under-specified in
+  the one direction I would notice least. I left it as a false positive rather than editing the target
+  after seeing the result. Do not quote the F1 without the denominator.
+* The coverage ledger reasons about the *shape* of a blind spot, never its contents. It knows an
+  in-place rewrite of `invoices.currency` is unobservable to replay; it cannot know the consumer at
+  risk is a dbt model in another repository.
 
 MIT licensed. See [`LICENSE`](LICENSE).

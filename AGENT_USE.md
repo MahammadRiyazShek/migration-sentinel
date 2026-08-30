@@ -13,6 +13,7 @@ different thing and their runtime traces are separate: [`trajectories/`](traject
 |---|---|---|---|
 | Claude Opus 5 (Anthropic) | `claude-opus-5` | conversational, in-context; not an autonomous CLI harness with shell access | Implementation of everything under `sentinel/`, `baseline/`, `eval/` (harness and scorer code, not the labels), `site/`, `tools/` and `tests/`, from a design and a hazard vocabulary I set first. Also the prose in `README.md`, `REPRODUCTION.md` and `docs/`. |
 | Claude Opus 5, second session, supervisor role | `claude-opus-5` | separate context, given only the built repository and the challenge rules | An adversarial review pass over the finished submission: unzip, run, try to falsify the claims. It produced `eval/report_components.py`, `eval/time_sensitivity.py`, `tools/collect_agent_traces.py` and the first draft of this file. It did not touch pipeline code. |
+| Claude Opus 5, third session, supervisor role | `claude-opus-5` | separate context, given the finished v1 submission text and the shipped repository, with one instruction: find the assumptions this submission does not know it is making and try to make the headline numbers false | Produced the critique in [`docs/CRITIQUE_LOG.md`](docs/CRITIQUE_LOG.md), the two rejected alternative designs written up there, and the implementation of v2: `sentinel/coverage.py`, the verdict cap, the whole-relation maintenance rule, the `no_coverage` ablation arm, the new scorer fields and the five `TestCoverageLedger` tests. Its sharpest finding lowered nothing and *raised* a published cost: the reviewer-minute claim got worse and two adversarial constant sets went from collapsing to reversing. |
 
 No other coding agent, autocomplete or code-generation tool was used. No agent had shell access to a
 machine of mine, a network credential, or write access to a repository; every change arrived as text I
@@ -72,14 +73,33 @@ Every one of these was my decision, not the agent's:
 * the scorer and its matching rules ([`eval/scoring.py`](eval/scoring.py))
 * the primary metric: unsafe approvals rather than F1, chosen before any number existed
 * the four reviewer-minute constants (`TIME_MODEL` in `eval/scoring.py`), and the decision to publish
-  the band in `results/time_sensitivity.md` including the constant set where the claim collapses
-* the decision to leave `case_09` and `case_12` as documented misses rather than extend the parser
-  until the case set went green
+  the band in `results/time_sensitivity.md` including the constant sets where the claim collapses - and,
+  in v2, the two where it now reverses. The agent's first instinct on seeing the reversal was to
+  reprice `decide_human_gate_minutes`. I overruled it: repricing a constant to make an inconvenient row
+  disappear, in the one file whose purpose is to stop me doing that, is the most self-serving edit
+  available in this project. The number is published as it fell out and `tools/check_results.py` now
+  asserts the coverage gate *costs* reviewer minutes, so the trade cannot be quietly reversed later.
+* the second primary metric in v2 (coverage-gap cases cleared without a sign-off) is defined as a
+  property of the **case**, computed once from the migration and the corpus and applied identically to
+  every arm, so no arm gets to grade its own blind spots. The agent's first draft measured each arm
+  against its own declared gaps, which would have let a reviewer that declares nothing score perfectly.
+* the decision to leave `case_09` as a documented miss rather than write a rule shaped like its label.
+  The consumer it hides is a dbt model in another repository; a rule that pattern-matched
+  `UPDATE ... WHERE col IS NULL` straight onto `CROSS_SERVICE_UNCOORDINATED` would have taken recall to
+  33/33 by fitting the answer key. What shipped instead argues about the tool's own reach - an in-place
+  rewrite is unobservable to replay - so the verdict is capped and the hazard is still counted as missed.
+  Recall is 0.970, not 1.000, and that is the honest number.
+* the `case_12` decision in the other direction: `CLUSTER` is one of a documented family of
+  whole-relation commands, so recognising it is a rule about a class rather than a patch for a case. The
+  guard is that it stays in the coverage ledger, which is asserted by a test
 * the rejection of the autonomous-shell architecture and of pure static analysis
   (`docs/DESIGN_LOG.md`)
 * the human approval gate: that `sentinel review` never touches a database, that `sentinel execute`
-  refuses without `--i-approve --reviewer "name"`, and that a `BLOCK` verdict needs a named override on
-  the record
+  refuses without `--i-approve --reviewer "name"`, that a `BLOCK` verdict needs a named override on the
+  record, and that an uncleared coverage gap is refused the same way
+* the rule that a coverage gap is never expressed as a hazard. Absence of evidence gets a named human
+  decision, not a severity. An agent that converts "I could not check this" into a finding is inflating
+  its own recall with its own ignorance
 
 The first four matter most. **The agent wrote the solution; it did not write the exam.** If it had
 written both, every metric in the README would be self-graded and worth nothing.

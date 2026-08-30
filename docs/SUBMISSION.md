@@ -1,18 +1,21 @@
-# Submission form content (paste-ready)
+# Submission form content (paste-ready, v2)
 
 Repo: <https://github.com/MahammadRiyazShek/migration-sentinel> ·
 Live desk: <https://migration-sentinel-frvo.vercel.app/>
+
+Everything below is regenerated from `results/` after `make verify`. If a number here disagrees with
+`results/comparison.md`, the file is stale and the file is wrong.
 
 ---
 
 ## Title
 
 ```
-Migration Sentinel: an agent pipeline that replays your schema migration before a human approves it
+Migration Sentinel: agents that replay your schema migration, prove the rollout plan, and refuse to call it safe where they could not see
 ```
 
-Alternate, if the form rewards the outcome over the mechanism:
-`Migration Sentinel: schema-migration review that proves its own rollout plan (0/12 unsafe approvals vs 1/12 for a prompt)`
+Shorter, if the form rewards outcome over mechanism:
+`Migration Sentinel: schema-migration review that proves its own rollout plan and caps its own verdict where it is blind (0/12 unsafe approvals, 0/2 blind spots cleared)`
 
 ---
 
@@ -20,129 +23,266 @@ Alternate, if the form rewards the outcome over the mechanism:
 
 **A two-line `ALTER TABLE` is either free or an outage, and the diff does not tell you which.**
 
-**Who has the problem.** The platform or data engineer on the schema-migration review rota at a
-20-to-300 engineer company: one Postgres primary, a dozen services and a BI layer reading it,
-migration PRs arriving from teams that own their feature but not the database.
+### Problem and user
 
-**The bottleneck.** Reviewing that PR honestly means answering six questions that are not in the
-diff. Which of our live statements touch this column? Does anything read `SELECT *` off the affected
-view, so the column set matters and not just the SQL? How big is the table, and does that turn this
-index build into a write stall? What data is in there right now that will not survive? Who deploys
-the code that breaks, and does the schema or the code land first? Have we been burned by this exact
-pattern before? Answering all six by hand is 20 to 40 minutes per PR. It gets 5. So review degrades
-into pattern matching on the diff text, which catches the obvious `DROP COLUMN` and misses the
-`DROP VIEW` a worker reads every minute. The evidence for a correct answer already exists in machine
-readable form (DDL, query corpus, row counts, the incident log); nobody has time to assemble it per PR.
+The platform or data engineer on the schema-migration review rota at a 20-to-300 engineer company.
+One Postgres primary, a dozen services and a BI layer reading it, migration PRs arriving from teams
+that own their feature but not the database.
 
-**The solution: one command per PR, and a review packet a human signs.**
+### The bottleneck
 
-```bash
-python -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json
-```
+Reviewing one honestly means answering six questions that are not in the diff. Which live statements
+touch this column? Does anything read `SELECT *` off the affected view, so the column set matters and
+not just the SQL text? How big is the table, and does that turn this index build into a write stall?
+What data is in there right now that will not survive the constraint? Who deploys the code that
+breaks, and does the schema or the code land first? Have we been burned by this exact pattern before?
 
-Five agents, fixed order, one feedback loop. Instructions for each are in `sentinel/agents/prompts/`.
+That is 20 to 40 minutes per PR. It gets 5. So review degrades into pattern matching on the diff
+text, which catches the obvious `DROP COLUMN` and misses the `DROP VIEW` a worker reads every minute.
+The evidence for a correct answer already exists in machine-readable form - DDL, query corpus, row
+counts, the incident log. Nobody has time to assemble it per PR.
 
-1. **Cartographer** parses the migration into an exact change set.
-2. **Blast Radius** resolves dependents, then materialises **two shadow databases** (pre and post
-   schema, seeded with fixtures) and executes the entire query corpus against both. Hazards quote the
-   engine's own error text, and column-set diffing catches the worst real failure: the query that
-   still runs and returns different columns, so tests stay green while the dashboard goes wrong.
-3. **Risk Officer** adds lock, volume and intent rules over the parsed ops and declared row counts,
-   then does exact-key recall over the team's incident log. Memory may only **raise** a severity and
-   must cite the incident id: surviving something once is not evidence of safety.
-4. **Rollout Engineer** rewrites the migration as executable expand/contract SQL with a rollback, and
-   refuses to decide dedupe rules, truncation rules or cutover windows on a human's behalf.
-5. **Verifier** re-parses and replays the generated plan. Failures go back to the Rollout Engineer
-   with the error text; after three attempts it escalates to a person instead of shipping a plan it
-   cannot prove.
+### Baseline vs advanced
 
-Tools decide facts, the model writes prose. Swap the model and the wording changes, not the verdict.
+Same 12 cases, same `sentinel.llm` interface, same hazard vocabulary, same scorer, same temperature.
+Only the scaffolding around the model changes.
 
-**Measured improvement.** Same 12 cases, same hazard vocabulary, same scorer, against two fair
-baselines: one prompt with the migration and the hazard list, and the obvious next move, that same
-prompt plus the full DDL and row counts. The pipeline makes **no unsafe approvals (0/12 vs 1/12)**,
-raises hazard recall from 0.545 to 0.939, backs **34/34** findings with machine evidence where the
-baselines back 0, and ships **12/12** verified rollout plans where the baselines ship none.
+- **Baseline A** - one model call: the migration, the rollback, the shared hazard vocabulary.
+- **Baseline B** - the obvious next move: the same prompt plus the full DDL and row counts.
+- **Migration Sentinel** - five agents with a shadow-replay engine, static rules over a parsed change
+  set, incident memory, generated expand/contract SQL, a verifier that replays the plan it just
+  wrote, and a coverage ledger that can cap the verdict.
 
-| metric | Baseline A (prompt) | Baseline B (prompt + schema) | Migration Sentinel |
+### Headline result (12 cases, identical inputs, identical scorer)
+
+| metric | A (prompt only) | B (prompt + schema) | Migration Sentinel |
 |---|---|---|---|
-| Unsafe approvals (primary) | 1/12 | 1/12 | **0/12** |
-| Hazard recall / precision | 0.545 / 0.947 | 0.606 / 0.690 | **0.939 / 0.969** |
-| Severity agreement | 0.611 | 0.550 | **0.968** |
+| **Unsafe approvals** (primary, lower is better) | 1/12 | 1/12 | **0/12** |
+| **Coverage-gap cases cleared without a sign-off** (primary) | 0/2 | 0/2 | **0/2** |
+| Hazard recall (strict code) | 0.545 | 0.606 | **0.970** |
+| Hazard precision (strict code) | 0.947 | 0.690 | **0.970** |
+| Hazard F1 (strict code) | 0.692 | 0.645 | **0.970** |
+| Severity agreement on matched hazards | 0.611 | 0.550 | **0.969** |
 | False alarms on the clean case | 1 | 1 | **0** |
-| Findings backed by machine evidence | 0/19 | 0/29 | **34/34** |
-| Verified rollout plans | 0/12 | 0/12 | **12/12** |
-| Modelled reviewer minutes per case | 29.7 | 34.7 | **8.5** |
+| Findings backed by machine evidence | 0/19 | 0/29 | **35/35** |
+| Blind spots named in the packet, with the object | 0 | 0 | **3** |
+| Verified expand/contract plans produced | 0/12 | 0/12 | **12/12** |
+| Modelled reviewer minutes per case | 29.7 | 34.7 | **9.2** |
+| Model tokens across all 12 cases (measured) | 5,837 | 11,577 | 25,967 |
 
-Baseline B is instructive on its own: more context made it *guess more*. Family recall rose to 0.864
-while strict precision fell to 0.690, because it started string-matching table names inside view
+There are two primary metrics and the second is new. Unsafe approvals is the outcome the on-call
+engineer cares about. Coverage-gap cases cleared without a sign-off is the outcome that metric cannot
+see: a review that says "ship as plan" directly above its own declared blind spot has not made an
+unsafe approval by the letter of the scorer, and has still told a reviewer the wrong thing.
+
+Both baselines score 0 on the second metric, and that is not a virtue. They score 0 because they
+request changes on 12 of 12 cases, so they never clear anything, and they name **zero** blind spots
+while doing it. The metric is defined as a property of the **case** - computed once from the migration
+and the corpus, applied identically to every arm - so no arm gets to grade its own blind spots.
+
+### What each component actually buys
+
+The ablation removes one component at a time: 9 arms x 12 cases = 108 reviews, generated by
+`eval/report_components.py`, oriented as *the cost of removing the component*.
+
+| arm | unsafe approvals | strict recall | severity | verified plans | gaps cleared | modelled min/case |
+|---|---|---|---|---|---|---|
+| all five agents | **0/12** | 0.970 | 0.969 | 12/12 | **0/2** | 9.2 |
+| minus shadow replay (rules only) | 1/12 | 0.576 | 0.947 | 0/12 | 0/2 | 23.3 |
+| minus static rules (replay only) | **2/12** | 0.333 | 1.000 | 12/12 | 0/2 | 8.8 |
+| minus incident memory | 0/12 | 0.970 | 0.938 | 12/12 | 0/2 | 9.2 |
+| minus verifier + retry loop | 0/12 | 0.970 | 0.969 | **0/12** | 0/2 | 23.3 |
+| minus coverage gate (the v1 behaviour) | 0/12 | 0.970 | 0.969 | 12/12 | **1/2** | 8.5 |
+
+Four readings, three of which do not flatter the design.
+
+**Replay alone is worse than rules alone.** 2 unsafe approvals against 1. A lock hazard produces no
+failing query, so nothing breaks, so a replay-only reviewer waves through the 48M-row index build and
+the unvalidated foreign key. Execution is necessary and not sufficient; pairing it with static rules
+over the parsed ops is the single biggest contribution in the changelog.
+
+**The verifier is worth nothing to detection and everything after it.** Removing it leaves every
+hazard metric untouched and takes verified plans from 12/12 to zero, which puts the expand/contract
+plan back in the reviewer's hands and the modelled time back to 23.3 minutes.
+
+**Incident memory is the thinnest component in the system.** Across twelve cases it moves severity
+agreement 0.938 -> 0.969: exactly one severity, on the one case that is a recurrence. That is a
+statement about the case set as much as the component. I am reporting it rather than filing it under
+orchestration and hoping nobody runs the arm.
+
+**The coverage gate is the only component that makes the pipeline look worse on a published number.**
+It moves no detection metric at all and it *adds* 0.7 modelled reviewer minutes per case, because
+every blind spot it opens is a decision a person has to make. What it buys is the one thing the other
+four cannot, and it is the change I would defend first.
+
+Baseline B is instructive in the same way: more context made it guess *more*, family recall up to
+0.864 while strict precision fell to 0.690, because it started string-matching table names inside view
 bodies. Context without the ability to check the context buys volume, not accuracy.
 
-**Which component does the work.** An ablation removes one component at a time. The headline:
-**replay-only is worse than rules-only** on the primary metric, 2 unsafe approvals against 1. A lock
-hazard produces no failing query, so a replay-only reviewer sees nothing break and says ship it. The
-two layers cover disjoint failure classes, which is the entire design rather than a nice-to-have.
-Incident memory changed no verdict and moved severity agreement 0.935 to 0.968; it stayed because
-severity is what decides whether a change waits for a maintenance window. Plan verification moved
-detection by exactly zero and cut modelled reviewer minutes by two thirds.
+### The number I attacked hardest, and where it breaks
 
-**Human control.** `sentinel review` never touches a database. `sentinel execute` applies phase 1 to
-an in-memory sandbox copy only, refuses without `--i-approve --reviewer "name"`, and refuses a BLOCK
-verdict unless a named reviewer overrides it on the record. Every packet ends with the decisions the
-tool will not make and an explicit list of what it did not check.
+`tools/check_results.py` re-asserts the reviewer-minute claim from the same four constants that
+produce it, so that audit cannot fail. `eval/time_sensitivity.py` recomputes every arm under six
+constant sets, three written specifically to break the claim, and reports the band in
+`results/time_sensitivity.md`.
 
-**Reproducibility.** Python 3.11+ standard library, zero pip dependencies, no API key, no network.
-The full evaluation, 96 reviews including all ablations, runs in **under a second for $0.00** and
-returns byte-identical numbers: `python eval/run_eval.py --ablations`. 15 stdlib tests cover
-determinism, the escalation path and the approval gate. `tools/check_results.py` re-asserts all 13
-headline claims from the raw result JSON and gates the deploy. The same prompts run against a hosted
-model with `--provider openai` for roughly $0.02.
+The reduction holds at **69%** under any uniform rescaling of the constants and 63% when checking an
+unevidenced claim is priced at one minute. It **reverses**, to -12% and -5%, under one specific ratio:
+pricing a hand-written expand/contract plan at 6 minutes against 6 minutes to approve a generated one.
 
-**The live desk** (<https://migration-sentinel-frvo.vercel.app/>) is not a mock. One button loads
-CPython 3.12 on WebAssembly (Pyodide 0.26.4), mounts the same `sentinel` package the CLI imports and
-runs `orchestrator.review` in your tab, on the twelve cases or on SQL you paste. Nothing is uploaded.
-Every live run is diffed against the packet recorded in `results/` and the page prints the diff either
-way, so you can catch the demo drifting from the repository without taking my word for it.
-`tools/test_browser_driver.py` runs the same driver under CPython: 12/12 parity.
+In v1 those two rows collapsed the advantage to about 1%. In v2 they flip its sign, and the reason is
+the coverage gate: every gap it opens becomes a human gate, and human gates are exactly what this
+model charges for. The first instinct was to reprice `decide_human_gate_minutes` and make the reversal
+go away. That would have been hiding a result in the one file whose entire purpose is to stop me
+hiding results, so the number is published as it fell out and `tools/check_results.py` now asserts
+that the coverage gate **costs** reviewer minutes rather than saving them.
 
-**Data and ethics.** Entirely synthetic: a fictional SaaS billing schema, `example`-domain emails, an
-invented incident log and invented row counts. No customer data, no credentials, nothing scraped.
+### How it works
 
-**What existed before.** The Python standard library, the expand/contract pattern as industry prior
-art, and Pyodide (Mozilla, MPL-2.0, loaded unmodified from CDN). Everything else was built for this
-challenge from scratch: the Postgres-subset parser and schema model, the shadow-replay engine, the
-corpus and incident-memory tools, five agent instruction sets and implementations, the orchestrator
-with its verify/retry loop, the CLI and approval gate, the model layer, the 12 cases and their ground
-truth, the scorer, the ablation harness, the tests and the review desk.
+One command per PR: `python -m sentinel review --case eval/cases/case_09_unbatched_backfill.json`.
 
-**Main failure mode: the corpus is the world.** Two of the twelve cases exist to expose it.
-`case_09` hides the risky consumer in a dbt model that is not in the corpus; `case_12` hides
-`CLUSTER invoices USING …` outside the parser's model. Both are missed, by construction. The
-mitigation is the part worth defending: an unparsed statement never becomes "safe", it travels
-through as an explicit unknown and lands in the packet's coverage-gap section next to everything that
-passed. A tool that quietly narrows its own scope launders a gap into a green check.
+Five agents in fixed order: **Cartographer** (parser), **Blast Radius** (shadow-database executor),
+**Risk Officer** (static rules + incident memory + coverage ledger + verdict), **Rollout Engineer**
+(plan generation), **Verifier** (replay + retry loop, max 3 attempts). The instructions that shape
+each are in `sentinel/agents/prompts/`.
 
-**Hot take.** Give an agent a tool that can be *loudly* wrong and pair it with rules that can be
-*quietly* wrong. Verification is not a synonym for correctness, it is a sensor with a specific blind
-spot, and the engineering is knowing that shape well enough to place a differently-shaped sensor next
-to it. The corollary I did not expect: detection was never the win. Adding plan generation and
-verification moved detection metrics by zero and still cut reviewer time by two thirds. Being right is
-table stakes; the tool earns its place by doing the tedious thing the human would otherwise do at 3am.
+Tools decide facts, the model writes prose. All hazards, severities, remediations and verdicts are
+produced by tools under `sentinel/tools/` and `sentinel/coverage.py`, never by the model, so the
+primary metrics are invariant to the model by construction. That is a deliberate trade and it costs
+something, so the README says where the agency actually is: the loop, not the wording - which tool
+each agent reaches for, the Verifier replaying the plan the Rollout Engineer just wrote, the policy
+tightening between attempts, the retry budget, and the escalation when the budget runs out.
 
-**Read in this order:** `README.md` (includes the full Improvement Changelog, one row per iteration
-with its evidence, including two experiments that were removed) → `REPRODUCTION.md` →
-`trajectories/case_01_rename_with_compat_view.md` → `docs/AGENT_TRAJECTORIES.md`.
+`sentinel review` never touches a database. `sentinel execute` uses an in-memory SQLite sandbox and
+refuses without `--i-approve --reviewer "name"`, refuses a `BLOCK` verdict without a named override,
+and refuses an uncleared coverage gap the same way.
+
+### What is new in v2, and why
+
+v2 came out of a hostile re-read of the finished v1 submission, logged in `docs/CRITIQUE_LOG.md` with
+the three hidden assumptions it found, the two radically different designs I rejected and why, and the
+three mistakes I caught in the first version of the fix. The ground truth, the hazard vocabulary and
+the scorer were **not** touched, so every v1 and v2 number is comparable.
+
+**The gap now constrains the verdict.** v1's own stated limitation. `case_09` returned
+`SAFE_WITH_PLAN` - which the packet renders as "SHIP AS PLAN" - directly above a declared blind spot,
+and scored a clean 0 on the primary metric while missing a real hazard. The metric could not see it,
+because the verdict ladder had no rung for *I did not see enough to say*. `sentinel/coverage.py` now
+computes, per affected object, what the review structurally could not observe: statements the parser
+never modelled; rows rewritten in place, because replay proves a statement still *runs* and never that
+it still returns the same *answer*; a value class erased in a way the rollback does not restore; and
+pre-existing columns no corpus statement touches. Any open gap caps `SAFE`/`SAFE_WITH_PLAN` at
+`NEEDS_COVERAGE_SIGNOFF`, which is not an approval in the scorer and not executable in the CLI.
+`BLOCK` is untouched: the cap can only stop a verdict from being clean, never make one safer.
+
+It invents no hazard. Absence of evidence becomes a named human decision, not a finding with a
+severity, so the cap costs no precision and inflates no recall. `case_09` goes from
+`SAFE_WITH_PLAN` to `NEEDS_COVERAGE_SIGNOFF` with `invoices.currency` named and marked irreversible;
+`case_06`, the clean case, is still `SAFE` with zero gaps.
+
+**Whole-relation rewrites are named.** `CLUSTER`, `VACUUM FULL`, `REINDEX` and
+`REFRESH MATERIALIZED VIEW` all take `ACCESS EXCLUSIVE` for the duration. Recognising the family
+closes `case_12`'s `TABLE_REWRITE_LOCK` miss (recall 0.939 -> 0.970). The trap, logged and pinned by a
+test: the tempting implementation gives these statements a real op kind, which quietly removes them
+from the unmodelled list and trades a truthfully reported blind spot for a detection point. They stay
+in the coverage ledger, because being able to name a statement is not being able to model it.
+
+### Coding agents used
+
+Required disclosure, in `AGENT_USE.md`: **Claude Opus 5** was the coding agent, used conversationally
+rather than as an autonomous shell harness, for everything under `sentinel/`, `eval/`, `site/`,
+`tools/` and `tests/`. A second Opus 5 session in a fresh context was pointed at the finished
+repository with instructions to falsify it; it produced `eval/report_components.py`,
+`eval/time_sensitivity.py` and `tools/collect_agent_traces.py`. A third session was pointed at the
+finished v1 *submission* with the same instruction; it produced `docs/CRITIQUE_LOG.md` and the v2
+implementation, and its sharpest finding raised a published cost rather than lowering one.
+
+What was never delegated: the twelve ground-truth labels, the hazard vocabulary, the scorer, the
+choice of primary metrics, and the rule that a coverage gap is never expressed as a hazard. An agent
+that writes both the solution and its own grading criteria has graded itself. `AGENT_USE.md` also
+names the moments I overruled the agent: the autonomous-shell architecture I rejected, the parser bug
+a test caught that no metric would have, the agent's first draft of the coverage metric that let each
+arm grade its own blind spots, and its instinct to reprice a constant so an inconvenient row would
+disappear.
+
+### Reproducibility
+
+Python 3.11+ standard library. Zero pip dependencies, no API key, no network.
+
+```bash
+python eval/run_eval.py --ablations      # 108 reviews, under 1 s, $0.00
+python -m unittest discover -s tests     # 22 tests
+python tools/check_results.py            # 18/18 headline claims re-asserted from raw JSON
+```
+
+`REPRODUCTION.md` is the full walkthrough from a clean clone, including the hosted-model path
+(roughly $0.02). Entirely synthetic data: a fictional SaaS billing schema, `example`-domain emails, an
+invented incident log and invented row counts. No customer data, credentials or scraped content.
+
+### Main failure mode: the corpus is the world
+
+Two of the twelve cases exist to expose it, and v2 changed how they land.
+
+`case_09` hides the risky consumer in a dbt model that is not in the corpus. **Still missed, and no
+longer cleared.** The ledger sees the shape of the hole even though it cannot see what is in it: the
+migration erases every `NULL` from `invoices.currency` and then makes `NULL` unreachable, so any
+consumer reading `NULL` as a state changes behaviour silently and the supplied rollback restores the
+column's nullability but not its values. Recall is 0.970 and not 1.000, because the honest fix argues
+about the tool's own reach rather than pattern-matching the answer key.
+
+`case_12` hides `CLUSTER invoices USING idx_invoices_customer` outside the parser's model. v2 reports
+the hazard and keeps the statement in the coverage ledger anyway.
+
+The mitigation, in two halves. The first was in v1: an unparsed statement never becomes "safe", it
+travels through as an explicit unknown. The second is v2, and it exists because the first was not
+enough: **a stated gap now constrains the verdict.** A tool that quietly narrows its own scope
+launders a gap into a green check; a tool that states the gap and then clears the change anyway has
+only moved the laundry to a footnote.
+
+Still unsolved: the ledger reasons about the *shape* of a blind spot, never its contents. It knows an
+in-place rewrite of `invoices.currency` is unobservable to replay. It cannot know the consumer at risk
+is a dbt model in another repository. And every detection number here is bounded by twelve cases, one
+schema and a ground truth I wrote myself - do not quote the F1 without the denominator.
+
+### Hot take
+
+Give an agent a tool that can be loudly wrong and pair it with rules that can be quietly wrong.
+Verification is not a synonym for correctness: it is a sensor with a specific blind spot, and the
+engineering is knowing that shape well enough to place a differently-shaped sensor next to it.
+
+The corollary I did not expect: **detection was never the win.** Adding plan generation and
+verification moved detection metrics by exactly zero and still cut modelled reviewer time by roughly
+two thirds. Being right is table stakes; the tool earns its place by doing the tedious thing the human
+would otherwise do at 3am.
+
+The one that took a second pass to see, and the reason v2 exists: **a sensor that reports its own
+blind spot has not finished the job until the blind spot can change the answer.** v1 did the hard part
+- it computed what it could not see and printed it honestly - and then let the verdict ignore it.
+Every reliability property in an agent lives at the point where evidence becomes a decision, and "we
+told the user in the appendix" is the most comfortable place in the whole system to hide a failure. The
+version that costs you something is the one worth trusting: the coverage gate moves no detection
+metric, adds reviewer minutes, and reverses the sign of my nicest number under adversarial constants.
+
+**Read in this order:** `docs/CRITIQUE_LOG.md` -> `README.md` (full Improvement Changelog, one row per
+iteration with its evidence, including the experiments that were removed and the designs that were
+rejected) -> `REPRODUCTION.md` -> `trajectories/case_09_unbatched_backfill.md` ->
+`docs/AGENT_TRAJECTORIES.md`.
+
+GitHub: <https://github.com/MahammadRiyazShek/migration-sentinel>
+Live demo: <https://migration-sentinel-frvo.vercel.app/>
 
 ---
 
 ## Video URL
 
-Record from `docs/VIDEO_SCRIPT.md` (4:40 shot list, every spoken number is on screen), then paste the
-link. Structure: problem and baseline → one full execution of `case_01` → the comparison table → the
-changelog, with iteration 3 (merging replay and rules) called out as the biggest contribution and the
-additive-column drift alert as the experiment that was removed.
+Existing 4:40 cut still holds for everything except the numbers on screen. If re-recording, use
+`docs/VIDEO_SCRIPT.md`: problem and baseline -> one full execution -> the comparison table -> the
+changelog, with iteration 3 (merging replay and rules) as the biggest contribution, the coverage gate
+as the change that cost a published number, and the additive-column drift alert as the experiment that
+was removed. If not re-recording, say in the description that the video shows v1 numbers and that
+`results/comparison.md` is authoritative.
 
 ## Source code
 
-Upload `migration-sentinel.zip` (~1.2 MB, well under the 50 MB limit). Repo:
+Upload the repo zip (well under the 50 MB limit). Repo:
 <https://github.com/MahammadRiyazShek/migration-sentinel>

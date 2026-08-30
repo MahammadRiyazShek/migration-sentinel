@@ -2,9 +2,9 @@
 
 **BLOCK - do not merge**
 
-Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 3 blocker, 4 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 3 blocker, 5 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_12_release_train` · case `case_12_release_train` · owning service `billing-api` · 8.8 ms · model scripted-v1 (10 calls, $0.0000)
+`run eval-case_12_release_train` · case `case_12_release_train` · owning service `billing-api` · 8.4 ms · model scripted-v1 (11 calls, $0.0000)
 
 ## Hazards
 
@@ -16,8 +16,9 @@ Do not ship this as written. 1 statement(s) the application issues today fail ag
 | 4 | **HIGH** | Destructive change shipped in a single step | `invoices.tax_rate` | static |
 | 5 | **HIGH** | Index built without CONCURRENTLY on a large table | `subscriptions` | static |
 | 6 | **HIGH** | Data-integrity constraint removed | `subscriptions` | static |
-| 7 | **HIGH** | Backfill runs as one unbounded statement | `invoices` | static |
-| 8 | **MEDIUM** | No rollback path supplied | `-` | static |
+| 7 | **HIGH** | Type change forces a full table rewrite | `invoices` | static |
+| 8 | **HIGH** | Backfill runs as one unbounded statement | `invoices` | static |
+| 9 | **MEDIUM** | No rollback path supplied | `-` | static |
 
 ### 1. [BLOCKER] Live query breaks after migration
 
@@ -63,13 +64,21 @@ subscriptions_seats_chk (check) is dropped from subscriptions; no query breaks t
 - evidence: statement 4: `ALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk`
 - evidence: constraint text: (seats > 0)
 
-### 7. [HIGH] Backfill runs as one unbounded statement
+### 7. [HIGH] Type change forces a full table rewrite
+
+CLUSTER rewrites invoices under an ACCESS EXCLUSIVE lock (48,000,000 rows, very large)
+
+- evidence: statement 6: `CLUSTER invoices USING idx_invoices_customer`
+- evidence: declared row estimate for invoices: 48,000,000
+- evidence: recognised as a whole-relation maintenance command; the statement itself is still not modelled structurally and stays in the coverage ledger
+
+### 8. [HIGH] Backfill runs as one unbounded statement
 
 backfill on invoices runs as one statement over 48,000,000 rows
 
 - evidence: statement 5: `UPDATE invoices SET status = 'open' WHERE status = 'draft'`
 
-### 8. [MEDIUM] No rollback path supplied
+### 9. [MEDIUM] No rollback path supplied
 
 the change ships without a rollback script
 
@@ -126,7 +135,9 @@ DROP INDEX CONCURRENTLY "idx_usage_events_name";
 - duplicates already exist for subscriptions ("customer_id"); a human must decide the dedupe rule - phase 2 promotes the index to UNIQUE only after that
 - confirm invoices.tax_rate has had zero reads for the agreed observation window before phase 2
 - dropping subscriptions_seats_chk removes an invariant: the data owner must sign off and a monitoring check should replace it
-- statement 6 (unsupported) is outside the tool's model and needs manual review: CLUSTER invoices USING idx_invoices_customer
+- statement 6 (maintenance_rewrite) is outside the tool's model and needs manual review: CLUSTER invoices USING idx_invoices_customer
+- coverage gap on `invoices.status` (in_place_data_mutation): a reviewer confirms which consumers of invoices.status depend on the current values
+- coverage gap on `invoices` (unmodelled_statement): a reviewer confirms by hand what statement 6 does to invoices and to anything reading it
 
 ### Questions for the reviewer
 
@@ -135,14 +146,23 @@ DROP INDEX CONCURRENTLY "idx_usage_events_name";
 - What is the acceptable write-stall window for this table?
 - What enforces this invariant once the constraint is gone?
 - What is the accepted risk for MISSING_ROLLBACK?
-- What batch size and pause has this table tolerated before?
+- What is the accepted risk for TABLE_REWRITE_LOCK?
+
+## Coverage ledger
+
+2 gap(s) between what this migration touches and what this review could actually observe. A gap is an absence of evidence, so it is recorded as a decision for a person rather than as a finding with a severity.
+
+| object | gap | why it is a gap | closes when |
+|---|---|---|---|
+| `invoices.status` | existing rows rewritten; replay cannot see changed answers | rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns the same answer | a reviewer confirms which consumers of invoices.status depend on the current values |
+| `invoices` | statement not modelled by the parser | the parser produced no structural model for this statement, so no post-migration schema and no replay covers it | a reviewer confirms by hand what statement 6 does to invoices and to anything reading it |
 
 ## What this review did not check
 
 - Lock behaviour is inferred from declared row estimates and static rules; the shadow database is SQLite and cannot reproduce PostgreSQL lock queues.
 - Fixture data is a small synthetic sample, so data-dependent hazards are detected only where the fixtures expose them.
 - Application code is only visible through the query corpus; anything issuing dynamic SQL that is not in the corpus is invisible here.
-- unmodelled statement: op 6 (unsupported) not modelled structurally: CLUSTER invoices USING idx_invoices_customer
+- unmodelled statement: op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer
 
 ## Approval
 

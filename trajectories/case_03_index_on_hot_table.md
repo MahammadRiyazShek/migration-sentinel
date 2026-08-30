@@ -2,7 +2,7 @@
 
 - run id: `eval-case_03_index_on_hot_table`
 - case: `case_03_index_on_hot_table`
-- events: 24
+- events: 25
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.74 ms)
+**tool** `schema.parse` (0.62 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.03 ms)
+**tool** `migration.parse` (0.02 ms)
 
 ```json
 {
@@ -81,7 +81,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -154,7 +154,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.12 ms)
+**tool** `corpus.dependents` (0.14 ms)
 
 ```json
 {
@@ -340,7 +340,7 @@ _tool responded_
 19
 ```
 
-**tool** `shadow.replay` (2.92 ms)
+**tool** `shadow.replay` (2.85 ms)
 
 ```json
 {
@@ -485,6 +485,71 @@ _tool responded_
 ]
 ```
 
+**tool** `coverage.ledger` (0.11 ms)
+
+```json
+{
+ "args": {
+  "ops": [
+   {
+    "kind": "create_index",
+    "table": "invoices",
+    "column": null,
+    "detail": {
+     "name": "idx_invoices_status",
+     "unique": false,
+     "concurrently": false,
+     "columns": [
+      "status"
+     ]
+    },
+    "sql": "CREATE INDEX idx_invoices_status ON invoices (status)",
+    "index": 0
+   }
+  ],
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "high",
+    "label": "support customer lookup",
+    "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+   },
+   {
+    "id": "q_bi_summary",
+    "service": "bi",
+    "criticality": "high",
+    "label": "dbt model stg_customers",
+    "sql": "SELECT * F
+```
+
+_tool responded_
+
+```json
+{
+ "gaps": [],
+ "gap_kinds": [],
+ "irreversible": [],
+ "corpus_statements": 14,
+ "parser_notes": []
+}
+```
+
 **model** `scripted-v1` tag=`hazard_narrative` tokens=455/60 cost=$0.0
 
 > Index built without CONCURRENTLY on a large table. Writes queue behind the build; at this row count that is a user-visible stall. Evidence: statement 0: `CREATE INDEX idx_invoices_status ON invoices (status)` Previously bit us in INC-2024-07.
@@ -500,6 +565,8 @@ _tool responded_
   "high": 0,
   "blocker": 1
  },
+ "coverage_gaps": [],
+ "verdict_capped_by_coverage": false,
  "hazards": [
   {
    "code": "INDEX_LOCK_NO_CONCURRENT",
@@ -568,7 +635,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.07 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -636,7 +703,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.62 ms)
+**tool** `shadow.replay` (2.67 ms)
 
 ```json
 {

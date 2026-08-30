@@ -84,9 +84,9 @@ Expected: `REQUEST_CHANGES` with 3 findings, no evidence, no plan. Variant `prom
 python eval/run_eval.py --ablations
 ```
 
-This runs 12 cases x (2 baseline variants + 1 pipeline) plus 5 ablation configurations = 96 reviews.
+This runs 12 cases x (2 baseline variants + 1 pipeline) plus 6 ablation configurations = 108 reviews.
 
-* measured runtime on the reference machine: **0.62 s total**, about 8.5 ms per pipeline review
+* measured runtime on the reference machine: **under 1 s total**, about 8 ms per pipeline review
 * cost: **$0.00** (the default model is the offline scripted stand-in)
 * stdout ends with the comparison table
 
@@ -104,12 +104,20 @@ Expected files:
 Headline numbers you should see, byte for byte:
 
 ```
-| **Unsafe approvals** (primary, lower is better) | 1/12 | 1/12 | 0/12 |
-| Hazard recall (strict code)                     | 0.545 | 0.606 | 0.939 |
-| Hazard precision (strict code)                  | 0.947 | 0.69  | 0.969 |
-| Severity agreement on matched hazards           | 0.611 | 0.55  | 0.968 |
-| Verified expand/contract plans produced         | 0/12  | 0/12  | 12/12 |
+| **Unsafe approvals** (primary, lower is better)             | 1/12  | 1/12  | 0/12  |
+| **Coverage-gap cases cleared without a sign-off**           | 0/2   | 0/2   | 0/2   |
+| Hazard recall (strict code)                                 | 0.545 | 0.606 | 0.97  |
+| Hazard precision (strict code)                              | 0.947 | 0.69  | 0.97  |
+| Severity agreement on matched hazards                       | 0.611 | 0.55  | 0.969 |
+| Findings backed by machine evidence                         | 0/19  | 0/29  | 35/35 |
+| Blind spots named in the packet, with the object             | 0     | 0     | 3     |
+| Verified expand/contract plans produced                     | 0/12  | 0/12  | 12/12 |
+| Modelled reviewer minutes per case                          | 29.7  | 34.7  | 9.2   |
 ```
+
+Per-case verdicts you should see: 9 x `BLOCK`, 1 x `SAFE` (`case_06`, the clean case), 1 x
+`SAFE_WITH_PLAN` (`case_07`), and 1 x `NEEDS_COVERAGE_SIGNOFF` (`case_09`, capped because the
+migration erases every `NULL` from `invoices.currency` and the rollback does not restore them).
 
 If any of those differ, the run is not reproducing and I would like to know.
 
@@ -123,7 +131,9 @@ Reads `results/ablation.json` and rewrites [`results/components.md`](results/com
 as the cost of removing each component rather than as the score of each arm. Under a second, $0.00.
 This is where the verifier and incident memory stop looking decorative: both leave every detection
 metric untouched, and removing the verifier moves verified plans 12/12 -> 0/12 and modelled reviewer
-minutes 8.5 -> 23.3.
+minutes 9.2 -> 23.3. It is also where the coverage gate looks *bad*: it moves no detection metric at
+all and adds 0.7 modelled reviewer minutes per case. The `no_coverage` arm is the v1 behaviour, and it
+is the only arm that clears a declared blind spot (1/2 against 0/2).
 
 ### 4b. Sensitivity band on the reviewer-minute claim
 
@@ -137,9 +147,12 @@ Runs no reviews and calls no model, so it cannot change any other number. It sel
 per-case minute figures are recomputed from the raw fields and asserted equal to what
 `eval/scoring.py` stored, so drift between the two fails loudly.
 
-Expected: the reduction against the better baseline holds at 71-72% under uniform rescaling and
-collapses to about 1% under one specific ratio (a hand-written plan priced at 6 minutes against 6
-minutes to approve a generated one). That collapse is the point of running it.
+Expected: the reduction against the better baseline holds at **69%** under uniform rescaling, 63% when
+an unevidenced claim is priced at 1 minute, and **reverses to -12% and -5%** under one specific ratio
+(a hand-written plan priced at 6 minutes against 6 minutes to approve a generated one). In v1 those two
+rows collapsed the advantage to about 1%; in v2 they flip its sign, because the coverage gate turns
+every blind spot into a human gate and human gates are exactly what this model charges for. That
+reversal is the point of running it.
 
 ### 4c. Development-agent trace index
 
@@ -158,10 +171,15 @@ a hit or on an empty directory rather than writing an index that lists nothing. 
 python -m unittest discover -s tests -v
 ```
 
-Expected: `Ran 15 tests ... OK`, about 0.1 s. They cover the parser traps, the shadow replay,
+Expected: `Ran 22 tests ... OK`, about 0.15 s. They cover the parser traps, the shadow replay,
 memory escalation, determinism (same case twice, identical hazards and plan), the escalation path
 (`max_attempts=1` on case_01 must escalate instead of shipping an unverified plan) and the approval
-gate (refuses without `--i-approve`, refuses a `BLOCK` verdict without an explicit override).
+gate (refuses without `--i-approve`, refuses a `BLOCK` verdict without an explicit override, and
+refuses an uncleared coverage gap with exit code 4). Five of the 22 are the v2 coverage suite:
+`TestCoverageLedger` asserts that the cap never makes a verdict safer, that it fires on `case_09` with
+`invoices.currency` named, that it does **not** fire on the clean case, that disabling the gate
+reproduces the v1 verdict exactly, and that a maintenance command recognised by name still stays in
+the coverage ledger.
 
 ## 6. The human approval gate
 
@@ -235,7 +253,7 @@ them after the evaluation, never before.
 
 ```bash
 python eval/run_eval.py --ablations      # writes results/ and trajectories/
-python tools/check_results.py            # 13/13 claims hold  (exits 1 if one does not)
+python tools/check_results.py            # 18/18 claims hold  (exits 1 if one does not)
 python tools/build_site.py               # -> site/data/bundle.json  (~467 KB), site/py/ (38 files)
 python tools/build_artifact.py           # -> site/standalone.html   (one file, no live engine)
 python tools/test_browser_driver.py      # 12/12 parity with the recorded packets
@@ -250,7 +268,7 @@ What you should see, in order:
 2. **Boot the engine in this browser** â†’ about 12 MB of Pyodide from jsDelivr, then
    `38 files mounted`. Roughly 5 to 15 seconds on a first visit, under two on a warm cache.
 3. **Run this case live** â†’ the packet re-renders with a `live run` chip, a wall-clock figure
-   measured in the tab (typically 20 to 60 ms, slower than the 8.5 ms CLI number because
+   measured in the tab (typically 20 to 60 ms, slower than the ~8 ms CLI number because
    WebAssembly), and a parity line: *"the run in this tab reproduced the recorded packet exactly"*.
 4. Edit the SQL in the Migration tab, press **Review this SQL** â†’ a real packet for your migration,
    with a note that there is no ground truth to score it against.

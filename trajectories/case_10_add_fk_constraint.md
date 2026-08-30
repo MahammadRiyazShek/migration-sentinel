@@ -2,7 +2,7 @@
 
 - run id: `eval-case_10_add_fk_constraint`
 - case: `case_10_add_fk_constraint`
-- events: 24
+- events: 25
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.64 ms)
+**tool** `schema.parse` (0.69 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.16 ms)
+**tool** `migration.parse` (0.09 ms)
 
 ```json
 {
@@ -80,7 +80,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -325,7 +325,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (2.97 ms)
+**tool** `shadow.replay` (2.62 ms)
 
 ```json
 {
@@ -464,6 +464,66 @@ _tool responded_
 ]
 ```
 
+**tool** `coverage.ledger` (0.11 ms)
+
+```json
+{
+ "args": {
+  "ops": [
+   {
+    "kind": "add_constraint",
+    "table": "invoices",
+    "column": null,
+    "detail": {
+     "constraint": "invoices_customer_fk",
+     "constraint_kind": "foreign_key",
+     "expr": "(customer_id) REFERENCES customers (id)",
+     "columns": [],
+     "not_valid": false
+    },
+    "sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id)",
+    "index": 0
+   }
+  ],
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "high",
+    "label": "support customer lookup",
+    "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+   },
+   {
+    "id": "q_bi_summary
+```
+
+_tool responded_
+
+```json
+{
+ "gaps": [],
+ "gap_kinds": [],
+ "irreversible": [],
+ "corpus_statements": 14,
+ "parser_notes": []
+}
+```
+
 **model** `scripted-v1` tag=`hazard_narrative` tokens=477/71 cost=$0.0
 
 > Constraint added without NOT VALID / VALIDATE split. Validation scans the whole table under a lock that blocks writes. Evidence: statement 0: `ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id)` Previously bit us in INC-2024-11.
@@ -479,6 +539,8 @@ _tool responded_
   "high": 0,
   "blocker": 1
  },
+ "coverage_gaps": [],
+ "verdict_capped_by_coverage": false,
  "hazards": [
   {
    "code": "CONSTRAINT_VALIDATION_LOCK",
@@ -547,7 +609,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.08 ms)
+**tool** `migration.parse` (0.07 ms)
 
 ```json
 {
@@ -613,7 +675,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.61 ms)
+**tool** `shadow.replay` (2.58 ms)
 
 ```json
 {

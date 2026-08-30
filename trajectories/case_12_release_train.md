@@ -2,7 +2,7 @@
 
 - run id: `eval-case_12_release_train`
 - case: `case_12_release_train`
-- events: 39
+- events: 42
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.71 ms)
+**tool** `schema.parse` (0.62 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.42 ms)
+**tool** `migration.parse` (0.16 ms)
 
 ```json
 {
@@ -136,17 +136,19 @@ _tool responded_
   "index": 5
  },
  {
-  "kind": "unsupported",
-  "table": null,
+  "kind": "maintenance_rewrite",
+  "table": "invoices",
   "column": null,
-  "detail": {},
+  "detail": {
+   "command": "CLUSTER"
+  },
   "sql": "CLUSTER invoices USING idx_invoices_customer",
   "index": 6
  }
 ]
 ```
 
-**tool** `schema.apply_ops` (0.1 ms)
+**tool** `schema.apply_ops` (0.09 ms)
 
 ```json
 {
@@ -210,7 +212,7 @@ _tool responded_
 [
  "Schema",
  [
-  "op 6 (unsupported) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
+  "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
  ]
 ]
 ```
@@ -227,7 +229,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
   "dml_update",
   "drop_column",
   "drop_constraint",
-  "unsupported"
+  "maintenance_rewrite"
  ],
  "tables_touched": [
   "invoices",
@@ -235,7 +237,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
   "usage_events"
  ],
  "unmodelled": [
-  "op 6 (unsupported) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
+  "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
  ]
 }
 ```
@@ -263,7 +265,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.15 ms)
+**tool** `corpus.dependents` (0.14 ms)
 
 ```json
 {
@@ -393,7 +395,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -463,7 +465,7 @@ _tool responded_
 21
 ```
 
-**tool** `shadow.replay` (3.05 ms)
+**tool** `shadow.replay` (2.93 ms)
 
 ```json
 {
@@ -760,6 +762,26 @@ _tool responded_
 ```json
 {
  "args": {
+  "hazard_code": "TABLE_REWRITE_LOCK",
+  "table": "invoices"
+ }
+}
+```
+
+_tool responded_
+
+```json
+[
+ 0,
+ []
+]
+```
+
+**tool** `memory.escalation` (0.0 ms)
+
+```json
+{
+ "args": {
   "hazard_code": "UNBATCHED_BACKFILL",
   "table": "invoices"
  }
@@ -795,6 +817,99 @@ _tool responded_
 ]
 ```
 
+**tool** `coverage.ledger` (0.14 ms)
+
+```json
+{
+ "args": {
+  "ops": [
+   {
+    "kind": "add_column",
+    "table": "subscriptions",
+    "column": "billing_interval",
+    "detail": {
+     "type": "TEXT",
+     "not_null": true,
+     "default": "'monthly'",
+     "unique": false
+    },
+    "sql": "ALTER TABLE subscriptions ADD COLUMN billing_interval TEXT NOT NULL DEFAULT 'monthly'",
+    "index": 0
+   },
+   {
+    "kind": "create_index",
+    "table": "subscriptions",
+    "column": null,
+    "detail": {
+     "name": "idx_subscriptions_customer",
+     "unique": true,
+     "concurrently": false,
+     "columns": [
+      "customer_id"
+     ]
+    },
+    "sql": "CREATE UNIQUE INDEX idx_subscriptions_customer ON subscriptions (customer_id)",
+    "index": 1
+   },
+   {
+    "kind": "drop_column",
+    "table": "invoices",
+    "column": "tax_rate",
+    "detail": {},
+    "sql": "ALTER TABLE invoices DROP COLUMN tax_rate",
+    "index": 2
+   },
+   {
+    "kind": "create_index",
+    "table": "usage_events",
+    "column": null,
+    "detail": {
+     "name": "idx_usage_events_name",
+     "unique": false,
+     "concurrently": false,
+     "columns": [
+      "event_name"
+     ]
+    },
+    "sql": "CREATE INDEX idx_usage_events_name ON usage_events (event_na
+```
+
+_tool responded_
+
+```json
+{
+ "gaps": [
+  {
+   "kind": "in_place_data_mutation",
+   "object": "invoices.status",
+   "statement_index": 5,
+   "statement": "UPDATE invoices SET status = 'open' WHERE status = 'draft'",
+   "why": "rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns ...",
+   "closes_with": "a reviewer confirms which consumers of invoices.status depend on the current values",
+   "irreversible": false
+  },
+  {
+   "kind": "unmodelled_statement",
+   "object": "invoices",
+   "statement_index": 6,
+   "statement": "CLUSTER invoices USING idx_invoices_customer",
+   "why": "the parser produced no structural model for this statement, so no post-migration schema and no replay covers it",
+   "closes_with": "a reviewer confirms by hand what statement 6 does to invoices and to anything reading it",
+   "irreversible": false
+  }
+ ],
+ "gap_kinds": [
+  "in_place_data_mutation",
+  "unmodelled_statement"
+ ],
+ "irreversible": [],
+ "corpus_statements": 14,
+ "parser_notes": [
+  "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
+ ]
+}
+```
+
 **model** `scripted-v1` tag=`hazard_narrative` tokens=451/73 cost=$0.0
 
 > Live query breaks after migration. A statement the application issues today fails against the post-migration schema. Evidence: shadow replay: `SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1` -> OperationalError: no such column: tax_rate Owning service(s): billing-api.
@@ -819,6 +934,10 @@ _tool responded_
 
 > Data-integrity constraint removed. Nothing breaks today; invalid rows start accumulating and are expensive to clean up later. Evidence: statement 4: `ALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk`
 
+**model** `scripted-v1` tag=`hazard_narrative` tokens=478/48 cost=$0.0
+
+> Type change forces a full table rewrite. An ACCESS EXCLUSIVE lock for the length of the rewrite is downtime by another name. Evidence: statement 6: `CLUSTER invoices USING idx_invoices_customer`
+
 **model** `scripted-v1` tag=`hazard_narrative` tokens=428/51 cost=$0.0
 
 > Backfill runs as one unbounded statement. One long transaction holds locks and bloats WAL; it cannot be paused or resumed. Evidence: statement 5: `UPDATE invoices SET status = 'open' WHERE status = 'draft'`
@@ -835,9 +954,14 @@ _tool responded_
  "counts": {
   "low": 0,
   "medium": 1,
-  "high": 4,
+  "high": 5,
   "blocker": 3
  },
+ "coverage_gaps": [
+  "in_place_data_mutation:invoices.status",
+  "unmodelled_statement:invoices"
+ ],
+ "verdict_capped_by_coverage": false,
  "hazards": [
   {
    "code": "BREAKING_QUERY",
@@ -884,6 +1008,12 @@ _tool responded_
    "memory": []
   },
   {
+   "code": "TABLE_REWRITE_LOCK",
+   "severity": "high",
+   "source": "static",
+   "memory": []
+  },
+  {
    "code": "UNBATCHED_BACKFILL",
    "severity": "high",
    "source": "static",
@@ -921,6 +1051,7 @@ _tool responded_
   "INDEX_LOCK_NO_CONCURRENT",
   "INTEGRITY_CONSTRAINT_REMOVED",
   "MISSING_ROLLBACK",
+  "TABLE_REWRITE_LOCK",
   "UNBATCHED_BACKFILL",
   "UNIQUE_VIOLATION_EXISTING_DATA"
  ]
@@ -929,14 +1060,14 @@ _tool responded_
 
 </details>
 
-**model** `scripted-v1` tag=`reviewer_questions` tokens=519/90 cost=$0.0
+**model** `scripted-v1` tag=`reviewer_questions` tokens=524/88 cost=$0.0
 
 > - Which deploy lands first: the query change or the schema change?
 > - What is the accepted risk for DESTRUCTIVE_NO_EXPAND_CONTRACT?
 > - What is the acceptable write-stall window for this table?
 > - What enforces this invariant once the constraint is gone?
 > - What is the accepted risk for MISSING_ROLLBACK?
-> - What batch size and pause has this table tolerated before?
+> - What is the accepted risk for TABLE_REWRITE_LOCK?
 
 **result**
 
@@ -945,7 +1076,7 @@ _tool responded_
  "attempt": 1,
  "phase1_statements": 5,
  "phase2_statements": 4,
- "human_gates": 4
+ "human_gates": 6
 }
 ```
 
@@ -965,7 +1096,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.13 ms)
+**tool** `migration.parse` (0.12 ms)
 
 ```json
 {
@@ -1101,7 +1232,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.86 ms)
+**tool** `shadow.replay` (2.82 ms)
 
 ```json
 {
@@ -1195,9 +1326,9 @@ _tool responded_
 }
 ```
 
-**model** `scripted-v1` tag=`executive_summary` tokens=38/60 cost=$0.0
+**model** `scripted-v1` tag=`executive_summary` tokens=38/78 cost=$0.0
 
-> Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 3 blocker, 4 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+> Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 3 blocker, 5 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
 ### Human checkpoint - pre-execution approval: **REQUIRED**
 

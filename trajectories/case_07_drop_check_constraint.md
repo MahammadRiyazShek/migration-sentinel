@@ -2,7 +2,7 @@
 
 - run id: `eval-case_07_drop_check_constraint`
 - case: `case_07_drop_check_constraint`
-- events: 24
+- events: 25
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.69 ms)
+**tool** `schema.parse` (0.66 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.6 ms)
+**tool** `migration.parse` (0.03 ms)
 
 ```json
 {
@@ -76,7 +76,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.09 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -144,7 +144,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.12 ms)
+**tool** `corpus.dependents` (0.11 ms)
 
 ```json
 {
@@ -332,7 +332,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.7 ms)
+**tool** `shadow.replay` (2.56 ms)
 
 ```json
 {
@@ -473,6 +473,70 @@ _tool responded_
 ]
 ```
 
+**tool** `coverage.ledger` (0.11 ms)
+
+```json
+{
+ "args": {
+  "ops": [
+   {
+    "kind": "drop_constraint",
+    "table": "customers",
+    "column": null,
+    "detail": {
+     "constraint": "customers_plan_chk"
+    },
+    "sql": "ALTER TABLE customers DROP CONSTRAINT customers_plan_chk",
+    "index": 0
+   }
+  ],
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "high",
+    "label": "support customer lookup",
+    "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+   },
+   {
+    "id": "q_bi_summary",
+    "service": "bi",
+    "criticality": "high",
+    "label": "dbt model stg_customers",
+    "sql": "SELECT * FROM customer_billing_summary"
+   },
+   {
+    "id": "q_bi_mrr",
+    "service": "
+```
+
+_tool responded_
+
+```json
+{
+ "gaps": [],
+ "gap_kinds": [],
+ "irreversible": [],
+ "corpus_statements": 14,
+ "parser_notes": []
+}
+```
+
 **model** `scripted-v1` tag=`hazard_narrative` tokens=458/51 cost=$0.0
 
 > Data-integrity constraint removed. Nothing breaks today; invalid rows start accumulating and are expensive to clean up later. Evidence: statement 0: `ALTER TABLE customers DROP CONSTRAINT customers_plan_chk`
@@ -488,6 +552,8 @@ _tool responded_
   "high": 1,
   "blocker": 0
  },
+ "coverage_gaps": [],
+ "verdict_capped_by_coverage": false,
  "hazards": [
   {
    "code": "INTEGRITY_CONSTRAINT_REMOVED",
@@ -590,7 +656,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.83 ms)
+**tool** `shadow.replay` (2.67 ms)
 
 ```json
 {

@@ -11,6 +11,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+from .. import coverage as coverage_tools
 from .base import Agent
 from .risk_officer import LOCK_ROWS_WARN
 from ..tools.sql_parse import Schema, sqlite_type
@@ -215,6 +216,10 @@ class RolloutEngineer(Agent):
             phase1, phase2 = keep, moved + phase2
             gates.append("phase 1 was reduced to additive statements only; the rest needs a human to "
                          "choose the deploy order")
+
+        # v2: every open coverage gap becomes a named human decision inside the plan,
+        # so the thing the tool could not see is work someone has to sign for.
+        gates += coverage_tools.signoff_gates(risk.get("coverage_ledger") or {"gaps": []})
 
         questions = self.model("reviewer_questions", {"codes": sorted(codes)},
                                user=f"Hazard codes: {sorted(codes)}").payload.get("questions", [])

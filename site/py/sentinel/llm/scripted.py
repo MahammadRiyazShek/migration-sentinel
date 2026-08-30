@@ -139,8 +139,14 @@ class ScriptedLLM(BaseLLM):
                 "BLOCK": "Do not ship this as written.",
                 "SAFE_WITH_PLAN": "Shippable, but only as the staged plan below.",
                 "SAFE": "No blocking hazards found.",
+                "NEEDS_COVERAGE_SIGNOFF": "Not cleared: the hazards found are not blocking, but this "
+                                          "review has a declared blind spot on an object the "
+                                          "migration touches.",
             }[v]
             bits = [head]
+            if p.get("coverage_gaps"):
+                bits.append(f"{p['coverage_gaps']} coverage gap(s) need a named sign-off before this "
+                            f"can be called safe.")
             if broken:
                 bits.append(f"{broken} statement(s) the application issues today fail against the "
                             f"post-migration schema in shadow replay.")

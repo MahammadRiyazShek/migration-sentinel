@@ -150,6 +150,14 @@
  },
  "escalated_to_human": false,
  "coverage_gaps": [],
+ "coverage_ledger": {
+  "gaps": [],
+  "gap_kinds": [],
+  "irreversible": [],
+  "corpus_statements": 14,
+  "parser_notes": []
+ },
+ "verdict_capped_by_coverage": false,
  "change_set": {
   "ops": [
    {
@@ -188,7 +196,8 @@
   "replay": true,
   "static": true,
   "memory": true,
-  "verify": true
+  "verify": true,
+  "coverage": true
  },
  "tool_calls": [
   {
@@ -204,7 +213,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.74,
+   "ms": 0.66,
    "result_summary": "Schema"
   },
   {
@@ -213,7 +222,7 @@
    "args": {
     "sql": "DROP VIEW open_invoices;\nCREATE VIEW open_invoices_v2 AS\n  SELECT id, customer_id, invoice_number, amount_cents, status, issued_at\n  FROM invoices WHERE status IN ('draft','open');\n"
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "drop_view",
@@ -364,7 +373,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.1,
    "result_summary": [
     {
      "query_id": "q_dunning_open",
@@ -631,7 +640,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.77,
+   "ms": 2.71,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -702,12 +711,111 @@
    ]
   },
   {
+   "agent": "risk_officer",
+   "tool": "coverage.ledger",
+   "args": {
+    "ops": [
+     {
+      "kind": "drop_view",
+      "table": null,
+      "column": null,
+      "detail": {
+       "name": "open_invoices"
+      },
+      "sql": "DROP VIEW open_invoices",
+      "index": 0
+     },
+     {
+      "kind": "create_view",
+      "table": null,
+      "column": null,
+      "detail": {
+       "name": "open_invoices_v2",
+       "select": "SELECT id, customer_id, invoice_number, amount_cents, status, issued_at FROM invoices WHERE status IN ('draft','open')",
+       "replace": false
+      },
+      "sql": "CREATE VIEW open_invoices_v2 AS SELECT id, customer_id, invoice_number, amount_cents, status, issued_at FROM invoices WH...",
+      "index": 1
+     }
+    ],
+    "schema": "Schema",
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+6 more"
+    ],
+    "unmodelled_notes": []
+   },
+   "ms": 0.11,
+   "result_summary": {
+    "gaps": [],
+    "gap_kinds": [],
+    "irreversible": [],
+    "corpus_statements": 14,
+    "parser_notes": []
+   }
+  },
+  {
    "agent": "verifier",
    "tool": "migration.parse",
    "args": {
     "sql": "CREATE VIEW open_invoices_v2 AS SELECT id, customer_id, invoice_number, amount_cents, status, issued_at FROM invoices WHERE status IN ('draft','open');"
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "create_view",
@@ -743,7 +851,7 @@
      }
     ]
    },
-   "ms": 0.09,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -972,7 +1080,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.75,
+   "ms": 2.64,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -995,7 +1103,7 @@
   "tokens_out": 257,
   "cost_usd": 0.0
  },
- "wall_ms": 7.5,
+ "wall_ms": 7.1,
  "severity_order": [
   "low",
   "medium",

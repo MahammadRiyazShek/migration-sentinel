@@ -44,6 +44,11 @@ TIME_MODEL = {
 
 APPROVE_VERDICTS = {"APPROVE", "SAFE"}
 
+# Verdicts that read as "you may proceed on what is written here". A packet that
+# declares a blind spot on an affected object and still lands in this set is the
+# v1 failure mode: the badge contradicts the appendix, and reviewers read badges.
+CLEAN_VERDICTS = {"APPROVE", "SAFE", "SAFE_WITH_PLAN"}
+
 
 def codes(hazards: list[dict[str, Any]]) -> set[str]:
     return {h["code"] for h in hazards}
@@ -60,7 +65,11 @@ def prf(tp: int, fp: int, fn: int) -> dict[str, float]:
     return {"precision": round(precision, 3), "recall": round(recall, 3), "f1": round(f1, 3)}
 
 
-def score_case(case: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:
+def score_case(case: dict[str, Any], result: dict[str, Any],
+               case_coverage_gaps: int = 0) -> dict[str, Any]:
+    """`case_coverage_gaps` is a property of the case, computed once from the migration and
+    the corpus, so every arm is measured against the same factual blind spots rather than
+    against its own opinion of them."""
     gt = case["ground_truth"]
     gt_codes = codes(gt["hazards"])
     pred_codes = codes(result["hazards"])
@@ -93,8 +102,15 @@ def score_case(case: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:
     elif gt["blocking"] or pred_codes:
         minutes += TIME_MODEL["write_expand_contract_plan_minutes"]
 
+    declared_gaps = len((result.get("coverage_ledger") or {}).get("gaps", []))
+    cleared_a_gap = bool(case_coverage_gaps and result["verdict"] in CLEAN_VERDICTS)
+
     return {
         "case_id": case["id"], "verdict": result["verdict"],
+        "case_coverage_gaps": case_coverage_gaps,
+        "declared_coverage_gaps": declared_gaps,
+        "coverage_signoff_required": result["verdict"] == "NEEDS_COVERAGE_SIGNOFF",
+        "gap_case_cleared_without_signoff": cleared_a_gap,
         "gt_blocking": gt["blocking"], "gt_codes": sorted(gt_codes), "pred_codes": sorted(pred_codes),
         "tp": tp, "fp": fp, "fn": fn,
         "fam_tp": sorted(gt_fam & pred_fam), "fam_fp": sorted(pred_fam - gt_fam),
@@ -130,6 +146,10 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "findings_total": sum(r["findings"] for r in rows),
         "findings_with_evidence": sum(r["evidenced_findings"] for r in rows),
         "verified_plans": sum(r["plan_verified"] for r in rows),
+        "cases_with_coverage_gaps": sum(1 for r in rows if r.get("case_coverage_gaps")),
+        "declared_coverage_gaps": sum(r.get("declared_coverage_gaps", 0) for r in rows),
+        "gap_cases_cleared_without_signoff": sum(
+            bool(r.get("gap_case_cleared_without_signoff")) for r in rows),
         "modelled_reviewer_minutes_total": sum(r["modelled_reviewer_minutes"] for r in rows),
         "modelled_reviewer_minutes_per_case": round(
             sum(r["modelled_reviewer_minutes"] for r in rows) / len(rows), 1),

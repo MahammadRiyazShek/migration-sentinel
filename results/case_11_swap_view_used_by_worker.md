@@ -4,7 +4,7 @@
 
 Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 1 blocker, 1 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_11_swap_view_used_by_worker` · case `case_11_swap_view_used_by_worker` · owning service `billing-api` · 7.5 ms · model scripted-v1 (5 calls, $0.0000)
+`run eval-case_11_swap_view_used_by_worker` · case `case_11_swap_view_used_by_worker` · owning service `billing-api` · 7.1 ms · model scripted-v1 (5 calls, $0.0000)
 
 ## Hazards
 

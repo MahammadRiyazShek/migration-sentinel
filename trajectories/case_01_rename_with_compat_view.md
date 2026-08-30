@@ -2,7 +2,7 @@
 
 - run id: `eval-case_01_rename_with_compat_view`
 - case: `case_01_rename_with_compat_view`
-- events: 44
+- events: 45
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (2.02 ms)
+**tool** `schema.parse` (0.63 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (1.55 ms)
+**tool** `migration.parse` (0.1 ms)
 
 ```json
 {
@@ -88,7 +88,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.09 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -169,7 +169,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.25 ms)
+**tool** `corpus.dependents` (0.19 ms)
 
 ```json
 {
@@ -287,7 +287,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -359,7 +359,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (3.16 ms)
+**tool** `shadow.replay` (3.13 ms)
 
 ```json
 {
@@ -765,6 +765,68 @@ _tool responded_
 ]
 ```
 
+**tool** `coverage.ledger` (0.12 ms)
+
+```json
+{
+ "args": {
+  "ops": [
+   {
+    "kind": "rename_column",
+    "table": "customers",
+    "column": "full_name",
+    "detail": {
+     "new_name": "name"
+    },
+    "sql": "ALTER TABLE customers RENAME COLUMN full_name TO name",
+    "index": 0
+   },
+   {
+    "kind": "create_view",
+    "table": null,
+    "column": null,
+    "detail": {
+     "name": "customer_billing_summary",
+     "select": "SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers",
+     "replace": true
+    },
+    "sql": "CREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, ...",
+    "index": 1
+   }
+  ],
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+ 
+```
+
+_tool responded_
+
+```json
+{
+ "gaps": [],
+ "gap_kinds": [],
+ "irreversible": [],
+ "corpus_statements": 14,
+ "parser_notes": []
+}
+```
+
 **model** `scripted-v1` tag=`hazard_narrative` tokens=446/69 cost=$0.0
 
 > Live query breaks after migration. A statement the application issues today fails against the post-migration schema. Evidence: shadow replay: `SELECT id, email, full_name, plan FROM customers WHERE id = 1` -> OperationalError: no such column: full_name Owning service(s): web.
@@ -800,6 +862,8 @@ _tool responded_
   "high": 3,
   "blocker": 2
  },
+ "coverage_gaps": [],
+ "verdict_capped_by_coverage": false,
  "hazards": [
   {
    "code": "BREAKING_QUERY",
@@ -910,7 +974,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.7 ms)
+**tool** `migration.parse` (0.12 ms)
 
 ```json
 {
@@ -963,7 +1027,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `schema.apply_ops` (0.07 ms)
 
 ```json
 {
@@ -1020,7 +1084,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.98 ms)
+**tool** `shadow.replay` (2.81 ms)
 
 ```json
 {
@@ -1314,7 +1378,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.1 ms)
+**tool** `migration.parse` (0.08 ms)
 
 ```json
 {
@@ -1400,7 +1464,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.71 ms)
+**tool** `shadow.replay` (2.73 ms)
 
 ```json
 {

@@ -2,7 +2,7 @@
 
 - run id: `eval-case_08_narrowing_country_code`
 - case: `case_08_narrowing_country_code`
-- events: 26
+- events: 27
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.65 ms)
+**tool** `schema.parse` (0.66 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.24 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -76,7 +76,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -144,7 +144,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.12 ms)
+**tool** `corpus.dependents` (0.17 ms)
 
 ```json
 {
@@ -261,7 +261,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.03 ms)
 
 ```json
 {
@@ -334,7 +334,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.87 ms)
+**tool** `shadow.replay` (2.79 ms)
 
 ```json
 {
@@ -523,6 +523,70 @@ _tool responded_
 ]
 ```
 
+**tool** `coverage.ledger` (0.11 ms)
+
+```json
+{
+ "args": {
+  "ops": [
+   {
+    "kind": "alter_type",
+    "table": "customers",
+    "column": "country_code",
+    "detail": {
+     "new_type": "varchar(2)"
+    },
+    "sql": "ALTER TABLE customers ALTER COLUMN country_code TYPE varchar(2)",
+    "index": 0
+   }
+  ],
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "high",
+    "label": "support customer lookup",
+    "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+   },
+   {
+    "id": "q_bi_summary",
+    "service": "bi",
+    "criticality": "high",
+    "label": "dbt model stg_customers",
+    "sql": "SELECT * FROM customer_billing_summary"
+   },
+   {
+    "id": "q_bi_mrr",
+    "service":
+```
+
+_tool responded_
+
+```json
+{
+ "gaps": [],
+ "gap_kinds": [],
+ "irreversible": [],
+ "corpus_statements": 14,
+ "parser_notes": []
+}
+```
+
 **model** `scripted-v1` tag=`hazard_narrative` tokens=426/40 cost=$0.0
 
 > Narrowing type change can silently lose data. Values that do not fit are truncated or rejected, and the old values are gone. Evidence: value scan offenders=['USA']
@@ -542,6 +606,8 @@ _tool responded_
   "high": 1,
   "blocker": 1
  },
+ "coverage_gaps": [],
+ "verdict_capped_by_coverage": false,
  "hazards": [
   {
    "code": "TYPE_NARROWING_DATA_LOSS",
@@ -652,7 +718,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.69 ms)
+**tool** `shadow.replay` (2.56 ms)
 
 ```json
 {

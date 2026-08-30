@@ -1,10 +1,12 @@
 # Migration review: Backfill invoices.currency and make it NOT NULL
 
-**SHIP AS PLAN - not as written**
+**NOT CLEARED - coverage gap on an affected object**
 
-Shippable, but only as the staged plan below. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_09_unbatched_backfill` · case `case_09_unbatched_backfill` · owning service `billing-api` · 7.6 ms · model scripted-v1 (4 calls, $0.0000)
+`run eval-case_09_unbatched_backfill` · case `case_09_unbatched_backfill` · owning service `billing-api` · 7.2 ms · model scripted-v1 (4 calls, $0.0000)
+
+> **Not cleared on coverage.** The hazards found here are not blocking, but 1 object(s) this migration touches sit inside a blind spot of the review. The verdict is capped rather than clean: no hazard has been invented, and nothing has been certified either. See *Coverage ledger* below.
 
 ## Hazards
 
@@ -45,11 +47,20 @@ UPDATE invoices SET currency = 'usd' WHERE currency IS NULL AND "id" IN (SELECT 
 ### Human decisions required (the tool will not decide these)
 
 - statement 1 (set_not_null) is outside the tool's model and needs manual review: ALTER TABLE invoices ALTER COLUMN currency SET NOT NULL
+- IRREVERSIBLE - coverage gap on `invoices.currency` (value_class_erased): a reviewer confirms no consumer treats invoices.currency IS NULL as meaningful, and that the pre-backfill values are captured somewhere restorable
 
 ### Questions for the reviewer
 
 - What is the accepted risk for NOT_NULL_NO_DEFAULT?
 - What batch size and pause has this table tolerated before?
+
+## Coverage ledger
+
+1 gap(s) between what this migration touches and what this review could actually observe. A gap is an absence of evidence, so it is recorded as a decision for a person rather than as a finding with a severity.
+
+| object | gap | why it is a gap | closes when |
+|---|---|---|---|
+| `invoices.currency` **(irreversible)** | a value class is erased and the rollback does not restore it | the backfill removes every NULL from invoices.currency and the following SET NOT NULL makes NULL unreachable; any consumer that reads NULL as a distinct state changes behaviour silently, and the supplied rollback restores the column's nullability but not the values | a reviewer confirms no consumer treats invoices.currency IS NULL as meaningful, and that the pre-backfill values are captured somewhere restorable |
 
 ## What this review did not check
 

@@ -19,6 +19,7 @@ from .agents.cartographer import Cartographer
 from .agents.risk_officer import RiskOfficer
 from .agents.rollout_engineer import Policy, RolloutEngineer
 from .agents.verifier import Verifier
+from . import coverage as coverage_tools
 from .hazards import SEVERITY_ORDER
 from .tools import query_corpus, shadow_db, sql_parse
 from .tools.incident_memory import IncidentMemory
@@ -30,11 +31,14 @@ MAX_ATTEMPTS = 3
 # Ablation switches. `full` is the shipped configuration; the others exist so the
 # changelog can point at a number instead of a feeling.
 FEATURE_SETS = {
-    "full": {"replay": True, "static": True, "memory": True, "verify": True},
-    "no_replay": {"replay": False, "static": True, "memory": True, "verify": False},
-    "no_static": {"replay": True, "static": False, "memory": True, "verify": True},
-    "no_memory": {"replay": True, "static": True, "memory": False, "verify": True},
-    "no_verify": {"replay": True, "static": True, "memory": True, "verify": False},
+    "full": {"replay": True, "static": True, "memory": True, "verify": True, "coverage": True},
+    "no_replay": {"replay": False, "static": True, "memory": True, "verify": False, "coverage": True},
+    "no_static": {"replay": True, "static": False, "memory": True, "verify": True, "coverage": True},
+    "no_memory": {"replay": True, "static": True, "memory": False, "verify": True, "coverage": True},
+    "no_verify": {"replay": True, "static": True, "memory": True, "verify": False, "coverage": True},
+    # v2 component. `no_coverage` reproduces the v1 behaviour exactly: gaps are
+    # still reported, they just do not constrain the verdict.
+    "no_coverage": {"replay": True, "static": True, "memory": True, "verify": True, "coverage": False},
 }
 
 
@@ -55,6 +59,8 @@ def build_registry(memory: IncidentMemory, tracer: Tracer) -> ToolRegistry:
     reg.register("memory.escalation", memory.escalation,
                  "Look up prior incidents for a hazard code and table; returns severity bump + ids.")
     reg.register("memory.recall", memory.recall, "Full prior-incident records for a hazard code.")
+    reg.register("coverage.ledger", coverage_tools.ledger,
+                 "Enumerate what this review structurally could not see, per affected object.")
     return reg
 
 
@@ -71,7 +77,8 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
     parsed = Cartographer(tools, llm, tracer).run(case)
     blast = BlastRadius(tools, llm, tracer).run(case, parsed, use_replay=feat["replay"])
     risk = RiskOfficer(tools, llm, tracer).run(case, parsed, blast,
-                                               use_static=feat["static"], use_memory=feat["memory"])
+                                               use_static=feat["static"], use_memory=feat["memory"],
+                                               use_coverage=feat.get("coverage", True))
 
     engineer = RolloutEngineer(tools, llm, tracer)
     verifier = Verifier(tools, llm, tracer)
@@ -119,8 +126,17 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
         tag="executive_summary",
         payload={"verdict": risk["verdict"], "counts": risk["counts"],
                  "broken_queries": len(blast["replay"].broken),
+                 "coverage_gaps": len(risk["coverage_ledger"]["gaps"]),
                  "plan_verified": check["verified"]}).text
     tracer.model_call("orchestrator", llm.calls[-1])
+
+    if risk["verdict_capped_by_coverage"]:
+        tracer.checkpoint("coverage sign-off", "REQUIRED",
+                          "The verdict is capped at NEEDS_COVERAGE_SIGNOFF. The hazards found are "
+                          "not blocking, but this review has "
+                          f"{len(risk['coverage_ledger']['gaps'])} declared blind spot(s) on objects "
+                          "the migration touches, and a packet must not certify what it did not see. "
+                          "Each gap is a human gate in the plan.")
 
     tracer.checkpoint("pre-execution approval", "REQUIRED",
                       "Nothing has been executed against any real database. `sentinel execute` runs "
@@ -146,6 +162,8 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
         "plan_verification": check,
         "escalated_to_human": escalated,
         "coverage_gaps": risk["coverage_gaps"] + check.get("unmodelled", []),
+        "coverage_ledger": risk["coverage_ledger"],
+        "verdict_capped_by_coverage": risk["verdict_capped_by_coverage"],
         "change_set": parsed["change_set"],
         "attempts": attempt,
         "features": feat,

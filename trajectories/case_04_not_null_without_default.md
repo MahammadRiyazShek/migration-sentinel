@@ -2,7 +2,7 @@
 
 - run id: `eval-case_04_not_null_without_default`
 - case: `case_04_not_null_without_default`
-- events: 29
+- events: 30
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.68 ms)
+**tool** `schema.parse` (0.65 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.03 ms)
 
 ```json
 {
@@ -79,7 +79,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -150,7 +150,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.16 ms)
+**tool** `corpus.dependents` (0.12 ms)
 
 ```json
 {
@@ -338,7 +338,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (3.16 ms)
+**tool** `shadow.replay` (2.74 ms)
 
 ```json
 {
@@ -631,6 +631,69 @@ _tool responded_
 ]
 ```
 
+**tool** `coverage.ledger` (0.08 ms)
+
+```json
+{
+ "args": {
+  "ops": [
+   {
+    "kind": "add_column",
+    "table": "customers",
+    "column": "billing_email",
+    "detail": {
+     "type": "TEXT",
+     "not_null": true,
+     "default": null,
+     "unique": false
+    },
+    "sql": "ALTER TABLE customers ADD COLUMN billing_email TEXT NOT NULL",
+    "index": 0
+   }
+  ],
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "high",
+    "label": "support customer lookup",
+    "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+   },
+   {
+    "id": "q_bi_summary",
+    "service": "bi",
+    "criticality": "high",
+    "label": "dbt model stg_customers",
+    "sql": "SELECT * FROM customer_billing_s
+```
+
+_tool responded_
+
+```json
+{
+ "gaps": [],
+ "gap_kinds": [],
+ "irreversible": [],
+ "corpus_statements": 14,
+ "parser_notes": []
+}
+```
+
 **model** `scripted-v1` tag=`hazard_narrative` tokens=470/86 cost=$0.0
 
 > Live query breaks after migration. A statement the application issues today fails against the post-migration schema. Evidence: shadow replay: `INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')` -> IntegrityError: NOT NULL constraint failed: customers.billing_email Owning service(s): web.
@@ -654,6 +717,8 @@ _tool responded_
   "high": 1,
   "blocker": 2
  },
+ "coverage_gaps": [],
+ "verdict_capped_by_coverage": false,
  "hazards": [
   {
    "code": "BREAKING_QUERY",
@@ -736,7 +801,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -766,7 +831,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.11 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -800,7 +865,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.65 ms)
+**tool** `shadow.replay` (2.57 ms)
 
 ```json
 {

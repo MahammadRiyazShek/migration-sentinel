@@ -4,7 +4,14 @@ from __future__ import annotations
 from typing import Any
 
 BADGE = {"BLOCK": "BLOCK - do not merge", "SAFE_WITH_PLAN": "SHIP AS PLAN - not as written",
-         "SAFE": "SAFE - no blocking hazards found"}
+         "SAFE": "SAFE - no blocking hazards found",
+         "NEEDS_COVERAGE_SIGNOFF": "NOT CLEARED - coverage gap on an affected object"}
+GAP_LABEL = {
+    "unmodelled_statement": "statement not modelled by the parser",
+    "in_place_data_mutation": "existing rows rewritten; replay cannot see changed answers",
+    "value_class_erased": "a value class is erased and the rollback does not restore it",
+    "uncovered_object": "no statement in the corpus references this object",
+}
 SEV_LABEL = {"blocker": "BLOCKER", "high": "HIGH", "medium": "MEDIUM", "low": "LOW"}
 
 
@@ -17,6 +24,13 @@ def render(report: dict[str, Any]) -> str:
           f"`run {r['run_id']}` · case `{r['case_id']}` · owning service `{r['owner_service']}` · "
           f"{r['wall_ms']} ms · model {r['model_usage']['model']} "
           f"({r['model_usage']['calls']} calls, ${r['model_usage']['cost_usd']:.4f})", ""]
+
+    if r.get("verdict_capped_by_coverage"):
+        gaps = r["coverage_ledger"]["gaps"]
+        L += [f"> **Not cleared on coverage.** The hazards found here are not blocking, but "
+              f"{len(gaps)} object(s) this migration touches sit inside a blind spot of the review. "
+              "The verdict is capped rather than clean: no hazard has been invented, and nothing has "
+              "been certified either. See *Coverage ledger* below.", ""]
 
     if r["escalated_to_human"]:
         L += ["> **Escalated to a human.** The pipeline could not produce a phase 1 it can prove is "
@@ -74,6 +88,19 @@ def render(report: dict[str, Any]) -> str:
         L += [f"- {g}" for g in plan["human_gates"]] + [""]
     if plan["questions"]:
         L += ["### Questions for the reviewer", ""] + [f"- {q}" for q in plan["questions"]] + [""]
+
+    cov = r.get("coverage_ledger") or {"gaps": []}
+    if cov["gaps"]:
+        L += ["## Coverage ledger", "",
+              f"{len(cov['gaps'])} gap(s) between what this migration touches and what this review "
+              f"could actually observe. A gap is an absence of evidence, so it is recorded as a "
+              f"decision for a person rather than as a finding with a severity.", "",
+              "| object | gap | why it is a gap | closes when |", "|---|---|---|---|"]
+        for g in cov["gaps"]:
+            flag = " **(irreversible)**" if g["irreversible"] else ""
+            L.append(f"| `{g['object']}`{flag} | {GAP_LABEL.get(g['kind'], g['kind'])} | "
+                     f"{g['why']} | {g['closes_with']} |")
+        L.append("")
 
     L += ["## What this review did not check", "",
           "- Lock behaviour is inferred from declared row estimates and static rules; the shadow "

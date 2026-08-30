@@ -2,7 +2,7 @@
 
 - run id: `eval-case_02_drop_column_still_read`
 - case: `case_02_drop_column_still_read`
-- events: 32
+- events: 33
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.69 ms)
+**tool** `schema.parse` (0.68 ms)
 
 ```json
 {
@@ -74,7 +74,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.12 ms)
+**tool** `schema.apply_ops` (0.11 ms)
 
 ```json
 {
@@ -330,7 +330,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.73 ms)
+**tool** `shadow.replay` (2.65 ms)
 
 ```json
 {
@@ -593,7 +593,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -697,6 +697,70 @@ _tool responded_
 ]
 ```
 
+**tool** `coverage.ledger` (0.11 ms)
+
+```json
+{
+ "args": {
+  "ops": [
+   {
+    "kind": "drop_column",
+    "table": "customers",
+    "column": "company_name",
+    "detail": {},
+    "sql": "ALTER TABLE customers DROP COLUMN company_name",
+    "index": 0
+   }
+  ],
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "high",
+    "label": "support customer lookup",
+    "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+   },
+   {
+    "id": "q_bi_summary",
+    "service": "bi",
+    "criticality": "high",
+    "label": "dbt model stg_customers",
+    "sql": "SELECT * FROM customer_billing_summary"
+   },
+   {
+    "id": "q_bi_mrr",
+    "service": "bi",
+    "criticality": "medium",
+    "label": "M
+```
+
+_tool responded_
+
+```json
+{
+ "gaps": [],
+ "gap_kinds": [],
+ "irreversible": [],
+ "corpus_statements": 14,
+ "parser_notes": []
+}
+```
+
 **model** `scripted-v1` tag=`hazard_narrative` tokens=456/76 cost=$0.0
 
 > Live query breaks after migration. A statement the application issues today fails against the post-migration schema. Evidence: shadow replay: `SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'` -> OperationalError: no such column: company_name Owning service(s): support-admin.
@@ -728,6 +792,8 @@ _tool responded_
   "high": 3,
   "blocker": 1
  },
+ "coverage_gaps": [],
+ "verdict_capped_by_coverage": false,
  "hazards": [
   {
    "code": "BREAKING_QUERY",
@@ -846,7 +912,7 @@ _tool responded_
 []
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -866,7 +932,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.74 ms)
+**tool** `shadow.replay` (2.67 ms)
 
 ```json
 {

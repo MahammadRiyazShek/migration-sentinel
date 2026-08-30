@@ -4,11 +4,11 @@
  "title": "Release train: six changes in one migration",
  "owner_service": "billing-api",
  "verdict": "BLOCK",
- "summary": "Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 3 blocker, 4 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "summary": "Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 3 blocker, 5 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
  "counts": {
   "low": 0,
   "medium": 1,
-  "high": 4,
+  "high": 5,
   "blocker": 3
  },
  "hazards": [
@@ -120,6 +120,24 @@
    "memory_refs": [],
    "remediation": "",
    "title": "Data-integrity constraint removed"
+  },
+  {
+   "code": "TABLE_REWRITE_LOCK",
+   "severity": "high",
+   "summary": "CLUSTER rewrites invoices under an ACCESS EXCLUSIVE lock (48,000,000 rows, very large)",
+   "evidence": [
+    "statement 6: `CLUSTER invoices USING idx_invoices_customer`",
+    "declared row estimate for invoices: 48,000,000",
+    "recognised as a whole-relation maintenance command; the statement itself is still not modelled structurally and stays in the coverage ledger"
+   ],
+   "objects": [
+    "invoices"
+   ],
+   "services": [],
+   "source": "static",
+   "memory_refs": [],
+   "remediation": "",
+   "title": "Type change forces a full table rewrite"
   },
   {
    "code": "UNBATCHED_BACKFILL",
@@ -290,7 +308,9 @@
    "duplicates already exist for subscriptions (\"customer_id\"); a human must decide the dedupe rule - phase 2 promotes the index to UNIQUE only after that",
    "confirm invoices.tax_rate has had zero reads for the agreed observation window before phase 2",
    "dropping subscriptions_seats_chk removes an invariant: the data owner must sign off and a monitoring check should replace it",
-   "statement 6 (unsupported) is outside the tool's model and needs manual review: CLUSTER invoices USING idx_invoices_customer"
+   "statement 6 (maintenance_rewrite) is outside the tool's model and needs manual review: CLUSTER invoices USING idx_invoices_customer",
+   "coverage gap on `invoices.status` (in_place_data_mutation): a reviewer confirms which consumers of invoices.status depend on the current values",
+   "coverage gap on `invoices` (unmodelled_statement): a reviewer confirms by hand what statement 6 does to invoices and to anything reading it"
   ],
   "questions": [
    "Which deploy lands first: the query change or the schema change?",
@@ -298,7 +318,7 @@
    "What is the acceptable write-stall window for this table?",
    "What enforces this invariant once the constraint is gone?",
    "What is the accepted risk for MISSING_ROLLBACK?",
-   "What batch size and pause has this table tolerated before?"
+   "What is the accepted risk for TABLE_REWRITE_LOCK?"
   ],
   "policy": {
    "include_view_changes": true,
@@ -326,8 +346,40 @@
  },
  "escalated_to_human": false,
  "coverage_gaps": [
-  "op 6 (unsupported) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
+  "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
  ],
+ "coverage_ledger": {
+  "gaps": [
+   {
+    "kind": "in_place_data_mutation",
+    "object": "invoices.status",
+    "statement_index": 5,
+    "statement": "UPDATE invoices SET status = 'open' WHERE status = 'draft'",
+    "why": "rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns the same answer",
+    "closes_with": "a reviewer confirms which consumers of invoices.status depend on the current values",
+    "irreversible": false
+   },
+   {
+    "kind": "unmodelled_statement",
+    "object": "invoices",
+    "statement_index": 6,
+    "statement": "CLUSTER invoices USING idx_invoices_customer",
+    "why": "the parser produced no structural model for this statement, so no post-migration schema and no replay covers it",
+    "closes_with": "a reviewer confirms by hand what statement 6 does to invoices and to anything reading it",
+    "irreversible": false
+   }
+  ],
+  "gap_kinds": [
+   "in_place_data_mutation",
+   "unmodelled_statement"
+  ],
+  "irreversible": [],
+  "corpus_statements": 14,
+  "parser_notes": [
+   "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
+  ]
+ },
+ "verdict_capped_by_coverage": false,
  "change_set": {
   "ops": [
    {
@@ -403,10 +455,12 @@
     "index": 5
    },
    {
-    "kind": "unsupported",
-    "table": null,
+    "kind": "maintenance_rewrite",
+    "table": "invoices",
     "column": null,
-    "detail": {},
+    "detail": {
+     "command": "CLUSTER"
+    },
     "sql": "CLUSTER invoices USING idx_invoices_customer",
     "index": 6
    }
@@ -417,7 +471,7 @@
    "dml_update",
    "drop_column",
    "drop_constraint",
-   "unsupported"
+   "maintenance_rewrite"
   ],
   "tables_touched": [
    "invoices",
@@ -429,7 +483,7 @@
    "subscriptions.billing_interval"
   ],
   "unmodelled": [
-   "op 6 (unsupported) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
+   "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
   ]
  },
  "attempts": 1,
@@ -437,7 +491,8 @@
   "replay": true,
   "static": true,
   "memory": true,
-  "verify": true
+  "verify": true,
+  "coverage": true
  },
  "tool_calls": [
   {
@@ -453,7 +508,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.71,
+   "ms": 0.62,
    "result_summary": "Schema"
   },
   {
@@ -462,7 +517,7 @@
    "args": {
     "sql": "ALTER TABLE subscriptions ADD COLUMN billing_interval TEXT NOT NULL DEFAULT 'monthly';\nCREATE UNIQUE INDEX idx_subscriptions_customer ON subscriptions (customer_id);\nALTER TABLE invoices DROP COLUMN tax_rate;\nCREATE INDEX idx_usage_events_name ON usage_events (event_name);\nALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk;\nUPDATE invoices SET status = 'open' WHERE status = 'draft';..."
    },
-   "ms": 0.42,
+   "ms": 0.16,
    "result_summary": [
     {
      "kind": "add_column",
@@ -537,10 +592,12 @@
      "index": 5
     },
     {
-     "kind": "unsupported",
-     "table": null,
+     "kind": "maintenance_rewrite",
+     "table": "invoices",
      "column": null,
-     "detail": {},
+     "detail": {
+      "command": "CLUSTER"
+     },
      "sql": "CLUSTER invoices USING idx_invoices_customer",
      "index": 6
     }
@@ -625,20 +682,22 @@
       "index": 5
      },
      {
-      "kind": "unsupported",
-      "table": null,
+      "kind": "maintenance_rewrite",
+      "table": "invoices",
       "column": null,
-      "detail": {},
+      "detail": {
+       "command": "CLUSTER"
+      },
       "sql": "CLUSTER invoices USING idx_invoices_customer",
       "index": 6
      }
     ]
    },
-   "ms": 0.1,
+   "ms": 0.09,
    "result_summary": [
     "Schema",
     [
-     "op 6 (unsupported) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
+     "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
     ]
    ]
   },
@@ -779,17 +838,19 @@
       "index": 5
      },
      {
-      "kind": "unsupported",
-      "table": null,
+      "kind": "maintenance_rewrite",
+      "table": "invoices",
       "column": null,
-      "detail": {},
+      "detail": {
+       "command": "CLUSTER"
+      },
       "sql": "CLUSTER invoices USING idx_invoices_customer",
       "index": 6
      }
     ],
     "schema": "Schema"
    },
-   "ms": 0.15,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -948,7 +1009,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.02,
    "result_summary": 21
   },
   {
@@ -1031,10 +1092,12 @@
       "index": 5
      },
      {
-      "kind": "unsupported",
-      "table": null,
+      "kind": "maintenance_rewrite",
+      "table": "invoices",
       "column": null,
-      "detail": {},
+      "detail": {
+       "command": "CLUSTER"
+      },
       "sql": "CLUSTER invoices USING idx_invoices_customer",
       "index": 6
      }
@@ -1242,7 +1305,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.05,
+   "ms": 2.93,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1365,6 +1428,19 @@
    "agent": "risk_officer",
    "tool": "memory.escalation",
    "args": {
+    "hazard_code": "TABLE_REWRITE_LOCK",
+    "table": "invoices"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    []
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
     "hazard_code": "UNBATCHED_BACKFILL",
     "table": "invoices"
    },
@@ -1388,12 +1464,197 @@
    ]
   },
   {
+   "agent": "risk_officer",
+   "tool": "coverage.ledger",
+   "args": {
+    "ops": [
+     {
+      "kind": "add_column",
+      "table": "subscriptions",
+      "column": "billing_interval",
+      "detail": {
+       "type": "TEXT",
+       "not_null": true,
+       "default": "'monthly'",
+       "unique": false
+      },
+      "sql": "ALTER TABLE subscriptions ADD COLUMN billing_interval TEXT NOT NULL DEFAULT 'monthly'",
+      "index": 0
+     },
+     {
+      "kind": "create_index",
+      "table": "subscriptions",
+      "column": null,
+      "detail": {
+       "name": "idx_subscriptions_customer",
+       "unique": true,
+       "concurrently": false,
+       "columns": [
+        "customer_id"
+       ]
+      },
+      "sql": "CREATE UNIQUE INDEX idx_subscriptions_customer ON subscriptions (customer_id)",
+      "index": 1
+     },
+     {
+      "kind": "drop_column",
+      "table": "invoices",
+      "column": "tax_rate",
+      "detail": {},
+      "sql": "ALTER TABLE invoices DROP COLUMN tax_rate",
+      "index": 2
+     },
+     {
+      "kind": "create_index",
+      "table": "usage_events",
+      "column": null,
+      "detail": {
+       "name": "idx_usage_events_name",
+       "unique": false,
+       "concurrently": false,
+       "columns": [
+        "event_name"
+       ]
+      },
+      "sql": "CREATE INDEX idx_usage_events_name ON usage_events (event_name)",
+      "index": 3
+     },
+     {
+      "kind": "drop_constraint",
+      "table": "subscriptions",
+      "column": null,
+      "detail": {
+       "constraint": "subscriptions_seats_chk"
+      },
+      "sql": "ALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk",
+      "index": 4
+     },
+     {
+      "kind": "dml_update",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": false
+      },
+      "sql": "UPDATE invoices SET status = 'open' WHERE status = 'draft'",
+      "index": 5
+     },
+     {
+      "kind": "maintenance_rewrite",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "command": "CLUSTER"
+      },
+      "sql": "CLUSTER invoices USING idx_invoices_customer",
+      "index": 6
+     }
+    ],
+    "schema": "Schema",
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+6 more"
+    ],
+    "unmodelled_notes": [
+     "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
+    ]
+   },
+   "ms": 0.14,
+   "result_summary": {
+    "gaps": [
+     {
+      "kind": "in_place_data_mutation",
+      "object": "invoices.status",
+      "statement_index": 5,
+      "statement": "UPDATE invoices SET status = 'open' WHERE status = 'draft'",
+      "why": "rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns ...",
+      "closes_with": "a reviewer confirms which consumers of invoices.status depend on the current values",
+      "irreversible": false
+     },
+     {
+      "kind": "unmodelled_statement",
+      "object": "invoices",
+      "statement_index": 6,
+      "statement": "CLUSTER invoices USING idx_invoices_customer",
+      "why": "the parser produced no structural model for this statement, so no post-migration schema and no replay covers it",
+      "closes_with": "a reviewer confirms by hand what statement 6 does to invoices and to anything reading it",
+      "irreversible": false
+     }
+    ],
+    "gap_kinds": [
+     "in_place_data_mutation",
+     "unmodelled_statement"
+    ],
+    "irreversible": [],
+    "corpus_statements": 14,
+    "parser_notes": [
+     "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
+    ]
+   }
+  },
+  {
    "agent": "verifier",
    "tool": "migration.parse",
    "args": {
     "sql": "ALTER TABLE \"subscriptions\" ADD COLUMN \"billing_interval\" TEXT DEFAULT 'monthly';\nCREATE INDEX CONCURRENTLY \"idx_subscriptions_customer_tmp_nonunique\" ON \"subscriptions\" (\"customer_id\");\nCREATE INDEX CONCURRENTLY \"idx_usage_events_name\" ON \"usage_events\" (\"event_name\");\nUPDATE invoices SET status = 'open' WHERE status = 'draft' AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE status = 'draft' LIMIT ..."
    },
-   "ms": 0.13,
+   "ms": 0.12,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1784,7 +2045,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.86,
+   "ms": 2.82,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1802,12 +2063,12 @@
  "model_usage": {
   "provider": "scripted",
   "model": "scripted-v1",
-  "calls": 10,
-  "tokens_in": 4135,
-  "tokens_out": 641,
+  "calls": 11,
+  "tokens_in": 4618,
+  "tokens_out": 705,
   "cost_usd": 0.0
  },
- "wall_ms": 8.8,
+ "wall_ms": 8.4,
  "severity_order": [
   "low",
   "medium",

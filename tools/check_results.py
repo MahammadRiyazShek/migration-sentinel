@@ -35,6 +35,12 @@ def main() -> int:
           A["unsafe_approvals"] == 1 and B["unsafe_approvals"] == 1,
           f"{A['unsafe_approvals']}, {B['unsafe_approvals']}")
     claim("pipeline strict F1 at least 0.95", S["strict"]["f1"] >= 0.95, S["strict"]["f1"])
+    claim("pipeline names every blind spot it has, with the object",
+          S["declared_coverage_gaps"] >= S["cases_with_coverage_gaps"],
+          f"{S['declared_coverage_gaps']} gaps across {S['cases_with_coverage_gaps']} cases")
+    claim("no coverage-gap case reaches a clean verdict",
+          S["gap_cases_cleared_without_signoff"] == 0,
+          S["gap_cases_cleared_without_signoff"])
     claim("pipeline beats both baselines on strict recall",
           S["strict"]["recall"] > max(A["strict"]["recall"], B["strict"]["recall"]),
           S["strict"]["recall"])
@@ -60,6 +66,20 @@ def main() -> int:
         claim("removing either layer costs at least one unsafe approval",
               min(replay_only, rules_only) > S["unsafe_approvals"],
               f"{replay_only}, {rules_only}")
+        nocov = ab["no_coverage"]["aggregate"]
+        claim("removing the coverage gate lets a declared blind spot reach a clean verdict",
+              nocov["gap_cases_cleared_without_signoff"] > S["gap_cases_cleared_without_signoff"],
+              f"no_coverage {nocov['gap_cases_cleared_without_signoff']} vs full "
+              f"{S['gap_cases_cleared_without_signoff']}")
+        claim("the coverage gate changes no detection metric",
+              (nocov["strict"]["f1"] == S["strict"]["f1"]
+               and nocov["unsafe_approvals"] == S["unsafe_approvals"]),
+              f"f1 {nocov['strict']['f1']} vs {S['strict']['f1']}")
+        claim("the coverage gate costs reviewer minutes rather than saving them",
+              nocov["modelled_reviewer_minutes_per_case"]
+              <= S["modelled_reviewer_minutes_per_case"],
+              f"no_coverage {nocov['modelled_reviewer_minutes_per_case']} vs full "
+              f"{S['modelled_reviewer_minutes_per_case']}")
 
     width = max(len(c[0]) for c in CLAIMS)
     bad = 0

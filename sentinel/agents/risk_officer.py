@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from .. import coverage as coverage_tools
 from ..hazards import Hazard, SEVERITY_ORDER, bump
 from .base import Agent
 
@@ -33,7 +34,8 @@ class RiskOfficer(Agent):
             "hazard by table size and past incidents, then issue a verdict.")
 
     def run(self, case: dict[str, Any], parsed: dict[str, Any], blast: dict[str, Any],
-            use_static: bool = True, use_memory: bool = True) -> dict[str, Any]:
+            use_static: bool = True, use_memory: bool = True,
+            use_coverage: bool = True) -> dict[str, Any]:
         schema = parsed["schema"]
         rows_of = {t.name: t.row_estimate for t in schema.tables.values()}
         self.start({"case": case["id"], "row_estimates": rows_of,
@@ -68,6 +70,19 @@ class RiskOfficer(Agent):
                     summary=(f"{op.detail['constraint']} is added without NOT VALID, so validation "
                              f"scans all {rows:,} rows under a lock"),
                     evidence=[f"statement {op.index}: `{op.sql[:110]}`"], objects=[op.table]))
+            if op.kind == "maintenance_rewrite":
+                cmd = op.detail.get("command", "maintenance")
+                sev = "high" if rows >= LOCK_ROWS_WARN else "medium"
+                hazards.append(Hazard(
+                    "TABLE_REWRITE_LOCK", sev, source="static",
+                    summary=(f"{cmd} rewrites {op.table or 'the relation'} under an ACCESS EXCLUSIVE "
+                             f"lock ({rows:,} rows, {klass})"),
+                    evidence=[f"statement {op.index}: `{op.sql[:110]}`",
+                              f"declared row estimate for {op.table}: {rows:,}",
+                              "recognised as a whole-relation maintenance command; the statement "
+                              "itself is still not modelled structurally and stays in the coverage "
+                              "ledger"],
+                    objects=[op.table] if op.table else []))
             if op.kind == "alter_type":
                 sev = "high" if rows >= LOCK_ROWS_WARN else "medium"
                 hazards.append(Hazard(
@@ -132,12 +147,31 @@ class RiskOfficer(Agent):
             hazards = self._apply_memory(hazards)
         counts = {s: sum(1 for h in hazards if h.severity == s) for s in SEVERITY_ORDER}
         verdict = "BLOCK" if counts["blocker"] else ("SAFE_WITH_PLAN" if counts["high"] else "SAFE")
+
+        # v2: a declared blind spot now constrains the verdict instead of sitting
+        # in an appendix underneath a clean badge.  Facts from a tool, as always.
+        cov = self.tool("coverage.ledger", ops=parsed["ops"], schema=schema,
+                        queries=case.get("queries", []),
+                        unmodelled_notes=parsed["change_set"]["unmodelled"]) \
+            if use_coverage else {"gaps": [], "gap_kinds": [], "irreversible": [],
+                                  "corpus_statements": len(case.get("queries", [])),
+                                  "parser_notes": parsed["change_set"]["unmodelled"]}
+        verdict, capped = coverage_tools.cap(verdict, cov)
+        if capped and self.tracer:
+            self.tracer.note(self.NAME,
+                             f"verdict capped to {verdict}: {len(cov['gaps'])} coverage gap(s) on "
+                             f"objects this migration touches "
+                             f"({', '.join(g['object'] for g in cov['gaps'])}). No hazard was "
+                             f"invented; the packet cannot certify what it did not see.")
         for h in hazards:
             self.model("hazard_narrative", {"hazard": h.to_json()},
                        user=f"Explain this hazard for a reviewer:\n{h.to_json()}")
         out = {"hazards": hazards, "counts": counts, "verdict": verdict,
-               "coverage_gaps": parsed["change_set"]["unmodelled"]}
+               "coverage_gaps": parsed["change_set"]["unmodelled"],
+               "coverage_ledger": cov, "verdict_capped_by_coverage": capped}
         self.end({"verdict": verdict, "counts": counts,
+                  "coverage_gaps": [g["kind"] + ":" + g["object"] for g in cov["gaps"]],
+                  "verdict_capped_by_coverage": capped,
                   "hazards": [{"code": h.code, "severity": h.severity, "source": h.source,
                                "memory": h.memory_refs} for h in hazards]})
         return out

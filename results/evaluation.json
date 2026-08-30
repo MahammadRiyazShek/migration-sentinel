@@ -11,6 +11,10 @@
     {
      "case_id": "case_01_rename_with_compat_view",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -51,13 +55,17 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
-     "wall_ms": 0.9,
+     "wall_ms": 0.8,
      "tokens": 499,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_02_drop_column_still_read",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -98,13 +106,17 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
-     "wall_ms": 0.1,
+     "wall_ms": 0.0,
      "tokens": 463,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_03_index_on_hot_table",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "INDEX_LOCK_NO_CONCURRENT"
@@ -137,6 +149,10 @@
     {
      "case_id": "case_04_not_null_without_default",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -169,13 +185,17 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
-     "wall_ms": 0.2,
+     "wall_ms": 0.1,
      "tokens": 460,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_05_unique_email_with_duplicates",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "INDEX_LOCK_NO_CONCURRENT",
@@ -205,13 +225,17 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
-     "wall_ms": 0.1,
+     "wall_ms": 0.0,
      "tokens": 485,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_06_safe_unique_index",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": false,
      "gt_codes": [],
      "pred_codes": [
@@ -235,13 +259,17 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
-     "wall_ms": 0.1,
+     "wall_ms": 0.0,
      "tokens": 466,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_07_drop_check_constraint",
      "verdict": "APPROVE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": false,
      "gt_codes": [
       "INTEGRITY_CONSTRAINT_REMOVED"
@@ -265,13 +293,17 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 5,
-     "wall_ms": 0.1,
+     "wall_ms": 0.0,
      "tokens": 463,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_08_narrowing_country_code",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "TABLE_REWRITE_LOCK",
@@ -304,13 +336,17 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
-     "wall_ms": 0.1,
+     "wall_ms": 0.0,
      "tokens": 457,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_09_unbatched_backfill",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": false,
      "gt_codes": [
       "CROSS_SERVICE_UNCOORDINATED",
@@ -354,6 +390,10 @@
     {
      "case_id": "case_10_add_fk_constraint",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "CONSTRAINT_VALIDATION_LOCK"
@@ -379,13 +419,17 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
-     "wall_ms": 0.1,
+     "wall_ms": 0.0,
      "tokens": 474,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_11_swap_view_used_by_worker",
      "verdict": "APPROVE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -427,6 +471,10 @@
     {
      "case_id": "case_12_release_train",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 2,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -508,9 +556,12 @@
     "findings_total": 19,
     "findings_with_evidence": 0,
     "verified_plans": 0,
+    "cases_with_coverage_gaps": 2,
+    "declared_coverage_gaps": 0,
+    "gap_cases_cleared_without_signoff": 0,
     "modelled_reviewer_minutes_total": 356,
     "modelled_reviewer_minutes_per_case": 29.7,
-    "wall_ms_per_case": 0.2,
+    "wall_ms_per_case": 0.1,
     "tokens_total": 5837,
     "cost_usd_total": 0.0
    }
@@ -520,6 +571,10 @@
     {
      "case_id": "case_01_rename_with_compat_view",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -569,6 +624,10 @@
     {
      "case_id": "case_02_drop_column_still_read",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -618,6 +677,10 @@
     {
      "case_id": "case_03_index_on_hot_table",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "INDEX_LOCK_NO_CONCURRENT"
@@ -650,6 +713,10 @@
     {
      "case_id": "case_04_not_null_without_default",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -691,6 +758,10 @@
     {
      "case_id": "case_05_unique_email_with_duplicates",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "INDEX_LOCK_NO_CONCURRENT",
@@ -727,6 +798,10 @@
     {
      "case_id": "case_06_safe_unique_index",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": false,
      "gt_codes": [],
      "pred_codes": [
@@ -757,6 +832,10 @@
     {
      "case_id": "case_07_drop_check_constraint",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": false,
      "gt_codes": [
       "INTEGRITY_CONSTRAINT_REMOVED"
@@ -794,6 +873,10 @@
     {
      "case_id": "case_08_narrowing_country_code",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "TABLE_REWRITE_LOCK",
@@ -838,6 +921,10 @@
     {
      "case_id": "case_09_unbatched_backfill",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": false,
      "gt_codes": [
       "CROSS_SERVICE_UNCOORDINATED",
@@ -879,13 +966,17 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 37,
-     "wall_ms": 0.2,
+     "wall_ms": 0.1,
      "tokens": 985,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_10_add_fk_constraint",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "CONSTRAINT_VALIDATION_LOCK"
@@ -923,6 +1014,10 @@
     {
      "case_id": "case_11_swap_view_used_by_worker",
      "verdict": "APPROVE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -964,6 +1059,10 @@
     {
      "case_id": "case_12_release_train",
      "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 2,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -1048,6 +1147,9 @@
     "findings_total": 29,
     "findings_with_evidence": 0,
     "verified_plans": 0,
+    "cases_with_coverage_gaps": 2,
+    "declared_coverage_gaps": 0,
+    "gap_cases_cleared_without_signoff": 0,
     "modelled_reviewer_minutes_total": 416,
     "modelled_reviewer_minutes_per_case": 34.7,
     "wall_ms_per_case": 0.1,
@@ -1060,6 +1162,10 @@
     {
      "case_id": "case_01_rename_with_compat_view",
      "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -1104,13 +1210,17 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 15.3,
+     "wall_ms": 11.5,
      "tokens": 4324,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_02_drop_column_still_read",
      "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -1155,13 +1265,17 @@
      "plan_verified": true,
      "human_gates": 2,
      "modelled_reviewer_minutes": 11,
-     "wall_ms": 7.6,
+     "wall_ms": 7.3,
      "tokens": 3220,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_03_index_on_hot_table",
      "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "INDEX_LOCK_NO_CONCURRENT"
@@ -1189,13 +1303,17 @@
      "plan_verified": true,
      "human_gates": 0,
      "modelled_reviewer_minutes": 5,
-     "wall_ms": 7.4,
+     "wall_ms": 7.1,
      "tokens": 1081,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_04_not_null_without_default",
      "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -1233,13 +1351,17 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 7.8,
+     "wall_ms": 7.2,
      "tokens": 2404,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_05_unique_email_with_duplicates",
      "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "INDEX_LOCK_NO_CONCURRENT",
@@ -1271,13 +1393,17 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 7.6,
+     "wall_ms": 7.1,
      "tokens": 1678,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_06_safe_unique_index",
      "verdict": "SAFE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": false,
      "gt_codes": [],
      "pred_codes": [],
@@ -1302,6 +1428,10 @@
     {
      "case_id": "case_07_drop_check_constraint",
      "verdict": "SAFE_WITH_PLAN",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": false,
      "gt_codes": [
       "INTEGRITY_CONSTRAINT_REMOVED"
@@ -1329,13 +1459,17 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 7.8,
+     "wall_ms": 6.9,
      "tokens": 1083,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_08_narrowing_country_code",
      "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "TABLE_REWRITE_LOCK",
@@ -1368,13 +1502,17 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 7.4,
+     "wall_ms": 7.1,
      "tokens": 1541,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_09_unbatched_backfill",
-     "verdict": "SAFE_WITH_PLAN",
+     "verdict": "NEEDS_COVERAGE_SIGNOFF",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 1,
+     "coverage_signoff_required": true,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": false,
      "gt_codes": [
       "CROSS_SERVICE_UNCOORDINATED",
@@ -1410,15 +1548,19 @@
      "findings": 2,
      "evidenced_findings": 2,
      "plan_verified": true,
-     "human_gates": 1,
-     "modelled_reviewer_minutes": 8,
-     "wall_ms": 7.6,
-     "tokens": 1548,
+     "human_gates": 2,
+     "modelled_reviewer_minutes": 11,
+     "wall_ms": 7.2,
+     "tokens": 1588,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_10_add_fk_constraint",
      "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "CONSTRAINT_VALIDATION_LOCK"
@@ -1446,13 +1588,17 @@
      "plan_verified": true,
      "human_gates": 0,
      "modelled_reviewer_minutes": 5,
-     "wall_ms": 7.4,
+     "wall_ms": 7.0,
      "tokens": 1114,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_11_swap_view_used_by_worker",
      "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -1489,13 +1635,17 @@
      "plan_verified": true,
      "human_gates": 2,
      "modelled_reviewer_minutes": 11,
-     "wall_ms": 7.5,
+     "wall_ms": 7.1,
      "tokens": 2066,
      "cost_usd": 0.0
     },
     {
      "case_id": "case_12_release_train",
      "verdict": "BLOCK",
+     "case_coverage_gaps": 2,
+     "declared_coverage_gaps": 2,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
      "gt_blocking": true,
      "gt_codes": [
       "BREAKING_QUERY",
@@ -1513,6 +1663,7 @@
       "INDEX_LOCK_NO_CONCURRENT",
       "INTEGRITY_CONSTRAINT_REMOVED",
       "MISSING_ROLLBACK",
+      "TABLE_REWRITE_LOCK",
       "UNBATCHED_BACKFILL",
       "UNIQUE_VIOLATION_EXISTING_DATA"
      ],
@@ -1522,13 +1673,12 @@
       "INDEX_LOCK_NO_CONCURRENT",
       "INTEGRITY_CONSTRAINT_REMOVED",
       "MISSING_ROLLBACK",
+      "TABLE_REWRITE_LOCK",
       "UNBATCHED_BACKFILL",
       "UNIQUE_VIOLATION_EXISTING_DATA"
      ],
      "fp": [],
-     "fn": [
-      "TABLE_REWRITE_LOCK"
-     ],
+     "fn": [],
      "fam_tp": [
       "consumer_breakage",
       "data_integrity",
@@ -1543,18 +1693,19 @@
       "INDEX_LOCK_NO_CONCURRENT",
       "INTEGRITY_CONSTRAINT_REMOVED",
       "MISSING_ROLLBACK",
+      "TABLE_REWRITE_LOCK",
       "UNBATCHED_BACKFILL",
       "UNIQUE_VIOLATION_EXISTING_DATA"
      ],
      "unsafe_approval": false,
      "false_alarm_on_clean_case": false,
-     "findings": 8,
-     "evidenced_findings": 8,
+     "findings": 9,
+     "evidenced_findings": 9,
      "plan_verified": true,
-     "human_gates": 4,
-     "modelled_reviewer_minutes": 17,
-     "wall_ms": 8.8,
-     "tokens": 4776,
+     "human_gates": 6,
+     "modelled_reviewer_minutes": 23,
+     "wall_ms": 8.4,
+     "tokens": 5323,
      "cost_usd": 0.0
     }
    ],
@@ -1563,12 +1714,12 @@
     "unsafe_approvals": 0,
     "false_alarms_on_clean_cases": 0,
     "strict": {
-     "precision": 0.969,
-     "recall": 0.939,
-     "f1": 0.954,
-     "tp": 31,
+     "precision": 0.97,
+     "recall": 0.97,
+     "f1": 0.97,
+     "tp": 32,
      "fp": 1,
-     "fn": 2
+     "fn": 1
     },
     "lenient_family": {
      "precision": 0.955,
@@ -1578,14 +1729,17 @@
      "fp": 1,
      "fn": 1
     },
-    "severity_agreement": 0.968,
-    "findings_total": 34,
-    "findings_with_evidence": 34,
+    "severity_agreement": 0.969,
+    "findings_total": 35,
+    "findings_with_evidence": 35,
     "verified_plans": 12,
-    "modelled_reviewer_minutes_total": 102,
-    "modelled_reviewer_minutes_per_case": 8.5,
-    "wall_ms_per_case": 8.3,
-    "tokens_total": 25380,
+    "cases_with_coverage_gaps": 2,
+    "declared_coverage_gaps": 3,
+    "gap_cases_cleared_without_signoff": 0,
+    "modelled_reviewer_minutes_total": 111,
+    "modelled_reviewer_minutes_per_case": 9.2,
+    "wall_ms_per_case": 7.6,
+    "tokens_total": 25967,
     "cost_usd_total": 0.0
    }
   }
@@ -1594,64 +1748,117 @@
   "case_01_rename_with_compat_view": {
    "attempts": 2,
    "escalated": false,
-   "coverage_gaps": []
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
   },
   "case_02_drop_column_still_read": {
    "attempts": 1,
    "escalated": false,
-   "coverage_gaps": []
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
   },
   "case_03_index_on_hot_table": {
    "attempts": 1,
    "escalated": false,
-   "coverage_gaps": []
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
   },
   "case_04_not_null_without_default": {
    "attempts": 1,
    "escalated": false,
-   "coverage_gaps": []
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
   },
   "case_05_unique_email_with_duplicates": {
    "attempts": 1,
    "escalated": false,
-   "coverage_gaps": []
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
   },
   "case_06_safe_unique_index": {
    "attempts": 1,
    "escalated": false,
-   "coverage_gaps": []
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
   },
   "case_07_drop_check_constraint": {
    "attempts": 1,
    "escalated": false,
-   "coverage_gaps": []
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
   },
   "case_08_narrowing_country_code": {
    "attempts": 1,
    "escalated": false,
-   "coverage_gaps": []
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
   },
   "case_09_unbatched_backfill": {
    "attempts": 1,
    "escalated": false,
-   "coverage_gaps": []
+   "coverage_gaps": [],
+   "coverage_ledger": [
+    {
+     "kind": "value_class_erased",
+     "object": "invoices.currency",
+     "statement_index": 0,
+     "statement": "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL",
+     "why": "the backfill removes every NULL from invoices.currency and the following SET NOT NULL makes NULL unreachable; any consumer that reads NULL as a distinct state changes behaviour silently, and the supplied rollback restores the column's nullability but not the values",
+     "closes_with": "a reviewer confirms no consumer treats invoices.currency IS NULL as meaningful, and that the pre-backfill values are captured somewhere restorable",
+     "irreversible": true
+    }
+   ],
+   "verdict_capped_by_coverage": true
   },
   "case_10_add_fk_constraint": {
    "attempts": 1,
    "escalated": false,
-   "coverage_gaps": []
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
   },
   "case_11_swap_view_used_by_worker": {
    "attempts": 1,
    "escalated": false,
-   "coverage_gaps": []
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
   },
   "case_12_release_train": {
    "attempts": 1,
    "escalated": false,
    "coverage_gaps": [
-    "op 6 (unsupported) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
-   ]
+    "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
+   ],
+   "coverage_ledger": [
+    {
+     "kind": "in_place_data_mutation",
+     "object": "invoices.status",
+     "statement_index": 5,
+     "statement": "UPDATE invoices SET status = 'open' WHERE status = 'draft'",
+     "why": "rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns the same answer",
+     "closes_with": "a reviewer confirms which consumers of invoices.status depend on the current values",
+     "irreversible": false
+    },
+    {
+     "kind": "unmodelled_statement",
+     "object": "invoices",
+     "statement_index": 6,
+     "statement": "CLUSTER invoices USING idx_invoices_customer",
+     "why": "the parser produced no structural model for this statement, so no post-migration schema and no replay covers it",
+     "closes_with": "a reviewer confirms by hand what statement 6 does to invoices and to anything reading it",
+     "irreversible": false
+    }
+   ],
+   "verdict_capped_by_coverage": false
   }
  }
 }

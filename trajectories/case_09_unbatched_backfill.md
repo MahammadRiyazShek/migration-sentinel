@@ -2,7 +2,7 @@
 
 - run id: `eval-case_09_unbatched_backfill`
 - case: `case_09_unbatched_backfill`
-- events: 26
+- events: 29
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.68 ms)
+**tool** `schema.parse` (0.63 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.07 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -85,7 +85,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -163,7 +163,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.14 ms)
 
 ```json
 {
@@ -338,7 +338,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (2.89 ms)
+**tool** `shadow.replay` (2.77 ms)
 
 ```json
 {
@@ -500,6 +500,87 @@ _tool responded_
 ]
 ```
 
+**tool** `coverage.ledger` (0.17 ms)
+
+```json
+{
+ "args": {
+  "ops": [
+   {
+    "kind": "dml_update",
+    "table": "invoices",
+    "column": null,
+    "detail": {
+     "where": true,
+     "batched": false
+    },
+    "sql": "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL",
+    "index": 0
+   },
+   {
+    "kind": "set_not_null",
+    "table": "invoices",
+    "column": "currency",
+    "detail": {},
+    "sql": "ALTER TABLE invoices ALTER COLUMN currency SET NOT NULL",
+    "index": 1
+   }
+  ],
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "high",
+    "label": "support customer lookup",
+    "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+   },
+   {
+    "id": "q_bi_summary
+```
+
+_tool responded_
+
+```json
+{
+ "gaps": [
+  {
+   "kind": "value_class_erased",
+   "object": "invoices.currency",
+   "statement_index": 0,
+   "statement": "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL",
+   "why": "the backfill removes every NULL from invoices.currency and the following SET NOT NULL makes NULL unreachable; any consum...",
+   "closes_with": "a reviewer confirms no consumer treats invoices.currency IS NULL as meaningful, and that the pre-backfill values are cap...",
+   "irreversible": true
+  }
+ ],
+ "gap_kinds": [
+  "value_class_erased"
+ ],
+ "irreversible": [
+  "invoices.currency"
+ ],
+ "corpus_statements": 14,
+ "parser_notes": []
+}
+```
+
+_note (risk_officer)_: verdict capped to NEEDS_COVERAGE_SIGNOFF: 1 coverage gap(s) on objects this migration touches (invoices.currency). No hazard was invented; the packet cannot certify what it did not see.
+
 **model** `scripted-v1` tag=`hazard_narrative` tokens=430/48 cost=$0.0
 
 > NOT NULL added without a usable default. Existing rows or in-flight inserts violate the constraint immediately. Evidence: statement 1: `ALTER TABLE invoices ALTER COLUMN currency SET NOT NULL`
@@ -512,13 +593,17 @@ _tool responded_
 
 ```json
 {
- "verdict": "SAFE_WITH_PLAN",
+ "verdict": "NEEDS_COVERAGE_SIGNOFF",
  "counts": {
   "low": 0,
   "medium": 0,
   "high": 2,
   "blocker": 0
  },
+ "coverage_gaps": [
+  "value_class_erased:invoices.currency"
+ ],
+ "verdict_capped_by_coverage": true,
  "hazards": [
   {
    "code": "NOT_NULL_NO_DEFAULT",
@@ -573,7 +658,7 @@ _tool responded_
  "attempt": 1,
  "phase1_statements": 2,
  "phase2_statements": 0,
- "human_gates": 1
+ "human_gates": 2
 }
 ```
 
@@ -621,7 +706,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -653,7 +738,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.7 ms)
+**tool** `shadow.replay` (2.55 ms)
 
 ```json
 {
@@ -750,9 +835,13 @@ _tool responded_
 }
 ```
 
-**model** `scripted-v1` tag=`executive_summary` tokens=41/39 cost=$0.0
+**model** `scripted-v1` tag=`executive_summary` tokens=43/77 cost=$0.0
 
-> Shippable, but only as the staged plan below. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+> Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+
+### Human checkpoint - coverage sign-off: **REQUIRED**
+
+The verdict is capped at NEEDS_COVERAGE_SIGNOFF. The hazards found are not blocking, but this review has 1 declared blind spot(s) on objects the migration touches, and a packet must not certify what it did not see. Each gap is a human gate in the plan.
 
 ### Human checkpoint - pre-execution approval: **REQUIRED**
 

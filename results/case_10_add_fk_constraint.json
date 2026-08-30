@@ -141,6 +141,14 @@
  },
  "escalated_to_human": false,
  "coverage_gaps": [],
+ "coverage_ledger": {
+  "gaps": [],
+  "gap_kinds": [],
+  "irreversible": [],
+  "corpus_statements": 14,
+  "parser_notes": []
+ },
+ "verdict_capped_by_coverage": false,
  "change_set": {
   "ops": [
    {
@@ -172,7 +180,8 @@
   "replay": true,
   "static": true,
   "memory": true,
-  "verify": true
+  "verify": true,
+  "coverage": true
  },
  "tool_calls": [
   {
@@ -188,7 +197,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.64,
+   "ms": 0.69,
    "result_summary": "Schema"
   },
   {
@@ -197,7 +206,7 @@
    "args": {
     "sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id);\n"
    },
-   "ms": 0.16,
+   "ms": 0.09,
    "result_summary": [
     {
      "kind": "add_constraint",
@@ -237,7 +246,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -663,7 +672,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.97,
+   "ms": 2.62,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -693,12 +702,103 @@
    ]
   },
   {
+   "agent": "risk_officer",
+   "tool": "coverage.ledger",
+   "args": {
+    "ops": [
+     {
+      "kind": "add_constraint",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "constraint": "invoices_customer_fk",
+       "constraint_kind": "foreign_key",
+       "expr": "(customer_id) REFERENCES customers (id)",
+       "columns": [],
+       "not_valid": false
+      },
+      "sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id)",
+      "index": 0
+     }
+    ],
+    "schema": "Schema",
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+6 more"
+    ],
+    "unmodelled_notes": []
+   },
+   "ms": 0.11,
+   "result_summary": {
+    "gaps": [],
+    "gap_kinds": [],
+    "irreversible": [],
+    "corpus_statements": 14,
+    "parser_notes": []
+   }
+  },
+  {
    "agent": "verifier",
    "tool": "migration.parse",
    "args": {
     "sql": "ALTER TABLE \"invoices\" ADD CONSTRAINT \"invoices_customer_fk\" FOREIGN KEY (customer_id) REFERENCES customers (id) NOT VALID;"
    },
-   "ms": 0.08,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "add_constraint",
@@ -969,7 +1069,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.61,
+   "ms": 2.58,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -992,7 +1092,7 @@
   "tokens_out": 120,
   "cost_usd": 0.0
  },
- "wall_ms": 7.4,
+ "wall_ms": 7.0,
  "severity_order": [
   "low",
   "medium",

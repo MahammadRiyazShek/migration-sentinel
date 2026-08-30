@@ -10,12 +10,12 @@ Minutes per case, mean over the same 12 cases in every row.
 
 | constant set | A (prompt only) | B (prompt + schema) | Migration Sentinel | best baseline - Sentinel | reduction |
 |---|---|---|---|---|---|
-| published midpoint | 29.7 | 34.7 | **8.5** | +21.2 | 71% |
-| all constants 0.5x | 14.8 | 17.3 | **4.2** | +10.6 | 72% |
-| all constants 2x | 59.3 | 69.3 | **17.0** | +42.3 | 71% |
-| adversarial: cheap verification | 24.9 | 27.4 | **8.5** | +16.4 | 66% |
-| adversarial: cheap plan, dear gate | 12.1 | 13.4 | **12.0** | +0.1 | 1% **(advantage collapses)** |
-| adversarial: reading dominates | 27.1 | 28.4 | **27.0** | +0.1 | 0% **(advantage collapses)** |
+| published midpoint | 29.7 | 34.7 | **9.2** | +20.5 | 69% |
+| all constants 0.5x | 14.8 | 17.3 | **4.6** | +10.2 | 69% |
+| all constants 2x | 59.3 | 69.3 | **18.5** | +40.8 | 69% |
+| adversarial: cheap verification | 24.9 | 27.4 | **9.2** | +15.7 | 63% |
+| adversarial: cheap plan, dear gate | 12.1 | 13.4 | **13.5** | -1.4 | -12% **(claim reverses)** |
+| adversarial: reading dominates | 27.1 | 28.4 | **28.5** | -1.4 | -5% **(claim reverses)** |
 
 Constant sets, in the order above:
 
@@ -28,19 +28,19 @@ Constant sets, in the order above:
 
 ## What the band says
 
-The reduction against the *better* baseline ranges from **0%** to **72%** across 6 constant sets. The sign never reverses and no set makes a baseline faster than the pipeline, but that is the weaker claim: **2 of 6 sets shrink the advantage to under 10%**, which for practical purposes is no advantage at all.
+The reduction against the *better* baseline ranges from **-12%** to **69%** across 6 constant sets. The sign never reverses, except in the flagged row, but that is the weaker claim: **2 of 6 sets shrink the advantage to under 10%**, which for practical purposes is no advantage at all.
 
 Reported honestly, that splits into two findings.
 
 **The claim is robust to how expensive you think a reviewer's time is.** Scaling all four
-constants together leaves the reduction at 71%/72%/71% for 1x, 0.5x and 2x, because a uniform scale cancels. Halving the cost of checking an
-unevidenced claim still leaves 66%. None of the plausible ways of being wrong about the *magnitude* of the
+constants together leaves the reduction at 69%/69%/69% for 1x, 0.5x and 2x, because a uniform scale cancels. Halving the cost of checking an
+unevidenced claim still leaves 63%. None of the plausible ways of being wrong about the *magnitude* of the
 constants touch the result.
 
 **The claim is not robust to their ratio, and one specific ratio carries all of it:**
 `write_expand_contract_plan` against `human_gate`. The last two sets price a hand-written
 expand/contract plan at 6 minutes and approving a generated one at 6 minutes, and the
-advantage goes to 1% and 0%. So the load-bearing assumption is not that reviewers are slow, it is that **writing a
+advantage goes to -12% and -5%. So the load-bearing assumption is not that reviewers are slow, it is that **writing a
 staged migration plan from scratch costs several times more than approving one that has
 already been replayed.** I believe that (the plans in `results/*.md` are 20 to 40 lines of
 phased DDL with backfill batching and a rollback for each phase, and `case_01` needed a retry
@@ -50,10 +50,16 @@ the whole time claim rests on it rather than on the four numbers in `TIME_MODEL`
 Two terms cannot be flipped by any choice of constants, only zeroed, and both are properties
 of the arms rather than of the model:
 
-1. Pipeline findings are 34/34 evidenced against 0/19 and 0/29 for the baselines, so the
+1. Pipeline findings are 35/35 evidenced against 0/19 and 0/29 for the baselines, so the
    `verify` term only ever charges the baselines. Driving `verify` to 0 deletes the term.
 2. The pipeline produces 12/12 verified plans, so it pays `gate` where a baseline pays `plan`.
    Reversing that needs `gate * human_gates > plan`.
+
+One term was added in v2 and it charges the pipeline, not the baselines: the coverage gate
+turns every declared blind spot into a human gate, so it buys reliability with exactly the
+currency this table measures. That is why the two adversarial ratio sets that merely
+*collapsed* the advantage in v1 now **reverse its sign**. The honest reading is that the
+coverage gate is a trade, not a free win, and the time claim is the side that pays.
 
 What the band does *not* do: it does not test the model's shape. Four linear terms with no
 interaction is an assumption no choice of constants can falsify. Measuring this properly means
@@ -65,6 +71,8 @@ the next experiment and it is not in this submission.
 | arm | modelled min/case |
 |---|---|
 | minus shadow replay (rules only) | 23.3 |
-| minus static rules (replay only) | 8.0 |
-| minus incident memory | 8.5 |
+| minus static rules (replay only) | 8.8 |
+| minus incident memory | 9.2 |
 | minus verifier + retry loop | 23.3 |
+| minus coverage gate (the v1 behaviour) | 8.5 |
+

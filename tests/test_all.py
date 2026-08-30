@@ -9,7 +9,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from sentinel import cli  # noqa: E402
+from sentinel import cli, coverage  # noqa: E402
 from sentinel.llm import get_llm  # noqa: E402
 from sentinel.orchestrator import review  # noqa: E402
 from sentinel.tools import shadow_db, sql_parse  # noqa: E402
@@ -49,11 +49,65 @@ class TestParser(unittest.TestCase):
         self.assertEqual(ops[0].detail["default"], "'a'")
 
     def test_unsupported_statement_is_flagged_not_ignored(self):
-        ops = sql_parse.parse_migration("CLUSTER invoices USING idx_invoices_customer;")
+        ops = sql_parse.parse_migration("GRANT SELECT ON invoices TO reporting_role;")
         self.assertEqual(ops[0].kind, "unsupported")
         schema = sql_parse.parse_schema("CREATE TABLE invoices (id SERIAL PRIMARY KEY);")
         _, notes = sql_parse.apply_ops(schema, ops)
         self.assertTrue(notes, "an unmodelled statement must surface as a coverage note")
+
+    def test_maintenance_rewrite_is_named_but_still_unmodelled(self):
+        """v2: recognising a statement by name must not quietly widen the tool's claimed reach."""
+        ops = sql_parse.parse_migration("CLUSTER invoices USING idx_invoices_customer;")
+        self.assertEqual(ops[0].kind, "maintenance_rewrite")
+        self.assertEqual(ops[0].table, "invoices")
+        self.assertEqual(ops[0].detail["command"], "CLUSTER")
+        schema = sql_parse.parse_schema("CREATE TABLE invoices (id SERIAL PRIMARY KEY);")
+        _, notes = sql_parse.apply_ops(schema, ops)
+        self.assertTrue(notes, "a named maintenance command is still not modelled structurally")
+
+
+class TestCoverageLedger(unittest.TestCase):
+    """v2: a declared blind spot has to constrain the verdict, not decorate it."""
+
+    def test_null_erasure_is_flagged_as_irreversible(self):
+        ops = sql_parse.parse_migration(
+            "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL;\n"
+            "ALTER TABLE invoices ALTER COLUMN currency SET NOT NULL;")
+        schema = sql_parse.parse_schema(
+            "CREATE TABLE invoices (id SERIAL PRIMARY KEY, currency TEXT);")
+        cov = coverage.ledger(ops, schema, [{"id": "q1", "service": "bi", "criticality": "low",
+                                             "sql": "SELECT currency FROM invoices"}])
+        kinds = [g["kind"] for g in cov["gaps"]]
+        self.assertIn("value_class_erased", kinds)
+        self.assertEqual(cov["irreversible"], ["invoices.currency"])
+
+    def test_cap_never_makes_a_verdict_safer(self):
+        gapped = {"gaps": [{"kind": "x", "object": "t.c", "irreversible": False,
+                            "closes_with": "check"}]}
+        self.assertEqual(coverage.cap("SAFE", gapped)[0], "NEEDS_COVERAGE_SIGNOFF")
+        self.assertEqual(coverage.cap("SAFE_WITH_PLAN", gapped)[0], "NEEDS_COVERAGE_SIGNOFF")
+        self.assertEqual(coverage.cap("BLOCK", gapped)[0], "BLOCK")
+        clean = {"gaps": []}
+        self.assertEqual(coverage.cap("SAFE", clean), ("SAFE", False))
+
+    def test_gap_case_is_capped_and_gated_not_cleared(self):
+        r = run("case_09_unbatched_backfill")["report"]
+        self.assertEqual(r["verdict"], "NEEDS_COVERAGE_SIGNOFF")
+        self.assertTrue(r["verdict_capped_by_coverage"])
+        self.assertEqual([g["object"] for g in r["coverage_ledger"]["gaps"]], ["invoices.currency"])
+        self.assertTrue(any("coverage gap" in g for g in r["plan"]["human_gates"]),
+                        "each gap must land in the plan as a human decision")
+        self.assertEqual(r["counts"]["blocker"], 0, "the cap must not invent a blocking hazard")
+
+    def test_cap_does_not_fire_on_the_clean_case(self):
+        r = run("case_06_safe_unique_index")["report"]
+        self.assertEqual(r["verdict"], "SAFE")
+        self.assertEqual(r["coverage_ledger"]["gaps"], [])
+
+    def test_disabling_the_gate_reproduces_the_v1_verdict(self):
+        r = run("case_09_unbatched_backfill", features="no_coverage")["report"]
+        self.assertEqual(r["verdict"], "SAFE_WITH_PLAN")
+        self.assertFalse(r["verdict_capped_by_coverage"])
 
 
 class TestShadowReplay(unittest.TestCase):
@@ -151,6 +205,18 @@ class TestApprovalGate(unittest.TestCase):
         code = cli.main(["execute", "--report", str(self.report_path), "--case", self.case_path,
                          "--i-approve", "--reviewer", "test reviewer"])
         self.assertEqual(code, 0)
+
+    def test_execute_refuses_an_uncleared_coverage_gap(self):
+        out = run("case_09_unbatched_backfill")
+        path = ROOT / "results" / "test_gate_coverage.json"
+        path.write_text(json.dumps(out["report"], default=str))
+        try:
+            code = cli.main(["execute", "--report", str(path),
+                             "--case", str(CASES / "case_09_unbatched_backfill.json"),
+                             "--i-approve", "--reviewer", "test reviewer"])
+            self.assertEqual(code, 4, "a declared coverage gap is not an approval")
+        finally:
+            path.unlink(missing_ok=True)
 
     def test_execute_refuses_a_blocked_review(self):
         out = run("case_02_drop_column_still_read")

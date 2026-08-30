@@ -2,7 +2,7 @@
 
 - run id: `eval-case_05_unique_email_with_duplicates`
 - case: `case_05_unique_email_with_duplicates`
-- events: 26
+- events: 27
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.71 ms)
+**tool** `schema.parse` (0.62 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.03 ms)
+**tool** `migration.parse` (0.02 ms)
 
 ```json
 {
@@ -81,7 +81,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -154,7 +154,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.13 ms)
+**tool** `corpus.dependents` (0.14 ms)
 
 ```json
 {
@@ -346,7 +346,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.92 ms)
+**tool** `shadow.replay` (2.77 ms)
 
 ```json
 {
@@ -557,7 +557,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -579,6 +579,71 @@ _tool responded_
 ]
 ```
 
+**tool** `coverage.ledger` (0.08 ms)
+
+```json
+{
+ "args": {
+  "ops": [
+   {
+    "kind": "create_index",
+    "table": "customers",
+    "column": null,
+    "detail": {
+     "name": "idx_customers_email",
+     "unique": true,
+     "concurrently": false,
+     "columns": [
+      "email"
+     ]
+    },
+    "sql": "CREATE UNIQUE INDEX idx_customers_email ON customers (email)",
+    "index": 0
+   }
+  ],
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "high",
+    "label": "support customer lookup",
+    "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+   },
+   {
+    "id": "q_bi_summary",
+    "service": "bi",
+    "criticality": "high",
+    "label": "dbt model stg_customers",
+    "sql": "SELE
+```
+
+_tool responded_
+
+```json
+{
+ "gaps": [],
+ "gap_kinds": [],
+ "irreversible": [],
+ "corpus_statements": 14,
+ "parser_notes": []
+}
+```
+
 **model** `scripted-v1` tag=`hazard_narrative` tokens=477/96 cost=$0.0
 
 > Uniqueness conflicts with data already in the table. The index build fails partway through, leaving the deploy half-applied. Evidence: shadow backfill: backfill customers: UNIQUE constraint failed: customers.email (row={'id': 3, 'email': 'ada@corp.example', 'full_name': 'Alan Turing', 'company_name': None, 'country_code': 'GB', 'plan': 'free', 'mrr_c Previously bit us in INC-2025-04.
@@ -598,6 +663,8 @@ _tool responded_
   "high": 1,
   "blocker": 1
  },
+ "coverage_gaps": [],
+ "verdict_capped_by_coverage": false,
  "hazards": [
   {
    "code": "UNIQUE_VIOLATION_EXISTING_DATA",
@@ -676,7 +743,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.11 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -708,7 +775,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -744,7 +811,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.71 ms)
+**tool** `shadow.replay` (2.62 ms)
 
 ```json
 {

@@ -182,6 +182,7 @@ button{font:inherit;color:inherit}
 .verdict[data-v="BLOCK"] .word{color:var(--blocker)}
 .verdict[data-v="SAFE"] .word{color:var(--ok)}
 .verdict[data-v="SAFE_WITH_PLAN"] .word{color:var(--medium)}
+.verdict[data-v="NEEDS_COVERAGE_SIGNOFF"] .word{color:var(--high,var(--medium))}
 .verdict .counts{font:500 .74rem/1.7 var(--mono);letter-spacing:.04em;color:var(--ink-3);
   font-variant-numeric:tabular-nums}
 .summary{font-family:var(--serif);font-size:1.1rem;line-height:1.5;color:var(--ink-2);
@@ -485,7 +486,7 @@ python3 -m unittest discover -s tests"><button class="copy">copy</button><span c
 <span class="p">$</span> cd migration-sentinel
 <span class="p">$</span> python3 eval/build_cases.py        <span class="c"># regenerate the 12 cases</span>
 <span class="p">$</span> python3 eval/run_eval.py --ablations <span class="c"># both baselines, pipeline, 5 ablations</span>
-<span class="p">$</span> python3 -m unittest discover -s tests <span class="c"># 15 tests</span></div>
+<span class="p">$</span> python3 -m unittest discover -s tests <span class="c"># 22 tests</span></div>
           <p class="prose" style="font-size:.9rem">
             Expected output: <code>results/comparison.md</code> with 0/12 unsafe approvals for the
             pipeline and 1/12 for both baselines, <code>results/ablation.md</code>, one review packet
@@ -777,6 +778,21 @@ function renderPacket() {
   head.appendChild(v);
   head.appendChild(el("p", "summary", esc(r.summary)));
   host.appendChild(head);
+
+  // v2: a declared blind spot caps the verdict, so it is shown next to the badge and
+  // not buried in the appendix. Absence of evidence is a decision, never a finding.
+  const cov = (r.coverage_ledger && r.coverage_ledger.gaps) || [];
+  if (cov.length) {
+    const box = el("div", "gate");
+    box.innerHTML = "<b>coverage ledger</b> " + cov.length + " gap(s) between what this migration touches and what the review could observe"
+      + (r.verdict_capped_by_coverage ? ", so the verdict is capped at <code>NEEDS_COVERAGE_SIGNOFF</code> rather than clean" : "")
+      + ".<ul style=\"margin:8px 0 0;padding-left:18px\">"
+      + cov.map(g => "<li><code>" + esc(g.object) + "</code> — " + esc(g.kind.replace(/_/g, " "))
+          + (g.irreversible ? " <b>(irreversible)</b>" : "") + ". " + esc(g.closes_with) + "</li>").join("")
+      + "</ul>";
+    box.style.marginTop = "16px";
+    host.appendChild(box);
+  }
 
   if (live && live.error) {
     host.appendChild(el("div", "gate", "<b>live run failed</b><pre style=\"white-space:pre-wrap;font-size:.72rem;margin:0\">" + esc(live.error) + "</pre>"));

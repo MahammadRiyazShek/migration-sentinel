@@ -62,7 +62,7 @@ Run `python eval/run_eval.py --ablations` on camera. It finishes in under a seco
 
 Show `results/comparison.md`: unsafe approvals 1/12 and 1/12 versus 0/12, recall 0.55 and 0.61 versus
 0.94, evidence 0 of 19 findings versus 34 of 34, verified plans 0 versus 12, modelled reviewer minutes
-30 versus 8.5.
+30 versus 9.2.
 
 > "Same twelve cases, same vocabulary, same scorer. Reviewer minutes are modelled from assumptions
 > you can read and disagree with in `eval/scoring.py`. Everything else is measured."
@@ -92,3 +92,19 @@ Show the changelog table, then the ablation table.
 > quietly narrows its own scope launders a gap into a green check.
 >
 > Clone it, run `python eval/run_eval.py`. No key, no network, one second, same numbers."
+
+
+---
+
+## v2 addendum (30 seconds, drop in after the changelog beat)
+
+> "One more row, and it is the only one that makes the tool look worse. Case 09 used to come back
+> SHIP AS PLAN with a declared blind spot printed underneath it. Reviewers read badges, not
+> appendices. So the coverage ledger now caps the verdict: NEEDS COVERAGE SIGNOFF, the object named,
+> the gap marked irreversible, and the CLI refuses to run it. It moves no detection metric. It adds
+> reviewer minutes. Under adversarial constants it reverses the sign of my best number, and that
+> reversal is published in results/time_sensitivity.md rather than repriced away. A sensor that
+> reports its own blind spot has not finished the job until the blind spot can change the answer."
+
+Show on screen: `results/case_09_unbatched_backfill.md` (the coverage ledger table), then the
+`no coverage gate` row of `results/components.md`.

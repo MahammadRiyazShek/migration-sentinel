@@ -4,7 +4,7 @@
 
 Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_01_rename_with_compat_view` · case `case_01_rename_with_compat_view` · owning service `web` · 15.3 ms · model scripted-v1 (9 calls, $0.0000)
+`run eval-case_01_rename_with_compat_view` · case `case_01_rename_with_compat_view` · owning service `web` · 11.5 ms · model scripted-v1 (9 calls, $0.0000)
 
 ## Hazards
 
