@@ -1,5 +1,5 @@
 {
- "run_id": "eval-case_12_release_train",
+ "run_id": "run-f0ec5d0b",
  "case_id": "case_12_release_train",
  "title": "Release train: six changes in one migration",
  "owner_service": "billing-api",
@@ -508,7 +508,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.57,
+   "ms": 1.91,
    "result_summary": "Schema"
   },
   {
@@ -517,7 +517,7 @@
    "args": {
     "sql": "ALTER TABLE subscriptions ADD COLUMN billing_interval TEXT NOT NULL DEFAULT 'monthly';\nCREATE UNIQUE INDEX idx_subscriptions_customer ON subscriptions (customer_id);\nALTER TABLE invoices DROP COLUMN tax_rate;\nCREATE INDEX idx_usage_events_name ON usage_events (event_name);\nALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk;\nUPDATE invoices SET status = 'open' WHERE status = 'draft';..."
    },
-   "ms": 0.14,
+   "ms": 2.89,
    "result_summary": [
     {
      "kind": "add_column",
@@ -693,7 +693,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.11,
    "result_summary": [
     "Schema",
     [
@@ -850,7 +850,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.12,
+   "ms": 0.28,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -1009,7 +1009,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": 21
   },
   {
@@ -1305,7 +1305,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.64,
+   "ms": 3.58,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1345,7 +1345,7 @@
     "hazard_code": "BREAKING_QUERY",
     "table": "q_billing_tax"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -1373,7 +1373,7 @@
     "hazard_code": "UNIQUE_VIOLATION_EXISTING_DATA",
     "table": "subscriptions"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     [
@@ -1388,7 +1388,7 @@
     "hazard_code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
     "table": "invoices"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     [
@@ -1615,7 +1615,7 @@
      "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
     ]
    },
-   "ms": 0.12,
+   "ms": 0.49,
    "result_summary": {
     "gaps": [
      {
@@ -1654,7 +1654,7 @@
    "args": {
     "sql": "ALTER TABLE \"subscriptions\" ADD COLUMN \"billing_interval\" TEXT DEFAULT 'monthly';\nCREATE INDEX CONCURRENTLY \"idx_subscriptions_customer_tmp_nonunique\" ON \"subscriptions\" (\"customer_id\");\nCREATE INDEX CONCURRENTLY \"idx_usage_events_name\" ON \"usage_events\" (\"event_name\");\nUPDATE invoices SET status = 'open' WHERE status = 'draft' AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE status = 'draft' LIMIT ..."
    },
-   "ms": 0.11,
+   "ms": 0.18,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1774,7 +1774,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.1,
    "result_summary": [
     "Schema",
     []
@@ -2045,7 +2045,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.39,
+   "ms": 2.71,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2068,7 +2068,7 @@
   "tokens_out": 705,
   "cost_usd": 0.0
  },
- "wall_ms": 7.3,
+ "wall_ms": 14.1,
  "severity_order": [
   "low",
   "medium",

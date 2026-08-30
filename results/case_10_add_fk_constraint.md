@@ -4,7 +4,7 @@
 
 Do not ship this as written. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_10_add_fk_constraint` · case `case_10_add_fk_constraint` · owning service `billing-api` · 6.1 ms · model scripted-v1 (3 calls, $0.0000)
+`run eval-case_10_add_fk_constraint` · case `case_10_add_fk_constraint` · owning service `billing-api` · 7.1 ms · model scripted-v1 (3 calls, $0.0000)
 
 ## Hazards
 

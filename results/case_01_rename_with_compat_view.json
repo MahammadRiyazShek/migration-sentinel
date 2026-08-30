@@ -528,7 +528,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -623,7 +623,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.17,
+   "ms": 0.19,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -994,7 +994,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.7,
+   "ms": 3.52,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1123,7 +1123,7 @@
     "hazard_code": "CROSS_SERVICE_UNCOORDINATED",
     "table": null
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -1151,7 +1151,7 @@
     "hazard_code": "SELECT_STAR_DRIFT",
     "table": "q_bi_summary"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     [
@@ -1262,7 +1262,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.11,
+   "ms": 0.12,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1277,7 +1277,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);\nCREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;"
    },
-   "ms": 0.11,
+   "ms": 0.12,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1361,7 +1361,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -1614,7 +1614,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.46,
+   "ms": 2.86,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1699,7 +1699,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);"
    },
-   "ms": 0.08,
+   "ms": 0.09,
    "result_summary": [
     {
      "kind": "add_column",
@@ -2000,7 +2000,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.25,
+   "ms": 2.96,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2086,7 +2086,7 @@
   "tokens_out": 622,
   "cost_usd": 0.0
  },
- "wall_ms": 10.1,
+ "wall_ms": 12.5,
  "severity_order": [
   "low",
   "medium",

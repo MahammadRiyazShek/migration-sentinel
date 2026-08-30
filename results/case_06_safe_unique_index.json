@@ -176,7 +176,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.62,
+   "ms": 0.78,
    "result_summary": "Schema"
   },
   {
@@ -185,7 +185,7 @@
    "args": {
     "sql": "CREATE UNIQUE INDEX CONCURRENTLY idx_invoices_number ON invoices (invoice_number);\n"
    },
-   "ms": 0.03,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "create_index",
@@ -227,7 +227,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -315,7 +315,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.1,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -659,7 +659,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.49,
+   "ms": 3.08,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -756,7 +756,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.1,
+   "ms": 0.12,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -771,7 +771,7 @@
    "args": {
     "sql": "CREATE UNIQUE INDEX CONCURRENTLY \"idx_invoices_number\" ON \"invoices\" (\"invoice_number\");"
    },
-   "ms": 0.04,
+   "ms": 0.09,
    "result_summary": [
     {
      "kind": "create_index",
@@ -813,7 +813,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.09,
    "result_summary": [
     "Schema",
     []
@@ -1045,7 +1045,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.03,
+   "ms": 2.9,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1068,7 +1068,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 7.0,
+ "wall_ms": 8.0,
  "severity_order": [
   "low",
   "medium",

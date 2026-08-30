@@ -4,7 +4,7 @@
 
 Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 3 blocker, 5 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_12_release_train` · case `case_12_release_train` · owning service `billing-api` · 7.3 ms · model scripted-v1 (11 calls, $0.0000)
+`run run-f0ec5d0b` · case `case_12_release_train` · owning service `billing-api` · 14.1 ms · model scripted-v1 (11 calls, $0.0000)
 
 ## Hazards
 
