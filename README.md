@@ -114,8 +114,20 @@ Full table: [`results/comparison.md`](results/comparison.md). Raw scores:
 | Wall clock per case (measured) | 0.2 ms | 0.1 ms | ~8 ms |
 | Model tokens, all 12 cases | 5,837 | 11,577 | 25,380 |
 
-Reviewer minutes are **modelled** from stated assumptions in `eval/scoring.py`, not measured with a
-stopwatch. Everything else is measured by the harness.
+Reviewer minutes are **modelled** from four stated constants in `eval/scoring.py`
+(`read_review=5`, `verify_unevidenced_claim=4`, `write_expand_contract_plan=20`,
+`decide_human_gate=3`), not measured with a stopwatch. Everything else is measured by the harness.
+
+Because `tools/check_results.py` re-asserts that claim from the same constants that produce it, the
+audit cannot fail, so the claim is also reported as a band:
+[`results/time_sensitivity.md`](results/time_sensitivity.md), regenerated with
+`python eval/time_sensitivity.py`. The reduction holds at 71-72% under any uniform rescaling of the
+constants and at 66% when checking an unevidenced claim is priced at one minute. It **collapses to
+about 1%** under one specific ratio: pricing a hand-written expand/contract plan at 6 minutes against
+6 minutes to approve a generated one. So the load-bearing assumption is not that reviewers are slow,
+it is that writing a staged plan from scratch costs several times more than approving one that has
+already been replayed. That is a belief about reviewers, not a measurement, and it is the one I would
+attack first.
 
 The primary metric is deliberately **unsafe approvals**, not F1: the reviewer's real failure is
 saying "ship it" to something that breaks production.
@@ -124,17 +136,33 @@ saying "ship it" to something that breaks production.
 
 From [`results/ablation.md`](results/ablation.md), same cases, one component removed at a time:
 
-| configuration | unsafe approvals | recall | precision | severity agreement | verified plans |
-|---|---|---|---|---|---|
-| full | **0/12** | 0.939 | 0.969 | 0.968 | 12/12 |
-| no shadow replay (rules only) | 1/12 | 0.545 | 1.000 | 0.944 | 0/12 |
-| no static rules (replay only) | 2/12 | 0.333 | 1.000 | 1.000 | 12/12 |
-| no incident memory | 0/12 | 0.939 | 0.969 | 0.935 | 12/12 |
-| no plan verification | 0/12 | 0.939 | 0.969 | 0.968 | 0/12 |
+| configuration | unsafe approvals | recall | precision | severity agreement | verified plans | modelled min/case |
+|---|---|---|---|---|---|---|
+| full | **0/12** | 0.939 | 0.969 | 0.968 | 12/12 | 8.5 |
+| no shadow replay (rules only) | 1/12 | 0.545 | 1.000 | 0.944 | 0/12 | 23.3 |
+| no static rules (replay only) | 2/12 | 0.333 | 1.000 | 1.000 | 12/12 | 8.0 |
+| no incident memory | 0/12 | 0.939 | 0.969 | 0.935 | 12/12 | 8.5 |
+| no plan verification | 0/12 | 0.939 | 0.969 | 0.968 | 0/12 | 23.3 |
 
-The interesting row is the third one. **Execution alone is worse than rules alone** on the primary
-metric (2 unsafe approvals vs 1), because a lock hazard produces no failing query, so a
-replay-only reviewer says "nothing broke, ship it". The two layers cover disjoint failure classes.
+Oriented as the cost of removing each component, with the same table generated from raw scores by
+`python eval/report_components.py --write`: [`results/components.md`](results/components.md).
+
+Three readings, including the two that do not flatter the design.
+
+**Execution alone is worse than rules alone** on the primary metric (2 unsafe approvals vs 1),
+because a lock hazard produces no failing query, so a replay-only reviewer says "nothing broke, ship
+it". The two layers cover disjoint failure classes, and merging them is the single biggest
+contribution in the changelog.
+
+**The verifier is worth nothing to detection and everything after it.** Every hazard metric is
+identical with it removed; verified plans go 12/12 -> 0/12 and modelled reviewer minutes go 8.5 ->
+23.3. Judged on detection alone it looks decorative. It is the change a reviewer notices most.
+
+**Incident memory is the thinnest component here.** It moves severity agreement 0.935 -> 0.968 and
+nothing else: exactly one severity, on the one case in twelve that is a recurrence. That is a
+statement about the case set as much as about the component, because one recurrence in twelve cases
+is all it can possibly move. It is reported rather than folded into "orchestration" and left for
+someone else to discover.
 
 ## Architecture
 
@@ -216,6 +244,26 @@ Pyodide is pre-existing (Mozilla, MPL-2.0) and is loaded from its CDN, unmodifie
 credentials, nothing scraped. `memory/incidents.jsonl` is fiction written to look like a real
 postmortem index.
 
+## Coding agents used to build this
+
+Required disclosure. Full version, including the human checkpoints and the honest gaps, in
+[`AGENT_USE.md`](AGENT_USE.md).
+
+**Claude Opus 5 (Anthropic)** was the coding agent for this project, used conversationally rather
+than through an autonomous CLI harness: I set the design, it wrote code, I ran the eval and pushed
+back. Everything in `sentinel/`, `eval/`, `site/`, `tools/` and `tests/` was written that way.
+
+What was **not** delegated, and the reason: the twelve cases and their ground-truth hazard sets
+(`eval/cases/`), the hazard vocabulary and severity ladder (`sentinel/hazards.py`), the scorer
+(`eval/scoring.py`) and the choice of unsafe approvals as the primary metric. An agent that writes
+both the solution and its own grading criteria has graded itself, and every number in this README
+would be worth nothing.
+
+Development traces are indexed in [`agent_traces/INDEX.md`](agent_traces/INDEX.md), generated by
+`python tools/collect_agent_traces.py` from the files actually present rather than listed by hand.
+These are separate from the runtime traces of the five agents that run *inside* the tool, which are
+in [`trajectories/`](trajectories/) and [`docs/AGENT_TRAJECTORIES.md`](docs/AGENT_TRAJECTORIES.md).
+
 ## Improvement Changelog
 
 Every row's evidence is an arm in `results/evaluation.json` or `results/ablation.json` and can be
@@ -271,7 +319,8 @@ well enough to put a second, differently-shaped sensor next to it.
 
 The corollary I did not expect: the most valuable output was not the hazard list, it was the
 *verified plan*. Detection metrics did not move at all when I added plan generation and verification.
-Reviewer minutes fell by two thirds. Being right is table stakes; the tool earns its place by doing
+Modelled reviewer minutes fell by two thirds at the published constants, and by 66-72% across every
+uniform rescaling of them (`results/time_sensitivity.md`). Being right is table stakes; the tool earns its place by doing
 the tedious thing the human would otherwise do at 3am.
 
 ## Repo map
@@ -286,11 +335,16 @@ sentinel/            the pipeline
   report.py, trace.py, cli.py, hazards.py
 baseline/            the one-prompt reviewer, two variants
 eval/                build_cases.py, 12 cases with ground truth, scoring.py, run_eval.py
+  report_components.py   what removing each component costs -> results/components.md
+  time_sensitivity.py    band on the modelled reviewer-minute claim
 memory/              incidents.jsonl (curated, fictional)
 results/             review packets, comparison.md, ablation.md, evaluation.json
 trajectories/        one markdown + jsonl trajectory per case
 site/                the review desk: index.html, generated data/ and py/ (Pyodide runtime)
 tools/               build_site.py, build_artifact.py, check_results.py
+  collect_agent_traces.py  generates agent_traces/INDEX.md, refuses on secret shapes
+agent_traces/        development-agent sessions (see AGENT_USE.md)
+AGENT_USE.md         coding-agent disclosure required by the challenge
 .github/workflows/   verify the claims, then publish the desk to GitHub Pages
 docs/                DESIGN_LOG.md, AGENT_TRAJECTORIES.md, VIDEO_SCRIPT.md
 tests/               15 stdlib tests

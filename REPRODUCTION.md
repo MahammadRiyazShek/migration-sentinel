@@ -113,6 +113,45 @@ Headline numbers you should see, byte for byte:
 
 If any of those differ, the run is not reproducing and I would like to know.
 
+### 4a. What each component costs to remove
+
+```bash
+python eval/report_components.py --write
+```
+
+Reads `results/ablation.json` and rewrites [`results/components.md`](results/components.md), oriented
+as the cost of removing each component rather than as the score of each arm. Under a second, $0.00.
+This is where the verifier and incident memory stop looking decorative: both leave every detection
+metric untouched, and removing the verifier moves verified plans 12/12 -> 0/12 and modelled reviewer
+minutes 8.5 -> 23.3.
+
+### 4b. Sensitivity band on the reviewer-minute claim
+
+```bash
+python eval/time_sensitivity.py --write
+```
+
+Reads the committed `results/` and rewrites `results/time_sensitivity.md`. Recomputes the reviewer
+minutes for every arm under six constant sets, three of them written specifically to break the claim.
+Runs no reviews and calls no model, so it cannot change any other number. It self-checks first: all 84
+per-case minute figures are recomputed from the raw fields and asserted equal to what
+`eval/scoring.py` stored, so drift between the two fails loudly.
+
+Expected: the reduction against the better baseline holds at 71-72% under uniform rescaling and
+collapses to about 1% under one specific ratio (a hand-written plan priced at 6 minutes against 6
+minutes to approve a generated one). That collapse is the point of running it.
+
+### 4c. Development-agent trace index
+
+```bash
+python tools/collect_agent_traces.py --write
+```
+
+Regenerates `agent_traces/INDEX.md` from the trace files actually present, with sizes and SHA-256
+prefixes, and greps every one of them for key, token and connection-string shapes. Exits non-zero on
+a hit or on an empty directory rather than writing an index that lists nothing. See
+[`AGENT_USE.md`](AGENT_USE.md).
+
 ## 5. Tests
 
 ```bash
@@ -208,12 +247,12 @@ What you should see, in order:
 
 1. The masthead numbers, the docket of 12 cases and the first packet, rendered from the bundle. No
    network beyond this origin and Google Fonts.
-2. **Boot the engine in this browser** → about 12 MB of Pyodide from jsDelivr, then
+2. **Boot the engine in this browser** â†’ about 12 MB of Pyodide from jsDelivr, then
    `38 files mounted`. Roughly 5 to 15 seconds on a first visit, under two on a warm cache.
-3. **Run this case live** → the packet re-renders with a `live run` chip, a wall-clock figure
+3. **Run this case live** â†’ the packet re-renders with a `live run` chip, a wall-clock figure
    measured in the tab (typically 20 to 60 ms, slower than the 8.5 ms CLI number because
    WebAssembly), and a parity line: *"the run in this tab reproduced the recorded packet exactly"*.
-4. Edit the SQL in the Migration tab, press **Review this SQL** → a real packet for your migration,
+4. Edit the SQL in the Migration tab, press **Review this SQL** â†’ a real packet for your migration,
    with a note that there is no ground truth to score it against.
 
 Runtime and cost for the whole section: about 20 seconds of wall clock, $0.00. Tested on Python
