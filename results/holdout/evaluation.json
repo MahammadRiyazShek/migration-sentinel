@@ -48,7 +48,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
-     "wall_ms": 0.9,
+     "wall_ms": 0.8,
      "tokens": 460,
      "cost_usd": 0.0
     },
@@ -89,7 +89,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
-     "wall_ms": 0.2,
+     "wall_ms": 0.1,
      "tokens": 498,
      "cost_usd": 0.0
     },
@@ -139,7 +139,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
-     "wall_ms": 0.3,
+     "wall_ms": 0.2,
      "tokens": 490,
      "cost_usd": 0.0
     },
@@ -203,7 +203,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 5,
-     "wall_ms": 0.2,
+     "wall_ms": 0.1,
      "tokens": 467,
      "cost_usd": 0.0
     },
@@ -238,7 +238,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 25,
-     "wall_ms": 0.2,
+     "wall_ms": 0.1,
      "tokens": 516,
      "cost_usd": 0.0
     },
@@ -282,7 +282,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
-     "wall_ms": 0.1,
+     "wall_ms": 0.2,
      "tokens": 462,
      "cost_usd": 0.0
     },
@@ -348,7 +348,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 45,
-     "wall_ms": 0.4,
+     "wall_ms": 0.3,
      "tokens": 633,
      "cost_usd": 0.0
     },
@@ -434,7 +434,7 @@
     "gap_cases_cleared_without_signoff": 1,
     "modelled_reviewer_minutes_total": 237,
     "modelled_reviewer_minutes_per_case": 26.3,
-    "wall_ms_per_case": 0.3,
+    "wall_ms_per_case": 0.2,
     "tokens_total": 4468,
     "cost_usd_total": 0.0
    }
@@ -483,7 +483,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
-     "wall_ms": 0.6,
+     "wall_ms": 0.4,
      "tokens": 1097,
      "cost_usd": 0.0
     },
@@ -609,7 +609,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
-     "wall_ms": 0.3,
+     "wall_ms": 0.2,
      "tokens": 1098,
      "cost_usd": 0.0
     },
@@ -730,7 +730,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
-     "wall_ms": 0.2,
+     "wall_ms": 0.3,
      "tokens": 1073,
      "cost_usd": 0.0
     },
@@ -886,7 +886,7 @@
     "gap_cases_cleared_without_signoff": 1,
     "modelled_reviewer_minutes_total": 301,
     "modelled_reviewer_minutes_per_case": 33.4,
-    "wall_ms_per_case": 0.3,
+    "wall_ms_per_case": 0.2,
     "tokens_total": 10093,
     "cost_usd_total": 0.0
    }
@@ -933,7 +933,7 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 11.3,
+     "wall_ms": 11.0,
      "tokens": 1916,
      "cost_usd": 0.0
     },
@@ -977,7 +977,7 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 10.2,
+     "wall_ms": 9.2,
      "tokens": 1711,
      "cost_usd": 0.0
     },
@@ -1029,7 +1029,7 @@
      "plan_verified": true,
      "human_gates": 2,
      "modelled_reviewer_minutes": 11,
-     "wall_ms": 11.6,
+     "wall_ms": 10.3,
      "tokens": 3176,
      "cost_usd": 0.0
     },
@@ -1058,7 +1058,7 @@
      "plan_verified": true,
      "human_gates": 0,
      "modelled_reviewer_minutes": 5,
-     "wall_ms": 9.8,
+     "wall_ms": 9.1,
      "tokens": 545,
      "cost_usd": 0.0
     },
@@ -1097,7 +1097,7 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 10.3,
+     "wall_ms": 9.0,
      "tokens": 1088,
      "cost_usd": 0.0
     },
@@ -1132,7 +1132,7 @@
      "plan_verified": true,
      "human_gates": 2,
      "modelled_reviewer_minutes": 11,
-     "wall_ms": 9.5,
+     "wall_ms": 9.2,
      "tokens": 593,
      "cost_usd": 0.0
     },
@@ -1175,7 +1175,7 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 9.5,
+     "wall_ms": 9.4,
      "tokens": 1593,
      "cost_usd": 0.0
     },
@@ -1248,7 +1248,7 @@
      "plan_verified": true,
      "human_gates": 6,
      "modelled_reviewer_minutes": 23,
-     "wall_ms": 10.9,
+     "wall_ms": 10.6,
      "tokens": 5838,
      "cost_usd": 0.0
     },
@@ -1300,7 +1300,7 @@
      "plan_verified": true,
      "human_gates": 3,
      "modelled_reviewer_minutes": 14,
-     "wall_ms": 9.9,
+     "wall_ms": 9.7,
      "tokens": 2674,
      "cost_usd": 0.0
     }
@@ -1336,7 +1336,7 @@
     "gap_cases_cleared_without_signoff": 0,
     "modelled_reviewer_minutes_total": 96,
     "modelled_reviewer_minutes_per_case": 10.7,
-    "wall_ms_per_case": 10.3,
+    "wall_ms_per_case": 9.7,
     "tokens_total": 19134,
     "cost_usd_total": 0.0
    }

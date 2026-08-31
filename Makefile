@@ -1,4 +1,4 @@
-.PHONY: help cases review baseline eval invariance holdout test site artifact serve verify docs form clean
+.PHONY: help cases review baseline eval invariance holdout test site artifact serve verify docs form determinism clean
 
 help:
 	@echo "make cases     regenerate the 12 evaluation cases"
@@ -11,6 +11,7 @@ help:
 	@echo "make verify    eval + assert every claim the README and the docs make"
 	@echo "make docs      audit the documentation only (references, glyphs, stale counts)"
 	@echo "make form      audit the submission form description against results/*.json"
+	@echo "make determinism  rerun every generator in a temp copy and diff it back"
 	@echo "make site      regenerate site/data + site/py from the results"
 	@echo "make serve     build the site and serve it at http://localhost:8000"
 
@@ -39,17 +40,23 @@ holdout:
 
 # v10: verify used to skip the tests and the held-out run, so a red suite and a failing
 # submission-text audit could both sit outside the one command the docs tell you to run.
+# v11: and it skipped the determinism proof, so "a rerun changes only the clock" was a sentence
+# in a document rather than an exit code in the one command the docs tell you to run.
 verify: eval invariance holdout
 	python3 -m unittest discover -s tests
 	python3 tools/check_results.py
 	python3 tools/check_docs.py
 	python3 tools/check_submission_text.py
+	python3 tools/check_determinism.py
 
 docs:
 	python3 tools/check_docs.py
 
 form:
 	python3 tools/check_submission_text.py
+
+determinism:
+	python3 tools/check_determinism.py
 
 site:
 	python3 tools/build_site.py

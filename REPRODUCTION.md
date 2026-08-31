@@ -227,7 +227,7 @@ a hit or on an empty directory rather than writing an index that lists nothing. 
 python -m unittest discover -s tests -v
 ```
 
-Expected: `Ran 52 tests ... OK`, about 0.3 s. They cover the parser traps, the shadow replay,
+Expected: `Ran 69 tests ... OK`, about 0.3 s. They cover the parser traps, the shadow replay,
 memory escalation, determinism (same case twice, identical hazards and plan), the escalation path
 (`max_attempts=1` on case_01 must escalate instead of shipping an unverified plan) and the approval
 gate (refuses without `--i-approve`, refuses a `BLOCK` verdict without an explicit override, and
@@ -258,10 +258,41 @@ python tools/check_docs.py
 #    PASS  every path-shaped file reference resolves
 #    PASS  exactly one judge entry point at the root
 #    PASS  paste-ready description exists and fits the form
-#    PASS  no stale claim count in a current-state document
-#    6/6 documentation checks hold across 193 authored files
+#    PASS  no stale count for a claim ledger or an audit
+#    PASS  no stale test count in a current-state document
+#    PASS  no heading trapped in a language-tagged code fence
+#    7/7 documentation checks hold across every authored file
+```
 
-### Step 7b: audit the description in the submission form
+The count of authored files is printed rather than documented here on purpose: it is the one
+number in this repository that changes every time a file is added, and a number no tool owns is
+a number that goes stale. The counts that *are* documented - claims, checks, tests - are each
+read out of the tool that owns them by this same audit, in v11 including the size of an audit,
+which is how `6 checks` and `Seven checks` sat in one document for three releases.
+
+### 5b. Prove the rerun changed only the clock
+
+```bash
+python3 tools/check_determinism.py
+# -> ran   eval/run_eval.py --ablations
+#    ran   eval/run_holdout.py --ablations
+#    ran   eval/model_invariance.py
+#    ran   eval/report_components.py
+#    85 files byte-identical on a rerun
+#    59 files differ, in wall-clock fields only
+#    wall-clock fields that moved: json field "ms", markdown "N ms", markdown "Wall clock per case" row
+#    PASS  every decision byte in results/ survives a rerun; only wall-clock fields move
+#          144 files compared, 0 decision differences
+```
+
+Run steps 3 and 4 and 80 files under `results/` change. Every one of those diffs is a measured
+millisecond, and this command is how you know that without taking anyone's word for it: it copies
+the repository to a temporary directory, reruns every generator there, and diffs all 144
+regenerated files back against the committed ones with the wall-clock fields - and only the
+wall-clock fields, each one named in the output - normalised. Zero decision differences is the
+pass condition. Your committed tree is never written to. About 3 seconds, most of it the copy.
+
+### 5c. Audit the description in the submission form
 
 ```bash
 python3 tools/check_submission_text.py

@@ -10,20 +10,28 @@ Whole evaluation is under a second and costs $0.00.**
 
 ---
 
-## Sixty seconds, four commands
+## Sixty seconds
 
 ```bash
 git clone https://github.com/MahammadRiyazShek/migration-sentinel && cd migration-sentinel
-python3 -m unittest discover -s tests   # 52 tests, ~0.3 s
-python3 eval/run_eval.py --ablations    # 108 reviews (12 cases x 9 arms), < 1 s
-python3 eval/model_invariance.py        # 180 reviews, 5 models x 3 narrator modes, < 1 s
-python3 tools/check_results.py          # 27/27 published claims re-asserted from raw JSON
-python3 tools/check_docs.py             # 6 checks on what the docs claim about the repo
-python3 tools/check_submission_text.py  # 6 checks on the description in the submission form
+python3 tools/check_results.py          # <- if you run one command, run this one
 ```
 
-The fourth command is the one to run if you only run one. It reads `results/*.json` and re-asserts
-every number in this repository, including the three that make the pipeline look worse.
+It reads `results/*.json` and re-asserts every number in this repository, including the five that
+make the pipeline look worse. Expect `44/44 claims hold`, in under a second, with no key and no
+network.
+
+The rest, in the order they build on each other:
+
+```bash
+python3 -m unittest discover -s tests   # 69 tests, ~0.3 s
+python3 eval/run_eval.py --ablations    # 108 reviews (12 cases x 9 arms), < 1 s
+python3 eval/run_holdout.py --ablations # the second schema: 9 held-out cases, rules frozen
+python3 eval/model_invariance.py        # 180 reviews, 5 models x 3 narrator modes, < 1 s
+python3 tools/check_determinism.py      # reruns everything in a temp copy and diffs it back
+python3 tools/check_docs.py             # 7 checks on what the docs claim about the repo
+python3 tools/check_submission_text.py  # 7 checks on the description in the submission form
+```
 
 ---
 
@@ -35,7 +43,7 @@ every number in this repository, including the three that make the pipeline look
 | Agent solution & engineering (30%) | `sentinel/agents/`, prompts in `sentinel/agents/prompts/`, `sentinel/orchestrator.py` | `results/ablation.md`: 9 arms, one component removed at a time. Replay alone is **worse** than rules alone (2 unsafe vs 1) |
 | End to end quality (20%) | `results/case_12_release_train.md`, live desk below | `python3 -m sentinel review --case eval/cases/case_12_release_train.json --print-report` produces the packet a reviewer actually reads |
 | Measured improvement (15%) | `results/comparison.md`, `README.md` §Improvement Changelog | 10 kept iterations, 3 removed experiments, 4 rejected designs, each row tied to an arm in `results/*.json` |
-| Reproducibility (15%) | `REPRODUCTION.md` | clean clone to main result in four commands, no key, no network. `tools/check_docs.py` audits the documentation itself: no dangling file reference, no stale claim or test count, one entry point. `tools/check_submission_text.py` audits the description in the submission form, which is the one artefact that lives outside this repository |
+| Reproducibility (15%) | `REPRODUCTION.md` | clean clone to main result in one command, no key, no network. `tools/check_determinism.py` reruns every generator in a temporary copy and diffs 144 files back against the committed ones: **0 decision differences**, and it names the wall-clock fields that do move rather than asking you to assume them. `tools/check_docs.py` audits the documentation itself: no dangling reference, no stale count, no heading trapped in a code fence. `tools/check_submission_text.py` audits the description in the submission form, the one artefact that lives outside this repository |
 | Hot take / insights (5%) | `README.md` §Hot take, `results/model_invariance.md` | the failure mode was found by writing an attacker against my own fix, not by removing a component |
 
 ---
@@ -55,6 +63,21 @@ every number in this repository, including the three that make the pipeline look
 
 Same 12 cases, same hazard vocabulary, same scorer, same temperature on both sides. Only the
 scaffolding changes.
+
+And on a **second schema written after the rules were hashed** - freight instead of billing, its
+own corpus, composite natural keys, no incident history, nine cases labelled from Postgres
+semantics, run once, no rule edits (`python3 eval/run_holdout.py --ablations`):
+
+| held-out metric | Baseline A | Baseline B | Migration Sentinel |
+|---|---|---|---|
+| Unsafe approvals | 1/9 | 1/9 | **0/9** |
+| Blocking cases given a clean verdict | 1/7 | 1/7 | **0/7** |
+| Hazard recall | 0.52 | 0.56 | **0.96** |
+| Modelled reviewer minutes per case | 26.3 | 33.4 | **10.7** |
+
+Recall is 1.0 once `holdout_06` is excluded, whose label sits outside the shared hazard vocabulary
+on purpose, so no arm can name it. The rules transfer. Two things did not, and
+[`results/holdout.md`](results/holdout.md) says which and what it cost to fix them.
 
 Reviewer minutes is the **one modelled number** in that table, from four stated constants in
 `eval/scoring.py`. It is published as a band instead of a point: `python3 eval/time_sensitivity.py`

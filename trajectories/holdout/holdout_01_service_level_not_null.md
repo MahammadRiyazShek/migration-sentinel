@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.86 ms)
+**tool** `schema.parse` (0.99 ms)
 
 ```json
 {
@@ -83,7 +83,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.14 ms)
+**tool** `schema.apply_ops` (0.09 ms)
 
 ```json
 {
@@ -324,7 +324,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (4.35 ms)
+**tool** `shadow.replay` (4.01 ms)
 
 ```json
 {
@@ -544,7 +544,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -564,7 +564,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.18 ms)
+**tool** `coverage.ledger` (0.17 ms)
 
 ```json
 {
@@ -751,7 +751,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `schema.apply_ops` (0.13 ms)
 
 ```json
 {
@@ -785,7 +785,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.81 ms)
+**tool** `shadow.replay` (3.87 ms)
 
 ```json
 {

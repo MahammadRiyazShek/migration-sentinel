@@ -62,12 +62,12 @@ the description says so.
 Upload the archive built from the tree that passes:
 
 ```bash
-python -m unittest discover -s tests    # 52 tests
+python -m unittest discover -s tests    # 69 tests
 python eval/run_eval.py --ablations     # 108 reviews
 python eval/run_holdout.py --ablations  # 9 held-out cases, three arms
 python eval/model_invariance.py         # 180 reviews
 python tools/check_results.py           # 44/44 claims hold
-python tools/check_docs.py              # 6 documentation checks
+python tools/check_docs.py              # 7 documentation checks
 python tools/check_submission_text.py   # 7 submission-text checks
 ```
 

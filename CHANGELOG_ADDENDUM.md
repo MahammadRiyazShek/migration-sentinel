@@ -356,3 +356,87 @@ python tools/check_results.py           # 44/44 claims hold
 python tools/check_docs.py              # 6 documentation checks
 python tools/check_submission_text.py   # 7 checks on the description in the form
 ```
+
+---
+
+## v11 - the guard that had not read this repository's own hot take
+
+Session 09 unzipped the submitted v10 archive and could not make a number false: 52 tests, `44/44
+claims hold`, `6/6` documentation checks, `7/7` submission-text checks, 12/12 packets, Python
+3.12.13, offline, first attempt, 0.7 s for the whole evaluation. So a green suite was the starting
+condition of the session rather than its result, and the question became what this repository
+asserts that none of its five audits can read.
+
+Three answers, and all three are the same defect class.
+
+**1. The claim-count audit was written in its own vocabulary.** `tools/check_docs.py` matched the
+literal shape `N/N claims`. `JUDGE_START_HERE.md` line 20 read:
+
+```
+python3 tools/check_results.py          # 27/27 published claims re-asserted from raw JSON
+```
+
+The command prints `44/44`. One adjective between the fraction and the noun, in the first file a
+judge opens, for three releases, with a green `PASS  no stale claim count` sitting above it. This
+is v5's lesson - *a defence audited in its own vocabulary reports on the attacker's imagination,
+not on itself* - arriving as a bug report against the tool written to apply it. Iteration 10 fixed
+the narrator with provenance and left the doc auditor holding the same bag.
+
+**2. The size of an audit had no audit.** `6 checks on the description in the submission form` on
+line 22, `Seven checks:` on line 94, one document, one tool, and the tool prints `7/7`. The README
+called them "claims" instead of "checks", which is how the same drift hid from a second pattern.
+
+**3. Nothing in 69 tests reads markdown structure.** `REPRODUCTION.md` was submitted missing one
+closing fence at line 263, so from section 5a to the end - the human approval gate, the
+hosted-model path, bring-your-own-migration, the review desk - every heading rendered inside a code
+block and every command rendered as prose, on the document the 15% reproducibility row is scored
+on.
+
+**The fix is provenance again, not a longer list.** Every count is now read out of the tool that
+owns it at run time, resolved by noun first and filename second; the pattern allows up to three
+words between the number and its noun and understands word-numbers; and a stale figure is exempt
+only where the line **dates itself** (`->`, `as of`, `was`, `v5`), so changelog rows and supervisor
+logs stay honest records rather than whitelisted lies. Six documentation checks became seven: two
+added, two merged into the one that resolves owners.
+
+**And the rerun got a command instead of a promise.** Running the evaluation rewrites 80 files
+under `results/`, which is an uncomfortable thing to hand a judge in a submission about verified
+determinism. `tools/check_determinism.py` copies the repository to a temporary directory, reruns
+every generator there, and diffs all 144 regenerated files back against the committed ones with
+the wall-clock fields - each one named in the output - normalised: **0 decision differences**, 85
+files byte-identical, 59 differing in three named fields. Its first run failed and named two
+wall-clock fields its own permission list had missed, and `TestDeterminism` now asserts the
+normaliser does *not* blur a verdict, a recall figure or the modelled reviewer minutes.
+
+**Evidence that nothing else moved.** Unsafe approvals 0/12 in sample and 0/9 held out, recall
+0.970 and 0.96, precision 0.970, severity agreement 0.969, plans 12/12 and 9/9, gap cases cleared
+0/2, evidenced findings 35/35, 9.2 and 10.7 modelled minutes per case, 0 of 180 and 0 of 126
+decision surfaces changed, 0 of 60 headlines model-written. Nothing under `sentinel/`,
+`eval/cases/`, `eval/holdout/`, `eval/scoring.py` or `memory/` was touched and
+`tools/check_results.py` is unchanged, so **44/44 means in v11 what it meant in v9.** The counts
+that moved are counts of audits and tests: documentation checks 6 -> 7, tests 52 -> 69.
+
+**The lesson, one layer out from v10's.** v10: a check whose failure nobody is required to read is
+a comment. v11: **every honesty layer inherits the perimeter of the examples its author had when
+they wrote it**, so the guard you are proudest of is the one most likely to be blind in exactly the
+way you already published. The counter is not vocabulary, it is to stop typing the number twice.
+Two perimeters of this fix are published rather than discovered: `Seven checks:` names no tool, so
+nothing can own it and it was corrected by hand; and README line 11 said "27 published *numbers*",
+which was rewritten to say *claims* so the audit could reach it - moving the prose into the audited
+vocabulary rather than widening the audit into false positives. Full reasoning, the two rejected
+designs and the self-review: [`docs/SUPERVISOR_LOG_V11.md`](docs/SUPERVISOR_LOG_V11.md); the trace
+with all six rejected attempts:
+[`agent_traces/session-09-supervisor-audit-the-auditor.md`](agent_traces/session-09-supervisor-audit-the-auditor.md).
+
+**How to verify from a clean clone**
+
+```bash
+make verify                             # everything below, in one command
+python -m unittest discover -s tests    # 69 tests
+python eval/run_eval.py --ablations     # 108 reviews
+python eval/run_holdout.py --ablations  # 9 held-out cases, three arms
+python tools/check_results.py           # 44/44 claims hold
+python tools/check_docs.py              # 7 documentation checks
+python tools/check_submission_text.py   # 7 checks on the description in the form
+python tools/check_determinism.py       # 144 files rerun and diffed, 0 decision differences
+```

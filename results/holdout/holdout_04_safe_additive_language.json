@@ -346,7 +346,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.84,
+   "ms": 0.94,
    "result_summary": "Schema"
   },
   {
@@ -355,7 +355,7 @@
    "args": {
     "sql": "ALTER TABLE drivers ADD COLUMN preferred_language TEXT;\nCREATE INDEX CONCURRENTLY idx_drivers_carrier ON drivers (carrier_id);\n"
    },
-   "ms": 0.09,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "add_column",
@@ -675,7 +675,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.02,
    "result_summary": 20
   },
   {
@@ -1031,7 +1031,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.72,
+   "ms": 3.37,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1457,7 +1457,7 @@
      ]
     }
    },
-   "ms": 0.21,
+   "ms": 0.16,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1540,7 +1540,7 @@
      }
     ]
    },
-   "ms": 0.12,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -1899,7 +1899,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.69,
+   "ms": 3.35,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1981,7 +1981,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 9.8,
+ "wall_ms": 9.1,
  "severity_order": [
   "low",
   "medium",

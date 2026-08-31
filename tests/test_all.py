@@ -577,3 +577,132 @@ class TestGeneralizationMetrics(unittest.TestCase):
         rows = [{"tp": ["BREAKING_QUERY"], "fn": ["TRIGGER_WRITE_AMPLIFICATION"]},
                 {"tp": [], "fn": ["MISSING_ROLLBACK"]}]
         self.assertEqual(self.rh.recall_excluding_unnameable(rows), 0.5)
+
+
+class TestDocAudit(unittest.TestCase):
+    """v11. `tools/check_docs.py` had a claim-count audit written against the exact phrase
+    `N/N claims`, so `27/27 published claims` - one adjective, in the first file a judge opens,
+    against a command that prints 44 - passed it for three releases. Widening the pattern is
+    worth nothing unless the widened pattern is itself attacked, so every case below is a string
+    that either defeated the old audit or must stay exempt from the new one."""
+
+    @classmethod
+    def setUpClass(cls):
+        from tools import check_docs
+        cls.cd = check_docs
+        # Fixed totals: this suite tests the detector, not the current state of the repository,
+        # and it must never shell out to check_docs.py, which runs unittest.
+        cls.totals = {"results": 44, "docs": 7, "submission_text": 7}
+
+    def stale(self, line):
+        return self.cd.stale_counts_in_line(line, self.totals)
+
+    def test_the_adjective_that_defeated_the_old_pattern_is_caught(self):
+        line = "python3 tools/check_results.py          # 27/27 published claims re-asserted"
+        found = self.stale(line)
+        self.assertEqual(len(found), 1, "the exact string submitted in JUDGE_START_HERE.md:20")
+        self.assertEqual((found[0][1], found[0][2]), (27, 44))
+
+    def test_a_bare_total_with_no_fraction_is_caught(self):
+        # README.md:549 as submitted: "check_results.py (27 claims about the numbers)".
+        found = self.stale("tools/  check_results.py (27 claims about the numbers)")
+        self.assertEqual([(f[1], f[2]) for f in found], [(27, 44)])
+
+    def test_a_word_number_is_caught(self):
+        # README.md:12 as submitted: "re-asserts the five claims this documentation makes".
+        line = "`python3 tools/check_docs.py` re-asserts the five claims this documentation makes"
+        self.assertEqual([(f[1], f[2]) for f in self.stale(line)], [(5, 7)])
+
+    def test_a_check_count_belongs_to_the_tool_named_on_the_line(self):
+        line = "python tools/check_submission_text.py   # 6 checks on the submission form text"
+        found = self.stale(line)
+        self.assertEqual([(f[1], f[2]) for f in found], [(6, 7)])
+        self.assertEqual(found[0][3], "tools/check_submission_text.py")
+
+    def test_the_noun_beats_the_filename_when_both_are_present(self):
+        line = "python3 tools/check_results.py && echo 6/6 documentation checks hold"
+        found = self.stale(line)
+        self.assertEqual(found[0][3], "tools/check_docs.py",
+                         "'documentation checks' is owned by check_docs even next to another tool")
+        self.assertEqual((found[0][1], found[0][2]), (6, 7))
+
+    def test_a_correct_count_raises_nothing(self):
+        self.assertEqual(self.stale("# 44/44 published claims re-asserted from raw JSON"), [])
+        self.assertEqual(self.stale("python3 tools/check_docs.py   # 7 checks on the docs"), [])
+
+    def test_a_dated_line_stays_exempt(self):
+        """The changelog rows and supervisor logs cite the counts of older runs. Those are honest
+        records, and the first draft of this audit failed on every one of them."""
+        for line in ["tests 27 -> 33, claims 23/23 -> 27/27",
+                     "`python tools/check_results.py` (27/27 as of v5) on a clean clone",
+                     "the audit was 18/18 claims then, and the count was stale"]:
+            self.assertEqual(self.stale(line), [], line)
+
+    def test_an_unattributable_check_count_is_left_alone_rather_than_audited_wrongly(self):
+        """`Seven checks:` names no tool, so nothing can own it. It is corrected by hand and the
+        perimeter is written down in docs/SUPERVISOR_LOG_V11.md rather than guessed at here."""
+        self.assertEqual(self.stale("Seven checks: it fits 9,000 characters on both counts"), [])
+
+    def test_a_heading_inside_a_tagged_fence_is_caught(self):
+        """REPRODUCTION.md was submitted missing one closing fence, so from section 5a to the end
+        of the file every heading rendered as code and every command rendered as prose."""
+        doc = "\n".join(["## 5a. Audit the docs", "", "```bash", "python3 tools/check_docs.py",
+                         "# -> PASS", "", "### 5b. Next section", "", "```", "prose"])
+        trapped = self.cd.trapped_headings(doc)
+        self.assertEqual([t[2] for t in trapped], ["### 5b. Next section"])
+
+    def test_an_untagged_fence_may_quote_a_heading(self):
+        """docs/AGENT_TRAJECTORIES.md quotes tool output containing a `###`, inside a fence with
+        no language tag and a proper close. A check that fires there gets switched off."""
+        doc = "\n".join(["**8. Human checkpoint**:", "", "```",
+                         "### Human checkpoint - pre-execution approval: REQUIRED",
+                         "Nothing has been executed.", "```", "", "## Next"])
+        self.assertEqual(self.cd.trapped_headings(doc), [])
+
+    def test_a_shell_comment_is_not_a_heading(self):
+        doc = "\n".join(["```bash", "# from the repository root", "# -> REFUSED", "```"])
+        self.assertEqual(self.cd.trapped_headings(doc), [])
+
+    def test_a_tagged_fence_left_open_at_end_of_file_is_caught(self):
+        trapped = self.cd.trapped_headings("```bash\npython3 -m unittest\n")
+        self.assertEqual(len(trapped), 1)
+        self.assertIn("never closed", trapped[0][2])
+
+
+class TestDeterminism(unittest.TestCase):
+    """v11. Rerunning the evaluation rewrites 80 files under `results/`, all of them wall-clock.
+    `tools/check_determinism.py` exists so that sentence is a command instead of a promise; these
+    tests are what stop its normaliser from quietly blurring a decision."""
+
+    @classmethod
+    def setUpClass(cls):
+        from tools import check_determinism
+        cls.det = check_determinism
+
+    def test_a_millisecond_field_is_blurred(self):
+        a, _ = self.det.normalise('{"stage": "shadow_replay", "ms": 3.49}')
+        b, fields = self.det.normalise('{"stage": "shadow_replay", "ms": 2.85}')
+        self.assertEqual(a, b)
+        self.assertIn('json field "ms"', fields)
+
+    def test_the_measured_wall_clock_table_row_is_blurred(self):
+        row = "| Wall clock per case (ms, measured) | 0.1 | 0.1 | %s |"
+        self.assertEqual(self.det.normalise(row % "8.0")[0],
+                         self.det.normalise(row % "8.2")[0])
+
+    def test_a_verdict_is_not_blurred(self):
+        a, _ = self.det.normalise('{"verdict": "BLOCK", "ms": 3.49}')
+        b, _ = self.det.normalise('{"verdict": "APPROVE", "ms": 2.85}')
+        self.assertNotEqual(a, b, "a decision must survive normalisation to be compared")
+
+    def test_a_metric_that_happens_to_sit_near_a_unit_is_not_blurred(self):
+        a, _ = self.det.normalise("| Hazard recall | 0.970 |")
+        b, _ = self.det.normalise("| Hazard recall | 0.606 |")
+        self.assertNotEqual(a, b)
+
+    def test_modelled_reviewer_minutes_are_not_blurred(self):
+        """The reviewer-minute figure is modelled from stated constants, not measured off the
+        clock, so it must not be in the permission list."""
+        a, _ = self.det.normalise('{"minutes_per_case": 9.2}')
+        b, _ = self.det.normalise('{"minutes_per_case": 8.5}')
+        self.assertNotEqual(a, b)
