@@ -23,7 +23,7 @@ sys.path.insert(0, str(ROOT))
 from baseline.baseline_review import run_case as run_baseline  # noqa: E402
 from eval.scoring import TIME_MODEL, aggregate, score_case  # noqa: E402
 from sentinel.coverage import ledger as coverage_ledger  # noqa: E402
-from sentinel.llm import get_llm  # noqa: E402
+from sentinel.llm import HOSTILE, get_llm  # noqa: E402
 from sentinel.tools import sql_parse  # noqa: E402
 from sentinel.orchestrator import FEATURE_SETS, review  # noqa: E402
 from sentinel.report import render  # noqa: E402
@@ -66,7 +66,8 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser("run_eval")
     ap.add_argument("--cases", default=str(ROOT / "eval" / "cases"))
     ap.add_argument("--out", default=str(ROOT / "results"))
-    ap.add_argument("--provider", default="scripted", choices=["scripted", "openai", "anthropic"])
+    ap.add_argument("--provider", default="scripted",
+                    choices=["scripted", "openai", "anthropic"] + sorted(HOSTILE))
     ap.add_argument("--model", default=None)
     ap.add_argument("--max-attempts", type=int, default=3)
     ap.add_argument("--only", default="all", choices=["all", "agent", "baseline"])

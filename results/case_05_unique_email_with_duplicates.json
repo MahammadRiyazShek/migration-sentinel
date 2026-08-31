@@ -5,6 +5,14 @@
  "owner_service": "web",
  "verdict": "BLOCK",
  "summary": "Do not ship this as written. 1 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "narrator": {
+  "guard": true,
+  "summary_overridden": false,
+  "summary_reasons": [],
+  "model_summary": "Do not ship this as written. 1 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "questions_source": "model",
+  "questions_dropped": []
+ },
  "counts": {
   "low": 0,
   "medium": 0,
@@ -180,6 +188,8 @@
    "What is the acceptable write-stall window for this table?",
    "Who owns cleaning the duplicate rows, and by when?"
   ],
+  "questions_source": "model",
+  "questions_dropped": [],
   "policy": {
    "include_view_changes": true,
    "expand_contract_type_change": true,
@@ -263,7 +273,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.74,
+   "ms": 0.69,
    "result_summary": "Schema"
   },
   {
@@ -402,7 +412,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.12,
+   "ms": 0.16,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -768,7 +778,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.8,
+   "ms": 3.29,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -926,7 +936,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.09,
+   "ms": 0.1,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -941,7 +951,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_customers_email_tmp_nonunique\" ON \"customers\" (\"email\");"
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "create_index",
@@ -983,7 +993,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -1215,7 +1225,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.81,
+   "ms": 3.52,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1238,7 +1248,7 @@
   "tokens_out": 221,
   "cost_usd": 0.0
  },
- "wall_ms": 7.7,
+ "wall_ms": 9.2,
  "severity_order": [
   "low",
   "medium",

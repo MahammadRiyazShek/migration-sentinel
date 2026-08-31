@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .. import coverage as coverage_tools
+from .. import narrator as narrator_tools
 from .base import Agent
 from .risk_officer import LOCK_ROWS_WARN
 from ..tools.sql_parse import Schema, sqlite_type
@@ -221,8 +222,18 @@ class RolloutEngineer(Agent):
         # so the thing the tool could not see is work someone has to sign for.
         gates += coverage_tools.signoff_gates(risk.get("coverage_ledger") or {"gaps": []})
 
-        questions = self.model("reviewer_questions", {"codes": sorted(codes)},
-                               user=f"Hazard codes: {sorted(codes)}").payload.get("questions", [])
+        resp = self.model("reviewer_questions", {"codes": sorted(codes)},
+                          user=f"Hazard codes: {sorted(codes)}")
+        if getattr(self, "guard_narrator", True):
+            questions, dropped = narrator_tools.guard_questions(
+                resp.payload, sorted(codes), risk.get("verdict", ""))
+        else:
+            # v2 behaviour, kept so the invariance harness can show what it costs:
+            # the payload is trusted, so a model that returns none takes the run down.
+            questions, dropped = resp.payload.get("questions", []), []
+        if dropped and self.tracer:
+            self.tracer.note(self.NAME, "narrator guard on reviewer questions: "
+                                        + "; ".join(dropped))
         plan = {
             "attempt": attempt,
             "phase1_sql": phase1,
@@ -231,6 +242,8 @@ class RolloutEngineer(Agent):
             "code_steps": list(dict.fromkeys(code_steps)),
             "human_gates": list(dict.fromkeys(gates)),
             "questions": questions,
+            "questions_source": "tool" if dropped else "model",
+            "questions_dropped": dropped,
             "policy": dict(policy.__dict__),
         }
         self.end({"attempt": attempt, "phase1_statements": len(phase1),

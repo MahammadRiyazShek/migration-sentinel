@@ -5,7 +5,7 @@ harness had been frozen. No code under `sentinel/`, `eval/`, `tools/` or
 `tests/` was changed; only how the results are presented on the submission form.
 
 Every claim below is verifiable from the committed repository with
-`python tools/check_results.py` (18/18) on a clean clone.
+`python tools/check_results.py` (23/23 as of v3) on a clean clone.
 
 ## v2.1 — submission text hardening
 
@@ -67,4 +67,35 @@ python -m unittest discover -s tests   # 22 tests, ~0.14 s
 python eval/run_eval.py --ablations    # 12 cases + 6 arms + 2 baselines
 python tools/check_results.py          # 18/18 claims hold
 python eval/time_sensitivity.py        # 6 constant sets, 2 reversals flagged
+```
+
+
+## v3 - the narrator is untrusted input
+
+**What changed in the code** (all additive; no case, label, scorer or metric definition was touched,
+and every detection number is byte-identical to v2):
+
+1. `sentinel/llm/adversarial.py` - three hostile model stand-ins: a sycophant, an injected model, a
+   degraded endpoint returning no payload.
+2. `sentinel/narrator.py` - the two places model text enters the packet (the headline and the reviewer
+   questions) are validated like a request body. The guard can only remove text.
+3. `eval/model_invariance.py` - 12 cases x 4 models x guard on/off = 96 reviews, diffing the decision
+   surface field by field against the cooperative reference. Writes `results/model_invariance.md`.
+4. `--no-narrator-guard` on `sentinel review` keeps the v2 behaviour runnable, so the two columns can be
+   compared rather than asserted.
+5. `tools/check_results.py`: 18 -> 23 claims. `tests/`: 22 -> 27.
+
+**What it found:** 0/84 completed reviews changed on facts, so v2's invariance claim survives its first
+real attack. And 23 of the 24 unguarded hostile reviews that ran printed a headline contradicting their
+own verdict, while `hostile-null` crashed 12/12 unguarded runs because v2 read `.payload.get(...)` off a
+raw model response. Full log, including the three mistakes caught in the first version of the fix:
+`docs/SUPERVISOR_LOG_V3.md`.
+
+**How to verify from a clean clone**
+
+```bash
+python -m unittest discover -s tests   # 27 tests
+python eval/run_eval.py --ablations    # 108 reviews
+python eval/model_invariance.py        # 96 reviews, hostile models included
+python tools/check_results.py          # 23/23 claims hold
 ```

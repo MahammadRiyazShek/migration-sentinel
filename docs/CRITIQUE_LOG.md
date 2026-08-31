@@ -43,7 +43,15 @@ agentic system at all, or a deterministic linter with a narrator attached.
 I still think the design is right - a review that gates a deploy should not have a nondeterministic
 verdict - but v1 sold determinism as a pure virtue and never priced what it costs in claim strength.
 
-**Not settled by measurement, settled by scope.** v2 states the boundary in one place instead of
+**v2: not settled by measurement, settled by scope. v3: settled by measurement.** The v3 pass
+wrote three models that are not trying to help and diffed the decision surface field by field across
+12 cases and both narrator-guard settings: `results/model_invariance.md`, 0/84 completed reviews
+changed. It also found what the scope answer below was hiding - the model still owned the headline
+sentence, and a sycophantic model printed a clean one above a `BLOCK` on 11 of 12 cases without
+moving a published number. See `docs/SUPERVISOR_LOG_V3.md` (A1, A2) and README ->
+*Can the model move any of this?*
+
+v2 states the boundary in one place instead of
 implying a stronger claim: the *facts* are deterministic, the *agency* is in the orchestration -
 tool selection per agent, the verifier's feedback loop, the policy tightening between attempts,
 the retry budget, and the escalation when the budget runs out. That loop is what is evaluated by

@@ -4,7 +4,7 @@
 
 No blocking hazards found. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_06_safe_unique_index` · case `case_06_safe_unique_index` · owning service `billing-api` · 8.0 ms · model scripted-v1 (2 calls, $0.0000)
+`run eval-case_06_safe_unique_index` · case `case_06_safe_unique_index` · owning service `billing-api` · 10.2 ms · model scripted-v1 (2 calls, $0.0000)
 
 ## Hazards
 

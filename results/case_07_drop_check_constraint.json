@@ -5,6 +5,14 @@
  "owner_service": "billing-api",
  "verdict": "SAFE_WITH_PLAN",
  "summary": "Shippable, but only as the staged plan below. 0 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "narrator": {
+  "guard": true,
+  "summary_overridden": false,
+  "summary_reasons": [],
+  "model_summary": "Shippable, but only as the staged plan below. 0 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "questions_source": "model",
+  "questions_dropped": []
+ },
  "counts": {
   "low": 0,
   "medium": 0,
@@ -121,6 +129,8 @@
   "questions": [
    "What enforces this invariant once the constraint is gone?"
   ],
+  "questions_source": "model",
+  "questions_dropped": [],
   "policy": {
    "include_view_changes": true,
    "expand_contract_type_change": true,
@@ -199,7 +209,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.68,
+   "ms": 0.84,
    "result_summary": "Schema"
   },
   {
@@ -208,7 +218,7 @@
    "args": {
     "sql": "ALTER TABLE customers DROP CONSTRAINT customers_plan_chk;\n"
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "drop_constraint",
@@ -323,7 +333,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.25,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -783,7 +793,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.15,
+   "ms": 0.12,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1024,7 +1034,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.55,
+   "ms": 3.25,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1047,7 +1057,7 @@
   "tokens_out": 104,
   "cost_usd": 0.0
  },
- "wall_ms": 7.3,
+ "wall_ms": 8.0,
  "severity_order": [
   "low",
   "medium",

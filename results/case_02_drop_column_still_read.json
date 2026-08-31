@@ -5,6 +5,14 @@
  "owner_service": "web",
  "verdict": "BLOCK",
  "summary": "Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 1 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "narrator": {
+  "guard": true,
+  "summary_overridden": false,
+  "summary_reasons": [],
+  "model_summary": "Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 1 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "questions_source": "model",
+  "questions_dropped": []
+ },
  "counts": {
   "low": 0,
   "medium": 1,
@@ -267,6 +275,8 @@
    "What is the accepted risk for MISSING_ROLLBACK?",
    "Do any consumers read this result set positionally or serialise it whole?"
   ],
+  "questions_source": "model",
+  "questions_dropped": [],
   "policy": {
    "include_view_changes": true,
    "expand_contract_type_change": true,
@@ -345,7 +355,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.7,
+   "ms": 0.72,
    "result_summary": "Schema"
   },
   {
@@ -354,7 +364,7 @@
    "args": {
     "sql": "ALTER TABLE customers DROP COLUMN company_name;\n"
    },
-   "ms": 0.04,
+   "ms": 0.03,
    "result_summary": [
     {
      "kind": "drop_column",
@@ -382,7 +392,7 @@
      }
     ]
    },
-   "ms": 0.12,
+   "ms": 0.14,
    "result_summary": [
     "Schema",
     []
@@ -463,7 +473,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.12,
+   "ms": 0.21,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -596,7 +606,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.05,
    "result_summary": 17
   },
   {
@@ -818,7 +828,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.71,
+   "ms": 4.49,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -948,7 +958,7 @@
     "hazard_code": "SELECT_STAR_DRIFT",
     "table": "q_bi_summary"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     [
@@ -1045,7 +1055,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.12,
+   "ms": 0.14,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1070,7 +1080,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1286,7 +1296,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.58,
+   "ms": 3.11,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1309,7 +1319,7 @@
   "tokens_out": 471,
   "cost_usd": 0.0
  },
- "wall_ms": 7.4,
+ "wall_ms": 10.4,
  "severity_order": [
   "low",
   "medium",

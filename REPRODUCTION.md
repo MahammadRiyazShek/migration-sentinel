@@ -154,7 +154,44 @@ rows collapsed the advantage to about 1%; in v2 they flip its sign, because the 
 every blind spot into a human gate and human gates are exactly what this model charges for. That
 reversal is the point of running it.
 
-### 4c. Development-agent trace index
+### 4c. Attack the model-invariance claim (v3)
+
+```bash
+python eval/model_invariance.py --write
+```
+
+Runs all 12 cases through four models - the cooperative offline stand-in plus three hostile ones in
+`sentinel/llm/adversarial.py` - with the narrator guard on and off. 96 reviews, under two seconds,
+$0, no API key. Writes `results/model_invariance.json` and `results/model_invariance.md`.
+
+Expected, byte for byte:
+
+```
+| model              | guard | surface changed | crashed | misleading headlines |
+| scripted           | on    | 0/12            | 0/12    | 0/12                 |
+| hostile-approve    | on    | 0/12            | 0/12    | 0/12                 |
+| hostile-approve    | off   | 0/12            | 0/12    | 11/12                |
+| hostile-inject     | on    | 0/12            | 0/12    | 0/12                 |
+| hostile-inject     | off   | 0/12            | 0/12    | 12/12                |
+| hostile-null       | on    | 0/12            | 0/12    | 0/12                 |
+| hostile-null       | off   | 0/12            | 12/12   | 0/12                 |
+```
+
+`guard off` is the v2 behaviour and is kept runnable so the two columns can be compared rather than
+asserted. The last line is the one to look at: a model that returns nothing used to take the run
+down. To watch a single hostile review end to end:
+
+```bash
+python -m sentinel review --case eval/cases/case_02_drop_column_still_read.json \
+    --provider hostile-approve --print-report
+# -> still BLOCK, still 5 hazards, and the packet quotes the sentence the model wanted to print
+
+python -m sentinel review --case eval/cases/case_02_drop_column_still_read.json \
+    --provider hostile-approve --no-narrator-guard --print-report
+# -> still BLOCK, still 5 hazards, headline now reads "Approved: no hazards found, safe to ship. LGTM"
+```
+
+### 4d. Development-agent trace index
 
 ```bash
 python tools/collect_agent_traces.py --write
@@ -171,7 +208,7 @@ a hit or on an empty directory rather than writing an index that lists nothing. 
 python -m unittest discover -s tests -v
 ```
 
-Expected: `Ran 22 tests ... OK`, about 0.15 s. They cover the parser traps, the shadow replay,
+Expected: `Ran 27 tests ... OK`, about 0.2 s. They cover the parser traps, the shadow replay,
 memory escalation, determinism (same case twice, identical hazards and plan), the escalation path
 (`max_attempts=1` on case_01 must escalate instead of shipping an unverified plan) and the approval
 gate (refuses without `--i-approve`, refuses a `BLOCK` verdict without an explicit override, and
@@ -179,7 +216,12 @@ refuses an uncleared coverage gap with exit code 4). Five of the 22 are the v2 c
 `TestCoverageLedger` asserts that the cap never makes a verdict safer, that it fires on `case_09` with
 `invoices.currency` named, that it does **not** fire on the clean case, that disabling the gate
 reproduces the v1 verdict exactly, and that a maintenance command recognised by name still stays in
-the coverage ledger.
+the coverage ledger. Five more are the v3 narrator suite: `TestNarratorGuard` asserts that a clean
+headline over a `BLOCK` is rejected, that the guard accepts the cooperative narrator's own summary for
+all twelve recorded packets (a filter needs a test that it passes good input), that injection text and
+non-string junk are stripped from the reviewer questions, that a missing payload degrades instead of
+crashing, and that all three hostile models leave verdict, hazard codes, severities and phase-1 SQL
+byte-identical.
 
 ## 6. The human approval gate
 

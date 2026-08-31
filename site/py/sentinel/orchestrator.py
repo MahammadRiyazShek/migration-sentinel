@@ -20,6 +20,7 @@ from .agents.risk_officer import RiskOfficer
 from .agents.rollout_engineer import Policy, RolloutEngineer
 from .agents.verifier import Verifier
 from . import coverage as coverage_tools
+from . import narrator as narrator_tools
 from .hazards import SEVERITY_ORDER
 from .tools import query_corpus, shadow_db, sql_parse
 from .tools.incident_memory import IncidentMemory
@@ -66,7 +67,14 @@ def build_registry(memory: IncidentMemory, tracer: Tracer) -> ToolRegistry:
 
 def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | None = None,
            max_attempts: int = MAX_ATTEMPTS, trace: bool = True,
-           run_id: str | None = None, features: str | dict[str, bool] = "full") -> dict[str, Any]:
+           run_id: str | None = None, features: str | dict[str, bool] = "full",
+           guard_narrator: bool = True) -> dict[str, Any]:
+    """Run the five agents over one case.
+
+    `guard_narrator=False` reproduces the v2 behaviour: model prose is copied into
+    the packet unchecked. It exists so `eval/model_invariance.py` can show what a
+    hostile narrator prints when nothing is guarding the headline.
+    """
     feat = FEATURE_SETS[features] if isinstance(features, str) else features
     started = time.perf_counter()
     run_id = run_id or f"run-{uuid.uuid4().hex[:8]}"
@@ -81,6 +89,7 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
                                                use_coverage=feat.get("coverage", True))
 
     engineer = RolloutEngineer(tools, llm, tracer)
+    engineer.guard_narrator = guard_narrator
     verifier = Verifier(tools, llm, tracer)
     policy = Policy()
     attempt, plan, check = 1, None, None
@@ -120,7 +129,7 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
                           "A human must decide the sequencing. Remaining problems: "
                           + "; ".join(check["problems"][:5]))
 
-    summary = llm.complete(
+    raw_summary = llm.complete(
         "You write the two-sentence verdict at the top of a database migration review.",
         f"verdict={risk['verdict']} counts={risk['counts']} broken={len(blast['replay'].broken)}",
         tag="executive_summary",
@@ -129,6 +138,31 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
                  "coverage_gaps": len(risk["coverage_ledger"]["gaps"]),
                  "plan_verified": check["verified"]}).text
     tracer.model_call("orchestrator", llm.calls[-1])
+
+    # The narrator writes the sentence a reviewer reads first, so it is treated as
+    # untrusted input rather than as output. The guard can only remove model text:
+    # it cannot invent a hazard, move a severity or change a verdict.
+    narrator_facts = {"counts": risk["counts"], "broken_queries": len(blast["replay"].broken),
+                      "coverage_gaps": len(risk["coverage_ledger"]["gaps"]),
+                      "plan_verified": check["verified"]}
+    if guard_narrator:
+        summary, summary_reasons = narrator_tools.guard_summary(
+            raw_summary, risk["verdict"], narrator_facts)
+    else:
+        summary, summary_reasons = raw_summary, []
+    if summary_reasons:
+        tracer.checkpoint("narrator guard", "SUMMARY REJECTED",
+                          "The model's headline was not printed. Reasons: "
+                          + "; ".join(summary_reasons)
+                          + ". The packet shows a summary written from the tool output instead.")
+    narrator_info = {
+        "guard": guard_narrator,
+        "summary_overridden": bool(summary_reasons),
+        "summary_reasons": summary_reasons,
+        "model_summary": narrator_tools.sanitise(raw_summary, 300),
+        "questions_source": plan.get("questions_source", "model"),
+        "questions_dropped": plan.get("questions_dropped", []),
+    }
 
     if risk["verdict_capped_by_coverage"]:
         tracer.checkpoint("coverage sign-off", "REQUIRED",
@@ -151,6 +185,7 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
         "owner_service": case.get("owner_service"),
         "verdict": risk["verdict"],
         "summary": summary,
+        "narrator": narrator_info,
         "counts": risk["counts"],
         "hazards": [h.to_json() for h in risk["hazards"]],
         "blast_radius": {

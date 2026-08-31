@@ -15,6 +15,8 @@ different thing and their runtime traces are separate: [`trajectories/`](traject
 | Claude Opus 5, second session, supervisor role | `claude-opus-5` | separate context, given only the built repository and the challenge rules | An adversarial review pass over the finished submission: unzip, run, try to falsify the claims. It produced `eval/report_components.py`, `eval/time_sensitivity.py`, `tools/collect_agent_traces.py` and the first draft of this file. It did not touch pipeline code. |
 | Claude Opus 5, third session, supervisor role | `claude-opus-5` | separate context, given the finished v1 submission text and the shipped repository, with one instruction: find the assumptions this submission does not know it is making and try to make the headline numbers false | Produced the critique in [`docs/CRITIQUE_LOG.md`](docs/CRITIQUE_LOG.md), the two rejected alternative designs written up there, and the implementation of v2: `sentinel/coverage.py`, the verdict cap, the whole-relation maintenance rule, the `no_coverage` ablation arm, the new scorer fields and the five `TestCoverageLedger` tests. Its sharpest finding lowered nothing and *raised* a published cost: the reviewer-minute claim got worse and two adversarial constant sets went from collapsing to reversing. |
 
+| Claude Opus 5, fifth session, supervisor role (ClickUp Brain agentic assistant) | `claude-opus-5` | separate context, given the v2 source archive and the submission form text, with a sandboxed Python shell and **no network access**; same instruction as the third session | Produced [`docs/SUPERVISOR_LOG_V3.md`](docs/SUPERVISOR_LOG_V3.md) and the implementation of v3: `sentinel/narrator.py`, `sentinel/llm/adversarial.py`, `eval/model_invariance.py`, the `--no-narrator-guard` switch, five new claims in `tools/check_results.py` and the five `TestNarratorGuard` tests. It ran the eval, the invariance harness, the tests and the claim audit itself in the sandbox. It did not touch the twelve cases, the ground truth, the hazard vocabulary, the scorer or either primary metric, and no detection number moved. |
+
 | Final packaging audit, fourth session | not disclosed to participant (Genspark AI assistant) | separate context, given the v2 source archive and the submission form text | Found that `agent_traces/INDEX.md` was referenced but absent; populated `agent_traces/` from real session artefacts only, regenerated the index with `tools/collect_agent_traces.py --write`, and re-ran the eval, tests and claim audit. It did not touch pipeline code, cases, ground truth or the scorer. |
 
 No other coding agent, autocomplete or code-generation tool was used. No agent had shell access to a
@@ -29,6 +31,16 @@ claim was audited by `tools/check_results.py` using the same four constants that
 cannot fail (`eval/time_sensitivity.py`, which found the collapse case). Same model, different
 context, adversarial framing. Two of those three findings are now committed artefacts, and the third
 one lowered a headline claim.
+
+**The fifth session is the one to read the log of.** Its instruction was the third session's: attack
+the finished submission. What it found was not a wrong number, it was a wrong *audience* - every metric
+in v2 read the decision surface, and the reviewer reads the headline sentence, which was the one thing
+a model wrote and nothing checked. It also found a plain bug that four earlier sessions and I had all
+walked past: `.payload.get("questions")` on a raw model response, so a provider returning an empty body
+crashed the review instead of degrading it. Neither finding was reachable by removing a component,
+which is the only kind of experiment v2 ran. Three mistakes in its own first fix are logged in
+`docs/SUPERVISOR_LOG_V3.md` (M1-M3), including a version of the guard that rejected the cooperative
+narrator's own correct summary while still publishing "0 misleading headlines".
 
 ## How the work was divided
 
@@ -99,6 +111,19 @@ Every one of these was my decision, not the agent's:
 * the human approval gate: that `sentinel review` never touches a database, that `sentinel execute`
   refuses without `--i-approve --reviewer "name"`, that a `BLOCK` verdict needs a named override on the
   record, and that an uncleared coverage gap is refused the same way
+* in v3, the rule that the narrator guard may only **remove** model text, never rewrite it. The
+  tempting version strips the false clause and keeps the sentence, which produces prose that neither
+  the model nor the tool wrote and that nobody can attribute in a postmortem. What shipped replaces the
+  headline wholesale and prints what the model tried to say, verbatim, next to the reason it was
+  rejected
+* in v3, the decision to publish `results/model_invariance.md` with every detection number identical to
+  v2. A robustness change that appears to improve accuracy is a changelog to distrust, and the guard is
+  structurally incapable of it: it can only delete text a metric never read
+* in v3, the rejection of the *safer* design. Deleting the narrator entirely (render every word from
+  tool output, demote the model to read-only Q&A) makes the whole class of problem impossible instead of
+  guarded. It also deletes the per-hazard explanation reviewers actually read, so it is named as the
+  next experiment in `sentinel/narrator.py` rather than shipped, and the weaker choice is stated as a
+  choice
 * the rule that a coverage gap is never expressed as a hazard. Absence of evidence gets a named human
   decision, not a severity. An agent that converts "I could not check this" into a finding is inflating
   its own recall with its own ignorance

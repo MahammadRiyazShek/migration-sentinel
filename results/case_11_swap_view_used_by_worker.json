@@ -5,6 +5,14 @@
  "owner_service": "billing-api",
  "verdict": "BLOCK",
  "summary": "Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 1 blocker, 1 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "narrator": {
+  "guard": true,
+  "summary_overridden": false,
+  "summary_reasons": [],
+  "model_summary": "Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 1 blocker, 1 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "questions_source": "model",
+  "questions_dropped": []
+ },
  "counts": {
   "low": 0,
   "medium": 1,
@@ -124,6 +132,8 @@
    "Has the owning team agreed to the deploy order?",
    "What is the accepted risk for MISSING_ROLLBACK?"
   ],
+  "questions_source": "model",
+  "questions_dropped": [],
   "policy": {
    "include_view_changes": true,
    "expand_contract_type_change": true,
@@ -213,7 +223,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.64,
+   "ms": 0.69,
    "result_summary": "Schema"
   },
   {
@@ -222,7 +232,7 @@
    "args": {
     "sql": "DROP VIEW open_invoices;\nCREATE VIEW open_invoices_v2 AS\n  SELECT id, customer_id, invoice_number, amount_cents, status, issued_at\n  FROM invoices WHERE status IN ('draft','open');\n"
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "drop_view",
@@ -373,7 +383,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.18,
+   "ms": 0.11,
    "result_summary": [
     {
      "query_id": "q_dunning_open",
@@ -640,7 +650,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.55,
+   "ms": 2.83,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -800,7 +810,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.17,
+   "ms": 0.15,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -815,7 +825,7 @@
    "args": {
     "sql": "CREATE VIEW open_invoices_v2 AS SELECT id, customer_id, invoice_number, amount_cents, status, issued_at FROM invoices WHERE status IN ('draft','open');"
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "create_view",
@@ -1080,7 +1090,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.64,
+   "ms": 3.35,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1103,7 +1113,7 @@
   "tokens_out": 257,
   "cost_usd": 0.0
  },
- "wall_ms": 7.4,
+ "wall_ms": 8.4,
  "severity_order": [
   "low",
   "medium",

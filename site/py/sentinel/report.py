@@ -25,6 +25,16 @@ def render(report: dict[str, Any]) -> str:
           f"{r['wall_ms']} ms · model {r['model_usage']['model']} "
           f"({r['model_usage']['calls']} calls, ${r['model_usage']['cost_usd']:.4f})", ""]
 
+    nar = r.get("narrator") or {}
+    if nar.get("summary_overridden"):
+        L += ["> **The model's summary was not printed.** The narrator guard "
+              "(`sentinel/narrator.py`) rejected it and the headline above was written from the "
+              "tool output instead. Reason(s): " + "; ".join(nar["summary_reasons"])
+              + f'. What the model wrote: "{nar.get("model_summary", "")}"', ""]
+    if nar.get("questions_dropped"):
+        L += ["> **Reviewer questions were filtered.** " + "; ".join(nar["questions_dropped"])
+              + ".", ""]
+
     if r.get("verdict_capped_by_coverage"):
         gaps = r["coverage_ledger"]["gaps"]
         L += [f"> **Not cleared on coverage.** The hazards found here are not blocking, but "

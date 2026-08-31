@@ -7,7 +7,7 @@ import sqlite3
 import sys
 from typing import Any
 
-from .llm import get_llm
+from .llm import HOSTILE, get_llm
 from .orchestrator import record_learning, review
 from .report import render
 from .tools import shadow_db, sql_parse
@@ -26,7 +26,7 @@ def cmd_review(args: argparse.Namespace) -> int:
     out = review(case, llm, incidents_path=args.incidents,
                  learned_path=args.learned if args.learn else None,
                  max_attempts=args.max_attempts, trace=not args.no_trace,
-                 run_id=args.run_id)
+                 run_id=args.run_id, guard_narrator=not args.no_narrator_guard)
     report = out["report"]
     if args.learn:
         report["memory_written"] = record_learning(out["memory"], report)
@@ -101,7 +101,12 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--case", required=True)
     r.add_argument("--out", default="results")
     r.add_argument("--trace-dir", default="trajectories")
-    r.add_argument("--provider", default="scripted", choices=["scripted", "openai", "anthropic"])
+    r.add_argument("--provider", default="scripted",
+                   choices=["scripted", "openai", "anthropic"] + sorted(HOSTILE),
+                   help="scripted (offline default), a hosted provider, or one of the hostile "
+                        "stand-ins used to attack the model-invariance claim")
+    r.add_argument("--no-narrator-guard", action="store_true",
+                   help="v2 behaviour: copy the model's prose into the packet unchecked")
     r.add_argument("--model", default=None)
     r.add_argument("--cassette", default=None, help="path to a prompt cassette for offline replay")
     r.add_argument("--cassette-mode", default="replay", choices=["replay", "record"])

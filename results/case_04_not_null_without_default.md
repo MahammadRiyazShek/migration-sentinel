@@ -4,7 +4,7 @@
 
 Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
 
-`run eval-case_04_not_null_without_default` · case `case_04_not_null_without_default` · owning service `billing-api` · 7.5 ms · model scripted-v1 (5 calls, $0.0000)
+`run eval-case_04_not_null_without_default` · case `case_04_not_null_without_default` · owning service `billing-api` · 10.9 ms · model scripted-v1 (5 calls, $0.0000)
 
 ## Hazards
 

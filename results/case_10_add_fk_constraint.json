@@ -5,6 +5,14 @@
  "owner_service": "billing-api",
  "verdict": "BLOCK",
  "summary": "Do not ship this as written. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "narrator": {
+  "guard": true,
+  "summary_overridden": false,
+  "summary_reasons": [],
+  "model_summary": "Do not ship this as written. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "questions_source": "model",
+  "questions_dropped": []
+ },
  "counts": {
   "low": 0,
   "medium": 0,
@@ -115,6 +123,8 @@
   "questions": [
    "What is the accepted risk for CONSTRAINT_VALIDATION_LOCK?"
   ],
+  "questions_source": "model",
+  "questions_dropped": [],
   "policy": {
    "include_view_changes": true,
    "expand_contract_type_change": true,
@@ -206,7 +216,7 @@
    "args": {
     "sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id);\n"
    },
-   "ms": 0.11,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "add_constraint",
@@ -246,7 +256,7 @@
      }
     ]
    },
-   "ms": 0.09,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -333,7 +343,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.12,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -672,7 +682,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.56,
+   "ms": 2.79,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -783,7 +793,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.15,
+   "ms": 0.13,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1069,7 +1079,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.54,
+   "ms": 2.6,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1092,7 +1102,7 @@
   "tokens_out": 120,
   "cost_usd": 0.0
  },
- "wall_ms": 7.1,
+ "wall_ms": 7.4,
  "severity_order": [
   "low",
   "medium",

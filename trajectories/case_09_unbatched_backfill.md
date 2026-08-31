@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.74 ms)
+**tool** `schema.parse` (0.69 ms)
 
 ```json
 {
@@ -163,7 +163,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.16 ms)
+**tool** `corpus.dependents` (0.12 ms)
 
 ```json
 {
@@ -270,7 +270,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -338,7 +338,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (2.66 ms)
+**tool** `shadow.replay` (3.35 ms)
 
 ```json
 {
@@ -500,7 +500,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.22 ms)
+**tool** `coverage.ledger` (0.16 ms)
 
 ```json
 {
@@ -678,7 +678,7 @@ _note (risk_officer)_: verdict capped to NEEDS_COVERAGE_SIGNOFF: 1 coverage gap(
 
 </details>
 
-**tool** `migration.parse` (0.06 ms)
+**tool** `migration.parse` (0.07 ms)
 
 ```json
 {
@@ -738,7 +738,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.61 ms)
+**tool** `shadow.replay` (2.69 ms)
 
 ```json
 {
