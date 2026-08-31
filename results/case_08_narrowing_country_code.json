@@ -559,7 +559,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": 17
   },
   {
@@ -783,7 +783,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.71,
+   "ms": 2.69,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1311,7 +1311,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.5,
+   "ms": 2.55,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1589,7 +1589,7 @@
   "tokens_out": 155,
   "cost_usd": 0.0
  },
- "wall_ms": 7.4,
+ "wall_ms": 7.5,
  "severity_order": [
   "low",
   "medium",

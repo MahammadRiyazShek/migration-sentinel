@@ -332,7 +332,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.77,
+   "ms": 0.79,
    "result_summary": "Schema"
   },
   {
@@ -421,7 +421,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -646,7 +646,7 @@
      }
     ]
    },
-   "ms": 0.11,
+   "ms": 0.13,
    "result_summary": 17
   },
   {
@@ -875,7 +875,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.62,
+   "ms": 2.64,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1190,7 +1190,7 @@
      "clean": true
     }
    },
-   "ms": 0.16,
+   "ms": 0.13,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1247,7 +1247,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.09,
    "result_summary": [
     "Schema",
     []
@@ -1479,7 +1479,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.59,
+   "ms": 2.58,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1730,7 +1730,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 5.65,
+   "ms": 5.66,
    "result_summary": {
     "statements_audited": 3,
     "scripts": {
@@ -1791,7 +1791,7 @@
   "tokens_out": 221,
   "cost_usd": 0.0
  },
- "wall_ms": 13.1,
+ "wall_ms": 13.2,
  "severity_order": [
   "low",
   "medium",

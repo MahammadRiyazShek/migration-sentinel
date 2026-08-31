@@ -292,7 +292,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.79,
+   "ms": 0.85,
    "result_summary": "Schema"
   },
   {
@@ -301,7 +301,7 @@
    "args": {
     "sql": "-- dunning copy for the retry email, PLAT-4471\nALTER TABLE invoices ADD COLUMN dunning_note TEXT DEFAULT 'not attempted -- see runbook';\nCREATE INDEX CONCURRENTLY idx_invoices_dunning_note ON invoices (dunning_note);\n"
    },
-   "ms": 0.08,
+   "ms": 0.09,
    "result_summary": [
     {
      "kind": "add_column",
@@ -369,7 +369,7 @@
      }
     ]
    },
-   "ms": 0.12,
+   "ms": 0.1,
    "result_summary": {
     "lexed_statements": 2,
     "ops": 2,
@@ -521,7 +521,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.14,
+   "ms": 0.13,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -1201,7 +1201,7 @@
      "clean": true
     }
    },
-   "ms": 0.14,
+   "ms": 0.17,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1529,7 +1529,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.95,
+   "ms": 2.98,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1775,7 +1775,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.5,
+   "ms": 3.46,
    "result_summary": {
     "statements_audited": 4,
     "scripts": {

@@ -353,7 +353,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 1.26,
+   "ms": 1.09,
    "result_summary": "Schema"
   },
   {
@@ -463,7 +463,7 @@
      }
     ]
    },
-   "ms": 0.12,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -979,7 +979,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.34,
+   "ms": 3.28,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1030,7 +1030,7 @@
     "hazard_code": "BREAKING_QUERY",
     "table": "q_driver_stop_arrive"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     []
@@ -1438,7 +1438,7 @@
      "clean": true
     }
    },
-   "ms": 0.18,
+   "ms": 0.16,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1832,7 +1832,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.37,
+   "ms": 3.31,
    "result_summary": {
     "materialised": false,
     "schema_errors": [
@@ -2202,7 +2202,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.66,
+   "ms": 3.65,
    "result_summary": {
     "statements_audited": 2,
     "scripts": {
@@ -2269,7 +2269,7 @@
   "tokens_out": 432,
   "cost_usd": 0.0
  },
- "wall_ms": 14.1,
+ "wall_ms": 13.7,
  "severity_order": [
   "low",
   "medium",

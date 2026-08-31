@@ -292,7 +292,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.84,
+   "ms": 0.97,
    "result_summary": "Schema"
   },
   {
@@ -375,7 +375,7 @@
      }
     ]
    },
-   "ms": 0.14,
+   "ms": 0.11,
    "result_summary": {
     "lexed_statements": 3,
     "ops": 3,
@@ -533,7 +533,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.25,
+   "ms": 0.22,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -684,7 +684,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.02,
    "result_summary": 22
   },
   {
@@ -929,7 +929,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.36,
+   "ms": 3.01,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1212,7 +1212,7 @@
      "clean": true
     }
    },
-   "ms": 0.26,
+   "ms": 0.19,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1227,7 +1227,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_usage_events_customer\" ON \"usage_events\" (\"customer_id\");"
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "create_index",
@@ -1269,7 +1269,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.09,
    "result_summary": [
     "Schema",
     []
@@ -1501,7 +1501,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.11,
+   "ms": 2.99,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1749,7 +1749,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.28,
+   "ms": 3.78,
    "result_summary": {
     "statements_audited": 2,
     "scripts": {
@@ -1799,7 +1799,7 @@
   "tokens_out": 112,
   "cost_usd": 0.0
  },
- "wall_ms": 12.5,
+ "wall_ms": 12.6,
  "severity_order": [
   "low",
   "medium",

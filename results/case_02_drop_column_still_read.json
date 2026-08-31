@@ -413,7 +413,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.77,
+   "ms": 0.79,
    "result_summary": "Schema"
   },
   {
@@ -917,7 +917,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.69,
+   "ms": 2.71,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1326,7 +1326,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.08,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1542,7 +1542,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.56,
+   "ms": 2.69,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1795,7 +1795,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 2.86,
+   "ms": 2.96,
    "result_summary": {
     "statements_audited": 1,
     "scripts": {
@@ -1855,7 +1855,7 @@
   "tokens_out": 471,
   "cost_usd": 0.0
  },
- "wall_ms": 10.6,
+ "wall_ms": 10.8,
  "severity_order": [
   "low",
   "medium",

@@ -595,7 +595,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.88,
+   "ms": 0.87,
    "result_summary": "Schema"
   },
   {
@@ -1171,7 +1171,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.13,
+   "ms": 3.34,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1328,7 +1328,7 @@
     "hazard_code": "SELECT_STAR_DRIFT",
     "table": "q_bi_summary"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     [
@@ -1611,7 +1611,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);\nCREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;"
    },
-   "ms": 0.19,
+   "ms": 0.15,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1948,7 +1948,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.76,
+   "ms": 2.77,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2334,7 +2334,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.71,
+   "ms": 2.69,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2658,7 +2658,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 6.07,
+   "ms": 6.22,
    "result_summary": {
     "statements_audited": 5,
     "scripts": {
@@ -2781,7 +2781,7 @@
   "tokens_out": 622,
   "cost_usd": 0.0
  },
- "wall_ms": 18.6,
+ "wall_ms": 19.0,
  "severity_order": [
   "low",
   "medium",

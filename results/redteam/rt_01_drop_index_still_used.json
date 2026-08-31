@@ -250,7 +250,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -366,7 +366,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.2,
+   "ms": 0.22,
    "result_summary": []
   },
   {
@@ -599,7 +599,7 @@
      "...+9 more"
     ]
    },
-   "ms": 4.03,
+   "ms": 3.65,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -963,7 +963,7 @@
      "clean": true
     }
    },
-   "ms": 0.33,
+   "ms": 0.31,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1204,7 +1204,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.03,
+   "ms": 3.12,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1450,7 +1450,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.49,
+   "ms": 3.36,
    "result_summary": {
     "statements_audited": 1,
     "scripts": {
@@ -1508,7 +1508,7 @@
   "tokens_out": 131,
   "cost_usd": 0.0
  },
- "wall_ms": 13.6,
+ "wall_ms": 13.1,
  "severity_order": [
   "low",
   "medium",

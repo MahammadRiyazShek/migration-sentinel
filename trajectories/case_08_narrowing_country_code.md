@@ -301,7 +301,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.03 ms)
 
 ```json
 {
@@ -374,7 +374,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.71 ms)
+**tool** `shadow.replay` (2.69 ms)
 
 ```json
 {
@@ -758,7 +758,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.5 ms)
+**tool** `shadow.replay` (2.55 ms)
 
 ```json
 {
