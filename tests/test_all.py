@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import unittest
@@ -369,7 +370,13 @@ class TestSubmissionText(unittest.TestCase):
 
     def test_the_committed_form_text_fits_the_field_and_is_plain_ascii(self):
         text = self.FORM.read_text(encoding="utf-8").strip()
-        self.assertLessEqual(len(text), 10000)
+        # The field's own label says 9,000. v10: this test asserted 10,000 for three releases,
+        # so it stood green over a description the form would have truncated. Both counts are
+        # asserted, because a form POST normalises every line break to CRLF and the counter in
+        # the page does not.
+        self.assertLessEqual(len(text), 9000)
+        self.assertLessEqual(len(text) + text.count("\n"), 9000,
+                             "fits the counter in the page but not the CRLF-normalised POST")
         self.assertEqual([c for c in text if ord(c) > 127], [],
                          "the form field is plain text; non-ASCII may be mangled")
         for markup in ("|", "**", "`"):
@@ -378,7 +385,11 @@ class TestSubmissionText(unittest.TestCase):
     def test_the_checker_passes_on_the_committed_form_text(self):
         out = self._run()
         self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
-        self.assertIn("6/6 submission-text checks hold", out.stdout)
+        # v10: this asserted "6/6" while the checker ran seven checks, so the count was
+        # defended by nobody. Ask the line for its own arithmetic instead of restating it.
+        m = re.search(r"(\d+)/(\d+) submission-text checks hold", out.stdout)
+        self.assertIsNotNone(m, out.stdout)
+        self.assertEqual(m.group(1), m.group(2), out.stdout)
 
     def test_a_wrong_figure_in_the_form_text_fails_the_audit(self):
         text = self.FORM.read_text(encoding="utf-8")

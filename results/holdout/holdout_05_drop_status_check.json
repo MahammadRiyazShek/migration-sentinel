@@ -205,7 +205,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.98,
+   "ms": 0.88,
    "result_summary": "Schema"
   },
   {
@@ -214,7 +214,7 @@
    "args": {
     "sql": "ALTER TABLE shipments DROP CONSTRAINT shipments_status_chk;\n"
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "drop_constraint",
@@ -246,7 +246,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -329,7 +329,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.22,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_dispatch_create",
@@ -778,7 +778,7 @@
      "...+7 more"
     ]
    },
-   "ms": 4.08,
+   "ms": 3.51,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1140,7 +1140,7 @@
      ]
     }
    },
-   "ms": 0.18,
+   "ms": 0.17,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1165,7 +1165,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.08,
+   "ms": 0.1,
    "result_summary": [
     "Schema",
     []
@@ -1495,7 +1495,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.9,
+   "ms": 4.51,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1518,7 +1518,7 @@
   "tokens_out": 105,
   "cost_usd": 0.0
  },
- "wall_ms": 10.8,
+ "wall_ms": 10.3,
  "severity_order": [
   "low",
   "medium",

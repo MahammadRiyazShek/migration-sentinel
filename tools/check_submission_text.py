@@ -75,10 +75,35 @@ def _load(rel):
 # ---------------------------------------------------------------- 1. fits the form
 
 def check_fits_the_form(text):
+    """Two counts, because the field and the browser do not agree on what a line break is.
+
+    v10: the committed text was 9,536 characters against a 9,000-character field, so the
+    submitted description was truncated somewhere inside the hot take - the 5% rubric row -
+    and no repository check could see it, because the previous release measured a length it
+    had already declared legal. It is measured here twice:
+
+      * as authored, one byte per newline, which is what a JavaScript character counter in
+        the page reports;
+      * CRLF-normalised, two bytes per newline, which is what a form POST actually carries
+        (HTML form submission normalises textarea line breaks to CRLF).
+
+    The text has 50 line breaks, so the two counts differ by 50. A description that fits one
+    and not the other is a description whose fate depends on where it is counted.
+    """
+    crlf = len(text) + text.count("\n")
+    problems = []
     if len(text) > FORM_LIMIT:
-        return [f"{len(text)} characters, over the form's {FORM_LIMIT} limit by "
-                f"{len(text) - FORM_LIMIT}"]
-    print(f"        {len(text)} of {FORM_LIMIT} characters, {FORM_LIMIT - len(text)} spare")
+        problems.append(f"{len(text)} characters, over the form's {FORM_LIMIT} limit by "
+                        f"{len(text) - FORM_LIMIT}")
+    if crlf > FORM_LIMIT:
+        problems.append(f"{crlf} characters once the browser normalises {text.count(chr(10))} "
+                        f"line breaks to CRLF, over the form's {FORM_LIMIT} limit by "
+                        f"{crlf - FORM_LIMIT}: it fits the counter in the page and not the "
+                        f"POST body")
+    if problems:
+        return problems
+    print(f"        {len(text)} of {FORM_LIMIT} characters as authored, {crlf} CRLF-normalised, "
+          f"{FORM_LIMIT - crlf} spare on the stricter count")
     return []
 
 

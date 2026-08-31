@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.01 ms)
+**tool** `schema.parse` (0.84 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.06 ms)
+**tool** `migration.parse` (0.09 ms)
 
 ```json
 {
@@ -98,7 +98,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.09 ms)
+**tool** `schema.apply_ops` (0.07 ms)
 
 ```json
 {
@@ -186,7 +186,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.29 ms)
+**tool** `corpus.dependents` (0.2 ms)
 
 ```json
 {
@@ -308,7 +308,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.05 ms)
+**tool** `corpus.blast_score` (0.03 ms)
 
 ```json
 {
@@ -377,7 +377,7 @@ _tool responded_
 20
 ```
 
-**tool** `shadow.replay` (3.94 ms)
+**tool** `shadow.replay` (3.72 ms)
 
 ```json
 {
@@ -624,7 +624,7 @@ _note (blast_radius)_: q_etl_driver_roster gains column(s) ['preferred_language'
 
 </details>
 
-**tool** `coverage.ledger` (0.18 ms)
+**tool** `coverage.ledger` (0.21 ms)
 
 ```json
 {
@@ -760,7 +760,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.12 ms)
+**tool** `migration.parse` (0.07 ms)
 
 ```json
 {
@@ -805,7 +805,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.09 ms)
+**tool** `schema.apply_ops` (0.12 ms)
 
 ```json
 {
@@ -854,7 +854,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (4.01 ms)
+**tool** `shadow.replay` (3.69 ms)
 
 ```json
 {

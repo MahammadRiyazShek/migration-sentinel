@@ -1,4 +1,4 @@
-.PHONY: help cases review baseline eval invariance test site artifact serve verify docs form clean
+.PHONY: help cases review baseline eval invariance holdout test site artifact serve verify docs form clean
 
 help:
 	@echo "make cases     regenerate the 12 evaluation cases"
@@ -6,6 +6,7 @@ help:
 	@echo "make baseline  run the one-prompt baseline on the same case"
 	@echo "make eval      full comparison + ablations (about 1 second, \$$0)"
 	@echo "make invariance 12 cases x 4 models x guard on/off, hostile narrators"
+	@echo "make holdout   9 held-out cases on the second schema, three arms"
 	@echo "make test      stdlib tests"
 	@echo "make verify    eval + assert every claim the README and the docs make"
 	@echo "make docs      audit the documentation only (references, glyphs, stale counts)"
@@ -33,7 +34,13 @@ invariance:
 test:
 	python3 -m unittest discover -s tests -v
 
-verify: eval invariance
+holdout:
+	python3 eval/run_holdout.py --ablations
+
+# v10: verify used to skip the tests and the held-out run, so a red suite and a failing
+# submission-text audit could both sit outside the one command the docs tell you to run.
+verify: eval invariance holdout
+	python3 -m unittest discover -s tests
 	python3 tools/check_results.py
 	python3 tools/check_docs.py
 	python3 tools/check_submission_text.py

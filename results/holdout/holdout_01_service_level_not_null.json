@@ -286,7 +286,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 1.02,
+   "ms": 0.86,
    "result_summary": "Schema"
   },
   {
@@ -295,7 +295,7 @@
    "args": {
     "sql": "ALTER TABLE shipments ADD COLUMN service_level TEXT NOT NULL;\n"
    },
-   "ms": 0.04,
+   "ms": 0.03,
    "result_summary": [
     {
      "kind": "add_column",
@@ -333,7 +333,7 @@
      }
     ]
    },
-   "ms": 0.15,
+   "ms": 0.14,
    "result_summary": [
     "Schema",
     []
@@ -871,7 +871,7 @@
      "...+7 more"
     ]
    },
-   "ms": 4.56,
+   "ms": 4.35,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -955,7 +955,7 @@
     "hazard_code": "NOT_NULL_NO_DEFAULT",
     "table": "shipments"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -1696,7 +1696,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.97,
+   "ms": 3.81,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1719,7 +1719,7 @@
   "tokens_out": 265,
   "cost_usd": 0.0
  },
- "wall_ms": 12.0,
+ "wall_ms": 11.3,
  "severity_order": [
   "low",
   "medium",

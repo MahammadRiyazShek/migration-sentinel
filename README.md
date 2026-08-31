@@ -401,7 +401,7 @@ in [`trajectories/`](trajectories/) and [`docs/AGENT_TRAJECTORIES.md`](docs/AGEN
 
 ## Improvement Changelog
 
-Iterations 1 to 6 are below. The later ones (v2.1 submission hardening, v3 narrator guard, v5 structural provenance, v7 documentation audit) continue in [`CHANGELOG_ADDENDUM.md`](CHANGELOG_ADDENDUM.md), each with the same evidence columns.
+Iterations 1 to 6 are below. The later ones (v2.1 submission hardening, v3 narrator guard, v5 structural provenance, v7 documentation audit, v8 submission-form audit, v10 the check nobody was required to read) continue in [`CHANGELOG_ADDENDUM.md`](CHANGELOG_ADDENDUM.md), each with the same evidence columns. The held-out session is [`docs/SUPERVISOR_LOG_V9.md`](docs/SUPERVISOR_LOG_V9.md) and the form-field session is [`docs/SUPERVISOR_LOG_V10.md`](docs/SUPERVISOR_LOG_V10.md).
 
 Every row's evidence is an arm in `results/evaluation.json` or `results/ablation.json` and can be
 reproduced with the commands in `REPRODUCTION.md`. Same 12 cases and same scorer throughout.

@@ -302,3 +302,57 @@ python tools/check_results.py           # 27/27 claims hold
 python tools/check_docs.py              # 6 documentation checks, exits 1 on any failure
 python tools/check_submission_text.py   # 6 checks on the description in the submission form
 ```
+
+## v10 - the check nobody was required to read
+
+**What I tried and why.** v8 committed the description a judge reads first and audited it with an exit
+code. v9 read the field's own label, found the cap was 9,000 and not 10,000, and corrected it in two
+files. Neither session then measured the shipped text against the number it had just corrected. The
+committed description was **9,536 characters against a 9,000-character field**: the failure mode and
+the hot take - the 5% rubric row, and the two paragraphs the whole project exists to earn - sat past
+the edge of the field. `tools/check_submission_text.py` printed `FAIL` about it on every run, and the
+one test guarding that checker asserted `6/6` while the checker ran seven checks, so a real failure and
+a stale expectation cancelled into a suite that read `FAILED (failures=1)` and got scrolled past.
+
+**What I did.** Cut the description to **8,897 characters** with every audited figure and all nine
+load-bearing sentences intact, taking the length out of connective tissue and duplication rather than
+out of claims. Then closed the class rather than the instance:
+
+- the length check measures **twice** - as authored, and CRLF-normalised, because a form POST turns
+  each of the 50 line breaks into two characters and the counter in the page does not. The first cut
+  fitted the counter at 8,958 and would have shipped a 9,008-character POST body;
+- the test stopped defending a release that no longer exists: 10,000 -> 9,000, plus the CRLF count, and
+  the hardcoded `6/6` became the checker's own arithmetic;
+- `docs/SUBMISSION.md` stopped being a **third** copy of the description. It held a v5-era variant,
+  9,753 characters under a "10,000 limit" note, with a different title and the sentence "Twelve cases,
+  one schema, ground truth I wrote" that the freight schema had made false two sessions earlier. It is
+  now the submission mechanics only, pointing at the single audited copy;
+- `JUDGE_START_HERE.md` and `docs/VIDEO_ADDENDUM.md` said "the repository is v5" and "33 tests, 27
+  claims". Corrected to the current tree, with the held-out world added to the video correction table.
+
+**Evidence that nothing else moved.** Unsafe approvals 0/12 in sample and 0/9 held out, strict recall
+and precision 0.970, severity agreement 0.969, plans 12/12, gap cases cleared 0/2, evidenced findings
+35/35, 9.2 modelled min/case, 0 of 168 completed reviews changing the decision surface, 0 of 60
+headlines model-written. Nothing under `sentinel/`, `eval/cases/`, `eval/holdout/`, `eval/scoring.py`
+or `memory/` was touched and `tools/check_results.py` is unchanged, so **44/44 means in v10 what it
+meant in v9.** The counts that moved are counts of audits: submission-text checks 6 -> 7, and 52 tests
+still pass with two of them no longer asserting the wrong numbers.
+
+**The lesson, one layer out from v8's.** v8: every lossy transform on the way to your user needs a
+statement of what has to survive it. v10: **a check whose failure nobody is required to read is a
+comment, and a test that asserts your last release will hide your current one.** The transform that
+truncated the most persuasive part of this submission was not lossy by design; it was a length limit,
+measured in a unit no gate in this repository had ever used. Full reasoning, including the two rival
+designs and the three mistakes in the first version of the fix:
+[`docs/SUPERVISOR_LOG_V10.md`](docs/SUPERVISOR_LOG_V10.md).
+
+**How to verify from a clean clone**
+
+```bash
+python -m unittest discover -s tests    # 52 tests
+python eval/run_eval.py --ablations     # 108 reviews
+python eval/run_holdout.py --ablations  # 9 held-out cases, three arms
+python tools/check_results.py           # 44/44 claims hold
+python tools/check_docs.py              # 6 documentation checks
+python tools/check_submission_text.py   # 7 checks on the description in the form
+```

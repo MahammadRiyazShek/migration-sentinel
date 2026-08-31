@@ -91,22 +91,25 @@ checker could see. So the exact text submitted to the form is committed verbatim
 python3 tools/check_submission_text.py
 ```
 
-Six checks: it fits 10,000 characters, it is 7-bit ASCII with no markdown a plain-text field
+Seven checks: it fits 9,000 characters on both counts (as authored and CRLF-normalised), it is 7-bit ASCII with no markdown a plain-text field
 would render literally, every headline / ablation / hostile-model figure in it is read back out
-of `results/*.json` arm for arm, and seven named load-bearing sentences are still present and
-still in position. `tests/test_all.py::TestSubmissionText` deletes each of those seven in turn
+of `results/*.json` arm for arm, and nine named load-bearing sentences are still present and
+still in position. `tests/test_all.py::TestSubmissionText` deletes each of those nine in turn
 and asserts the audit fails, so none of them is a regex nobody is defending.
 
-The first version of that text lost four of the seven, including the one command that proves
-every number in the submission. Details in [`docs/SUPERVISOR_LOG_V8.md`](docs/SUPERVISOR_LOG_V8.md).
+The first version of that text lost four of them, including the one command that proves every
+number in the submission: [`docs/SUPERVISOR_LOG_V8.md`](docs/SUPERVISOR_LOG_V8.md). The next
+version was 9,536 characters against a 9,000-character field, so the failure mode and the hot
+take were past the edge of the form while this audit printed `FAIL` and nothing was required to
+read it: [`docs/SUPERVISOR_LOG_V10.md`](docs/SUPERVISOR_LOG_V10.md).
 
 ---
 
 ## The video is older than the repo
 
-The submitted video was recorded against v2. The repository is v5. The problem, architecture,
-baseline comparison and walkthrough all still match; some on-screen numbers are stale and two
-components (the coverage gate and the structural narrator) did not exist yet.
+The submitted video was recorded against v2. The repository is v10. The problem, architecture,
+baseline comparison and walkthrough all still match; some on-screen numbers are stale and three
+components (the coverage gate, the structural narrator and the held-out world) did not exist yet.
 
 **Where the video and the repository disagree, `results/comparison.md` and
 `results/model_invariance.md` are authoritative.** An exhaustive, line-by-line correction table is in

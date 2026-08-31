@@ -524,7 +524,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 1.15,
+   "ms": 0.75,
    "result_summary": "Schema"
   },
   {
@@ -533,7 +533,7 @@
    "args": {
     "sql": "ALTER TABLE subscriptions ADD COLUMN billing_interval TEXT NOT NULL DEFAULT 'monthly';\nCREATE UNIQUE INDEX idx_subscriptions_customer ON subscriptions (customer_id);\nALTER TABLE invoices DROP COLUMN tax_rate;\nCREATE INDEX idx_usage_events_name ON usage_events (event_name);\nALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk;\nUPDATE invoices SET status = 'open' WHERE status = 'draft';..."
    },
-   "ms": 0.32,
+   "ms": 0.18,
    "result_summary": [
     {
      "kind": "add_column",
@@ -709,7 +709,7 @@
      }
     ]
    },
-   "ms": 0.15,
+   "ms": 0.16,
    "result_summary": [
     "Schema",
     [
@@ -866,7 +866,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.25,
+   "ms": 0.27,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -1321,7 +1321,7 @@
      "...+6 more"
     ]
    },
-   "ms": 4.71,
+   "ms": 4.69,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1404,7 +1404,7 @@
     "hazard_code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
     "table": "invoices"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     [
@@ -1419,7 +1419,7 @@
     "hazard_code": "INDEX_LOCK_NO_CONCURRENT",
     "table": "subscriptions"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     [
@@ -1447,7 +1447,7 @@
     "hazard_code": "TABLE_REWRITE_LOCK",
     "table": "invoices"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     []
@@ -1473,7 +1473,7 @@
     "hazard_code": "MISSING_ROLLBACK",
     "table": null
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -1774,7 +1774,7 @@
      ]
     }
    },
-   "ms": 0.34,
+   "ms": 0.31,
    "result_summary": {
     "gaps": [
      {
@@ -1815,7 +1815,7 @@
    "args": {
     "sql": "ALTER TABLE \"subscriptions\" ADD COLUMN \"billing_interval\" TEXT DEFAULT 'monthly';\nCREATE INDEX CONCURRENTLY \"idx_subscriptions_customer_tmp_nonunique\" ON \"subscriptions\" (\"customer_id\");\nCREATE INDEX CONCURRENTLY \"idx_usage_events_name\" ON \"usage_events\" (\"event_name\");\nUPDATE invoices SET status = 'open' WHERE status = 'draft' AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE status = 'draft' LIMIT ..."
    },
-   "ms": 0.2,
+   "ms": 0.14,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1935,7 +1935,7 @@
      }
     ]
    },
-   "ms": 0.12,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -2206,7 +2206,7 @@
      "...+6 more"
     ]
    },
-   "ms": 4.57,
+   "ms": 3.49,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2229,7 +2229,7 @@
   "tokens_out": 705,
   "cost_usd": 0.0
  },
- "wall_ms": 14.1,
+ "wall_ms": 12.0,
  "severity_order": [
   "low",
   "medium",

@@ -266,7 +266,7 @@ python tools/check_docs.py
 ```bash
 python3 tools/check_submission_text.py
 # ...
-#    6/6 submission-text checks hold: the description in the form is the description
+#    7/7 submission-text checks hold: the description in the form is the description
 #    this repository can back
 ```
 
