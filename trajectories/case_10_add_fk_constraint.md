@@ -2,7 +2,7 @@
 
 - run id: `eval-case_10_add_fk_constraint`
 - case: `case_10_add_fk_constraint`
-- events: 26
+- events: 27
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.65 ms)
+**tool** `schema.parse` (0.58 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.06 ms)
+**tool** `migration.parse` (0.08 ms)
 
 ```json
 {
@@ -80,7 +80,51 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `migration.audit` (0.05 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id);\n",
+  "ops": [
+   {
+    "kind": "add_constraint",
+    "table": "invoices",
+    "column": null,
+    "detail": {
+     "constraint": "invoices_customer_fk",
+     "constraint_kind": "foreign_key",
+     "expr": "(customer_id) REFERENCES customers (id)",
+     "columns": [],
+     "not_valid": false
+    },
+    "sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id)",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 97,
+  "attributed_chars": 97,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -152,7 +196,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.08 ms)
 
 ```json
 {
@@ -258,7 +302,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.01 ms)
 
 ```json
 {
@@ -325,7 +369,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (2.43 ms)
+**tool** `shadow.replay` (2.05 ms)
 
 ```json
 {
@@ -464,7 +508,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.24 ms)
+**tool** `coverage.ledger` (0.13 ms)
 
 ```json
 {
@@ -640,7 +684,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.11 ms)
 
 ```json
 {
@@ -675,7 +719,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.37 ms)
+**tool** `shadow.replay` (1.89 ms)
 
 ```json
 {

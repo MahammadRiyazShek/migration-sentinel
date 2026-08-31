@@ -14,17 +14,18 @@ sys.path.insert(0, str(ROOT))
 from sentinel import cli, narrator, coverage, rulebook  # noqa: E402
 from sentinel.llm import get_llm  # noqa: E402
 from sentinel.orchestrator import review  # noqa: E402
-from sentinel.tools import shadow_db, sql_parse  # noqa: E402
+from sentinel.tools import parse_audit, shadow_db, sql_lex, sql_parse  # noqa: E402
 from sentinel.tools.incident_memory import IncidentMemory  # noqa: E402
 
 CASES = ROOT / "eval" / "cases"
 HOLDOUT = ROOT / "eval" / "holdout"
 REDTEAM = ROOT / "eval" / "redteam"
+REDTEAM2 = ROOT / "eval" / "redteam2"
 INCIDENTS = ROOT / "memory" / "incidents.jsonl"
 
 
 def case(name: str) -> dict:
-    for directory in (CASES, HOLDOUT, REDTEAM):
+    for directory in (CASES, HOLDOUT, REDTEAM, REDTEAM2):
         path = directory / f"{name}.json"
         if path.exists():
             return json.loads(path.read_text())
@@ -1018,3 +1019,187 @@ class TestRedTeamSet(unittest.TestCase):
         par = json.loads(path.read_text())["in_sample_parity"]
         self.assertEqual(par["cases_moved"], 0, par["moved_ids"])
         self.assertEqual(par["labelled_cases_compared"], 21)
+
+
+class TestLexerParity(unittest.TestCase):
+    """The one property that let a splitter be replaced underneath 28 labelled cases.
+
+    If the scanner and the retired regex splitter disagree on any script in `eval/`, then
+    the v14 numbers and the v13 numbers are not comparable and the parity claim in
+    `results/redteam2.md` is meaningless. So it is a test rather than a sentence.
+    """
+
+    def _scripts(self):
+        for directory in (CASES, HOLDOUT, REDTEAM, REDTEAM2):
+            for path in sorted(directory.glob("*.json")):
+                doc = json.loads(path.read_text())
+                for key in ("schema_sql", "migration_sql", "rollback_sql"):
+                    yield f"{path.name}:{key}", doc.get(key) or ""
+
+    def test_the_scanner_agrees_with_the_retired_splitter_on_every_labelled_script(self):
+        checked = 0
+        for label, sql in self._scripts():
+            if label.startswith("rt2_"):
+                continue           # the round-2 set is exactly where they must differ
+            new = [sql_parse.norm(x) for x in sql_lex.split_statements(sql)]
+            old = [sql_parse.norm(x) for x in sql_parse.legacy_split_statements(sql)]
+            self.assertEqual(new, old, label)
+            checked += 1
+        self.assertGreater(checked, 60, "the parity sweep found almost no scripts to compare")
+
+    def test_the_scanner_differs_from_it_on_the_round_two_set_which_is_the_point(self):
+        differing = [label for label, sql in self._scripts()
+                     if label.startswith("rt2_")
+                     and [sql_parse.norm(x) for x in sql_lex.split_statements(sql)]
+                     != [sql_parse.norm(x) for x in sql_parse.legacy_split_statements(sql)]]
+        self.assertGreaterEqual(len(differing), 4, differing)
+
+
+class TestScanner(unittest.TestCase):
+    """The lexical facts the retired splitter got wrong, one test each."""
+
+    def test_a_comment_marker_inside_a_literal_does_not_end_the_statement(self):
+        sql = ("UPDATE invoices SET note = 'legacy -- do not touch' WHERE note IS NULL;\n"
+               "ALTER TABLE invoices DROP COLUMN tax_rate;\n"
+               "DROP TABLE invoice_archive;")
+        self.assertEqual(len(sql_lex.split_statements(sql)), 3)
+        self.assertEqual(len(sql_parse.legacy_split_statements(sql)), 1)
+        self.assertEqual([o.kind for o in sql_parse.parse_migration(sql)],
+                         ["dml_update", "drop_column", "drop_table"])
+
+    def test_block_comments_nest_the_way_postgres_nests_them(self):
+        sql = "/* outer /* inner */ ALTER TABLE t DROP COLUMN c; */ SELECT 1;"
+        self.assertEqual(sql_lex.split_statements(sql), ["SELECT 1"])
+        self.assertIn("DROP COLUMN", " ".join(sql_parse.legacy_split_statements(sql)))
+
+    def test_a_dollar_quoted_body_is_one_token_however_many_semicolons_it_holds(self):
+        sql = "DO $$ BEGIN PERFORM 1; PERFORM 2; END $$;"
+        self.assertEqual(len(sql_lex.split_statements(sql)), 1)
+        self.assertEqual(len(sql_parse.legacy_split_statements(sql)), 3)
+
+    def test_a_tagged_dollar_quote_is_matched_by_its_tag(self):
+        res = sql_lex.lex("CREATE FUNCTION f() RETURNS int AS $fn$ SELECT $$x$$; $fn$ LANGUAGE sql;")
+        self.assertEqual(len(res.statements), 1)
+        self.assertEqual([b.tag for b in res.dollar_bodies()], ["$fn$"])
+
+    def test_a_positional_parameter_is_not_a_dollar_quote(self):
+        res = sql_lex.lex("UPDATE t SET a = $1 WHERE b = $2;")
+        self.assertEqual(res.dollar_bodies(), [])
+        self.assertTrue(res.ok)
+
+    def test_doubled_and_backslash_escapes_both_close_correctly(self):
+        for sql in ("UPDATE t SET a = 'it''s fine';", "UPDATE t SET a = E'it\\'s fine';"):
+            self.assertTrue(sql_lex.lex(sql).ok, sql)
+            self.assertEqual(len(sql_lex.split_statements(sql)), 1, sql)
+
+    def test_an_unterminated_literal_is_a_reported_fact_rather_than_silence(self):
+        res = sql_lex.lex("UPDATE t SET a = 'oops WHERE id = 1;\nDROP TABLE t;")
+        self.assertFalse(res.ok)
+        self.assertEqual([u["kind"] for u in res.unterminated], ["string"])
+
+    def test_the_scanner_never_raises_on_anything(self):
+        for sql in ("", ";", "'", '"', "$$", "/*", "--", "$tag$ never closed",
+                    "SELECT ')(' ; DROP TABLE t;"):
+            sql_lex.lex(sql)
+
+
+class TestParseConservation(unittest.TestCase):
+    """The subtraction: statements in the file, minus statements an op accounts for."""
+
+    def test_an_ordinary_migration_is_conserved_exactly(self):
+        sql = "ALTER TABLE invoices ADD COLUMN note TEXT;\nCREATE INDEX CONCURRENTLY i ON invoices (note);"
+        audit = parse_audit.audit(sql, sql_parse.parse_migration(sql))
+        self.assertTrue(audit["clean"], audit)
+        self.assertEqual(audit["conservation"]["unattributed_chars"], 0)
+
+    def test_a_line_comment_is_attributed_rather_than_lost(self):
+        sql = "-- PLAT-1 widen the note\nALTER TABLE invoices ADD COLUMN note TEXT;"
+        audit = parse_audit.audit(sql, sql_parse.parse_migration(sql))
+        self.assertEqual(audit["conservation"]["unattributed_chars"], 0)
+        self.assertTrue(audit["clean"], audit)
+
+    def test_ddl_inside_a_procedural_body_is_censused_with_its_text(self):
+        sql = "DO $$ BEGIN ALTER TABLE invoices DROP COLUMN tax_rate; END $$;"
+        audit = parse_audit.audit(sql, sql_parse.parse_migration(sql))
+        self.assertEqual(len(audit["procedural"]), 1)
+        self.assertTrue(audit["procedural"][0]["destructive_inside"])
+
+    def test_a_procedural_body_with_no_ddl_reports_no_ddl(self):
+        sql = ("CREATE OR REPLACE FUNCTION f() RETURNS trigger AS $$ BEGIN "
+               "NEW.a := now(); RETURN NEW; END; $$ LANGUAGE plpgsql;")
+        audit = parse_audit.audit(sql, sql_parse.parse_migration(sql))
+        self.assertEqual(len(audit["procedural"]), 1)
+        self.assertEqual(audit["procedural"][0]["ddl_inside"], [])
+
+    def test_a_ddl_keyword_inside_a_quoted_message_is_not_ddl(self):
+        sql = "DO $$ BEGIN RAISE NOTICE 'about to drop table invoices'; END $$;"
+        audit = parse_audit.audit(sql, sql_parse.parse_migration(sql))
+        self.assertEqual(audit["procedural"][0]["ddl_inside"], [])
+
+    def test_the_retired_splitters_loss_is_recomputed_rather_than_asserted(self):
+        sql = ("UPDATE invoices SET note = 'a -- b' WHERE note IS NULL;\n"
+               "ALTER TABLE invoices DROP COLUMN tax_rate;")
+        loss = parse_audit.legacy_loss(sql)
+        self.assertEqual(loss["statements_in_file"], 2)
+        self.assertEqual(loss["statements_v13_saw"], 1)
+        self.assertEqual(loss["statements_lost"], 1)
+
+
+class TestTextConservationRules(unittest.TestCase):
+    """What the reviewer is shown, end to end, on the round-two cases."""
+
+    def test_the_swallowed_drop_column_is_found_and_blocks(self):
+        report = run("rt2_01_comment_marker_inside_literal")["report"]
+        self.assertEqual(report["verdict"], "BLOCK")
+        codes = {h["code"] for h in report["hazards"]}
+        self.assertIn("BREAKING_QUERY", codes)
+        self.assertIn("DESTRUCTIVE_NO_EXPAND_CONTRACT", codes)
+
+    def test_the_v13_pipeline_never_sees_the_second_statement(self):
+        report = run("rt2_01_comment_marker_inside_literal",
+                     features="no_text_conservation")["report"]
+        self.assertNotIn("DESTRUCTIVE_NO_EXPAND_CONTRACT",
+                         {h["code"] for h in report["hazards"]})
+
+    def test_ddl_in_a_do_block_blocks_and_cites_the_statement_inside(self):
+        report = run("rt2_02_do_block_hides_the_drop")["report"]
+        self.assertEqual(report["verdict"], "BLOCK")
+        haz = [h for h in report["hazards"] if h["code"] == "PROCEDURAL_DDL_UNREVIEWED"]
+        self.assertEqual(len(haz), 1)
+        self.assertEqual(haz[0]["severity"], "blocker")
+        self.assertTrue(any("DROP COLUMN" in e.upper() for e in haz[0]["evidence"]),
+                        haz[0]["evidence"])
+
+    def test_a_script_postgres_refuses_reports_only_that_it_is_refused(self):
+        report = run("rt2_03_unterminated_literal")["report"]
+        self.assertEqual({h["code"] for h in report["hazards"]}, {"MIGRATION_TEXT_UNPARSED"})
+        self.assertIn("unreviewable_text",
+                      {g["kind"] for g in report["coverage_ledger"]["gaps"]})
+
+    def test_a_commented_out_drop_is_not_a_hazard_the_canary(self):
+        report = run("rt2_04_nested_comment_phantom")["report"]
+        self.assertEqual(report["hazards"], [])
+        self.assertEqual(report["verdict"], "SAFE")
+
+    def test_v13_blocked_that_canary_which_is_why_it_is_in_the_set(self):
+        report = run("rt2_04_nested_comment_phantom", features="no_text_conservation")["report"]
+        self.assertEqual(report["verdict"], "BLOCK")
+
+    def test_a_function_body_without_ddl_is_a_gap_and_not_a_finding(self):
+        report = run("rt2_05_function_body_no_ddl")["report"]
+        self.assertEqual(report["hazards"], [])
+        self.assertEqual(report["verdict"], "NEEDS_COVERAGE_SIGNOFF")
+        self.assertIn("procedural_body", {g["kind"] for g in report["coverage_ledger"]["gaps"]})
+
+    def test_legal_sql_with_every_lexical_feature_stays_quiet(self):
+        report = run("rt2_06_ordinary_migration_with_quotes")["report"]
+        self.assertEqual(report["hazards"], [])
+        self.assertEqual(report["verdict"], "SAFE")
+
+    def test_the_ablation_arm_reproduces_v13_on_every_labelled_case(self):
+        path = ROOT / "results" / "redteam2" / "redteam2.json"
+        if not path.exists():
+            self.skipTest("run eval/run_redteam2.py first")
+        par = json.loads(path.read_text())["in_sample_parity"]
+        self.assertEqual(par["cases_moved"], 0, par["moved_ids"])
+        self.assertEqual(par["labelled_cases_compared"], 28)

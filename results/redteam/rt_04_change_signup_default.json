@@ -194,7 +194,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -210,7 +211,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.64,
+   "ms": 0.62,
    "result_summary": "Schema"
   },
   {
@@ -219,7 +220,7 @@
    "args": {
     "sql": "ALTER TABLE customers ALTER COLUMN plan SET DEFAULT 'team';\n"
    },
-   "ms": 0.04,
+   "ms": 0.03,
    "result_summary": [
     {
      "kind": "set_default",
@@ -232,6 +233,39 @@
      "index": 0
     }
    ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "ALTER TABLE customers ALTER COLUMN plan SET DEFAULT 'team';\n",
+    "ops": [
+     {
+      "kind": "set_default",
+      "table": "customers",
+      "column": "plan",
+      "detail": {
+       "default": "'team'"
+      },
+      "sql": "ALTER TABLE customers ALTER COLUMN plan SET DEFAULT 'team'",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.03,
+   "result_summary": {
+    "lexed_statements": 1,
+    "ops": 1,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 50,
+     "attributed_chars": 50,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
   },
   {
    "agent": "cartographer",
@@ -251,7 +285,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.03,
    "result_summary": [
     "Schema",
     []
@@ -334,7 +368,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.16,
+   "ms": 0.08,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -469,7 +503,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.01,
    "result_summary": 17
   },
   {
@@ -693,7 +727,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.62,
+   "ms": 1.99,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -927,9 +961,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 1,
+     "ops": 1,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 50,
+      "attributed_chars": 50,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.18,
+   "ms": 0.1,
    "result_summary": {
     "gaps": [
      {
@@ -967,7 +1014,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.05,
+   "ms": 0.03,
    "result_summary": [
     "Schema",
     []
@@ -1183,7 +1230,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.58,
+   "ms": 1.91,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1206,7 +1253,7 @@
   "tokens_out": 78,
   "cost_usd": 0.0
  },
- "wall_ms": 7.0,
+ "wall_ms": 5.4,
  "severity_order": [
   "low",
   "medium",

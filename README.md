@@ -170,11 +170,21 @@ From [`results/ablation.md`](results/ablation.md), same cases, one component rem
 | no incident memory | 0/12 | 0.970 | 0.970 | 0.938 | 12/12 | 0/2 | 9.2 |
 | no plan verification | 0/12 | 0.970 | 0.970 | 0.969 | **0/12** | 0/2 | 23.3 |
 | no coverage gate (= v1) | 0/12 | 0.970 | 0.970 | 0.969 | 12/12 | **1/2** | 8.5 |
+| no rule inventory (= v12) | 0/12 | 0.970 | 0.970 | 0.969 | 12/12 | 0/2 | 9.2 |
+| no parse conservation (= v13) | 0/12 | 0.970 | 0.970 | 0.969 | 12/12 | 0/2 | 9.2 |
 
 Oriented as the cost of removing each component, with the same table generated from raw scores by
 `python3 eval/report_components.py --write`: [`results/components.md`](results/components.md).
 
-Four readings, including the three that do not flatter the design.
+Five readings, including the four that do not flatter the design.
+
+**The last two arms move nothing here, and that is what they are for.** `no_rule_inventory` (v12
+behaviour) and `no_parse_conservation` (v13 behaviour, retired splitter included) are byte-identical
+to `full` on every case in this table, and on all 28 labelled cases across the three sets. An
+ablation can only remove what you already built, so a layer that costs nothing on the cases you
+labelled is invisible to this table by construction - which is why both were found by an adversarial
+pass instead, and why their prices are published on `eval/redteam` and `eval/redteam2` rather than
+hidden in a row of unchanged numbers.
 
 **Execution alone is worse than rules alone** on the primary metric (2 unsafe approvals vs 1),
 because a lock hazard produces no failing query, so a replay-only reviewer says "nothing broke, ship
@@ -324,6 +334,67 @@ still serves a lookup on `customer_id`).
 Full report: [`results/redteam.md`](results/redteam.md). Reasoning:
 [`docs/SUPERVISOR_LOG_V13.md`](docs/SUPERVISOR_LOG_V13.md).
 
+## Red team, round 2: the parse is a sample of the text
+
+Round 1 asked whether a hazard class was unenumerated. The fix,
+[`sentinel/rulebook.py`](sentinel/rulebook.py), is an exhaustive partition of every statement kind
+the parser can emit, with a test that fails when it learns a new one. Exhaustive over the **op
+list**. So the next pass asked whether the op list is the migration.
+
+```sql
+UPDATE invoices SET currency = 'usd -- legacy default' WHERE currency IS NULL;
+ALTER TABLE invoices DROP COLUMN tax_rate;
+```
+
+Two statements in. One op out. `strip_comments` deleted from the `--` inside the string literal to
+end of line, the unterminated quote that left swallowed the rest of the file, and the `DROP COLUMN`
+that breaks a live billing query was never presented to a rule, to shadow replay, or to the coverage
+ledger. Not missed. Not there.
+
+| metric | Baseline B | Sentinel v13 | Sentinel v14 |
+|---|---|---|---|
+| **Hazard recall** (primary) | 0.375 | 0.25 | **0.75** |
+| **Hazard precision** (primary) | 0.25 | 0.222 | **1.0** |
+| False alarms on the three correct migrations | 3 | 2 | **0** |
+| Findings backed by machine evidence | 0/12 | 17/17 | **6/6** |
+| Modelled reviewer minutes per case | 33.0 | 21.0 | **11.3** |
+
+Read the v13 column twice. Seventeen findings, every one citing machine evidence, at 0.222
+precision. **Evidence is not the same property as being about the right file.**
+
+* **The statement loss.** Legal Postgres, ordinary human copy, and it costs the v13 parser the
+  second half of the file. Across these six cases the retired splitter loses 2 statements outright
+  and invents 6 that Postgres never executes - recomputed from the retired code itself by
+  `parse_audit.legacy_loss`, not asserted.
+* **DDL inside `DO $$ ... $$`.** The idempotency guard every migration generator writes. The
+  retired splitter had no concept of dollar quoting and shredded the body at its inner semicolons.
+  `procedural_block` is now its own op kind, and `rt2_02` is labelled with all three hazards a
+  Postgres reviewer would name - two of which the pipeline **still cannot find**, because a keyword
+  census over a procedural body is not a parse. Published recall on that case is 1 of 3. What
+  protects the reviewer is that the case is not cleared.
+* **The same defect with the sign flipped.** Postgres nests block comments; a non-greedy regex does
+  not. v13 **blocked a migration whose destructive statement is commented out**, citing a broken
+  query and a cross-service hazard, both evidenced, both about text that never runs. `rt2_04` and
+  `rt2_06` carry no hazard at all and stay in the set as canaries.
+
+**Read the generalisation number first.** These six cases are in sample. The evidence that the layer
+was *missing* rather than *retuned* runs the other way and is computed per case by
+`eval/run_redteam2.py`: `no_text_conservation` reproduces v13 exactly, retired splitter included,
+and is identical to `full` on **28 of 28** labelled cases in `eval/cases`, `eval/holdout` and
+`eval/redteam` - same verdicts, same hazards, same severities, same gap counts. A splitter swapped
+out underneath 28 labelled cases without moving one number is a splitter that was wrong only where
+nothing had ever looked.
+
+Two experiments this pass removed, both recorded in the modules rather than deleted. Reporting the
+wreckage: the first version raised the unterminated-literal blocker *and* the two hazards inferred
+from the mangled remainder, which is `rt2_04`'s defect in the opposite direction - a script Postgres
+refuses now reports only that it is refused, worth precision 1.0 against 0.6. And censusing the raw
+source, which turned `RAISE NOTICE 'about to drop table invoices'` into a destructive finding; every
+census now runs over literal-masked scanner output, with a test for the notice.
+
+Full report: [`results/redteam2.md`](results/redteam2.md). Reasoning:
+[`docs/SUPERVISOR_LOG_V14.md`](docs/SUPERVISOR_LOG_V14.md).
+
 ## Architecture
 
 Five agents, fixed order, one feedback loop. Instructions for each are in
@@ -393,8 +464,8 @@ python3 -m sentinel cases                                     # list them
 python3 -m sentinel review --case eval/cases/case_12_release_train.json --print-report
 python3 eval/run_eval.py --ablations                          # everything, ~1 second
 python3 eval/model_invariance.py                              # 180 reviews: 5 models x 3 narrator modes
-python3 -m unittest discover -s tests -v                      # 104 tests
-python3 tools/check_results.py                                # 57/57 claims, from raw JSON
+python3 -m unittest discover -s tests -v                      # 129 tests
+python3 tools/check_results.py                                # 67/67 claims, from raw JSON
 python3 tools/check_docs.py                                   # 9 checks on the docs themselves
 python3 tools/check_submission_text.py                        # 7 checks on the submission form text
 python3 tools/check_cross_version.py                          # the same diff on a second interpreter
@@ -482,6 +553,8 @@ v2 number in this file is comparable.
 | **Iteration 10: take the headline away from the model** | Iteration 9 shipped a blocklist and wrote its own limit into `sentinel/narrator.py`: the audit uses the same regexes as the guard, so `0/36` measured what the blocklist already knew. So I wrote the attacker that exploits precisely that gap. `hostile-fluent` writes prose with no banned phrase, no verdict token and no injection marker in it, and still tells the reviewer the change can ride the normal release train. Then I replaced the defence rather than extending the list: the headline is now a pure function of tool output (`narrator.render_headline`) on every run, the model's prose is demoted to a labelled *Model commentary* section at the end of the packet, and the harness counts **provenance** - who wrote the sentence above the badge - instead of asking a regex whether it liked the wording. Three modes (`off`, `pattern`, `structural`) all still run, so each defence has a price. | the v3 guard printed the fluent liar above a `BLOCK` on **12/12** cases while the v3 audit column read **0/12** - the metric said the guard held and the reviewer read a lie; misleading headlines reaching the reviewer over 48 hostile reviews per mode: **36/48 (v2) -> 13/48 (v3 blocklist) -> 0/48 (v5)**; model-written headlines **0 of 60** across all five models; decision surface **0/168** completed reviews of 180; every detection metric byte-identical again (recall 0.970, precision 0.970, severity 0.969, unsafe 0/12, plans 12/12, 9.2 min/case); tests 27 -> 33, claims 23/23 -> 27/27 | Kept. The lesson is not "regexes are weak", it is that **a defence audited in its own vocabulary reports on the attacker's imagination, not on itself**. Provenance is checkable without a language model in the loop: either the bytes came from a tool or they did not. What it does *not* fix is published in the same table - the reviewer questions and the demoted note are still pattern-guarded, so the fluent liar's two plausible questions still print, below the evidence and attributed to the model. The exposure is bounded by placement now, not by vocabulary, and the next experiment is named in the module rather than in a slide. |
 | **Iteration 11: audit the auditor, and prove the rerun** | An external supervisor pass over the submitted archive, on the assumption that everything the suite can see is already green - it was: 52 tests, `44/44 claims`, `6/6` docs, `7/7` form text, 12/12 packets, first attempt, offline. So the session went looking for what no audit could see, and found the repository's own hot take pointed back at it. `tools/check_docs.py` asserted "no stale claim count" against the literal phrase `N/N claims`, so `JUDGE_START_HERE.md` line 20 advertised **`27/27 published claims`** for a command that prints 44 - one adjective, in the first file a judge opens, for three releases. The size of an *audit* had no audit at all, so `6 checks` and `Seven checks` sat 70 lines apart in one document about one tool that prints 7. And `REPRODUCTION.md` was missing one closing fence at line 263, so from section 5a to the end - approval gate, hosted-model path, review desk - headings rendered as code and commands rendered as prose, invisible to a suite in which nothing reads markdown structure. Fix: every count is read out of the tool that owns it at run time, the pattern is loose (up to three words between the number and its noun, word-numbers included), and a stale figure is exempt only where the line **dates itself** - so changelog rows like this one stay honest records instead of whitelisted lies. Plus `tools/check_determinism.py`, because rerunning the evaluation rewrites 80 files under `results/` and "trust me, it is only the timings" is the exact sentence this project exists to refuse. | the widened audit found **6 stale counts** in live documents, 4 of them in the two files a judge reads first, and 1 trapped heading; determinism, measured rather than asserted: **144 files compared, 0 decision differences**, 85 byte-identical, 59 differing in three named wall-clock fields; every decision metric unmoved and re-asserted after the edits, not before - unsafe approvals 0/12 and 0/9, recall 0.970 and 0.96, plans 12/12 and 9/9, 9.2 and 10.7 min/case, decision surface 0/180 and 0/126; tests 52 -> 69, docs checks 6 -> 7 (two added, two merged into one owner-resolving check), claims 44/44 unchanged | Kept. The lesson is the v5 lesson arriving as a bug report against the tool that was supposed to have learned it: **a guard audited in its own vocabulary reports on the author's imagination**, and an honesty layer inherits the perimeter of the examples its author had. So the counter was not a longer list of phrasings, it was to stop typing the number twice. Two perimeters are published rather than discovered: `Seven checks:` names no tool, so nothing can own it and it was fixed by hand; and README line 11 said "27 published *numbers*", which I rewrote to say *claims* so the audit could reach it - moving the prose into the audited vocabulary rather than widening the audit into false positives. The first draft of the fence check fired 18 times to catch 1 defect, and a check that cries wolf gets switched off by whoever owns it. |
 | **Iteration 12: change the interpreter, and read the documentation in the order a stranger would** | A second external supervisor pass over the submitted archive, same standing instruction, and everything the suite can see was green on the first attempt on *two* interpreters - so the session attacked the sentence rather than the suite. "3.11 and 3.12 verified" meant *the tests do not raise on either*, and nothing in eleven releases had ever compared the two `results/` trees; dict ordering, float repr, `round`, `re` and the bundled `sqlite3` are all routes from an interpreter upgrade to a moved verdict, and none of them raises. So `tools/check_cross_version.py` reruns all four generators under both interpreters in private copies and diffs the trees, raw then wall-clock-normalised. Then it followed `JUDGE_START_HERE.md` in the order it is written and broke the flagship reproducibility command: `python3 -m sentinel review` writes its packet into `results/` with the run id it mints for an interactive run, so `check_determinism.py` reports a decision difference over a random hex string on a packet that is otherwise byte-identical. Then it read the audit tools themselves: `check_docs.py` announced "Six checks" while running seven, `check_submission_text.py` announced "Eight checks" while running seven, a dead shadowed `_current_claim_count` sat inside the file that audits stale duplication, and three live documents said "the repository is v10" at v11 - including the first line of the video notice, whose only job is to tell a judge which artefact is newer. | **146 files compared, 0 decision differences** across CPython 3.11.2 and 3.12.13 (`results/cross_version.md`), with the unflattering half published as a claim rather than a footnote: 64 files moved on timing alone, up to 7.1 ms absolute in the recorded run, so the decisions are portable and the milliseconds never were. The provenance preflight reproduces the failure and then diagnoses it, with both fixes printed. Claims 44 -> 46, documentation checks 7 -> 9, tests 69 -> 82; no file under `sentinel/` touched, so the freeze still names the same three post-freeze files, and every decision number was re-asserted after the edits rather than before - unsafe approvals 0/12 and 0/9, recall 0.970 and 0.96, plans 12/12 and 9/9, 9.2 and 10.7 min/case, decision surface 0/180 and 0/126 - none moved. | Kept, and two decisions in it are worth more than the checks. The run-id trap was fixed with **documentation and a diagnosis instead of code**, because `sentinel/cli.py` sits inside the frozen decision tree and spending a held-out attestation on a documentation defect is a bad trade. And the first draft of the version check **exempted all four instances of the bug it was written for**, because the defective sentence dates itself with the version of the video: the third generation of this repository's own hot take, which is why the regression test feeds it that exact sentence. Full log: [`docs/SUPERVISOR_LOG_V12.md`](docs/SUPERVISOR_LOG_V12.md). |
+| **Iteration 13: the rule set is a sample of the hazards** | Both labelled sets were written from one hazard vocabulary, so neither could ask whether a class of hazard was unenumerated. So the pass ran the opposite brief - find a migration a Postgres primary calls an outage and this pipeline calls SAFE - and probed statement *kinds* rather than hazards. Two hits in six probes, both absent rules rather than wrong ones, plus the finding underneath them: every gap class in the ledger was keyed to a kind some rule already handled, so it could only declare blind spots about objects something had already looked at. | red-team set: unsafe approvals **3/7 -> 0/7**, blocking cases cleared **3/3 -> 0/3**, false alarms 0; on the 21 labelled cases in `eval/cases` and `eval/holdout` **nothing moved** - same verdicts, hazards, severities and gap counts, computed per case rather than asserted; cost 1.7 modelled reviewer minutes per case | Kept. Two removed experiments are in `sentinel/rulebook.py` rather than in a commit message: default-deny flagged `case_06`, the cry-wolf canary, because "no hazard was produced" is indistinguishable from "nothing looked" if you only count hazards; and a bare `drop_index` blocker blocked the commonest correct index migration there is. On `CONCURRENTLY` inside a transaction the **text-only baseline beat the pipeline**, which is published rather than left out. |
+| **Iteration 14: the parse is a sample of the text** | Iteration 13's inventory is exhaustive over the op list, and the op list is a lossy function of the file. `strip_comments` deleted from `--` to end of line inside string literals too, so `'usd -- legacy default'` left an unterminated quote that swallowed the rest of the migration: a two-statement file arrived as one `dml_update` and the `DROP COLUMN` was never presented to a rule, to replay or to the ledger. Fix: a real scanner (`sentinel/tools/sql_lex.py` - `''` and `E'\''` escapes, `$tag$` bodies, **nested** block comments, spans, unterminated constructs as facts) plus the subtraction that catches the next one (`sentinel/tools/parse_audit.py`: statements the scanner finds, minus statements an op accounts for). | round-2 set: recall **0.25 -> 0.75**, precision **0.222 -> 1.0**, false alarms **2 -> 0**, modelled minutes **21.0 -> 11.3**; the retired splitter loses 2 statements and invents 6, recomputed from the retired code; `no_text_conservation` reproduces v13 exactly and is identical to `full` on **28 of 28** labelled cases; tests 104 -> 129, claims 57 -> 67 | Kept, and the unflattering number is the one to read: every false finding in the v13 packet **cited machine evidence**. `rt2_04` is the canary - v13 blocked a migration whose destructive statement is inside a nested comment. Two experiments removed: reporting the hazards inferred from a script Postgres refuses (precision 1.0 against 0.6), and censusing raw source, which read `RAISE NOTICE 'about to drop table invoices'` as destructive. Full log: [`docs/SUPERVISOR_LOG_V14.md`](docs/SUPERVISOR_LOG_V14.md). |
 | **Rejected: two models with opposing incentives** | Put the model back on the detection path, honestly: one instance must argue the migration is safe, one must argue it breaks something, each must cite a tool result, and a deterministic judge accepts only claims whose citation resolves to a real replay row or row count. Disagreement between them is itself a signal for where a human should look. | not run - it moves recall back onto a nondeterministic component, so the primary metric stops being reproducible from a clean clone with no API key, and there is no fair way to compare a two-model debate against a single prompt | Rejected for this submission and it is the design most likely to raise the recall ceiling, because the ceiling is currently set by what my rules and my corpus know. The reason it is not here is the same reason the verdict is deterministic: a review that gates a deploy should return the same answer twice. |
 | **Rejected in v3, half-adopted in v5: delete the narrator entirely** | Render every word of the packet from tool output and demote the model to a read-only Q&A layer over the evidence, whose answers never enter the record. It makes the whole class of problem in Iteration 9 structurally impossible instead of guarded. | v3: not run, because it removes the per-hazard explanation reviewers actually read and answers a challenge about agentic workflows with a linter plus a chatbot. v5: run for the *headline* only - 0/60 model-written headlines, 0/48 misleading headlines reaching the reviewer, and the per-hazard explanations kept | The half that shipped is the half where model prose sits **above** the evidence and can be mistaken for the verdict. The half that did not is the per-hazard explanation, which sits beside the engine error text that contradicts it. Splitting the rejection by *placement in the packet* is the thing I would not have found without writing the attacker: it is not "is model prose allowed", it is "can model prose be mistaken for a finding". |
 | **Rejected: counterexample search instead of review** | Attack the migration rather than review it: generate a row set plus a statement that is valid before and fails after, then shrink it to a minimal reproduction. It never needs a declared consumer, so it attacks *the corpus is the world* at the root instead of reporting around it. | not run - it changes the primary metric from "unsafe approvals" to "counterexamples found", for which there is no fair baseline, and it needs a real PostgreSQL, which breaks reproduction from a clean clone with no API key | Rejected for this submission, kept as the design I would build next. Written up in full in `docs/CRITIQUE_LOG.md` (V1) rather than left as a hallway opinion. A witness that *could* exist is also a weaker artifact for a reviewer than a failure in a statement their own service issues today. |
@@ -528,6 +601,21 @@ structural argument about the tool's own reach, which is the only kind of argume
 make.
 
 ## Hot take
+
+**Count what goes in, count what comes out, publish the difference.** Four releases of this
+repository have found the same defect one level up: the corpus is a sample of the consumers, the
+fixture is a sample of the data, the rule set is a sample of the hazards, the parse is a sample of
+the text. Each time the previous fix was correct and its perimeter was invisible from inside,
+because the layer that should have caught the new hole was built on the assumption the hole
+violated. An audit that starts after a transforming stage cannot see what that stage dropped, so
+conservation is not a nice property to have - it is the only kind of completeness claim that
+survives its own author.
+
+And the half that indicts the metric rather than the parser: **every single false finding in the
+v13 packet cited machine evidence.** "35/35 findings evidenced" has been the headline
+reproducibility number here for twelve releases, and it is equally true of a review of a file that
+was two thirds string literal. Provenance tells you a claim came from a tool. It does not tell you
+the tool was looking at the artefact you are about to deploy.
 
 Give an agent a tool that can be *loudly* wrong, and pair it with rules that can be *quietly* wrong.
 
@@ -583,7 +671,12 @@ sentinel/            the pipeline
   agents/            cartographer, blast_radius, risk_officer, rollout_engineer, verifier
   coverage.py        the coverage ledger + verdict cap (v2)
   narrator.py        model prose treated as untrusted input (v3)
+  rulebook.py        which statement kinds anything here actually inspects (v13)
   tools/             sql_parse, shadow_db, query_corpus, incident_memory, registry
+  tools/sql_lex.py   the scanner Postgres would recognise: dollar quoting, nested block
+                     comments, literal-aware comment stripping, statement spans (v14)
+  tools/parse_audit.py  statements the scanner finds minus statements an op accounts for,
+                     plus a literal-masked census of every procedural body (v14)
   llm/               scripted stand-in, hosted providers, cassette record/replay
   llm/adversarial.py four hostile models used to attack this repo's own claims: a
                      sycophant, an injected model, a dead endpoint (v3) and a fluent
@@ -592,6 +685,8 @@ sentinel/            the pipeline
   report.py, trace.py, cli.py, hazards.py
 baseline/            the one-prompt reviewer, two variants
 eval/                build_cases.py, 12 cases with ground truth, scoring.py, run_eval.py
+  redteam/           7 cases written to make this pipeline approve an outage (v13)
+  redteam2/          6 cases the parser itself gets wrong (v14)
   report_components.py   what removing each component costs -> results/components.md
   time_sensitivity.py    band on the modelled reviewer-minute claim
   model_invariance.py    12 cases x 5 models x 3 narrator modes = 180 reviews (v3, v5)
@@ -599,7 +694,7 @@ memory/              incidents.jsonl (curated, fictional)
 results/             review packets, comparison.md, ablation.md, evaluation.json
 trajectories/        one markdown + jsonl trajectory per case
 site/                the review desk: index.html, generated data/ and py/ (Pyodide runtime)
-tools/               build_site.py, build_artifact.py, check_results.py (57 claims about the numbers)
+tools/               build_site.py, build_artifact.py, check_results.py (67 claims about the numbers)
   check_docs.py          9 claims the docs make about the repo: references, glyphs, entry
                          point, stale counts for any claim ledger or audit, stale test counts,
                          no heading trapped in a code fence (v11), no counting tool that
@@ -619,12 +714,12 @@ AGENT_USE.md         coding-agent disclosure required by the challenge
 SUBMISSION_FORM_TEXT.txt  the exact plain-text description submitted to the form, committed
                      verbatim so tools/check_submission_text.py can audit it (v8)
 .github/workflows/   verify the claims, then publish the desk to GitHub Pages
-docs/                CRITIQUE_LOG.md (read first), SUPERVISOR_LOG_V3.md to _V12.md,
+docs/                CRITIQUE_LOG.md (read first), SUPERVISOR_LOG_V3.md to _V14.md,
                      DESIGN_LOG.md, AGENT_TRAJECTORIES.md, SUBMISSION.md,
                      VIDEO_SCRIPT.md (what the submitted video was made from),
                      VIDEO_SCRIPT_V12.md (single-take script against the current numbers),
                      VIDEO_ADDENDUM.md (every number the video predates)
-tests/               104 stdlib tests
+tests/               129 stdlib tests
 ```
 
 ## Limitations, stated plainly

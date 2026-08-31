@@ -1,4 +1,4 @@
-.PHONY: help cases review baseline eval invariance holdout test site artifact serve verify docs form determinism crossversion clean
+.PHONY: help cases review baseline eval invariance holdout redteam redteam2 test site artifact serve verify docs form determinism crossversion clean
 
 help:
 	@echo "make cases     regenerate the 12 evaluation cases"
@@ -8,6 +8,7 @@ help:
 	@echo "make invariance 12 cases x 4 models x guard on/off, hostile narrators"
 	@echo "make holdout   9 held-out cases on the second schema, three arms"
 	@echo "make redteam   7 cases written to make this pipeline approve an outage"
+	@echo "make redteam2  6 cases the parser itself gets wrong (v14)"
 	@echo "make test      stdlib tests"
 	@echo "make verify    eval + assert every claim the README and the docs make"
 	@echo "make docs      audit the documentation only (references, glyphs, stale counts)"
@@ -43,6 +44,9 @@ holdout:
 redteam:
 	python3 eval/run_redteam.py
 
+redteam2:
+	python3 eval/run_redteam2.py
+
 # v10: verify used to skip the tests and the held-out run, so a red suite and a failing
 # submission-text audit could both sit outside the one command the docs tell you to run.
 # v11: and it skipped the determinism proof, so "a rerun changes only the clock" was a sentence
@@ -50,7 +54,12 @@ redteam:
 # v12: and the determinism proof reruns everything under one interpreter, so "3.11 and 3.12
 # verified" was a claim about exceptions rather than about numbers until check_cross_version ran
 # here too. It SKIPs with a printed reason on a machine with a single Python, rather than passing.
-verify: eval invariance holdout redteam
+# v13: and it skipped the red-team set entirely, so the two holes an adversarial pass found
+# were closed in the code and unproven by the one command the docs tell you to run.
+# v14: and the round-2 set is here for the same reason. `redteam2` also recomputes what the
+# retired splitter did to each file, so "the parse is a sample of the text" is an exit code
+# rather than a paragraph.
+verify: eval invariance holdout redteam redteam2
 	python3 -m unittest discover -s tests
 	python3 tools/check_results.py
 	python3 tools/check_docs.py

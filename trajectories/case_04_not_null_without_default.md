@@ -2,7 +2,7 @@
 
 - run id: `eval-case_04_not_null_without_default`
 - case: `case_04_not_null_without_default`
-- events: 31
+- events: 32
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.72 ms)
+**tool** `schema.parse` (0.67 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.03 ms)
 
 ```json
 {
@@ -79,7 +79,50 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `migration.audit` (0.03 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE customers ADD COLUMN billing_email TEXT NOT NULL;\n",
+  "ops": [
+   {
+    "kind": "add_column",
+    "table": "customers",
+    "column": "billing_email",
+    "detail": {
+     "type": "TEXT",
+     "not_null": true,
+     "default": null,
+     "unique": false
+    },
+    "sql": "ALTER TABLE customers ADD COLUMN billing_email TEXT NOT NULL",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 52,
+  "attributed_chars": 52,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -150,7 +193,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.12 ms)
+**tool** `corpus.dependents` (0.1 ms)
 
 ```json
 {
@@ -338,7 +381,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.67 ms)
+**tool** `shadow.replay` (2.05 ms)
 
 ```json
 {
@@ -571,7 +614,7 @@ _note (blast_radius)_: q_bi_summary gains column(s) ['billing_email']; recorded 
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -631,7 +674,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.13 ms)
+**tool** `coverage.ledger` (0.1 ms)
 
 ```json
 {
@@ -801,7 +844,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.05 ms)
 
 ```json
 {
@@ -831,7 +874,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -865,7 +908,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.5 ms)
+**tool** `shadow.replay` (2.0 ms)
 
 ```json
 {

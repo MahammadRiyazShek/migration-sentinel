@@ -212,7 +212,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -228,7 +229,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.67,
+   "ms": 0.61,
    "result_summary": "Schema"
   },
   {
@@ -237,7 +238,7 @@
    "args": {
     "sql": "DROP VIEW open_invoices;\nCREATE VIEW open_invoices_v2 AS\n  SELECT id, customer_id, invoice_number, amount_cents, status, issued_at\n  FROM invoices WHERE status IN ('draft','open');\n"
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "drop_view",
@@ -262,6 +263,51 @@
      "index": 1
     }
    ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "DROP VIEW open_invoices;\nCREATE VIEW open_invoices_v2 AS\n  SELECT id, customer_id, invoice_number, amount_cents, status, issued_at\n  FROM invoices WHERE status IN ('draft','open');\n",
+    "ops": [
+     {
+      "kind": "drop_view",
+      "table": null,
+      "column": null,
+      "detail": {
+       "name": "open_invoices"
+      },
+      "sql": "DROP VIEW open_invoices",
+      "index": 0
+     },
+     {
+      "kind": "create_view",
+      "table": null,
+      "column": null,
+      "detail": {
+       "name": "open_invoices_v2",
+       "select": "SELECT id, customer_id, invoice_number, amount_cents, status, issued_at FROM invoices WHERE status IN ('draft','open')",
+       "replace": false
+      },
+      "sql": "CREATE VIEW open_invoices_v2 AS SELECT id, customer_id, invoice_number, amount_cents, status, issued_at FROM invoices WH...",
+      "index": 1
+     }
+    ]
+   },
+   "ms": 0.07,
+   "result_summary": {
+    "lexed_statements": 2,
+    "ops": 2,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 155,
+     "attributed_chars": 155,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
   },
   {
    "agent": "cartographer",
@@ -293,7 +339,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -388,7 +434,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.17,
+   "ms": 0.09,
    "result_summary": [
     {
      "query_id": "q_dunning_open",
@@ -419,7 +465,7 @@
      }
     ]
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": 4
   },
   {
@@ -655,7 +701,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.49,
+   "ms": 2.12,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -693,7 +739,7 @@
     "hazard_code": "BREAKING_QUERY",
     "table": "q_dunning_open"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     []
@@ -957,9 +1003,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 2,
+     "ops": 2,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 155,
+      "attributed_chars": 155,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.15,
+   "ms": 0.13,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -974,7 +1033,7 @@
    "args": {
     "sql": "CREATE VIEW open_invoices_v2 AS SELECT id, customer_id, invoice_number, amount_cents, status, issued_at FROM invoices WHERE status IN ('draft','open');"
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "create_view",
@@ -1010,7 +1069,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -1239,7 +1298,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.54,
+   "ms": 2.0,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1262,7 +1321,7 @@
   "tokens_out": 257,
   "cost_usd": 0.0
  },
- "wall_ms": 7.1,
+ "wall_ms": 6.0,
  "severity_order": [
   "low",
   "medium",

@@ -2,7 +2,7 @@
 
 - run id: `eval-rt_02_concurrently_inside_transaction`
 - case: `rt_02_concurrently_inside_transaction`
-- events: 26
+- events: 27
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.68 ms)
+**tool** `schema.parse` (0.56 ms)
 
 ```json
 {
@@ -97,7 +97,68 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `migration.audit` (0.05 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "BEGIN;\nCREATE INDEX CONCURRENTLY idx_usage_events_customer ON usage_events (customer_id);\nCOMMIT;\n",
+  "ops": [
+   {
+    "kind": "transaction_control",
+    "table": null,
+    "column": null,
+    "detail": {},
+    "sql": "BEGIN",
+    "index": 0
+   },
+   {
+    "kind": "create_index",
+    "table": "usage_events",
+    "column": null,
+    "detail": {
+     "name": "idx_usage_events_customer",
+     "unique": false,
+     "concurrently": true,
+     "columns": [
+      "customer_id"
+     ]
+    },
+    "sql": "CREATE INDEX CONCURRENTLY idx_usage_events_customer ON usage_events (customer_id)",
+    "index": 1
+   },
+   {
+    "kind": "transaction_control",
+    "table": null,
+    "column": null,
+    "detail": {},
+    "sql": "COMMIT",
+    "index": 2
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 3,
+ "ops": 3,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 86,
+  "attributed_chars": 86,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.1 ms)
 
 ```json
 {
@@ -187,7 +248,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.14 ms)
+**tool** `corpus.dependents` (0.1 ms)
 
 ```json
 {
@@ -381,7 +442,7 @@ _tool responded_
 22
 ```
 
-**tool** `shadow.replay` (2.78 ms)
+**tool** `shadow.replay` (2.01 ms)
 
 ```json
 {
@@ -679,7 +740,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.07 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -711,7 +772,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -747,7 +808,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.69 ms)
+**tool** `shadow.replay` (2.0 ms)
 
 ```json
 {

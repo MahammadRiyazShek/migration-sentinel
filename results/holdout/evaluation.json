@@ -48,8 +48,8 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
-     "wall_ms": 0.8,
-     "tokens": 500,
+     "wall_ms": 0.6,
+     "tokens": 537,
      "cost_usd": 0.0
     },
     {
@@ -90,7 +90,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
      "wall_ms": 0.1,
-     "tokens": 537,
+     "tokens": 575,
      "cost_usd": 0.0
     },
     {
@@ -139,8 +139,8 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
-     "wall_ms": 0.2,
-     "tokens": 530,
+     "wall_ms": 0.1,
+     "tokens": 567,
      "cost_usd": 0.0
     },
     {
@@ -168,8 +168,8 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 5,
-     "wall_ms": 0.1,
-     "tokens": 516,
+     "wall_ms": 0.0,
+     "tokens": 553,
      "cost_usd": 0.0
     },
     {
@@ -204,7 +204,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 5,
      "wall_ms": 0.0,
-     "tokens": 506,
+     "tokens": 544,
      "cost_usd": 0.0
     },
     {
@@ -239,7 +239,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 25,
      "wall_ms": 0.1,
-     "tokens": 555,
+     "tokens": 593,
      "cost_usd": 0.0
     },
     {
@@ -283,7 +283,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
      "wall_ms": 0.0,
-     "tokens": 502,
+     "tokens": 539,
      "cost_usd": 0.0
     },
     {
@@ -349,7 +349,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 45,
      "wall_ms": 0.2,
-     "tokens": 672,
+     "tokens": 710,
      "cost_usd": 0.0
     },
     {
@@ -399,7 +399,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
      "wall_ms": 0.0,
-     "tokens": 505,
+     "tokens": 543,
      "cost_usd": 0.0
     }
    ],
@@ -434,8 +434,8 @@
     "gap_cases_cleared_without_signoff": 1,
     "modelled_reviewer_minutes_total": 237,
     "modelled_reviewer_minutes_per_case": 26.3,
-    "wall_ms_per_case": 0.2,
-    "tokens_total": 4823,
+    "wall_ms_per_case": 0.1,
+    "tokens_total": 5161,
     "cost_usd_total": 0.0
    }
   },
@@ -483,8 +483,8 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
-     "wall_ms": 0.4,
-     "tokens": 1137,
+     "wall_ms": 0.3,
+     "tokens": 1174,
      "cost_usd": 0.0
     },
     {
@@ -525,7 +525,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
      "wall_ms": 0.1,
-     "tokens": 1148,
+     "tokens": 1185,
      "cost_usd": 0.0
     },
     {
@@ -575,7 +575,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
      "wall_ms": 0.1,
-     "tokens": 1140,
+     "tokens": 1178,
      "cost_usd": 0.0
     },
     {
@@ -610,7 +610,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
      "wall_ms": 0.1,
-     "tokens": 1137,
+     "tokens": 1175,
      "cost_usd": 0.0
     },
     {
@@ -652,7 +652,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 33,
      "wall_ms": 0.1,
-     "tokens": 1160,
+     "tokens": 1197,
      "cost_usd": 0.0
     },
     {
@@ -687,7 +687,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 25,
      "wall_ms": 0.1,
-     "tokens": 1165,
+     "tokens": 1203,
      "cost_usd": 0.0
     },
     {
@@ -731,7 +731,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
      "wall_ms": 0.1,
-     "tokens": 1112,
+     "tokens": 1150,
      "cost_usd": 0.0
     },
     {
@@ -798,8 +798,8 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 49,
-     "wall_ms": 0.2,
-     "tokens": 1309,
+     "wall_ms": 0.1,
+     "tokens": 1346,
      "cost_usd": 0.0
     },
     {
@@ -851,7 +851,7 @@
      "human_gates": 0,
      "modelled_reviewer_minutes": 37,
      "wall_ms": 0.1,
-     "tokens": 1140,
+     "tokens": 1178,
      "cost_usd": 0.0
     }
    ],
@@ -887,7 +887,7 @@
     "modelled_reviewer_minutes_total": 301,
     "modelled_reviewer_minutes_per_case": 33.4,
     "wall_ms_per_case": 0.1,
-    "tokens_total": 10448,
+    "tokens_total": 10786,
     "cost_usd_total": 0.0
    }
   },
@@ -933,7 +933,7 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 9.4,
+     "wall_ms": 7.0,
      "tokens": 1916,
      "cost_usd": 0.0
     },
@@ -977,7 +977,7 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 8.3,
+     "wall_ms": 6.4,
      "tokens": 1711,
      "cost_usd": 0.0
     },
@@ -1029,7 +1029,7 @@
      "plan_verified": true,
      "human_gates": 2,
      "modelled_reviewer_minutes": 11,
-     "wall_ms": 8.4,
+     "wall_ms": 7.0,
      "tokens": 3176,
      "cost_usd": 0.0
     },
@@ -1058,7 +1058,7 @@
      "plan_verified": true,
      "human_gates": 0,
      "modelled_reviewer_minutes": 5,
-     "wall_ms": 8.0,
+     "wall_ms": 6.3,
      "tokens": 545,
      "cost_usd": 0.0
     },
@@ -1097,7 +1097,7 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 7.7,
+     "wall_ms": 6.0,
      "tokens": 1088,
      "cost_usd": 0.0
     },
@@ -1132,7 +1132,7 @@
      "plan_verified": true,
      "human_gates": 2,
      "modelled_reviewer_minutes": 11,
-     "wall_ms": 8.0,
+     "wall_ms": 6.3,
      "tokens": 593,
      "cost_usd": 0.0
     },
@@ -1175,7 +1175,7 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 8.2,
+     "wall_ms": 6.4,
      "tokens": 1593,
      "cost_usd": 0.0
     },
@@ -1248,7 +1248,7 @@
      "plan_verified": true,
      "human_gates": 6,
      "modelled_reviewer_minutes": 23,
-     "wall_ms": 9.6,
+     "wall_ms": 7.6,
      "tokens": 5838,
      "cost_usd": 0.0
     },
@@ -1300,7 +1300,7 @@
      "plan_verified": true,
      "human_gates": 3,
      "modelled_reviewer_minutes": 14,
-     "wall_ms": 8.1,
+     "wall_ms": 6.3,
      "tokens": 2674,
      "cost_usd": 0.0
     }
@@ -1336,7 +1336,7 @@
     "gap_cases_cleared_without_signoff": 0,
     "modelled_reviewer_minutes_total": 96,
     "modelled_reviewer_minutes_per_case": 10.7,
-    "wall_ms_per_case": 8.4,
+    "wall_ms_per_case": 6.6,
     "tokens_total": 19134,
     "cost_usd_total": 0.0
    }

@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_06_audit_trigger`
 - case: `holdout_06_audit_trigger`
-- events: 27
+- events: 28
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.85 ms)
+**tool** `schema.parse` (0.67 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.13 ms)
+**tool** `migration.parse` (0.1 ms)
 
 ```json
 {
@@ -88,7 +88,55 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `migration.audit` (0.08 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "CREATE TABLE stop_status_audit (\n  id SERIAL PRIMARY KEY,\n  stop_id INTEGER NOT NULL,\n  old_status TEXT,\n  new_status TEXT,\n  changed_at TIMESTAMPTZ NOT NULL\n);\nCREATE TRIGGER trg_stop_status_audit AFTER UPDATE OF status ON shipment_stops\n  FOR EACH ROW EXECUTE FUNCTION log_stop_status_change();\n",
+  "ops": [
+   {
+    "kind": "create_table",
+    "table": "stop_status_audit",
+    "column": null,
+    "detail": {
+     "table": "Table"
+    },
+    "sql": "CREATE TABLE stop_status_audit ( id SERIAL PRIMARY KEY, stop_id INTEGER NOT NULL, old_status TEXT, new_status TEXT, chan...",
+    "index": 0
+   },
+   {
+    "kind": "unsupported",
+    "table": null,
+    "column": null,
+    "detail": {},
+    "sql": "CREATE TRIGGER trg_stop_status_audit AFTER UPDATE OF status ON shipment_stops FOR EACH ROW EXECUTE FUNCTION log_stop_sta...",
+    "index": 1
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 2,
+ "ops": 2,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 247,
+  "attributed_chars": 247,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -172,7 +220,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.1 ms)
+**tool** `corpus.dependents` (0.07 ms)
 
 ```json
 {
@@ -239,7 +287,7 @@ _tool responded_
 0
 ```
 
-**tool** `shadow.replay` (2.93 ms)
+**tool** `shadow.replay` (2.32 ms)
 
 ```json
 {
@@ -362,7 +410,7 @@ _tool responded_
 
 </details>
 
-**tool** `coverage.ledger` (0.17 ms)
+**tool** `coverage.ledger` (0.14 ms)
 
 ```json
 {
@@ -537,7 +585,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -568,7 +616,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.91 ms)
+**tool** `shadow.replay` (2.18 ms)
 
 ```json
 {

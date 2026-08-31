@@ -2,7 +2,7 @@
 
 - run id: `eval-case_02_drop_column_still_read`
 - case: `case_02_drop_column_still_read`
-- events: 34
+- events: 35
 
 ## Agent: cartographer
 
@@ -74,7 +74,45 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.13 ms)
+**tool** `migration.audit` (0.04 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE customers DROP COLUMN company_name;\n",
+  "ops": [
+   {
+    "kind": "drop_column",
+    "table": "customers",
+    "column": "company_name",
+    "detail": {},
+    "sql": "ALTER TABLE customers DROP COLUMN company_name",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 41,
+  "attributed_chars": 41,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.09 ms)
 
 ```json
 {
@@ -140,7 +178,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.15 ms)
+**tool** `corpus.dependents` (0.09 ms)
 
 ```json
 {
@@ -330,7 +368,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.39 ms)
+**tool** `shadow.replay` (2.03 ms)
 
 ```json
 {
@@ -633,7 +671,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -697,7 +735,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.18 ms)
+**tool** `coverage.ledger` (0.13 ms)
 
 ```json
 {
@@ -912,7 +950,7 @@ _tool responded_
 []
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -932,7 +970,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.63 ms)
+**tool** `shadow.replay` (2.01 ms)
 
 ```json
 {

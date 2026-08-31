@@ -104,6 +104,22 @@ HAZARDS: dict[str, dict[str, str]] = {
         "why": "Postgres refuses CREATE/DROP INDEX CONCURRENTLY inside a transaction block, and most "
                "migration frameworks open one by default, so the deploy fails on the statement itself.",
     },
+    "MIGRATION_TEXT_UNPARSED": {
+        "title": "Migration text no structural review covered",
+        "default_severity": "blocker",
+        "detect": "lexical scan vs op list (parse conservation)",
+        "why": "The reviewed artefact and the deployed artefact are not the same object: the "
+               "scanner finds a statement or an unterminated construct that no parsed operation "
+               "accounts for, so a rule never saw it and replay never ran it.",
+    },
+    "PROCEDURAL_DDL_UNREVIEWED": {
+        "title": "Schema change executes inside a procedural body",
+        "default_severity": "blocker",
+        "detect": "lexical scan of dollar-quoted bodies",
+        "why": "DDL inside DO or a function body runs on deploy but is invisible to the "
+               "expand/contract analysis, the dependency map and the shadow replay, so the "
+               "packet would otherwise certify a migration whose schema change it never modelled.",
+    },
     "MISSING_ROLLBACK": {
         "title": "No rollback path supplied",
         "default_severity": "medium",

@@ -13,12 +13,22 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+from . import sql_lex
+
 # --------------------------------------------------------------------------
 # statement splitting
 # --------------------------------------------------------------------------
 
 
-def strip_comments(sql: str) -> str:
+def legacy_strip_comments(sql: str) -> str:
+    """The v13 comment stripper. RETIRED, kept because it is the artefact under test.
+
+    It deletes from `--` to end of line unconditionally, including inside a string
+    literal, which is how `'legacy -- do not touch'` became an unterminated quote that
+    swallowed the two destructive statements after it.  See `sentinel/tools/sql_lex.py`.
+    Reachable only through `legacy_split_statements`, which only the `no_text_conservation`
+    ablation arm and `tools/parse_audit.legacy_loss` call.
+    """
     sql = re.sub(r"/\*.*?\*/", " ", sql, flags=re.S)
     out = []
     for line in sql.splitlines():
@@ -27,9 +37,31 @@ def strip_comments(sql: str) -> str:
     return "\n".join(out)
 
 
+def strip_comments(sql: str) -> str:
+    """Comments removed, literal-aware, via the scanner. Nested block comments included."""
+    res = sql_lex.lex(sql or "")
+    chars = list(sql or "")
+    for span in res.comment_spans:
+        for i in range(max(0, span.start), min(span.end, len(chars))):
+            chars[i] = " "
+    return "".join(chars)
+
+
 def split_statements(sql: str) -> list[str]:
-    """Split on semicolons that are not inside quotes or parentheses."""
-    sql = strip_comments(sql)
+    """Top-level statements, comments removed. Delegates to the scanner.
+
+    v14. Byte-identical to `legacy_split_statements` on all 84 schema, migration and
+    rollback scripts in `eval/` (`tests/test_all.py::TestLexerParity`), which is why the
+    swap moved no published number, and different from it on exactly the inputs the
+    scanner exists for: dollar-quoted bodies, nested block comments, and a `--` inside a
+    string literal.
+    """
+    return sql_lex.split_statements(sql)
+
+
+def legacy_split_statements(sql: str) -> list[str]:
+    """The v13 splitter. RETIRED. See `legacy_strip_comments` for what it does wrong."""
+    sql = legacy_strip_comments(sql)
     stmts, buf, depth, quote = [], [], 0, None
     for ch in sql:
         if quote:
@@ -318,6 +350,11 @@ class Op:
 # relation.  Documented family, not a per-case special case: every one of these
 # takes ACCESS EXCLUSIVE for the duration and none of them is expressible as a
 # structural schema change, which is why they get an op kind of their own.
+# v14: statements that run a program rather than a single command. Matched on the
+# statement head, so a `$$`-quoted default or a quoted piece of documentation stays a
+# string rather than becoming a program.
+PROCEDURAL_HEAD = re.compile(r"^\s*(do\b|create\s+(or\s+replace\s+)?(function|procedure)\b)", re.I)
+
 MAINTENANCE_REWRITE = (
     r"(?P<cmd>cluster|vacuum\s+full|reindex(\s+(table|index|schema|database))?|"
     r"refresh\s+materialized\s+view)"
@@ -330,9 +367,16 @@ def _alter_actions(body: str) -> list[str]:
     return _split_top_level_commas(body)
 
 
-def parse_migration(sql: str) -> list[Op]:
+def parse_migration(sql: str, legacy_split: bool = False) -> list[Op]:
+    """Typed operations for one migration script.
+
+    `legacy_split` restores the v13 splitter so the `no_text_conservation` ablation arm
+    can reproduce v13 exactly and this layer can be priced like every other one here.
+    Nothing in the shipped path passes it.
+    """
+    splitter = legacy_split_statements if legacy_split else split_statements
     ops: list[Op] = []
-    for i, raw in enumerate(split_statements(sql)):
+    for i, raw in enumerate(splitter(sql)):
         stmt = norm(raw)
         low = stmt.lower()
         if low.startswith(("begin", "commit", "rollback", "set ", "lock ")):
@@ -435,6 +479,17 @@ def parse_migration(sql: str) -> list[Op]:
             continue
         if m := re.match(r"insert\s+into\s+(?P<table>\"?[\w$.]+\"?)", stmt, flags=re.I):
             ops.append(Op("dml_insert", stmt, i, ident(m.group("table")), None, {}))
+            continue
+        # v14: a procedural body. `DO $$ ... $$` and function bodies carry statements
+        # that execute and that nothing here models; the retired splitter shredded them at
+        # their inner semicolons. Given its own kind so `sentinel/rulebook.py` has to
+        # classify it and `tools/parse_audit.py` can census what is inside.
+        if PROCEDURAL_HEAD.match(stmt) and sql_lex.DOLLAR_TAG.search(raw):
+            ops.append(Op("procedural_block", stmt, i, None, None,
+                          {"head": norm(stmt)[:80],
+                           "bodies": [b.tag for b in
+                                      (sql_lex.lex(raw).statements or [None])[0].dollar_bodies]
+                                     if sql_lex.lex(raw).statements else []}))
             continue
         if m := re.match(MAINTENANCE_REWRITE, stmt, flags=re.I):
             # Recognised by name, still not modelled structurally.  The op carries a

@@ -175,7 +175,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -191,7 +192,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.69,
+   "ms": 0.59,
    "result_summary": "Schema"
   },
   {
@@ -221,6 +222,44 @@
   },
   {
    "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "CREATE UNIQUE INDEX CONCURRENTLY idx_invoices_number ON invoices (invoice_number);\n",
+    "ops": [
+     {
+      "kind": "create_index",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "name": "idx_invoices_number",
+       "unique": true,
+       "concurrently": true,
+       "columns": [
+        "invoice_number"
+       ]
+      },
+      "sql": "CREATE UNIQUE INDEX CONCURRENTLY idx_invoices_number ON invoices (invoice_number)",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.04,
+   "result_summary": {
+    "lexed_statements": 1,
+    "ops": 1,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 74,
+     "attributed_chars": 74,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
+  },
+  {
+   "agent": "cartographer",
    "tool": "schema.apply_ops",
    "args": {
     "schema": "Schema",
@@ -242,7 +281,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -445,7 +484,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.01,
    "result_summary": 16
   },
   {
@@ -674,7 +713,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.51,
+   "ms": 2.08,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -913,9 +952,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 1,
+     "ops": 1,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 74,
+      "attributed_chars": 74,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.15,
+   "ms": 0.13,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -930,7 +982,7 @@
    "args": {
     "sql": "CREATE UNIQUE INDEX CONCURRENTLY \"idx_invoices_number\" ON \"invoices\" (\"invoice_number\");"
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "create_index",
@@ -972,7 +1024,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -1204,7 +1256,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.5,
+   "ms": 2.03,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1227,7 +1279,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 6.7,
+ "wall_ms": 5.7,
  "severity_order": [
   "low",
   "medium",

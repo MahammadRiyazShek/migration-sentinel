@@ -206,7 +206,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -222,7 +223,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.67,
+   "ms": 0.6,
    "result_summary": "Schema"
   },
   {
@@ -231,7 +232,7 @@
    "args": {
     "sql": "CREATE INDEX idx_invoices_status ON invoices (status);\n"
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": [
     {
      "kind": "create_index",
@@ -249,6 +250,44 @@
      "index": 0
     }
    ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "CREATE INDEX idx_invoices_status ON invoices (status);\n",
+    "ops": [
+     {
+      "kind": "create_index",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "name": "idx_invoices_status",
+       "unique": false,
+       "concurrently": false,
+       "columns": [
+        "status"
+       ]
+      },
+      "sql": "CREATE INDEX idx_invoices_status ON invoices (status)",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.04,
+   "result_summary": {
+    "lexed_statements": 1,
+    "ops": 1,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 48,
+     "attributed_chars": 48,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
   },
   {
    "agent": "cartographer",
@@ -273,7 +312,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -361,7 +400,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.43,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -723,7 +762,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.6,
+   "ms": 2.09,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -977,9 +1016,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 1,
+     "ops": 1,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 48,
+      "attributed_chars": 48,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.13,
+   "ms": 0.1,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -994,7 +1046,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_invoices_status\" ON \"invoices\" (\"status\");"
    },
-   "ms": 0.03,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "create_index",
@@ -1036,7 +1088,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -1268,7 +1320,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.68,
+   "ms": 2.0,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1291,7 +1343,7 @@
   "tokens_out": 109,
   "cost_usd": 0.0
  },
- "wall_ms": 7.1,
+ "wall_ms": 6.2,
  "severity_order": [
   "low",
   "medium",

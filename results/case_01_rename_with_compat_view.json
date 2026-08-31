@@ -462,7 +462,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -478,7 +479,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.68,
+   "ms": 0.61,
    "result_summary": "Schema"
   },
   {
@@ -487,7 +488,7 @@
    "args": {
     "sql": "ALTER TABLE customers RENAME COLUMN full_name TO name;\nCREATE OR REPLACE VIEW customer_billing_summary AS\n  SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;\n"
    },
-   "ms": 0.06,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "rename_column",
@@ -512,6 +513,51 @@
      "index": 1
     }
    ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "ALTER TABLE customers RENAME COLUMN full_name TO name;\nCREATE OR REPLACE VIEW customer_billing_summary AS\n  SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;\n",
+    "ops": [
+     {
+      "kind": "rename_column",
+      "table": "customers",
+      "column": "full_name",
+      "detail": {
+       "new_name": "name"
+      },
+      "sql": "ALTER TABLE customers RENAME COLUMN full_name TO name",
+      "index": 0
+     },
+     {
+      "kind": "create_view",
+      "table": null,
+      "column": null,
+      "detail": {
+       "name": "customer_billing_summary",
+       "select": "SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers",
+       "replace": true
+      },
+      "sql": "CREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, ...",
+      "index": 1
+     }
+    ]
+   },
+   "ms": 0.08,
+   "result_summary": {
+    "lexed_statements": 2,
+    "ops": 2,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 177,
+     "attributed_chars": 177,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
   },
   {
    "agent": "cartographer",
@@ -543,7 +589,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -638,7 +684,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.18,
+   "ms": 0.15,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -773,7 +819,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.02,
    "result_summary": 17
   },
   {
@@ -1009,7 +1055,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.69,
+   "ms": 2.49,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1151,7 +1197,7 @@
     "hazard_code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
     "table": "customers"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     [
@@ -1419,9 +1465,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 2,
+     "ops": 2,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 177,
+      "attributed_chars": 177,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.2,
+   "ms": 0.14,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1436,7 +1495,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);\nCREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;"
    },
-   "ms": 0.11,
+   "ms": 0.13,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1520,7 +1579,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1773,7 +1832,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.64,
+   "ms": 2.16,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1858,7 +1917,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);"
    },
-   "ms": 0.08,
+   "ms": 0.18,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1918,7 +1977,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -2159,7 +2218,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.49,
+   "ms": 2.08,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2245,7 +2304,7 @@
   "tokens_out": 622,
   "cost_usd": 0.0
  },
- "wall_ms": 12.6,
+ "wall_ms": 9.9,
  "severity_order": [
   "low",
   "medium",

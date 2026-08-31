@@ -2,7 +2,7 @@
 
 - run id: `eval-case_11_swap_view_used_by_worker`
 - case: `case_11_swap_view_used_by_worker`
-- events: 31
+- events: 32
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.67 ms)
+**tool** `schema.parse` (0.61 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -88,7 +88,59 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `migration.audit` (0.07 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "DROP VIEW open_invoices;\nCREATE VIEW open_invoices_v2 AS\n  SELECT id, customer_id, invoice_number, amount_cents, status, issued_at\n  FROM invoices WHERE status IN ('draft','open');\n",
+  "ops": [
+   {
+    "kind": "drop_view",
+    "table": null,
+    "column": null,
+    "detail": {
+     "name": "open_invoices"
+    },
+    "sql": "DROP VIEW open_invoices",
+    "index": 0
+   },
+   {
+    "kind": "create_view",
+    "table": null,
+    "column": null,
+    "detail": {
+     "name": "open_invoices_v2",
+     "select": "SELECT id, customer_id, invoice_number, amount_cents, status, issued_at FROM invoices WHERE status IN ('draft','open')",
+     "replace": false
+    },
+    "sql": "CREATE VIEW open_invoices_v2 AS SELECT id, customer_id, invoice_number, amount_cents, status, issued_at FROM invoices WH...",
+    "index": 1
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 2,
+ "ops": 2,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 155,
+  "attributed_chars": 155,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -167,7 +219,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.17 ms)
+**tool** `corpus.dependents` (0.09 ms)
 
 ```json
 {
@@ -233,7 +285,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.01 ms)
+**tool** `corpus.blast_score` (0.0 ms)
 
 ```json
 {
@@ -260,7 +312,7 @@ _tool responded_
 4
 ```
 
-**tool** `shadow.replay` (2.49 ms)
+**tool** `shadow.replay` (2.12 ms)
 
 ```json
 {
@@ -416,7 +468,7 @@ _note (blast_radius)_: view open_invoices breakage folded into the corpus statem
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -476,7 +528,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.15 ms)
+**tool** `coverage.ledger` (0.13 ms)
 
 ```json
 {
@@ -645,7 +697,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -674,7 +726,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -707,7 +759,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.54 ms)
+**tool** `shadow.replay` (2.0 ms)
 
 ```json
 {

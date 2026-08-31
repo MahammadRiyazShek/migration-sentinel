@@ -229,7 +229,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -245,7 +246,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.62,
+   "ms": 0.57,
    "result_summary": "Schema"
   },
   {
@@ -270,6 +271,39 @@
   },
   {
    "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "ALTER TABLE customers ALTER COLUMN country_code TYPE varchar(2);\n",
+    "ops": [
+     {
+      "kind": "alter_type",
+      "table": "customers",
+      "column": "country_code",
+      "detail": {
+       "new_type": "varchar(2)"
+      },
+      "sql": "ALTER TABLE customers ALTER COLUMN country_code TYPE varchar(2)",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.03,
+   "result_summary": {
+    "lexed_statements": 1,
+    "ops": 1,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 56,
+     "attributed_chars": 56,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
+  },
+  {
+   "agent": "cartographer",
    "tool": "schema.apply_ops",
    "args": {
     "schema": "Schema",
@@ -286,7 +320,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -369,7 +403,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.08,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -502,7 +536,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.04,
    "result_summary": 17
   },
   {
@@ -726,7 +760,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.5,
+   "ms": 2.14,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -759,7 +793,7 @@
     "hazard_code": "TYPE_NARROWING_DATA_LOSS",
     "table": "customers"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     []
@@ -998,9 +1032,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 1,
+     "ops": 1,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 56,
+      "attributed_chars": 56,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.16,
+   "ms": 0.15,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1025,7 +1072,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -1241,7 +1288,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.42,
+   "ms": 1.94,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1264,7 +1311,7 @@
   "tokens_out": 155,
   "cost_usd": 0.0
  },
- "wall_ms": 6.8,
+ "wall_ms": 5.8,
  "severity_order": [
   "low",
   "medium",

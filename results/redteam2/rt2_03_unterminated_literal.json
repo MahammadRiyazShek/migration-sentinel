@@ -1,0 +1,1729 @@
+{
+ "run_id": "eval-rt2_03_unterminated_literal",
+ "case_id": "rt2_03_unterminated_literal",
+ "title": "Mark the invoice open and drop the tax column, with one quote missing",
+ "owner_service": "platform",
+ "verdict": "BLOCK",
+ "summary": "Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 blocker, 0 high, 0 medium, 0 low. The rewritten plan still breaks at least one statement, so a human has to decide the sequencing. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
+ "narrator": {
+  "mode": "structural",
+  "guard": true,
+  "headline_source": "tool",
+  "summary_overridden": false,
+  "summary_reasons": [],
+  "model_summary": "Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 blocker, 0 high, 0 medium, 0 low. The rewritten plan still breaks at least one statement, so a human has to decide the sequencing.",
+  "model_note": "Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 blocker, 0 high, 0 medium, 0 low. The rewritten plan still breaks at least one statement, so a human has to decide the sequencing.",
+  "model_note_reasons": [],
+  "questions_source": "model",
+  "questions_dropped": []
+ },
+ "counts": {
+  "low": 0,
+  "medium": 0,
+  "high": 0,
+  "blocker": 1
+ },
+ "hazards": [
+  {
+   "code": "MIGRATION_TEXT_UNPARSED",
+   "severity": "blocker",
+   "summary": "an unterminated string starts at character 29, so Postgres rejects this script and everything after that point was reviewed as string content rather than as SQL",
+   "evidence": [
+    "scanner: `'open WHERE id = 1;\nALTER TABLE invoices DROP COLUMN tax_rate;`",
+    "a single-quoted literal never closes, so Postgres rejects the script and everything after the quote was read as string content"
+   ],
+   "objects": [
+    "migration script"
+   ],
+   "services": [],
+   "source": "static",
+   "memory_refs": [],
+   "remediation": "close the literal. If the intent was a comment inside a string, it is not one: Postgres reads `--` inside quotes as text",
+   "title": "Migration text no structural review covered"
+  }
+ ],
+ "blast_radius": {
+  "dependent_queries": [
+   {
+    "query_id": "q_billing_invoice_create",
+    "service": "billing-api",
+    "criticality": "critical",
+    "matched": [
+     "invoices"
+    ],
+    "uses_select_star": false,
+    "label": "invoice creation"
+   },
+   {
+    "query_id": "q_billing_tax",
+    "service": "billing-api",
+    "criticality": "high",
+    "matched": [
+     "invoices"
+    ],
+    "uses_select_star": false,
+    "label": "invoice tax display"
+   },
+   {
+    "query_id": "q_billing_currency",
+    "service": "billing-api",
+    "criticality": "medium",
+    "matched": [
+     "invoices"
+    ],
+    "uses_select_star": false,
+    "label": "currency rollup"
+   },
+   {
+    "query_id": "q_dunning_open",
+    "service": "dunning-worker",
+    "criticality": "critical",
+    "matched": [
+     "open_invoices"
+    ],
+    "uses_select_star": true,
+    "label": "open invoice sweep"
+   },
+   {
+    "query_id": "q_billing_status_update",
+    "service": "billing-api",
+    "criticality": "high",
+    "matched": [
+     "invoices"
+    ],
+    "uses_select_star": false,
+    "label": "mark invoice open"
+   },
+   {
+    "query_id": "q_billing_customer_invoices",
+    "service": "billing-api",
+    "criticality": "critical",
+    "matched": [
+     "invoices"
+    ],
+    "uses_select_star": false,
+    "label": "customer invoice list"
+   },
+   {
+    "query_id": "q_support_open_for_customer",
+    "service": "support-admin",
+    "criticality": "high",
+    "matched": [
+     "invoices"
+    ],
+    "uses_select_star": false,
+    "label": "open invoices for a customer"
+   },
+   {
+    "query_id": "q_bi_revenue_by_customer",
+    "service": "bi",
+    "criticality": "medium",
+    "matched": [
+     "invoices"
+    ],
+    "uses_select_star": false,
+    "label": "revenue per customer"
+   }
+  ],
+  "blast_score": 25,
+  "replay": {
+   "materialised": true,
+   "schema_errors": [],
+   "data_errors": [
+    "migration DML failed (stmt 0): unrecognized token: \"'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;\" :: UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate"
+   ],
+   "broken": [],
+   "column_drift": [],
+   "rowcount_drift": [],
+   "data_loss": [],
+   "queries_run": 19,
+   "queries_ok_before": 19,
+   "queries_ok_after": 19
+  }
+ },
+ "plan": {
+  "attempt": 2,
+  "phase1_sql": [
+   "-- repeat until zero rows are affected (batch size 5000):",
+   "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate LIMIT 5000);"
+  ],
+  "phase2_sql": [],
+  "rollback_sql": [],
+  "code_steps": [],
+  "human_gates": [
+   "phase 1 was reduced to additive statements only; the rest needs a human to choose the deploy order",
+   "coverage gap on `invoices.status` (in_place_data_mutation): a reviewer confirms which consumers of invoices.status depend on the current values",
+   "coverage gap on `characters 29 onward` (unreviewable_text): the script is fixed and resubmitted; there is nothing here for a reviewer to sign off, because there is nothing here that runs"
+  ],
+  "questions": [
+   "What is the accepted risk for MIGRATION_TEXT_UNPARSED?"
+  ],
+  "questions_source": "model",
+  "questions_dropped": [],
+  "policy": {
+   "include_view_changes": true,
+   "expand_contract_type_change": true,
+   "minimal_phase1": true,
+   "notes": [
+    "fell back to a minimal additive phase 1: everything not provably backwards compatible moved to phase 2"
+   ]
+  }
+ },
+ "plan_verification": {
+  "verified": false,
+  "problems": [
+   "phase-1 data step failed: migration DML failed (stmt 0): unrecognized token: \"'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate LIMIT 5000);\" :: UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate"
+  ],
+  "replay": {
+   "materialised": true,
+   "schema_errors": [],
+   "data_errors": [
+    "migration DML failed (stmt 0): unrecognized token: \"'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate LIMIT 5000);\" :: UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate"
+   ],
+   "broken": [],
+   "column_drift": [],
+   "rowcount_drift": [],
+   "data_loss": [],
+   "queries_run": 19,
+   "queries_ok_before": 19,
+   "queries_ok_after": 19
+  },
+  "unmodelled": []
+ },
+ "escalated_to_human": true,
+ "coverage_gaps": [],
+ "coverage_ledger": {
+  "gaps": [
+   {
+    "kind": "in_place_data_mutation",
+    "object": "invoices.status",
+    "object_inferred": false,
+    "statement_index": 0,
+    "statement": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;",
+    "why": "rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns the same answer",
+    "closes_with": "a reviewer confirms which consumers of invoices.status depend on the current values",
+    "irreversible": false
+   },
+   {
+    "kind": "unreviewable_text",
+    "object": "characters 29 onward",
+    "object_inferred": false,
+    "statement_index": null,
+    "statement": "'open WHERE id = 1;\nALTER TABLE invoices DROP COLUMN tax_rate;\n",
+    "why": "an unterminated string starts at character 29; from there to the end of the file every character was read as string content, so nothing in that region was parsed, ruled or replayed, and no finding about it would be about anything Postgres executes",
+    "closes_with": "the script is fixed and resubmitted; there is nothing here for a reviewer to sign off, because there is nothing here that runs",
+    "irreversible": false
+   }
+  ],
+  "gap_kinds": [
+   "in_place_data_mutation",
+   "unreviewable_text"
+  ],
+  "irreversible": [],
+  "corpus_statements": 17,
+  "parser_notes": []
+ },
+ "verdict_capped_by_coverage": false,
+ "change_set": {
+  "ops": [
+   {
+    "kind": "dml_update",
+    "table": "invoices",
+    "column": null,
+    "detail": {
+     "where": true,
+     "batched": false
+    },
+    "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;",
+    "index": 0
+   }
+  ],
+  "op_kinds": [
+   "dml_update"
+  ],
+  "tables_touched": [
+   "invoices"
+  ],
+  "columns_touched": [],
+  "unmodelled": []
+ },
+ "attempts": 2,
+ "features": {
+  "replay": true,
+  "static": true,
+  "memory": true,
+  "verify": true,
+  "coverage": true,
+  "rule_coverage": true,
+  "text_conservation": true
+ },
+ "tool_calls": [
+  {
+   "agent": "cartographer",
+   "tool": "schema.parse",
+   "args": {
+    "sql": "CREATE TABLE customers (\n  id SERIAL PRIMARY KEY,\n  email TEXT NOT NULL,\n  full_name TEXT,\n  company_name TEXT,\n  country_code TEXT NOT NULL DEFAULT 'US',\n  plan TEXT NOT NULL DEFAULT 'free',\n  mrr_cents INTEGER NOT NULL DEFAULT 0,\n  signed_up_at TIMESTAMPTZ NOT NULL,\n  CONSTRAINT customers_plan_chk CHECK (plan IN ('free','team','business','enterprise'))\n);\n\nCREATE TABLE subscriptions (\n  id SERIA...",
+    "row_estimates": {
+     "customers": 2400000,
+     "subscriptions": 2600000,
+     "invoices": 48000000,
+     "invoice_lines": 190000000,
+     "usage_events": 900000000
+    }
+   },
+   "ms": 0.53,
+   "result_summary": "Schema"
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.parse",
+   "args": {
+    "sql": "UPDATE invoices SET status = 'open WHERE id = 1;\nALTER TABLE invoices DROP COLUMN tax_rate;\n"
+   },
+   "ms": 0.04,
+   "result_summary": [
+    {
+     "kind": "dml_update",
+     "table": "invoices",
+     "column": null,
+     "detail": {
+      "where": true,
+      "batched": false
+     },
+     "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;",
+     "index": 0
+    }
+   ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "UPDATE invoices SET status = 'open WHERE id = 1;\nALTER TABLE invoices DROP COLUMN tax_rate;\n",
+    "ops": [
+     {
+      "kind": "dml_update",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": false
+      },
+      "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.03,
+   "result_summary": {
+    "lexed_statements": 1,
+    "ops": 1,
+    "unterminated": [
+     {
+      "kind": "string",
+      "start": 29,
+      "end": 92,
+      "text": "'open WHERE id = 1;\nALTER TABLE invoices DROP COLUMN tax_rate;\n",
+      "why": "a single-quoted literal never closes, so Postgres rejects the script and everything after the quote was read as string c..."
+     }
+    ],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 74,
+     "attributed_chars": 74,
+     "unattributed_chars": 0
+    },
+    "clean": false
+   }
+  },
+  {
+   "agent": "cartographer",
+   "tool": "schema.apply_ops",
+   "args": {
+    "schema": "Schema",
+    "ops": [
+     {
+      "kind": "dml_update",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": false
+      },
+      "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.03,
+   "result_summary": [
+    "Schema",
+    []
+   ]
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "corpus.dependents",
+   "args": {
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+9 more"
+    ],
+    "ops": [
+     {
+      "kind": "dml_update",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": false
+      },
+      "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;",
+      "index": 0
+     }
+    ],
+    "schema": "Schema"
+   },
+   "ms": 0.11,
+   "result_summary": [
+    {
+     "query_id": "q_billing_invoice_create",
+     "service": "billing-api",
+     "criticality": "critical",
+     "matched": [
+      "invoices"
+     ],
+     "uses_select_star": false,
+     "label": "invoice creation"
+    },
+    {
+     "query_id": "q_billing_tax",
+     "service": "billing-api",
+     "criticality": "high",
+     "matched": [
+      "invoices"
+     ],
+     "uses_select_star": false,
+     "label": "invoice tax display"
+    },
+    {
+     "query_id": "q_billing_currency",
+     "service": "billing-api",
+     "criticality": "medium",
+     "matched": [
+      "invoices"
+     ],
+     "uses_select_star": false,
+     "label": "currency rollup"
+    },
+    {
+     "query_id": "q_dunning_open",
+     "service": "dunning-worker",
+     "criticality": "critical",
+     "matched": [
+      "open_invoices"
+     ],
+     "uses_select_star": true,
+     "label": "open invoice sweep"
+    },
+    {
+     "query_id": "q_billing_status_update",
+     "service": "billing-api",
+     "criticality": "high",
+     "matched": [
+      "invoices"
+     ],
+     "uses_select_star": false,
+     "label": "mark invoice open"
+    },
+    {
+     "query_id": "q_billing_customer_invoices",
+     "service": "billing-api",
+     "criticality": "critical",
+     "matched": [
+      "invoices"
+     ],
+     "uses_select_star": false,
+     "label": "customer invoice list"
+    },
+    {
+     "query_id": "q_support_open_for_customer",
+     "service": "support-admin",
+     "criticality": "high",
+     "matched": [
+      "invoices"
+     ],
+     "uses_select_star": false,
+     "label": "open invoices for a customer"
+    },
+    {
+     "query_id": "q_bi_revenue_by_customer",
+     "service": "bi",
+     "criticality": "medium",
+     "matched": [
+      "invoices"
+     ],
+     "uses_select_star": false,
+     "label": "revenue per customer"
+    }
+   ]
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "corpus.blast_score",
+   "args": {
+    "hits": [
+     {
+      "query_id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "matched": [
+       "invoices"
+      ],
+      "uses_select_star": false,
+      "label": "invoice creation"
+     },
+     {
+      "query_id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "matched": [
+       "invoices"
+      ],
+      "uses_select_star": false,
+      "label": "invoice tax display"
+     },
+     {
+      "query_id": "q_billing_currency",
+      "service": "billing-api",
+      "criticality": "medium",
+      "matched": [
+       "invoices"
+      ],
+      "uses_select_star": false,
+      "label": "currency rollup"
+     },
+     {
+      "query_id": "q_dunning_open",
+      "service": "dunning-worker",
+      "criticality": "critical",
+      "matched": [
+       "open_invoices"
+      ],
+      "uses_select_star": true,
+      "label": "open invoice sweep"
+     },
+     {
+      "query_id": "q_billing_status_update",
+      "service": "billing-api",
+      "criticality": "high",
+      "matched": [
+       "invoices"
+      ],
+      "uses_select_star": false,
+      "label": "mark invoice open"
+     },
+     {
+      "query_id": "q_billing_customer_invoices",
+      "service": "billing-api",
+      "criticality": "critical",
+      "matched": [
+       "invoices"
+      ],
+      "uses_select_star": false,
+      "label": "customer invoice list"
+     },
+     {
+      "query_id": "q_support_open_for_customer",
+      "service": "support-admin",
+      "criticality": "high",
+      "matched": [
+       "invoices"
+      ],
+      "uses_select_star": false,
+      "label": "open invoices for a customer"
+     },
+     {
+      "query_id": "q_bi_revenue_by_customer",
+      "service": "bi",
+      "criticality": "medium",
+      "matched": [
+       "invoices"
+      ],
+      "uses_select_star": false,
+      "label": "revenue per customer"
+     }
+    ]
+   },
+   "ms": 0.02,
+   "result_summary": 25
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "shadow.replay",
+   "args": {
+    "pre_schema": "Schema",
+    "post_schema": "Schema",
+    "ops": [
+     {
+      "kind": "dml_update",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": false
+      },
+      "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;",
+      "index": 0
+     }
+    ],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+9 more"
+    ]
+   },
+   "ms": 1.94,
+   "result_summary": {
+    "materialised": true,
+    "schema_errors": [],
+    "data_errors": [
+     "migration DML failed (stmt 0): unrecognized token: \"'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;\" :: U..."
+    ],
+    "broken": [],
+    "column_drift": [],
+    "rowcount_drift": [],
+    "data_loss": [],
+    "queries_run": 19,
+    "queries_ok_before": 19,
+    "queries_ok_after": 19
+   }
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "MIGRATION_TEXT_UNPARSED",
+    "table": "migration script"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    []
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "coverage.ledger",
+   "args": {
+    "ops": [
+     {
+      "kind": "dml_update",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": false
+      },
+      "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;",
+      "index": 0
+     }
+    ],
+    "schema": "Schema",
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+9 more"
+    ],
+    "unmodelled_notes": [],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 1,
+     "ops": 1,
+     "unterminated": [
+      {
+       "kind": "string",
+       "start": 29,
+       "end": 92,
+       "text": "'open WHERE id = 1;\nALTER TABLE invoices DROP COLUMN tax_rate;\n",
+       "why": "a single-quoted literal never closes, so Postgres rejects the script and everything after the quote was read as string c..."
+      }
+     ],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 74,
+      "attributed_chars": 74,
+      "unattributed_chars": 0
+     },
+     "clean": false
+    }
+   },
+   "ms": 0.14,
+   "result_summary": {
+    "gaps": [
+     {
+      "kind": "in_place_data_mutation",
+      "object": "invoices.status",
+      "object_inferred": false,
+      "statement_index": 0,
+      "statement": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;",
+      "why": "rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns ...",
+      "closes_with": "a reviewer confirms which consumers of invoices.status depend on the current values",
+      "irreversible": false
+     },
+     {
+      "kind": "unreviewable_text",
+      "object": "characters 29 onward",
+      "object_inferred": false,
+      "statement_index": null,
+      "statement": "'open WHERE id = 1;\nALTER TABLE invoices DROP COLUMN tax_rate;\n",
+      "why": "an unterminated string starts at character 29; from there to the end of the file every character was read as string cont...",
+      "closes_with": "the script is fixed and resubmitted; there is nothing here for a reviewer to sign off, because there is nothing here tha...",
+      "irreversible": false
+     }
+    ],
+    "gap_kinds": [
+     "in_place_data_mutation",
+     "unreviewable_text"
+    ],
+    "irreversible": [],
+    "corpus_statements": 17,
+    "parser_notes": []
+   }
+  },
+  {
+   "agent": "verifier",
+   "tool": "migration.parse",
+   "args": {
+    "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate LIMIT 5000);"
+   },
+   "ms": 0.05,
+   "result_summary": [
+    {
+     "kind": "dml_update",
+     "table": "invoices",
+     "column": null,
+     "detail": {
+      "where": true,
+      "batched": true
+     },
+     "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM...",
+     "index": 0
+    }
+   ]
+  },
+  {
+   "agent": "verifier",
+   "tool": "schema.apply_ops",
+   "args": {
+    "schema": "Schema",
+    "ops": [
+     {
+      "kind": "dml_update",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": true
+      },
+      "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM...",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.04,
+   "result_summary": [
+    "Schema",
+    []
+   ]
+  },
+  {
+   "agent": "verifier",
+   "tool": "shadow.replay",
+   "args": {
+    "pre_schema": "Schema",
+    "post_schema": "Schema",
+    "ops": [
+     {
+      "kind": "dml_update",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": true
+      },
+      "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM...",
+      "index": 0
+     }
+    ],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+9 more"
+    ]
+   },
+   "ms": 1.97,
+   "result_summary": {
+    "materialised": true,
+    "schema_errors": [],
+    "data_errors": [
+     "migration DML failed (stmt 0): unrecognized token: \"'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"i..."
+    ],
+    "broken": [],
+    "column_drift": [],
+    "rowcount_drift": [],
+    "data_loss": [],
+    "queries_run": 19,
+    "queries_ok_before": 19,
+    "queries_ok_after": 19
+   }
+  },
+  {
+   "agent": "verifier",
+   "tool": "migration.parse",
+   "args": {
+    "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate LIMIT 5000);"
+   },
+   "ms": 0.06,
+   "result_summary": [
+    {
+     "kind": "dml_update",
+     "table": "invoices",
+     "column": null,
+     "detail": {
+      "where": true,
+      "batched": true
+     },
+     "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM...",
+     "index": 0
+    }
+   ]
+  },
+  {
+   "agent": "verifier",
+   "tool": "schema.apply_ops",
+   "args": {
+    "schema": "Schema",
+    "ops": [
+     {
+      "kind": "dml_update",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": true
+      },
+      "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM...",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.04,
+   "result_summary": [
+    "Schema",
+    []
+   ]
+  },
+  {
+   "agent": "verifier",
+   "tool": "shadow.replay",
+   "args": {
+    "pre_schema": "Schema",
+    "post_schema": "Schema",
+    "ops": [
+     {
+      "kind": "dml_update",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": true
+      },
+      "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM...",
+      "index": 0
+     }
+    ],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+9 more"
+    ]
+   },
+   "ms": 2.4,
+   "result_summary": {
+    "materialised": true,
+    "schema_errors": [],
+    "data_errors": [
+     "migration DML failed (stmt 0): unrecognized token: \"'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"i..."
+    ],
+    "broken": [],
+    "column_drift": [],
+    "rowcount_drift": [],
+    "data_loss": [],
+    "queries_run": 19,
+    "queries_ok_before": 19,
+    "queries_ok_after": 19
+   }
+  }
+ ],
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 4,
+  "tokens_in": 1513,
+  "tokens_out": 172,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 8.3,
+ "severity_order": [
+  "low",
+  "medium",
+  "high",
+  "blocker"
+ ]
+}

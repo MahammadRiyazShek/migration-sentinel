@@ -224,7 +224,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -242,7 +243,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.86,
+   "ms": 0.64,
    "result_summary": "Schema"
   },
   {
@@ -273,6 +274,45 @@
   },
   {
    "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "CREATE UNIQUE INDEX idx_carrier_invoices_number ON carrier_invoices (carrier_id, invoice_number);\n",
+    "ops": [
+     {
+      "kind": "create_index",
+      "table": "carrier_invoices",
+      "column": null,
+      "detail": {
+       "name": "idx_carrier_invoices_number",
+       "unique": true,
+       "concurrently": false,
+       "columns": [
+        "carrier_id",
+        "invoice_number"
+       ]
+      },
+      "sql": "CREATE UNIQUE INDEX idx_carrier_invoices_number ON carrier_invoices (carrier_id, invoice_number)",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.04,
+   "result_summary": {
+    "lexed_statements": 1,
+    "ops": 1,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 89,
+     "attributed_chars": 89,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
+  },
+  {
+   "agent": "cartographer",
    "tool": "schema.apply_ops",
    "args": {
     "schema": "Schema",
@@ -295,7 +335,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -384,7 +424,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.13,
+   "ms": 0.08,
    "result_summary": [
     {
      "query_id": "q_dispatch_create",
@@ -501,7 +541,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.01,
    "result_summary": 14
   },
   {
@@ -845,7 +885,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.03,
+   "ms": 2.23,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -883,7 +923,7 @@
     "hazard_code": "UNIQUE_VIOLATION_EXISTING_DATA",
     "table": "carrier_invoices"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     [
@@ -1231,9 +1271,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 1,
+     "ops": 1,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 89,
+      "attributed_chars": 89,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.19,
+   "ms": 0.11,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1292,7 +1345,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1639,7 +1692,7 @@
      "...+7 more"
     ]
    },
-   "ms": 2.99,
+   "ms": 2.18,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1662,7 +1715,7 @@
   "tokens_out": 230,
   "cost_usd": 0.0
  },
- "wall_ms": 8.3,
+ "wall_ms": 6.4,
  "severity_order": [
   "low",
   "medium",

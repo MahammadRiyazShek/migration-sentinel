@@ -234,7 +234,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -250,7 +251,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.65,
+   "ms": 0.55,
    "result_summary": "Schema"
   },
   {
@@ -259,7 +260,7 @@
    "args": {
     "sql": "DROP INDEX CONCURRENTLY idx_invoices_customer;\nCREATE INDEX CONCURRENTLY idx_invoices_customer_status ON invoices (customer_id, status);\n"
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "drop_index",
@@ -288,6 +289,55 @@
      "index": 1
     }
    ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "DROP INDEX CONCURRENTLY idx_invoices_customer;\nCREATE INDEX CONCURRENTLY idx_invoices_customer_status ON invoices (customer_id, status);\n",
+    "ops": [
+     {
+      "kind": "drop_index",
+      "table": null,
+      "column": null,
+      "detail": {
+       "name": "idx_invoices_customer"
+      },
+      "sql": "DROP INDEX CONCURRENTLY idx_invoices_customer",
+      "index": 0
+     },
+     {
+      "kind": "create_index",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "name": "idx_invoices_customer_status",
+       "unique": false,
+       "concurrently": true,
+       "columns": [
+        "customer_id",
+        "status"
+       ]
+      },
+      "sql": "CREATE INDEX CONCURRENTLY idx_invoices_customer_status ON invoices (customer_id, status)",
+      "index": 1
+     }
+    ]
+   },
+   "ms": 0.05,
+   "result_summary": {
+    "lexed_statements": 2,
+    "ops": 2,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 123,
+     "attributed_chars": 123,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
   },
   {
    "agent": "cartographer",
@@ -323,7 +373,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -422,7 +472,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.17,
+   "ms": 0.09,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -609,7 +659,7 @@
      "...+1 more"
     ]
    },
-   "ms": 0.03,
+   "ms": 0.02,
    "result_summary": 28
   },
   {
@@ -849,7 +899,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.61,
+   "ms": 2.05,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -931,7 +981,7 @@
      "customer_id"
     ]
    },
-   "ms": 0.18,
+   "ms": 0.13,
    "result_summary": [
     {
      "query_id": "q_billing_customer_invoices",
@@ -1201,9 +1251,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 2,
+     "ops": 2,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 123,
+      "attributed_chars": 123,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.14,
+   "ms": 0.1,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1282,7 +1345,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -1525,7 +1588,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.63,
+   "ms": 1.87,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1548,7 +1611,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 7.3,
+ "wall_ms": 5.6,
  "severity_order": [
   "low",
   "medium",

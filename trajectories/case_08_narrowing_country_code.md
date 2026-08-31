@@ -2,7 +2,7 @@
 
 - run id: `eval-case_08_narrowing_country_code`
 - case: `case_08_narrowing_country_code`
-- events: 28
+- events: 29
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.62 ms)
+**tool** `schema.parse` (0.57 ms)
 
 ```json
 {
@@ -76,7 +76,47 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `migration.audit` (0.03 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE customers ALTER COLUMN country_code TYPE varchar(2);\n",
+  "ops": [
+   {
+    "kind": "alter_type",
+    "table": "customers",
+    "column": "country_code",
+    "detail": {
+     "new_type": "varchar(2)"
+    },
+    "sql": "ALTER TABLE customers ALTER COLUMN country_code TYPE varchar(2)",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 56,
+  "attributed_chars": 56,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -144,7 +184,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.08 ms)
 
 ```json
 {
@@ -261,7 +301,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.04 ms)
 
 ```json
 {
@@ -334,7 +374,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.5 ms)
+**tool** `shadow.replay` (2.14 ms)
 
 ```json
 {
@@ -483,7 +523,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -523,7 +563,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.16 ms)
+**tool** `coverage.ledger` (0.15 ms)
 
 ```json
 {
@@ -698,7 +738,7 @@ _tool responded_
 []
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -718,7 +758,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.42 ms)
+**tool** `shadow.replay` (1.94 ms)
 
 ```json
 {

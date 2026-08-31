@@ -1,0 +1,33 @@
+{
+ "case_id": "rt2_02_do_block_hides_the_drop",
+ "variant": "prompt_with_schema",
+ "verdict": "REQUEST_CHANGES",
+ "hazards": [
+  {
+   "code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+   "severity": "high",
+   "note": "The diff drops a column or table in a single step; old application code will break.",
+   "evidence": [],
+   "source": "model"
+  },
+  {
+   "code": "VIEW_BREAKAGE",
+   "severity": "high",
+   "note": "View open_invoices reads a table this migration alters and may stop resolving.",
+   "evidence": [],
+   "source": "model"
+  }
+ ],
+ "review_text": "Verdict: REQUEST_CHANGES\n\n- [HIGH] DESTRUCTIVE_NO_EXPAND_CONTRACT: The diff drops a column or table in a single step; old application code will break.\n- [HIGH] VIEW_BREAKAGE: View open_invoices reads a table this migration alters and may stop resolving.",
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 1,
+  "tokens_in": 1029,
+  "tokens_out": 63,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 0.1,
+ "plan": null,
+ "plan_verified": false
+}

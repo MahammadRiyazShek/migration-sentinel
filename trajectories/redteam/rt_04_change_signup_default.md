@@ -2,7 +2,7 @@
 
 - run id: `eval-rt_04_change_signup_default`
 - case: `rt_04_change_signup_default`
-- events: 26
+- events: 27
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.64 ms)
+**tool** `schema.parse` (0.62 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.03 ms)
 
 ```json
 {
@@ -76,7 +76,47 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `migration.audit` (0.03 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE customers ALTER COLUMN plan SET DEFAULT 'team';\n",
+  "ops": [
+   {
+    "kind": "set_default",
+    "table": "customers",
+    "column": "plan",
+    "detail": {
+     "default": "'team'"
+    },
+    "sql": "ALTER TABLE customers ALTER COLUMN plan SET DEFAULT 'team'",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 50,
+  "attributed_chars": 50,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.03 ms)
 
 ```json
 {
@@ -144,7 +184,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.16 ms)
+**tool** `corpus.dependents` (0.08 ms)
 
 ```json
 {
@@ -262,7 +302,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.01 ms)
 
 ```json
 {
@@ -336,7 +376,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.62 ms)
+**tool** `shadow.replay` (1.99 ms)
 
 ```json
 {
@@ -457,7 +497,7 @@ _tool responded_
 
 </details>
 
-**tool** `coverage.ledger` (0.18 ms)
+**tool** `coverage.ledger` (0.1 ms)
 
 ```json
 {
@@ -625,7 +665,7 @@ _tool responded_
 []
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.03 ms)
 
 ```json
 {
@@ -645,7 +685,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.58 ms)
+**tool** `shadow.replay` (1.91 ms)
 
 ```json
 {

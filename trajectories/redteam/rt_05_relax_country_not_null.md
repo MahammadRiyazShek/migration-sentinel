@@ -2,7 +2,7 @@
 
 - run id: `eval-rt_05_relax_country_not_null`
 - case: `rt_05_relax_country_not_null`
-- events: 26
+- events: 27
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.68 ms)
+**tool** `schema.parse` (0.55 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.03 ms)
 
 ```json
 {
@@ -74,7 +74,45 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `migration.audit` (0.03 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE customers ALTER COLUMN country_code DROP NOT NULL;\n",
+  "ops": [
+   {
+    "kind": "drop_not_null",
+    "table": "customers",
+    "column": "country_code",
+    "detail": {},
+    "sql": "ALTER TABLE customers ALTER COLUMN country_code DROP NOT NULL",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 53,
+  "attributed_chars": 53,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.03 ms)
 
 ```json
 {
@@ -140,7 +178,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.12 ms)
+**tool** `corpus.dependents` (0.08 ms)
 
 ```json
 {
@@ -257,7 +295,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.01 ms)
 
 ```json
 {
@@ -330,7 +368,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.61 ms)
+**tool** `shadow.replay` (2.0 ms)
 
 ```json
 {
@@ -450,7 +488,7 @@ _tool responded_
 
 </details>
 
-**tool** `coverage.ledger` (0.14 ms)
+**tool** `coverage.ledger` (0.1 ms)
 
 ```json
 {
@@ -616,7 +654,7 @@ _tool responded_
 []
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -636,7 +674,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.65 ms)
+**tool** `shadow.replay` (1.89 ms)
 
 ```json
 {

@@ -2,7 +2,7 @@
 
 - run id: `eval-case_01_rename_with_compat_view`
 - case: `case_01_rename_with_compat_view`
-- events: 46
+- events: 47
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.68 ms)
+**tool** `schema.parse` (0.61 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.06 ms)
+**tool** `migration.parse` (0.07 ms)
 
 ```json
 {
@@ -88,7 +88,59 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `migration.audit` (0.08 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE customers RENAME COLUMN full_name TO name;\nCREATE OR REPLACE VIEW customer_billing_summary AS\n  SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;\n",
+  "ops": [
+   {
+    "kind": "rename_column",
+    "table": "customers",
+    "column": "full_name",
+    "detail": {
+     "new_name": "name"
+    },
+    "sql": "ALTER TABLE customers RENAME COLUMN full_name TO name",
+    "index": 0
+   },
+   {
+    "kind": "create_view",
+    "table": null,
+    "column": null,
+    "detail": {
+     "name": "customer_billing_summary",
+     "select": "SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers",
+     "replace": true
+    },
+    "sql": "CREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, ...",
+    "index": 1
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 2,
+ "ops": 2,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 177,
+  "attributed_chars": 177,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -169,7 +221,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.18 ms)
+**tool** `corpus.dependents` (0.15 ms)
 
 ```json
 {
@@ -287,7 +339,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.04 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -359,7 +411,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (3.69 ms)
+**tool** `shadow.replay` (2.49 ms)
 
 ```json
 {
@@ -701,7 +753,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -765,7 +817,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.2 ms)
+**tool** `coverage.ledger` (0.14 ms)
 
 ```json
 {
@@ -974,7 +1026,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.11 ms)
+**tool** `migration.parse` (0.13 ms)
 
 ```json
 {
@@ -1027,7 +1079,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -1084,7 +1136,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.64 ms)
+**tool** `shadow.replay` (2.16 ms)
 
 ```json
 {
@@ -1378,7 +1430,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.08 ms)
+**tool** `migration.parse` (0.18 ms)
 
 ```json
 {
@@ -1419,7 +1471,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -1464,7 +1516,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.49 ms)
+**tool** `shadow.replay` (2.08 ms)
 
 ```json
 {

@@ -23,11 +23,11 @@
   "provider": "scripted",
   "model": "scripted-v1",
   "calls": 1,
-  "tokens_in": 508,
+  "tokens_in": 546,
   "tokens_out": 69,
   "cost_usd": 0.0
  },
- "wall_ms": 0.1,
+ "wall_ms": 0.0,
  "plan": null,
  "plan_verified": false
 }

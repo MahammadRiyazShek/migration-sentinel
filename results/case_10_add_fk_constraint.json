@@ -196,7 +196,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -212,7 +213,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.65,
+   "ms": 0.58,
    "result_summary": "Schema"
   },
   {
@@ -221,7 +222,7 @@
    "args": {
     "sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id);\n"
    },
-   "ms": 0.06,
+   "ms": 0.08,
    "result_summary": [
     {
      "kind": "add_constraint",
@@ -238,6 +239,43 @@
      "index": 0
     }
    ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id);\n",
+    "ops": [
+     {
+      "kind": "add_constraint",
+      "table": "invoices",
+      "column": null,
+      "detail": {
+       "constraint": "invoices_customer_fk",
+       "constraint_kind": "foreign_key",
+       "expr": "(customer_id) REFERENCES customers (id)",
+       "columns": [],
+       "not_valid": false
+      },
+      "sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id)",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.05,
+   "result_summary": {
+    "lexed_statements": 1,
+    "ops": 1,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 97,
+     "attributed_chars": 97,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
   },
   {
    "agent": "cartographer",
@@ -261,7 +299,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -348,7 +386,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.08,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -459,7 +497,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.01,
    "result_summary": 16
   },
   {
@@ -687,7 +725,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.43,
+   "ms": 2.05,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -940,9 +978,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 1,
+     "ops": 1,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 97,
+      "attributed_chars": 97,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.24,
+   "ms": 0.13,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -997,7 +1048,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.11,
    "result_summary": [
     "Schema",
     []
@@ -1228,7 +1279,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.37,
+   "ms": 1.89,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1251,7 +1302,7 @@
   "tokens_out": 120,
   "cost_usd": 0.0
  },
- "wall_ms": 6.8,
+ "wall_ms": 5.8,
  "severity_order": [
   "low",
   "medium",

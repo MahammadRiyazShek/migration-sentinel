@@ -23,7 +23,7 @@
   "provider": "scripted",
   "model": "scripted-v1",
   "calls": 1,
-  "tokens_in": 937,
+  "tokens_in": 974,
   "tokens_out": 59,
   "cost_usd": 0.0
  },

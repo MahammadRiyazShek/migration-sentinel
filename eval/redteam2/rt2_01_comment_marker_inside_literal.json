@@ -1,0 +1,306 @@
+{
+ "id": "rt2_01_comment_marker_inside_literal",
+ "title": "Normalise the invoice currency default, then retire the unused tax column",
+ "owner_service": "platform",
+ "scenario": "A two-statement cleanup PR. The backfill note is a string literal that happens to contain a double hyphen, which is legal Postgres and completely ordinary in human-written copy. billing-api still selects invoices.tax_rate.",
+ "migration_sql": "UPDATE invoices SET currency = 'usd -- legacy default' WHERE currency IS NULL;\nALTER TABLE invoices DROP COLUMN tax_rate;\n",
+ "rollback_sql": "ALTER TABLE invoices ADD COLUMN tax_rate REAL;\n",
+ "ground_truth": {
+  "blocking": true,
+  "hazards": [
+   {
+    "code": "BREAKING_QUERY",
+    "severity": "blocker",
+    "note": "q_billing_tax selects invoices.tax_rate and fails against the post-migration schema."
+   },
+   {
+    "code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+    "severity": "high",
+    "note": "The column is dropped in the same deploy that still ships the code reading it."
+   },
+   {
+    "code": "UNBATCHED_BACKFILL",
+    "severity": "high",
+    "note": "One unbounded UPDATE over a 48M-row table holds locks and bloats WAL for the length of the statement."
+   },
+   {
+    "code": "CROSS_SERVICE_UNCOORDINATED",
+    "severity": "high",
+    "note": "The migration is owned by platform and the breakage lands in billing-api, whose deploy the author does not control."
+   }
+  ],
+  "notes": "The SQL is valid Postgres. Nothing here is a syntax defect, which is why the label carries no MIGRATION_TEXT_UNPARSED: the defect was in the reader. v13 parsed one statement out of two and reported on the half it could see."
+ },
+ "schema_sql": "CREATE TABLE customers (\n  id SERIAL PRIMARY KEY,\n  email TEXT NOT NULL,\n  full_name TEXT,\n  company_name TEXT,\n  country_code TEXT NOT NULL DEFAULT 'US',\n  plan TEXT NOT NULL DEFAULT 'free',\n  mrr_cents INTEGER NOT NULL DEFAULT 0,\n  signed_up_at TIMESTAMPTZ NOT NULL,\n  CONSTRAINT customers_plan_chk CHECK (plan IN ('free','team','business','enterprise'))\n);\n\nCREATE TABLE subscriptions (\n  id SERIAL PRIMARY KEY,\n  customer_id INTEGER NOT NULL,\n  status TEXT NOT NULL DEFAULT 'active',\n  seats INTEGER NOT NULL DEFAULT 1,\n  price_cents INTEGER NOT NULL,\n  started_on TEXT NOT NULL,\n  canceled_on TEXT,\n  CONSTRAINT subscriptions_seats_chk CHECK (seats > 0)\n);\n\nCREATE TABLE invoices (\n  id SERIAL PRIMARY KEY,\n  customer_id INTEGER NOT NULL,\n  subscription_id INTEGER,\n  invoice_number TEXT NOT NULL,\n  amount_cents INTEGER NOT NULL,\n  tax_rate REAL,\n  currency TEXT NOT NULL DEFAULT 'usd',\n  status TEXT NOT NULL DEFAULT 'draft',\n  issued_at TIMESTAMPTZ,\n  paid_at TIMESTAMPTZ\n);\n\nCREATE TABLE invoice_lines (\n  id SERIAL PRIMARY KEY,\n  invoice_id INTEGER NOT NULL,\n  description TEXT NOT NULL,\n  quantity INTEGER NOT NULL DEFAULT 1,\n  unit_price_cents INTEGER NOT NULL\n);\n\nCREATE TABLE usage_events (\n  id SERIAL PRIMARY KEY,\n  customer_id INTEGER NOT NULL,\n  event_name TEXT NOT NULL,\n  quantity INTEGER NOT NULL DEFAULT 1,\n  occurred_at TIMESTAMPTZ NOT NULL\n);\n\nCREATE VIEW customer_billing_summary AS SELECT * FROM customers;\n\nCREATE VIEW open_invoices AS\n  SELECT id, customer_id, invoice_number, amount_cents, status\n  FROM invoices WHERE status IN ('draft','open');\n\nCREATE INDEX idx_invoices_customer ON invoices (customer_id);\n\nCREATE INDEX idx_customers_company ON customers (company_name);\nCREATE INDEX idx_usage_events_occurred ON usage_events (occurred_at);",
+ "row_estimates": {
+  "customers": 2400000,
+  "subscriptions": 2600000,
+  "invoices": 48000000,
+  "invoice_lines": 190000000,
+  "usage_events": 900000000
+ },
+ "queries": [
+  {
+   "id": "q_web_profile",
+   "service": "web",
+   "criticality": "critical",
+   "label": "customer profile page",
+   "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+  },
+  {
+   "id": "q_web_signup",
+   "service": "web",
+   "criticality": "critical",
+   "label": "signup insert",
+   "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+  },
+  {
+   "id": "q_support_lookup",
+   "service": "support-admin",
+   "criticality": "high",
+   "label": "support customer lookup",
+   "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+  },
+  {
+   "id": "q_bi_summary",
+   "service": "bi",
+   "criticality": "high",
+   "label": "dbt model stg_customers",
+   "sql": "SELECT * FROM customer_billing_summary"
+  },
+  {
+   "id": "q_bi_mrr",
+   "service": "bi",
+   "criticality": "medium",
+   "label": "MRR by plan",
+   "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+  },
+  {
+   "id": "q_bi_country",
+   "service": "bi",
+   "criticality": "low",
+   "label": "customers by country",
+   "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+  },
+  {
+   "id": "q_billing_invoice_create",
+   "service": "billing-api",
+   "criticality": "critical",
+   "label": "invoice creation",
+   "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+  },
+  {
+   "id": "q_billing_tax",
+   "service": "billing-api",
+   "criticality": "high",
+   "label": "invoice tax display",
+   "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+  },
+  {
+   "id": "q_billing_currency",
+   "service": "billing-api",
+   "criticality": "medium",
+   "label": "currency rollup",
+   "sql": "SELECT currency, COUNT(*) AS n FROM invoices GROUP BY currency"
+  },
+  {
+   "id": "q_dunning_open",
+   "service": "dunning-worker",
+   "criticality": "critical",
+   "label": "open invoice sweep",
+   "sql": "SELECT * FROM open_invoices"
+  },
+  {
+   "id": "q_mobile_seats",
+   "service": "mobile-api",
+   "criticality": "high",
+   "label": "seat count for the app",
+   "sql": "SELECT id, seats, status FROM subscriptions WHERE customer_id = 1"
+  },
+  {
+   "id": "q_web_line_items",
+   "service": "web",
+   "criticality": "high",
+   "label": "invoice line items",
+   "sql": "SELECT description, quantity, unit_price_cents FROM invoice_lines WHERE invoice_id = 1"
+  },
+  {
+   "id": "q_analytics_usage",
+   "service": "bi",
+   "criticality": "medium",
+   "label": "usage rollup",
+   "sql": "SELECT event_name, SUM(quantity) AS q FROM usage_events GROUP BY event_name"
+  },
+  {
+   "id": "q_billing_status_update",
+   "service": "billing-api",
+   "criticality": "high",
+   "label": "mark invoice open",
+   "sql": "UPDATE invoices SET status = 'open' WHERE id = 1"
+  },
+  {
+   "id": "q_billing_customer_invoices",
+   "service": "billing-api",
+   "criticality": "critical",
+   "label": "customer invoice list",
+   "sql": "SELECT id, invoice_number, amount_cents, status FROM invoices WHERE customer_id = 1 ORDER BY issued_at DESC LIMIT 50"
+  },
+  {
+   "id": "q_support_open_for_customer",
+   "service": "support-admin",
+   "criticality": "high",
+   "label": "open invoices for a customer",
+   "sql": "SELECT invoice_number, status FROM invoices WHERE customer_id = 1 AND status = 'open'"
+  },
+  {
+   "id": "q_bi_revenue_by_customer",
+   "service": "bi",
+   "criticality": "medium",
+   "label": "revenue per customer",
+   "sql": "SELECT customer_id, SUM(amount_cents) AS revenue FROM invoices GROUP BY customer_id"
+  }
+ ],
+ "seed": {
+  "customers": [
+   {
+    "id": 1,
+    "email": "ada@corp.example",
+    "full_name": "Ada Lovelace",
+    "company_name": "Corp",
+    "country_code": "US",
+    "plan": "business",
+    "mrr_cents": 49900,
+    "signed_up_at": "2024-01-04"
+   },
+   {
+    "id": 2,
+    "email": "grace@corp.example",
+    "full_name": "Grace Hopper",
+    "company_name": "Corp",
+    "country_code": "USA",
+    "plan": "team",
+    "mrr_cents": 9900,
+    "signed_up_at": "2024-03-11"
+   },
+   {
+    "id": 3,
+    "email": "alan@lab.example",
+    "full_name": "Alan Turing",
+    "company_name": null,
+    "country_code": "GB",
+    "plan": "free",
+    "mrr_cents": 0,
+    "signed_up_at": "2025-06-02"
+   },
+   {
+    "id": 4,
+    "email": "katherine@nasa.example",
+    "full_name": "Katherine Johnson",
+    "company_name": "NASA",
+    "country_code": "US",
+    "plan": "enterprise",
+    "mrr_cents": 249900,
+    "signed_up_at": "2023-11-20"
+   }
+  ],
+  "subscriptions": [
+   {
+    "id": 1,
+    "customer_id": 1,
+    "status": "active",
+    "seats": 12,
+    "price_cents": 49900,
+    "started_on": "2024-01-04",
+    "canceled_on": null
+   },
+   {
+    "id": 2,
+    "customer_id": 1,
+    "status": "canceled",
+    "seats": 3,
+    "price_cents": 9900,
+    "started_on": "2023-02-01",
+    "canceled_on": "2024-01-03"
+   },
+   {
+    "id": 3,
+    "customer_id": 4,
+    "status": "active",
+    "seats": 400,
+    "price_cents": 249900,
+    "started_on": "2023-11-20",
+    "canceled_on": null
+   }
+  ],
+  "invoices": [
+   {
+    "id": 1,
+    "customer_id": 1,
+    "subscription_id": 1,
+    "invoice_number": "INV-1001",
+    "amount_cents": 49900,
+    "tax_rate": 0.2,
+    "currency": "usd",
+    "status": "open",
+    "issued_at": "2026-01-01",
+    "paid_at": null
+   },
+   {
+    "id": 2,
+    "customer_id": 4,
+    "subscription_id": 3,
+    "invoice_number": "INV-1002",
+    "amount_cents": 249900,
+    "tax_rate": 0.0,
+    "currency": "usd",
+    "status": "paid",
+    "issued_at": "2026-01-01",
+    "paid_at": "2026-01-05"
+   },
+   {
+    "id": 3,
+    "customer_id": 1,
+    "subscription_id": 1,
+    "invoice_number": "INV-1003",
+    "amount_cents": 1200,
+    "tax_rate": null,
+    "currency": "eur",
+    "status": "draft",
+    "issued_at": null,
+    "paid_at": null
+   }
+  ],
+  "invoice_lines": [
+   {
+    "id": 1,
+    "invoice_id": 1,
+    "description": "Business plan",
+    "quantity": 12,
+    "unit_price_cents": 4158
+   },
+   {
+    "id": 2,
+    "invoice_id": 2,
+    "description": "Enterprise plan",
+    "quantity": 400,
+    "unit_price_cents": 624
+   }
+  ],
+  "usage_events": [
+   {
+    "id": 1,
+    "customer_id": 1,
+    "event_name": "api_call",
+    "quantity": 900,
+    "occurred_at": "2026-01-30"
+   },
+   {
+    "id": 2,
+    "customer_id": 4,
+    "event_name": "seat_active",
+    "quantity": 400,
+    "occurred_at": "2026-01-30"
+   }
+  ]
+ }
+}

@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_01_service_level_not_null`
 - case: `holdout_01_service_level_not_null`
-- events: 28
+- events: 29
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.06 ms)
+**tool** `schema.parse` (0.7 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.03 ms)
 
 ```json
 {
@@ -83,7 +83,50 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `migration.audit` (0.04 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE shipments ADD COLUMN service_level TEXT NOT NULL;\n",
+  "ops": [
+   {
+    "kind": "add_column",
+    "table": "shipments",
+    "column": "service_level",
+    "detail": {
+     "type": "TEXT",
+     "not_null": true,
+     "default": null,
+     "unique": false
+    },
+    "sql": "ALTER TABLE shipments ADD COLUMN service_level TEXT NOT NULL",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 52,
+  "attributed_chars": 52,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -155,7 +198,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.19 ms)
+**tool** `corpus.dependents` (0.13 ms)
 
 ```json
 {
@@ -257,7 +300,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.05 ms)
 
 ```json
 {
@@ -324,7 +367,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (3.47 ms)
+**tool** `shadow.replay` (2.51 ms)
 
 ```json
 {
@@ -564,7 +607,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.16 ms)
+**tool** `coverage.ledger` (0.12 ms)
 
 ```json
 {
@@ -751,7 +794,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -785,7 +828,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.98 ms)
+**tool** `shadow.replay` (2.34 ms)
 
 ```json
 {

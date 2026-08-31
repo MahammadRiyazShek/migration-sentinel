@@ -30,11 +30,11 @@
   "provider": "scripted",
   "model": "scripted-v1",
   "calls": 1,
-  "tokens_in": 941,
+  "tokens_in": 978,
   "tokens_out": 82,
   "cost_usd": 0.0
  },
- "wall_ms": 0.5,
+ "wall_ms": 0.4,
  "plan": null,
  "plan_verified": false
 }

@@ -128,7 +128,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -144,7 +145,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.69,
+   "ms": 0.56,
    "result_summary": "Schema"
   },
   {
@@ -169,6 +170,39 @@
   },
   {
    "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "DROP INDEX idx_customers_company;\n",
+    "ops": [
+     {
+      "kind": "drop_index",
+      "table": null,
+      "column": null,
+      "detail": {
+       "name": "idx_customers_company"
+      },
+      "sql": "DROP INDEX idx_customers_company",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.03,
+   "result_summary": {
+    "lexed_statements": 1,
+    "ops": 1,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 30,
+     "attributed_chars": 30,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
+  },
+  {
+   "agent": "cartographer",
    "tool": "schema.apply_ops",
    "args": {
     "schema": "Schema",
@@ -185,7 +219,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.03,
    "result_summary": [
     "Schema",
     []
@@ -268,7 +302,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.07,
    "result_summary": []
   },
   {
@@ -501,7 +535,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.62,
+   "ms": 2.01,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -583,7 +617,7 @@
      "company_name"
     ]
    },
-   "ms": 0.13,
+   "ms": 0.09,
    "result_summary": []
   },
   {
@@ -806,9 +840,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 1,
+     "ops": 1,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 30,
+      "attributed_chars": 30,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.23,
+   "ms": 0.18,
    "result_summary": {
     "gaps": [
      {
@@ -868,7 +915,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -1095,7 +1142,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.57,
+   "ms": 1.9,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1118,7 +1165,7 @@
   "tokens_out": 78,
   "cost_usd": 0.0
  },
- "wall_ms": 7.1,
+ "wall_ms": 5.5,
  "severity_order": [
   "low",
   "medium",

@@ -62,11 +62,11 @@ the description says so.
 Upload the archive built from the tree that passes:
 
 ```bash
-python3 -m unittest discover -s tests    # 104 tests
+python3 -m unittest discover -s tests    # 129 tests
 python3 eval/run_eval.py --ablations     # 120 reviews
 python3 eval/run_holdout.py --ablations  # 9 held-out cases, three arms
 python3 eval/model_invariance.py         # 180 reviews
-python3 tools/check_results.py           # 57/57 claims hold
+python3 tools/check_results.py           # 67/67 claims hold
 python3 tools/check_docs.py              # 9 documentation checks
 python3 tools/check_submission_text.py   # 7 submission-text checks
 ```
@@ -78,7 +78,7 @@ completeness and reproducibility gate before rubric scoring begins.
 
 - [ ] description pasted from `SUBMISSION_FORM_TEXT.txt`, unedited, `7/7` green
 - [ ] title and video URL fields match the two blocks above
-- [ ] source archive is the tree that prints `57/57 claims hold`, `9/9 documentation checks` and
+- [ ] source archive is the tree that prints `67/67 claims hold`, `9/9 documentation checks` and
       `0 decision differences` on both `check_determinism.py` and `check_cross_version.py`
 - [ ] `agent_traces/INDEX.md` regenerated (`python3 tools/collect_agent_traces.py --write`) and secret
       scan clean

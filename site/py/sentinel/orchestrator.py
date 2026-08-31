@@ -7,6 +7,11 @@ and every claim traceable to a tool call.  The model contributes wording and
 reviewer questions; it never decides whether something is a hazard.
 
   cartographer -> blast_radius -> risk_officer -> (rollout_engineer <-> verifier)* -> approval gate
+
+v14 adds one step inside the cartographer rather than a sixth agent, on purpose: the parse
+is reconciled against an independent lexical scan of the same file before anything
+downstream is allowed to treat the op list as the migration. A defect upstream of every
+agent does not get its own agent; it gets an invariant. See `sentinel/tools/parse_audit.py`.
 """
 from __future__ import annotations
 
@@ -22,7 +27,7 @@ from .agents.verifier import Verifier
 from . import coverage as coverage_tools
 from . import narrator as narrator_tools
 from .hazards import SEVERITY_ORDER
-from .tools import query_corpus, shadow_db, sql_parse
+from .tools import parse_audit, query_corpus, shadow_db, sql_parse
 from .tools.incident_memory import IncidentMemory
 from .tools.registry import ToolRegistry
 from .trace import Tracer
@@ -33,19 +38,19 @@ MAX_ATTEMPTS = 3
 # changelog can point at a number instead of a feeling.
 FEATURE_SETS = {
     "full": {"replay": True, "static": True, "memory": True, "verify": True, "coverage": True,
-             "rule_coverage": True},
+             "rule_coverage": True, "text_conservation": True},
     "no_replay": {"replay": False, "static": True, "memory": True, "verify": False,
-                  "coverage": True, "rule_coverage": True},
+                  "coverage": True, "rule_coverage": True, "text_conservation": True},
     "no_static": {"replay": True, "static": False, "memory": True, "verify": True,
-                  "coverage": True, "rule_coverage": True},
+                  "coverage": True, "rule_coverage": True, "text_conservation": True},
     "no_memory": {"replay": True, "static": True, "memory": False, "verify": True,
-                  "coverage": True, "rule_coverage": True},
+                  "coverage": True, "rule_coverage": True, "text_conservation": True},
     "no_verify": {"replay": True, "static": True, "memory": True, "verify": False,
-                  "coverage": True, "rule_coverage": True},
+                  "coverage": True, "rule_coverage": True, "text_conservation": True},
     # v2 component. `no_coverage` reproduces the v1 behaviour exactly: gaps are
     # still reported, they just do not constrain the verdict.
     "no_coverage": {"replay": True, "static": True, "memory": True, "verify": True,
-                    "coverage": False, "rule_coverage": True},
+                    "coverage": False, "rule_coverage": True, "text_conservation": True},
     # v13 component. `no_rule_coverage` reproduces v12 exactly: the two rules the
     # red-team pass found missing are off, and the ledger goes back to declaring blind
     # spots only about objects some rule had already looked at. It is identical to
@@ -53,16 +58,30 @@ FEATURE_SETS = {
     # this layer was absent rather than retuned - and it is 2/6 unsafe approvals on
     # eval/redteam, where `full` is 0/6.
     "no_rule_coverage": {"replay": True, "static": True, "memory": True, "verify": True,
-                         "coverage": True, "rule_coverage": False},
+                         "coverage": True, "rule_coverage": False, "text_conservation": True},
+    # v14 component. `no_text_conservation` reproduces v13 exactly, splitter included: the
+    # migration is split by the retired regex stripper, and the reconciliation between the
+    # op list and the file does not run. It is identical to `full` on all 28 labelled cases
+    # in eval/cases, eval/holdout and eval/redteam, which is the evidence that this layer
+    # was absent rather than retuned - and it loses two thirds of a migration on
+    # eval/redteam2/rt2_01 without reporting anything.
+    "no_text_conservation": {"replay": True, "static": True, "memory": True, "verify": True,
+                             "coverage": True, "rule_coverage": True, "text_conservation": False},
 }
 
 
-def build_registry(memory: IncidentMemory, tracer: Tracer) -> ToolRegistry:
+def build_registry(memory: IncidentMemory, tracer: Tracer,
+                   text_conservation: bool = True) -> ToolRegistry:
     reg = ToolRegistry(tracer)
     reg.register("schema.parse", sql_parse.parse_schema,
                  "Parse current DDL into a structural schema model.")
-    reg.register("migration.parse", sql_parse.parse_migration,
+    reg.register("migration.parse",
+                 (sql_parse.parse_migration if text_conservation
+                  else lambda sql: sql_parse.parse_migration(sql, legacy_split=True)),
                  "Parse a migration script into typed operations.")
+    reg.register("migration.audit", parse_audit.audit,
+                 "Reconcile the op list against an independent lexical scan of the same file: "
+                 "unterminated constructs, statements no operation accounts for, procedural bodies.")
     reg.register("schema.apply_ops", sql_parse.apply_ops,
                  "Apply operations to a schema model, returning the post-migration schema.")
     reg.register("corpus.dependents", query_corpus.dependents,
@@ -111,14 +130,17 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
     run_id = run_id or f"run-{uuid.uuid4().hex[:8]}"
     tracer = Tracer(run_id, case["id"], enabled=trace)
     memory = IncidentMemory(incidents_path, learned_path)
-    tools = build_registry(memory, tracer)
+    tools = build_registry(memory, tracer,
+                           text_conservation=feat.get("text_conservation", True))
 
-    parsed = Cartographer(tools, llm, tracer).run(case)
+    parsed = Cartographer(tools, llm, tracer).run(
+        case, text_conservation=feat.get("text_conservation", True))
     blast = BlastRadius(tools, llm, tracer).run(case, parsed, use_replay=feat["replay"])
     risk = RiskOfficer(tools, llm, tracer).run(case, parsed, blast,
                                                use_static=feat["static"], use_memory=feat["memory"],
                                                use_coverage=feat.get("coverage", True),
-                                               use_rule_coverage=feat.get("rule_coverage", True))
+                                               use_rule_coverage=feat.get("rule_coverage", True),
+                                               use_text_conservation=feat.get("text_conservation", True))
 
     engineer = RolloutEngineer(tools, llm, tracer)
     engineer.guard_narrator = guarded

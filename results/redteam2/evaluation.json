@@ -1,0 +1,948 @@
+{
+ "time_model_assumptions": {
+  "read_review_minutes": 5,
+  "verify_unevidenced_claim_minutes": 4,
+  "write_expand_contract_plan_minutes": 20,
+  "decide_human_gate_minutes": 3
+ },
+ "arms": {
+  "baseline_prompt_only": {
+   "per_case": [
+    {
+     "case_id": "rt2_01_comment_marker_inside_literal",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "tp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "fp": [],
+     "fn": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED"
+     ],
+     "fam_tp": [
+      "operational_lock",
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [
+      "consumer_breakage"
+     ],
+     "severity_matches": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.6,
+     "tokens": 583,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_02_do_block_hides_the_drop",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "PROCEDURAL_DDL_UNREVIEWED"
+     ],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT"
+     ],
+     "tp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT"
+     ],
+     "fp": [],
+     "fn": [
+      "BREAKING_QUERY",
+      "PROCEDURAL_DDL_UNREVIEWED"
+     ],
+     "fam_tp": [
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [
+      "PROCEDURAL_DDL_UNREVIEWED",
+      "consumer_breakage"
+     ],
+     "severity_matches": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.1,
+     "tokens": 577,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_03_unterminated_literal",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "MIGRATION_TEXT_UNPARSED"
+     ],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "tp": [],
+     "fp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "fn": [
+      "MIGRATION_TEXT_UNPARSED"
+     ],
+     "fam_tp": [],
+     "fam_fp": [
+      "operational_lock",
+      "process"
+     ],
+     "fam_fn": [
+      "MIGRATION_TEXT_UNPARSED"
+     ],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.0,
+     "tokens": 575,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_04_nested_comment_phantom",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT"
+     ],
+     "tp": [],
+     "fp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT"
+     ],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [
+      "process"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": true,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.1,
+     "tokens": 569,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_05_function_body_no_ddl",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 0.1,
+     "tokens": 573,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_06_ordinary_migration_with_quotes",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 0.0,
+     "tokens": 575,
+     "cost_usd": 0.0
+    }
+   ],
+   "aggregate": {
+    "cases": 6,
+    "unsafe_approvals": 0,
+    "blocking_cases": 3,
+    "clean_verdicts_on_blocking_cases": 0,
+    "false_alarms_on_clean_cases": 1,
+    "strict": {
+     "precision": 0.5,
+     "recall": 0.375,
+     "f1": 0.429,
+     "tp": 3,
+     "fp": 3,
+     "fn": 5
+    },
+    "lenient_family": {
+     "precision": 0.5,
+     "recall": 0.429,
+     "f1": 0.462,
+     "tp": 3,
+     "fp": 3,
+     "fn": 4
+    },
+    "severity_agreement": 1.0,
+    "findings_total": 6,
+    "findings_with_evidence": 0,
+    "verified_plans": 0,
+    "cases_with_coverage_gaps": 2,
+    "declared_coverage_gaps": 0,
+    "gap_cases_cleared_without_signoff": 0,
+    "modelled_reviewer_minutes_total": 134,
+    "modelled_reviewer_minutes_per_case": 22.3,
+    "wall_ms_per_case": 0.1,
+    "tokens_total": 3452,
+    "cost_usd_total": 0.0
+   }
+  },
+  "baseline_prompt_with_schema": {
+   "per_case": [
+    {
+     "case_id": "rt2_01_comment_marker_inside_literal",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL",
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "fp": [
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED"
+     ],
+     "fam_tp": [
+      "consumer_breakage",
+      "operational_lock",
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 3,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 37,
+     "wall_ms": 0.3,
+     "tokens": 1097,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_02_do_block_hides_the_drop",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "PROCEDURAL_DDL_UNREVIEWED"
+     ],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT"
+     ],
+     "fp": [
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [
+      "BREAKING_QUERY",
+      "PROCEDURAL_DDL_UNREVIEWED"
+     ],
+     "fam_tp": [
+      "consumer_breakage",
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [
+      "PROCEDURAL_DDL_UNREVIEWED"
+     ],
+     "severity_matches": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.1,
+     "tokens": 1092,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_03_unterminated_literal",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "MIGRATION_TEXT_UNPARSED"
+     ],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL",
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [],
+     "fp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL",
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [
+      "MIGRATION_TEXT_UNPARSED"
+     ],
+     "fam_tp": [],
+     "fam_fp": [
+      "consumer_breakage",
+      "operational_lock",
+      "process"
+     ],
+     "fam_fn": [
+      "MIGRATION_TEXT_UNPARSED"
+     ],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 3,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 37,
+     "wall_ms": 0.1,
+     "tokens": 1090,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_04_nested_comment_phantom",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [],
+     "fp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [
+      "consumer_breakage",
+      "process"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": true,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.1,
+     "tokens": 1084,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_05_function_body_no_ddl",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [],
+     "fp": [
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [
+      "consumer_breakage"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": true,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.1,
+     "tokens": 1074,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_06_ordinary_migration_with_quotes",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [],
+     "fp": [
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [
+      "consumer_breakage"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": true,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.1,
+     "tokens": 1076,
+     "cost_usd": 0.0
+    }
+   ],
+   "aggregate": {
+    "cases": 6,
+    "unsafe_approvals": 0,
+    "blocking_cases": 3,
+    "clean_verdicts_on_blocking_cases": 0,
+    "false_alarms_on_clean_cases": 3,
+    "strict": {
+     "precision": 0.25,
+     "recall": 0.375,
+     "f1": 0.3,
+     "tp": 3,
+     "fp": 9,
+     "fn": 5
+    },
+    "lenient_family": {
+     "precision": 0.417,
+     "recall": 0.714,
+     "f1": 0.526,
+     "tp": 5,
+     "fp": 7,
+     "fn": 2
+    },
+    "severity_agreement": 1.0,
+    "findings_total": 12,
+    "findings_with_evidence": 0,
+    "verified_plans": 0,
+    "cases_with_coverage_gaps": 2,
+    "declared_coverage_gaps": 0,
+    "gap_cases_cleared_without_signoff": 0,
+    "modelled_reviewer_minutes_total": 198,
+    "modelled_reviewer_minutes_per_case": 33.0,
+    "wall_ms_per_case": 0.1,
+    "tokens_total": 6513,
+    "cost_usd_total": 0.0
+   }
+  },
+  "agent_pipeline": {
+   "per_case": [
+    {
+     "case_id": "rt2_01_comment_marker_inside_literal",
+     "verdict": "BLOCK",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 1,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "pred_codes": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "tp": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "consumer_breakage",
+      "operational_lock",
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "UNBATCHED_BACKFILL"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 4,
+     "evidenced_findings": 4,
+     "plan_verified": true,
+     "human_gates": 2,
+     "modelled_reviewer_minutes": 11,
+     "wall_ms": 6.6,
+     "tokens": 2665,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_02_do_block_hides_the_drop",
+     "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 1,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "PROCEDURAL_DDL_UNREVIEWED"
+     ],
+     "pred_codes": [
+      "PROCEDURAL_DDL_UNREVIEWED"
+     ],
+     "tp": [
+      "PROCEDURAL_DDL_UNREVIEWED"
+     ],
+     "fp": [],
+     "fn": [
+      "BREAKING_QUERY",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT"
+     ],
+     "fam_tp": [
+      "PROCEDURAL_DDL_UNREVIEWED"
+     ],
+     "fam_fp": [],
+     "fam_fn": [
+      "consumer_breakage",
+      "process"
+     ],
+     "severity_matches": [
+      "PROCEDURAL_DDL_UNREVIEWED"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 1,
+     "plan_verified": true,
+     "human_gates": 2,
+     "modelled_reviewer_minutes": 11,
+     "wall_ms": 5.8,
+     "tokens": 1193,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_03_unterminated_literal",
+     "verdict": "BLOCK",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 2,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "MIGRATION_TEXT_UNPARSED"
+     ],
+     "pred_codes": [
+      "MIGRATION_TEXT_UNPARSED"
+     ],
+     "tp": [
+      "MIGRATION_TEXT_UNPARSED"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "MIGRATION_TEXT_UNPARSED"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "MIGRATION_TEXT_UNPARSED"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 1,
+     "plan_verified": false,
+     "human_gates": 3,
+     "modelled_reviewer_minutes": 25,
+     "wall_ms": 8.3,
+     "tokens": 1685,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_04_nested_comment_phantom",
+     "verdict": "SAFE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": true,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 5.5,
+     "tokens": 545,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_05_function_body_no_ddl",
+     "verdict": "NEEDS_COVERAGE_SIGNOFF",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 1,
+     "coverage_signoff_required": true,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": true,
+     "human_gates": 2,
+     "modelled_reviewer_minutes": 11,
+     "wall_ms": 5.6,
+     "tokens": 593,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt2_06_ordinary_migration_with_quotes",
+     "verdict": "SAFE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": true,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 5.6,
+     "tokens": 545,
+     "cost_usd": 0.0
+    }
+   ],
+   "aggregate": {
+    "cases": 6,
+    "unsafe_approvals": 0,
+    "blocking_cases": 3,
+    "clean_verdicts_on_blocking_cases": 0,
+    "false_alarms_on_clean_cases": 0,
+    "strict": {
+     "precision": 1.0,
+     "recall": 0.75,
+     "f1": 0.857,
+     "tp": 6,
+     "fp": 0,
+     "fn": 2
+    },
+    "lenient_family": {
+     "precision": 1.0,
+     "recall": 0.714,
+     "f1": 0.833,
+     "tp": 5,
+     "fp": 0,
+     "fn": 2
+    },
+    "severity_agreement": 1.0,
+    "findings_total": 6,
+    "findings_with_evidence": 6,
+    "verified_plans": 5,
+    "cases_with_coverage_gaps": 2,
+    "declared_coverage_gaps": 5,
+    "gap_cases_cleared_without_signoff": 0,
+    "modelled_reviewer_minutes_total": 68,
+    "modelled_reviewer_minutes_per_case": 11.3,
+    "wall_ms_per_case": 6.2,
+    "tokens_total": 7226,
+    "cost_usd_total": 0.0
+   }
+  }
+ },
+ "agent_notes": {
+  "rt2_01_comment_marker_inside_literal": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [
+    {
+     "kind": "in_place_data_mutation",
+     "object": "invoices.currency",
+     "object_inferred": false,
+     "statement_index": 0,
+     "statement": "UPDATE invoices SET currency = 'usd -- legacy default' WHERE currency IS NULL",
+     "why": "rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns the same answer",
+     "closes_with": "a reviewer confirms which consumers of invoices.currency depend on the current values",
+     "irreversible": false
+    }
+   ],
+   "verdict_capped_by_coverage": false
+  },
+  "rt2_02_do_block_hides_the_drop": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [
+    "op 0 (procedural_block) not modelled structurally: DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.colu"
+   ],
+   "coverage_ledger": [
+    {
+     "kind": "procedural_body",
+     "object": "$$ body at statement 0",
+     "object_inferred": false,
+     "statement_index": 0,
+     "statement": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns W",
+     "why": "the body holds 3 scanned statement(s) and nothing in this pipeline models a procedural block: the census below is a keyword scan, not a parse, so the packet knows that DDL is in there and not what the block does with it (branches, loops, exception handlers, dynamic SQL)",
+     "closes_with": "a reviewer reads the $$ body of statement 0 in full, including every branch, before phase 1",
+     "irreversible": true
+    }
+   ],
+   "verdict_capped_by_coverage": false
+  },
+  "rt2_03_unterminated_literal": {
+   "attempts": 2,
+   "escalated": true,
+   "coverage_gaps": [],
+   "coverage_ledger": [
+    {
+     "kind": "in_place_data_mutation",
+     "object": "invoices.status",
+     "object_inferred": false,
+     "statement_index": 0,
+     "statement": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate;",
+     "why": "rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns the same answer",
+     "closes_with": "a reviewer confirms which consumers of invoices.status depend on the current values",
+     "irreversible": false
+    },
+    {
+     "kind": "unreviewable_text",
+     "object": "characters 29 onward",
+     "object_inferred": false,
+     "statement_index": null,
+     "statement": "'open WHERE id = 1;\nALTER TABLE invoices DROP COLUMN tax_rate;\n",
+     "why": "an unterminated string starts at character 29; from there to the end of the file every character was read as string content, so nothing in that region was parsed, ruled or replayed, and no finding about it would be about anything Postgres executes",
+     "closes_with": "the script is fixed and resubmitted; there is nothing here for a reviewer to sign off, because there is nothing here that runs",
+     "irreversible": false
+    }
+   ],
+   "verdict_capped_by_coverage": false
+  },
+  "rt2_04_nested_comment_phantom": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  },
+  "rt2_05_function_body_no_ddl": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [
+    "op 1 (procedural_block) not modelled structurally: CREATE OR REPLACE FUNCTION stamp_dunning() RETURNS trigger A"
+   ],
+   "coverage_ledger": [
+    {
+     "kind": "procedural_body",
+     "object": "$fn$ body at statement 1",
+     "object_inferred": false,
+     "statement_index": 1,
+     "statement": "CREATE OR REPLACE FUNCTION stamp_dunning() RETURNS trigger AS $fn$ BEGIN NEW.",
+     "why": "the body holds 3 scanned statement(s) and nothing in this pipeline models a procedural block: the census below is a keyword scan, not a parse, so the packet knows that DDL is in there and not what the block does with it (branches, loops, exception handlers, dynamic SQL)",
+     "closes_with": "a reviewer reads the $fn$ body of statement 1 in full, including every branch, before phase 1",
+     "irreversible": false
+    }
+   ],
+   "verdict_capped_by_coverage": true
+  },
+  "rt2_06_ordinary_migration_with_quotes": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  }
+ }
+}

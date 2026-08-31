@@ -2,7 +2,7 @@
 
 - run id: `eval-case_06_safe_unique_index`
 - case: `case_06_safe_unique_index`
-- events: 24
+- events: 25
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.69 ms)
+**tool** `schema.parse` (0.59 ms)
 
 ```json
 {
@@ -81,7 +81,52 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `migration.audit` (0.04 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "CREATE UNIQUE INDEX CONCURRENTLY idx_invoices_number ON invoices (invoice_number);\n",
+  "ops": [
+   {
+    "kind": "create_index",
+    "table": "invoices",
+    "column": null,
+    "detail": {
+     "name": "idx_invoices_number",
+     "unique": true,
+     "concurrently": true,
+     "columns": [
+      "invoice_number"
+     ]
+    },
+    "sql": "CREATE UNIQUE INDEX CONCURRENTLY idx_invoices_number ON invoices (invoice_number)",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 74,
+  "attributed_chars": 74,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -262,7 +307,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.01 ms)
 
 ```json
 {
@@ -331,7 +376,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (2.51 ms)
+**tool** `shadow.replay` (2.08 ms)
 
 ```json
 {
@@ -453,7 +498,7 @@ _tool responded_
 
 </details>
 
-**tool** `coverage.ledger` (0.15 ms)
+**tool** `coverage.ledger` (0.13 ms)
 
 ```json
 {
@@ -587,7 +632,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.05 ms)
 
 ```json
 {
@@ -619,7 +664,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -655,7 +700,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.5 ms)
+**tool** `shadow.replay` (2.03 ms)
 
 ```json
 {

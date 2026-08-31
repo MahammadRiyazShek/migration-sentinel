@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_07_narrow_invoice_amount`
 - case: `holdout_07_narrow_invoice_amount`
-- events: 30
+- events: 31
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.84 ms)
+**tool** `schema.parse` (0.8 ms)
 
 ```json
 {
@@ -80,7 +80,47 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `migration.audit` (0.03 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE carrier_invoices ALTER COLUMN amount TYPE numeric(8,2);\n",
+  "ops": [
+   {
+    "kind": "alter_type",
+    "table": "carrier_invoices",
+    "column": "amount",
+    "detail": {
+     "new_type": "numeric(8,2)"
+    },
+    "sql": "ALTER TABLE carrier_invoices ALTER COLUMN amount TYPE numeric(8,2)",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 59,
+  "attributed_chars": 59,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -149,7 +189,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.07 ms)
 
 ```json
 {
@@ -262,7 +302,7 @@ _tool responded_
 5
 ```
 
-**tool** `shadow.replay` (2.97 ms)
+**tool** `shadow.replay` (2.23 ms)
 
 ```json
 {
@@ -416,7 +456,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -456,7 +496,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.19 ms)
+**tool** `coverage.ledger` (0.15 ms)
 
 ```json
 {
@@ -630,7 +670,7 @@ _note (risk_officer)_: verdict capped to NEEDS_COVERAGE_SIGNOFF: 1 coverage gap(
 
 </details>
 
-**tool** `migration.parse` (0.12 ms)
+**tool** `migration.parse` (0.09 ms)
 
 ```json
 {
@@ -671,7 +711,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -716,7 +756,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.97 ms)
+**tool** `shadow.replay` (2.2 ms)
 
 ```json
 {

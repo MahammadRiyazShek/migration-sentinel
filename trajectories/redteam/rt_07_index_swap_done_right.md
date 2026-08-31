@@ -2,7 +2,7 @@
 
 - run id: `eval-rt_07_index_swap_done_right`
 - case: `rt_07_index_swap_done_right`
-- events: 26
+- events: 27
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.65 ms)
+**tool** `schema.parse` (0.55 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.05 ms)
 
 ```json
 {
@@ -92,7 +92,63 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `migration.audit` (0.05 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "DROP INDEX CONCURRENTLY idx_invoices_customer;\nCREATE INDEX CONCURRENTLY idx_invoices_customer_status ON invoices (customer_id, status);\n",
+  "ops": [
+   {
+    "kind": "drop_index",
+    "table": null,
+    "column": null,
+    "detail": {
+     "name": "idx_invoices_customer"
+    },
+    "sql": "DROP INDEX CONCURRENTLY idx_invoices_customer",
+    "index": 0
+   },
+   {
+    "kind": "create_index",
+    "table": "invoices",
+    "column": null,
+    "detail": {
+     "name": "idx_invoices_customer_status",
+     "unique": false,
+     "concurrently": true,
+     "columns": [
+      "customer_id",
+      "status"
+     ]
+    },
+    "sql": "CREATE INDEX CONCURRENTLY idx_invoices_customer_status ON invoices (customer_id, status)",
+    "index": 1
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 2,
+ "ops": 2,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 123,
+  "attributed_chars": 123,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -177,7 +233,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.17 ms)
+**tool** `corpus.dependents` (0.09 ms)
 
 ```json
 {
@@ -321,7 +377,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -390,7 +446,7 @@ _tool responded_
 28
 ```
 
-**tool** `shadow.replay` (2.61 ms)
+**tool** `shadow.replay` (2.05 ms)
 
 ```json
 {
@@ -513,7 +569,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.access_path_users` (0.18 ms)
+**tool** `corpus.access_path_users` (0.13 ms)
 
 ```json
 {
@@ -601,7 +657,7 @@ _tool responded_
 
 _note (risk_officer)_: idx_invoices_customer is dropped but statement 1 creates idx_invoices_customer_status on invoices(customer_id, status), whose leading columns still serve invoices(customer_id). The access path survives, so no ACCESS_PATH_REMOVED is raised.
 
-**tool** `coverage.ledger` (0.14 ms)
+**tool** `coverage.ledger` (0.1 ms)
 
 ```json
 {
@@ -782,7 +838,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -829,7 +885,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.63 ms)
+**tool** `shadow.replay` (1.87 ms)
 
 ```json
 {

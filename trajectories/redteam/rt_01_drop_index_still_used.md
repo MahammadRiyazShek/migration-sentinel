@@ -2,7 +2,7 @@
 
 - run id: `eval-rt_01_drop_index_still_used`
 - case: `rt_01_drop_index_still_used`
-- events: 27
+- events: 28
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.67 ms)
+**tool** `schema.parse` (0.51 ms)
 
 ```json
 {
@@ -76,7 +76,47 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `migration.audit` (0.03 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "DROP INDEX idx_invoices_customer;\n",
+  "ops": [
+   {
+    "kind": "drop_index",
+    "table": null,
+    "column": null,
+    "detail": {
+     "name": "idx_invoices_customer"
+    },
+    "sql": "DROP INDEX idx_invoices_customer",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 30,
+  "attributed_chars": 30,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -142,7 +182,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.17 ms)
+**tool** `corpus.dependents` (0.12 ms)
 
 ```json
 {
@@ -213,7 +253,7 @@ _tool responded_
 0
 ```
 
-**tool** `shadow.replay` (3.36 ms)
+**tool** `shadow.replay` (2.27 ms)
 
 ```json
 {
@@ -335,7 +375,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.access_path_users` (0.26 ms)
+**tool** `corpus.access_path_users` (0.14 ms)
 
 ```json
 {
@@ -421,7 +461,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -441,7 +481,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.28 ms)
+**tool** `coverage.ledger` (0.23 ms)
 
 ```json
 {
@@ -606,7 +646,7 @@ _tool responded_
 []
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -626,7 +666,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.71 ms)
+**tool** `shadow.replay` (2.08 ms)
 
 ```json
 {

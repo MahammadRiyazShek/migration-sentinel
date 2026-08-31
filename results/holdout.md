@@ -3,6 +3,7 @@
 ```
 decision-code freeze: POST-FREEZE (34 files hashed under sentinel/)
   frozen at: v5 decision code, hashed before the held-out schema, cases or labels existed
+  changed: sentinel/agents/cartographer.py
   changed: sentinel/agents/risk_officer.py
   changed: sentinel/agents/rollout_engineer.py
   changed: sentinel/coverage.py
@@ -11,7 +12,10 @@ decision-code freeze: POST-FREEZE (34 files hashed under sentinel/)
   changed: sentinel/orchestrator.py
   changed: sentinel/tools/query_corpus.py
   changed: sentinel/tools/shadow_db.py
+  changed: sentinel/tools/sql_parse.py
   added: sentinel/rulebook.py
+  added: sentinel/tools/parse_audit.py
+  added: sentinel/tools/sql_lex.py
   -> the held-out numbers below are an AFTER-THE-FIX run. The frozen first-contact run is kept in results/holdout/frozen_run.json.
 ```
 

@@ -11,6 +11,13 @@ says nothing about how the planner will find the rows, so `DROP INDEX` on a hot 
 was a clean SAFE.  And it adds one thing both halves saw and neither correlated:
 `CONCURRENTLY` inside a transaction block, which Postgres refuses outright.  See
 `sentinel/rulebook.py` for why those two were absent rather than wrong.
+
+v14 adds two more that no rule over the op list could ever have raised, because the op
+list was not the migration: text in the file that no operation accounts for, and DDL
+executing inside a procedural body.  Both read the reconciliation in
+`sentinel/tools/parse_audit.py`.  A `--` inside a string literal used to cost this agent
+two thirds of a migration silently, and no rule can fire on a statement that was never
+parsed.
 """
 from __future__ import annotations
 
@@ -94,12 +101,20 @@ class RiskOfficer(Agent):
 
     def run(self, case: dict[str, Any], parsed: dict[str, Any], blast: dict[str, Any],
             use_static: bool = True, use_memory: bool = True,
-            use_coverage: bool = True, use_rule_coverage: bool = True) -> dict[str, Any]:
+            use_coverage: bool = True, use_rule_coverage: bool = True,
+            use_text_conservation: bool = True) -> dict[str, Any]:
         schema = parsed["schema"]
         rows_of = {t.name: t.row_estimate for t in schema.tables.values()}
         self.start({"case": case["id"], "row_estimates": rows_of,
                     "inherited_hazards": [h.code for h in blast["hazards"]]})
         hazards: list[Hazard] = list(blast["hazards"])
+        # v14: the reconciliation between this op list and the file it came from. A rule
+        # cannot fire on a statement that never became an op, so two of the findings below
+        # are keyed to the scan rather than to an op. See `sentinel/tools/parse_audit.py`.
+        audit = parsed.get("text_audit") if use_text_conservation else None
+        bodies_at = {}
+        for _body in (audit or {}).get("procedural", []):
+            bodies_at.setdefault(_body["statement_index"], []).append(_body)
 
         for op in (parsed["ops"] if use_static else []):
             rows = rows_of.get(op.table or "", 0)
@@ -239,6 +254,29 @@ class RiskOfficer(Agent):
                                      "need an explicit opt-out (Rails disable_ddl_transaction!, "
                                      "Django atomic = False, Alembic autocommit block)")))
 
+            # v14, rule 1: DDL executing inside a procedural body. Keyed to the op, priced
+            # from the census in tools/parse_audit.py, which is a keyword scan over
+            # literal-masked text rather than a parse - so the DDL is a finding and the
+            # block itself stays a declared gap.
+            if op.kind == "procedural_block":
+                for body in bodies_at.get(op.index, []):
+                    if not body["ddl_inside"]:
+                        continue
+                    shown = (body["destructive_inside"] or body["ddl_inside"])[:3]
+                    hazards.append(Hazard(
+                        "PROCEDURAL_DDL_UNREVIEWED",
+                        "blocker" if body["destructive_inside"] else "high", source="static",
+                        summary=(f"{len(body['ddl_inside'])} schema or data statement(s) execute "
+                                 f"inside the {body['tag']} body of statement {op.index}; the "
+                                 f"expand/contract analysis, the dependency map and the shadow "
+                                 f"replay all ran on the outer statement only"),
+                        evidence=[f"statement {op.index}: `{body['head']}`"]
+                                 + [f"inside the body: `{t[:100]}`" for t in shown],
+                        objects=["migration script"],
+                        remediation=("lift the DDL out of the procedural block so it can be planned "
+                                     "and reviewed as a statement; keep the block for the data "
+                                     "logic that actually needs it")))
+
             if op.kind == "drop_constraint":
                 table = schema.tables.get(op.table)
                 con = next((c for c in (table.constraints if table else [])
@@ -252,6 +290,62 @@ class RiskOfficer(Agent):
                              + ([f"constraint text: {con.expr}"] if con else
                                 ["constraint not found in current schema - verify the name"]),
                     objects=[op.table]))
+
+        # v14, rule 2: text in the file that no operation accounts for. Not keyed to an op,
+        # because the defect is precisely that there is no op: `strip_comments` cut a string
+        # literal at a `--` inside it and the resulting unterminated quote swallowed two
+        # destructive statements. Findings rather than gaps because the evidence is positive
+        # and carries a span - the scanner can quote the text nobody reviewed. Where the
+        # scan cannot say what the text does, the ledger takes it as a gap instead; see
+        # `unattributed_statement` in sentinel/coverage.py.
+        unparsed: list[Hazard] = []
+        if use_static and audit:
+            for bad in audit["unterminated"]:
+                unparsed.append(Hazard(
+                    "MIGRATION_TEXT_UNPARSED", "blocker", source="static",
+                    summary=(f"an unterminated {bad['kind'].replace('_', ' ')} starts at character "
+                             f"{bad['start']}, so Postgres rejects this script and everything after "
+                             f"that point was reviewed as string content rather than as SQL"),
+                    evidence=[f"scanner: `{bad['text'].strip()[:100]}`", bad["why"]],
+                    objects=["migration script"],
+                    remediation=("close the literal. If the intent was a comment inside a string, "
+                                 "it is not one: Postgres reads `--` inside quotes as text")))
+            for miss in audit["unaccounted"]:
+                if not miss["destructive"]:
+                    continue
+                unparsed.append(Hazard(
+                    "MIGRATION_TEXT_UNPARSED", "blocker", source="static",
+                    summary=(f"statement {miss['statement_index']} is in the file and no parsed "
+                             f"operation accounts for it, and its text is destructive, so a change "
+                             f"this review never modelled will execute"),
+                    evidence=[f"scanner statement {miss['statement_index']} "
+                              f"(characters {miss['start']}-{miss['end']}): `{miss['text'][:110]}`",
+                              f"the parse produced {audit['ops']} operation(s) for "
+                              f"{audit['lexed_statements']} scanned statement(s)"],
+                    objects=["migration script"],
+                    remediation="rewrite the statement in a form the parser models, or review it by "
+                                "hand and record the decision against this run"))
+
+        # v14, and the experiment this pass removed. The first version reported the
+        # unterminated-literal hazard *alongside* the hazards inferred from the mangled
+        # remainder, which on rt2_03 meant two findings about statements Postgres will never
+        # execute - the identical sin to raising a blocker on a commented-out statement
+        # (rt2_04), in the opposite direction. A script the server refuses has no hazards
+        # other than that it is refused, so the findings derived from the wreckage are
+        # dropped and only the parse failure is reported. The coverage ledger still names the
+        # region nobody could read: `unreviewable_text`.
+        if unparsed:
+            dropped = sorted({h.code for h in hazards})
+            hazards = unparsed
+            if self.tracer:
+                self.tracer.checkpoint(
+                    "parse conservation", "SCRIPT DOES NOT PARSE",
+                    "Postgres will refuse this script, so no statement in it executes and any "
+                    "finding read off the mangled remainder would be a claim about text that "
+                    "never runs. "
+                    + (f"Suppressed for that reason: {', '.join(dropped)}. " if dropped else "")
+                    + "The only honest output is the parse failure and the region nobody could "
+                      "read. Fix the script and resubmit for review.")
 
         if use_static and not case.get("rollback_sql"):
             hazards.append(Hazard(
@@ -284,7 +378,8 @@ class RiskOfficer(Agent):
                         queries=case.get("queries", []),
                         unmodelled_notes=parsed["change_set"]["unmodelled"],
                         seed=case.get("seed", {}),
-                        rule_coverage=use_rule_coverage) \
+                        rule_coverage=use_rule_coverage,
+                        text_audit=(parsed.get("text_audit") if use_text_conservation else None)) \
             if use_coverage else {"gaps": [], "gap_kinds": [], "irreversible": [],
                                   "corpus_statements": len(case.get("queries", [])),
                                   "parser_notes": parsed["change_set"]["unmodelled"]}

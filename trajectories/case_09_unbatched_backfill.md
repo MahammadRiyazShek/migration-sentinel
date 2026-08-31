@@ -2,7 +2,7 @@
 
 - run id: `eval-case_09_unbatched_backfill`
 - case: `case_09_unbatched_backfill`
-- events: 30
+- events: 31
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.7 ms)
+**tool** `schema.parse` (0.6 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.07 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -85,7 +85,56 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `migration.audit` (0.05 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL;\nALTER TABLE invoices ALTER COLUMN currency SET NOT NULL;\n",
+  "ops": [
+   {
+    "kind": "dml_update",
+    "table": "invoices",
+    "column": null,
+    "detail": {
+     "where": true,
+     "batched": false
+    },
+    "sql": "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL",
+    "index": 0
+   },
+   {
+    "kind": "set_not_null",
+    "table": "invoices",
+    "column": "currency",
+    "detail": {},
+    "sql": "ALTER TABLE invoices ALTER COLUMN currency SET NOT NULL",
+    "index": 1
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 2,
+ "ops": 2,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 97,
+  "attributed_chars": 97,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -163,7 +212,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.09 ms)
 
 ```json
 {
@@ -270,7 +319,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.01 ms)
 
 ```json
 {
@@ -338,7 +387,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (2.45 ms)
+**tool** `shadow.replay` (2.19 ms)
 
 ```json
 {
@@ -460,7 +509,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -500,7 +549,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.18 ms)
+**tool** `coverage.ledger` (0.16 ms)
 
 ```json
 {
@@ -679,7 +728,7 @@ _note (risk_officer)_: verdict capped to NEEDS_COVERAGE_SIGNOFF: 1 coverage gap(
 
 </details>
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -707,7 +756,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -739,7 +788,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.49 ms)
+**tool** `shadow.replay` (2.05 ms)
 
 ```json
 {

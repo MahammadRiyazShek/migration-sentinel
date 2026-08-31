@@ -68,6 +68,35 @@ the evaluation set:
     that distinction the first version of this flagged `case_06`, the case that exists
     to catch reviewers who cry wolf.
 
+`unattributed_statement`
+    v14, and the perimeter of the perimeter.  Every class above is keyed to an *op*, so
+    the ledger's universe has always been the parse - and the parse is a lossy function of
+    the file.  `strip_comments` cut a string literal at a `--` inside it, the unterminated
+    quote swallowed the rest of the script, and a three-statement migration arrived here as
+    one `dml_update`.  Nothing was flagged, because nothing was there to flag: two
+    destructive statements never became ops at all.  A gap class over ops cannot see a
+    statement that never became one.  `tools/parse_audit.py` reconciles the op list against
+    an independent lexical scan of the same text, and any statement the scan finds and the
+    parse does not becomes this gap - or, where its text is destructive, a finding, because
+    then the evidence is positive.
+
+`unreviewable_text`
+    v14.  The other half of the parse-failure answer.  If the scanner finds an unterminated
+    literal, identifier or comment, Postgres refuses the whole script, so the migration on
+    disk is not a migration at all - and every hazard the mangled remainder appears to
+    contain is a claim about text that never executes.  The first version of this layer
+    published those hazards next to the parse failure, which is the same defect as blocking
+    a commented-out statement.  Findings from the wreckage are dropped, the parse failure is
+    the finding, and this gap names the region nobody could read.
+
+`procedural_body`
+    v14.  A `DO $$ ... $$` or function body executes statements no structural parser here
+    models, and the retired splitter used to shred them at the semicolons inside.  The
+    census that reports DDL in there is a keyword scan over literal-masked text: enough to
+    know a schema change is happening, not enough to know what the block does with it.  So
+    the DDL is a finding and the block is a gap, which is the same division this ledger has
+    drawn since v2.
+
 `unused_access_path`
     v13, the other half of the `DROP INDEX` fix.  When an index is dropped and no
     statement in the corpus filters, joins or sorts by its columns, the honest answer
@@ -157,11 +186,17 @@ def _nulls_erased(sql: str, columns: list[str]) -> list[str]:
 def ledger(ops: list[Any], schema: Any, queries: list[dict[str, Any]],
            unmodelled_notes: list[str] | None = None,
            seed: dict[str, list[dict[str, Any]]] | None = None,
-           rule_coverage: bool = True) -> dict[str, Any]:
+           rule_coverage: bool = True,
+           text_audit: dict[str, Any] | None = None) -> dict[str, Any]:
     """Deterministic coverage facts for one migration. Pure function, no model involved.
 
     `seed` is the fixture the shadow replay runs on. It is passed in so the ledger can
     say what the fixture could not have shown, which is the v6 gap class.
+
+    `text_audit` is the v14 layer: the reconciliation between this op list and the file it
+    came from, from `tools/parse_audit.py`. It is the first input to this ledger that is
+    not derived from `ops`, which is the whole point - every gap class above takes the op
+    list as the migration, and the op list is a lossy function of the text.
 
     `rule_coverage` is the v13 layer: the two gap classes that come from the rule
     inventory rather than from the data. It is a switch only so `no_rule_coverage` can
@@ -273,6 +308,47 @@ def ledger(ops: list[Any], schema: Any, queries: list[dict[str, Any]],
                     f"query planner to ask",
                     f"a reviewer reads pg_stat_user_indexes.idx_scan for "
                     f"{op.detail.get('name', 'the index')} over a full business cycle before phase 2")
+
+    # v14: the two gap classes that come from the file rather than from the op list. The
+    # findings side of the same reconciliation lives in agents/risk_officer.py; these are
+    # the half where the honest answer is "something is there and I cannot tell you what
+    # it does". Not gated on `rule_coverage`: this layer has its own ablation arm
+    # (`no_text_conservation`) so the two can be priced apart.
+    if text_audit:
+        for bad in text_audit["unterminated"]:
+            add("unreviewable_text", f"characters {bad['start']} onward",
+                type("O", (), {"index": None, "sql": bad["text"]}),
+                f"an unterminated {bad['kind'].replace('_', ' ')} starts at character "
+                f"{bad['start']}; from there to the end of the file every character was read as "
+                f"string content, so nothing in that region was parsed, ruled or replayed, and no "
+                f"finding about it would be about anything Postgres executes",
+                "the script is fixed and resubmitted; there is nothing here for a reviewer to "
+                "sign off, because there is nothing here that runs",
+                irreversible=False)
+        for miss in text_audit["unaccounted"]:
+            if miss["destructive"]:
+                continue          # a finding instead; see the risk officer
+            obj = relation_hint(miss["text"]) or "migration script"
+            add("unattributed_statement", obj,
+                type("O", (), {"index": miss["statement_index"], "sql": miss["text"]}),
+                f"the scanner finds a `{miss['keyword'] or 'statement'}` statement at characters "
+                f"{miss['start']}-{miss['end']} that no parsed operation accounts for, so no rule "
+                f"inspected it and shadow replay never ran it; the parse produced "
+                f"{text_audit['ops']} operation(s) for {text_audit['lexed_statements']} scanned "
+                f"statement(s)",
+                f"a reviewer reads statement {miss['statement_index']} by hand and records what it "
+                f"does to {obj}",
+                object_inferred=obj != "migration script")
+        for body in text_audit["procedural"]:
+            add("procedural_body", f"{body['tag']} body at statement {body['statement_index']}",
+                type("O", (), {"index": body["statement_index"], "sql": body["head"]}),
+                f"the body holds {body['body_statements']} scanned statement(s) and nothing in this "
+                f"pipeline models a procedural block: the census below is a keyword scan, not a "
+                f"parse, so the packet knows that DDL is in there and not what the block does with "
+                f"it (branches, loops, exception handlers, dynamic SQL)",
+                f"a reviewer reads the {body['tag']} body of statement {body['statement_index']} in "
+                f"full, including every branch, before phase 1",
+                irreversible=bool(body["destructive_inside"]))
 
     # v13: statement kinds nothing in this pipeline inspects. The gap class that exists
     # because the ledger could previously only declare blind spots about objects some

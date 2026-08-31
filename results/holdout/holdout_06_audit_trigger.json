@@ -146,7 +146,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -164,7 +165,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.85,
+   "ms": 0.67,
    "result_summary": "Schema"
   },
   {
@@ -173,7 +174,7 @@
    "args": {
     "sql": "CREATE TABLE stop_status_audit (\n  id SERIAL PRIMARY KEY,\n  stop_id INTEGER NOT NULL,\n  old_status TEXT,\n  new_status TEXT,\n  changed_at TIMESTAMPTZ NOT NULL\n);\nCREATE TRIGGER trg_stop_status_audit AFTER UPDATE OF status ON shipment_stops\n  FOR EACH ROW EXECUTE FUNCTION log_stop_status_change();\n"
    },
-   "ms": 0.13,
+   "ms": 0.1,
    "result_summary": [
     {
      "kind": "create_table",
@@ -194,6 +195,47 @@
      "index": 1
     }
    ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "CREATE TABLE stop_status_audit (\n  id SERIAL PRIMARY KEY,\n  stop_id INTEGER NOT NULL,\n  old_status TEXT,\n  new_status TEXT,\n  changed_at TIMESTAMPTZ NOT NULL\n);\nCREATE TRIGGER trg_stop_status_audit AFTER UPDATE OF status ON shipment_stops\n  FOR EACH ROW EXECUTE FUNCTION log_stop_status_change();\n",
+    "ops": [
+     {
+      "kind": "create_table",
+      "table": "stop_status_audit",
+      "column": null,
+      "detail": {
+       "table": "Table"
+      },
+      "sql": "CREATE TABLE stop_status_audit ( id SERIAL PRIMARY KEY, stop_id INTEGER NOT NULL, old_status TEXT, new_status TEXT, chan...",
+      "index": 0
+     },
+     {
+      "kind": "unsupported",
+      "table": null,
+      "column": null,
+      "detail": {},
+      "sql": "CREATE TRIGGER trg_stop_status_audit AFTER UPDATE OF status ON shipment_stops FOR EACH ROW EXECUTE FUNCTION log_stop_sta...",
+      "index": 1
+     }
+    ]
+   },
+   "ms": 0.08,
+   "result_summary": {
+    "lexed_statements": 2,
+    "ops": 2,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 247,
+     "attributed_chars": 247,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
   },
   {
    "agent": "cartographer",
@@ -221,7 +263,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     [
@@ -314,7 +356,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.1,
+   "ms": 0.07,
    "result_summary": []
   },
   {
@@ -669,7 +711,7 @@
      "...+7 more"
     ]
    },
-   "ms": 2.93,
+   "ms": 2.32,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1027,9 +1069,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 2,
+     "ops": 2,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 247,
+      "attributed_chars": 247,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.17,
+   "ms": 0.14,
    "result_summary": {
     "gaps": [
      {
@@ -1091,7 +1146,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1432,7 +1487,7 @@
      "...+7 more"
     ]
    },
-   "ms": 2.91,
+   "ms": 2.18,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1455,7 +1510,7 @@
   "tokens_out": 78,
   "cost_usd": 0.0
  },
- "wall_ms": 8.0,
+ "wall_ms": 6.3,
  "severity_order": [
   "low",
   "medium",

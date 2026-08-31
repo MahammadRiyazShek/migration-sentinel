@@ -156,10 +156,12 @@ def main() -> int:
         claim("the decision code was hashed before the held-out labels existed, and every "
               "file changed or added since is named",
               man["files"] == 34 and post_freeze == [
-                  "sentinel/agents/risk_officer.py", "sentinel/agents/rollout_engineer.py",
-                  "sentinel/coverage.py", "sentinel/hazards.py", "sentinel/llm/scripted.py",
-                  "sentinel/orchestrator.py", "sentinel/tools/query_corpus.py",
-                  "sentinel/tools/shadow_db.py", "sentinel/rulebook.py"],
+                  "sentinel/agents/cartographer.py", "sentinel/agents/risk_officer.py",
+                  "sentinel/agents/rollout_engineer.py", "sentinel/coverage.py",
+                  "sentinel/hazards.py", "sentinel/llm/scripted.py", "sentinel/orchestrator.py",
+                  "sentinel/tools/query_corpus.py", "sentinel/tools/shadow_db.py",
+                  "sentinel/tools/sql_parse.py", "sentinel/rulebook.py",
+                  "sentinel/tools/parse_audit.py", "sentinel/tools/sql_lex.py"],
               f"{man['files']} hashed, {len(post_freeze)} moved since: {post_freeze}")
         claim("no unsafe approval out of sample either", H["unsafe_approvals"] == 0,
               H["unsafe_approvals"])
@@ -284,6 +286,66 @@ def main() -> int:
         claim("closing these two holes costs reviewer minutes rather than saving them",
               R["minutes"] > R12["minutes"],
               f"{R12['minutes']} -> {R['minutes']} modelled minutes per case")
+
+    # ------------------------------------------------------------ red team, round 2
+    # v14. Round 1 asked whether a hazard class was unenumerated. This asks whether the op
+    # list is the migration, and it is not: a `--` inside a string literal cost the v13
+    # parser the second half of a two-statement file. Read the parity claim first - the same
+    # splitter swap moves nothing on 28 labelled cases.
+    rt2_path = ROOT / "results" / "redteam2" / "redteam2.json"
+    if rt2_path.exists():
+        rt2 = json.loads(rt2_path.read_text())
+        Q = rt2["arms"]["agent_pipeline"]
+        Q13 = rt2["arms"]["sentinel_v13"]
+        QB = rt2["arms"]["baseline_prompt_with_schema"]
+        par2 = rt2["in_sample_parity"]
+        per2 = rt2["per_case"]
+        loss = rt2["splitter_loss_totals"]
+
+        claim("6 round-2 cases, aimed at the parser rather than at the rules",
+              rt2["cases"] == 6 and Q["cases"] == Q13["cases"] == 6, rt2["cases"])
+        claim("the retired splitter loses whole statements and invents others, recomputed from "
+              "the retired code",
+              loss["statements_lost"] >= 2 and loss["phantom_statements"] >= 2,
+              f"{loss['statements_lost']} lost, {loss['phantom_statements']} phantom")
+        claim("v14 more than doubles recall on the set the v13 parser could not read",
+              Q["recall"] >= 2 * Q13["recall"], f"v13 {Q13['recall']} -> v14 {Q['recall']}")
+        claim("every v14 finding on this set is about text Postgres executes",
+              Q["precision"] == 1.0 and Q["false_alarms"] == 0,
+              f"precision {Q['precision']}, {Q['false_alarms']} false alarms")
+        claim("v13 raised false alarms here, all of them evidenced, which is the unflattering "
+              "half: evidence is not the same property as being about the right file",
+              Q13["false_alarms"] > 0
+              and Q13["evidenced"].split("/")[0] == Q13["evidenced"].split("/")[1],
+              f"{Q13['false_alarms']} false alarms, {Q13['evidenced']} evidenced, precision "
+              f"{Q13['precision']}")
+        claim("the commented-out destructive statement is a hazard to v13 and to baseline B, "
+              "and to v14 it is a comment",
+              per2["rt2_04_nested_comment_phantom"]["verdict"] == "SAFE"
+              and per2["rt2_04_nested_comment_phantom"]["v13_verdict"] == "BLOCK",
+              f"v14 {per2['rt2_04_nested_comment_phantom']['verdict']}, v13 "
+              f"{per2['rt2_04_nested_comment_phantom']['v13_verdict']}")
+        claim("a script Postgres refuses reports only that it is refused",
+              per2["rt2_03_unterminated_literal"]["tp"] == ["MIGRATION_TEXT_UNPARSED"]
+              and per2["rt2_03_unterminated_literal"]["fp"] == [],
+              f"tp {per2['rt2_03_unterminated_literal']['tp']}, fp "
+              f"{per2['rt2_03_unterminated_literal']['fp']}")
+        claim("the DO block is named and still not cleared, and the two hazards inside it stay "
+              "in the label as published misses",
+              sorted(per2["rt2_02_do_block_hides_the_drop"]["fn"])
+              == ["BREAKING_QUERY", "DESTRUCTIVE_NO_EXPAND_CONTRACT"]
+              and per2["rt2_02_do_block_hides_the_drop"]["verdict"] == "BLOCK",
+              f"found {per2['rt2_02_do_block_hides_the_drop']['tp']}, missed "
+              f"{sorted(per2['rt2_02_do_block_hides_the_drop']['fn'])}")
+        claim("the v14 layer moves nothing that was already being measured, across all three "
+              "labelled sets",
+              par2["cases_moved"] == 0 and par2["labelled_cases_compared"] == 28,
+              f"{par2['labelled_cases_compared'] - par2['cases_moved']} of "
+              f"{par2['labelled_cases_compared']} labelled cases identical")
+        claim("closing the parser holes costs reviewer minutes on this set and none elsewhere",
+              Q["minutes"] < Q13["minutes"] and QB["minutes"] > Q["minutes"],
+              f"v13 {Q13['minutes']}, v14 {Q['minutes']}, baseline B {QB['minutes']} modelled "
+              f"minutes per case")
 
     # -------------------------------------------------------- cross-interpreter
     # v12. Everything above is measured under one interpreter. "3.11 and 3.12 verified" used to

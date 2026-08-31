@@ -1,8 +1,8 @@
 # Trajectory - case_12_release_train
 
-- run id: `run-927e4c6c`
+- run id: `eval-case_12_release_train`
 - case: `case_12_release_train`
-- events: 43
+- events: 44
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.86 ms)
+**tool** `schema.parse` (0.65 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (2.89 ms)
+**tool** `migration.parse` (0.17 ms)
 
 ```json
 {
@@ -148,7 +148,65 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.14 ms)
+**tool** `migration.audit` (0.15 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE subscriptions ADD COLUMN billing_interval TEXT NOT NULL DEFAULT 'monthly';\nCREATE UNIQUE INDEX idx_subscriptions_customer ON subscriptions (customer_id);\nALTER TABLE invoices DROP COLUMN tax_rate;\nCREATE INDEX idx_usage_events_name ON usage_events (event_name);\nALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk;\nUPDATE invoices SET status = 'open' WHERE status = 'draft';...",
+  "ops": [
+   {
+    "kind": "add_column",
+    "table": "subscriptions",
+    "column": "billing_interval",
+    "detail": {
+     "type": "TEXT",
+     "not_null": true,
+     "default": "'monthly'",
+     "unique": false
+    },
+    "sql": "ALTER TABLE subscriptions ADD COLUMN billing_interval TEXT NOT NULL DEFAULT 'monthly'",
+    "index": 0
+   },
+   {
+    "kind": "create_index",
+    "table": "subscriptions",
+    "column": null,
+    "detail": {
+     "name": "idx_subscriptions_customer",
+     "unique": true,
+     "concurrently": false,
+     "columns": [
+      "customer_id"
+     ]
+    },
+    "sql": "CREATE UNIQUE INDEX idx_subscriptions_customer ON subscriptions (customer_id)",
+    "index": 1
+   },
+   {
+    "kind": "drop_column",
+    "table": "invoices",
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 7,
+ "ops": 7,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 390,
+  "attributed_chars": 390,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -265,7 +323,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.27 ms)
+**tool** `corpus.dependents` (0.18 ms)
 
 ```json
 {
@@ -395,7 +453,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.28 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -465,7 +523,7 @@ _tool responded_
 21
 ```
 
-**tool** `shadow.replay` (3.15 ms)
+**tool** `shadow.replay` (2.09 ms)
 
 ```json
 {
@@ -671,7 +729,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -817,7 +875,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.43 ms)
+**tool** `coverage.ledger` (0.15 ms)
 
 ```json
 {
@@ -1098,7 +1156,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.13 ms)
+**tool** `migration.parse` (0.19 ms)
 
 ```json
 {
@@ -1169,7 +1227,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.09 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -1234,7 +1292,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.71 ms)
+**tool** `shadow.replay` (2.14 ms)
 
 ```json
 {

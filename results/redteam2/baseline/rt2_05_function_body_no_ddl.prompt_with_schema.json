@@ -1,0 +1,26 @@
+{
+ "case_id": "rt2_05_function_body_no_ddl",
+ "variant": "prompt_with_schema",
+ "verdict": "REQUEST_CHANGES",
+ "hazards": [
+  {
+   "code": "VIEW_BREAKAGE",
+   "severity": "high",
+   "note": "View open_invoices reads a table this migration alters and may stop resolving.",
+   "evidence": [],
+   "source": "model"
+  }
+ ],
+ "review_text": "Verdict: REQUEST_CHANGES\n\n- [HIGH] VIEW_BREAKAGE: View open_invoices reads a table this migration alters and may stop resolving.",
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 1,
+  "tokens_in": 1042,
+  "tokens_out": 32,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 0.1,
+ "plan": null,
+ "plan_verified": false
+}

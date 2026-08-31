@@ -18,16 +18,19 @@ git clone https://github.com/MahammadRiyazShek/migration-sentinel && cd migratio
 python3 tools/check_results.py          # <- if you run one command, run this one
 ```
 
-It reads `results/*.json` and re-asserts every number in this repository, including the five that
-make the pipeline look worse. Expect `57/57 claims hold`, in under a second, with no key and no
+It reads `results/*.json` and re-asserts every number in this repository, including the ten that
+make the pipeline look worse - among them the case where the text-only baseline beats the previous
+release, and the case where every false finding in that release cited machine evidence. Expect `67/67 claims hold`, in under a second, with no key and no
 network.
 
 The rest, in the order they build on each other:
 
 ```bash
-python3 -m unittest discover -s tests   # 104 tests, ~0.3 s
+python3 -m unittest discover -s tests   # 129 tests, ~0.3 s
 python3 eval/run_eval.py --ablations    # 120 reviews (12 cases x 9 arms), < 1 s
 python3 eval/run_holdout.py --ablations # the second schema: 9 held-out cases, rules frozen
+python3 eval/run_redteam.py             # 7 cases written to make this pipeline approve an outage
+python3 eval/run_redteam2.py            # 6 cases the parser itself gets wrong (v14)
 python3 eval/model_invariance.py        # 180 reviews, 5 models x 3 narrator modes, < 1 s
 python3 tools/check_determinism.py      # reruns everything in a temp copy and diffs it back
 python3 tools/check_cross_version.py    # reruns it again on a second interpreter and diffs that
@@ -57,6 +60,7 @@ that packet is identical, which is the point.
 | End to end quality (20%) | `results/case_12_release_train.md`, live desk below | `python3 -m sentinel review --case eval/cases/case_12_release_train.json --print-report` produces the packet a reviewer actually reads |
 | Measured improvement (15%) | `results/comparison.md`, `README.md` §Improvement Changelog | 10 kept iterations, 3 removed experiments, 4 rejected designs, each row tied to an arm in `results/*.json` |
 | Reproducibility (15%) | `REPRODUCTION.md` | clean clone to main result in one command, no key, no network. `tools/check_determinism.py` reruns every generator in a temporary copy and diffs 146 files back against the committed ones: **0 decision differences**, and it names the wall-clock fields that do move rather than asking you to assume them. `tools/check_cross_version.py` does the same diff across **two interpreters** - CPython 3.11.2 and 3.12.13, 146 files, **0 decision differences** - and publishes the half that fails: in the recorded run the wall-clock figures moved by up to 7.1 ms on the same machine, so the decisions are portable and the timings never were. `tools/check_docs.py` audits the documentation itself: no dangling reference, no stale count (including the size of an audit, in its own docstring), no heading trapped in a code fence, no document declaring an older release than the newest one. `tools/check_submission_text.py` audits the description in the submission form, the one artefact that lives outside this repository |
+| Adversarial evidence (no rubric row, read it anyway) | `results/redteam.md`, `results/redteam2.md` | two passes whose only brief was to find a migration a Postgres primary calls an outage and this pipeline calls SAFE. Round 1 found two unenumerated hazard classes; round 2 found that a `--` inside a string literal cost the parser the second half of a migration. Both publish the arm that reproduces the previous release, and both publish that it is identical to the shipped one on every labelled case - which is the only evidence that the layer was missing rather than retuned |
 | Hot take / insights (5%) | `README.md` §Hot take, `results/model_invariance.md` | the failure mode was found by writing an attacker against my own fix, not by removing a component |
 
 ---
@@ -143,7 +147,7 @@ read it: [`docs/SUPERVISOR_LOG_V10.md`](docs/SUPERVISOR_LOG_V10.md).
 
 ## The video is older than the repo
 
-The submitted video was recorded against v2. The repository is v13. The problem, architecture,
+The submitted video was recorded against v2. The repository is v14. The problem, architecture,
 baseline comparison and walkthrough all still match; some on-screen numbers are stale and three
 components (the coverage gate, the structural narrator and the held-out world) did not exist yet.
 

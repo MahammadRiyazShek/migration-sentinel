@@ -1,0 +1,1222 @@
+{
+ "run_id": "eval-rt2_02_do_block_hides_the_drop",
+ "case_id": "rt2_02_do_block_hides_the_drop",
+ "title": "Idempotent column cleanup wrapped in a DO block, as the framework generates it",
+ "owner_service": "platform",
+ "verdict": "BLOCK",
+ "summary": "Do not ship this as written. 1 coverage gap(s) need a named sign-off before this can be called safe. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
+ "narrator": {
+  "mode": "structural",
+  "guard": true,
+  "headline_source": "tool",
+  "summary_overridden": false,
+  "summary_reasons": [],
+  "model_summary": "Do not ship this as written. 1 coverage gap(s) need a named sign-off before this can be called safe. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note": "Do not ship this as written. 1 coverage gap(s) need a named sign-off before this can be called safe. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note_reasons": [],
+  "questions_source": "model",
+  "questions_dropped": []
+ },
+ "counts": {
+  "low": 0,
+  "medium": 0,
+  "high": 0,
+  "blocker": 1
+ },
+ "hazards": [
+  {
+   "code": "PROCEDURAL_DDL_UNREVIEWED",
+   "severity": "blocker",
+   "summary": "1 schema or data statement(s) execute inside the $$ body of statement 0; the expand/contract analysis, the dependency map and the shadow replay all ran on the outer statement only",
+   "evidence": [
+    "statement 0: `DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns W`",
+    "inside the body: `ALTER TABLE invoices DROP COLUMN tax_rate`"
+   ],
+   "objects": [
+    "migration script"
+   ],
+   "services": [],
+   "source": "static",
+   "memory_refs": [],
+   "remediation": "lift the DDL out of the procedural block so it can be planned and reviewed as a statement; keep the block for the data logic that actually needs it",
+   "title": "Schema change executes inside a procedural body"
+  }
+ ],
+ "blast_radius": {
+  "dependent_queries": [],
+  "blast_score": 0,
+  "replay": {
+   "materialised": true,
+   "schema_errors": [],
+   "data_errors": [],
+   "broken": [],
+   "column_drift": [],
+   "rowcount_drift": [],
+   "data_loss": [],
+   "queries_run": 19,
+   "queries_ok_before": 19,
+   "queries_ok_after": 19
+  }
+ },
+ "plan": {
+  "attempt": 1,
+  "phase1_sql": [],
+  "phase2_sql": [],
+  "rollback_sql": [],
+  "code_steps": [],
+  "human_gates": [
+   "statement 0 (procedural_block) is outside the tool's model and needs manual review: DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'invoic",
+   "IRREVERSIBLE - coverage gap on `$$ body at statement 0` (procedural_body): a reviewer reads the $$ body of statement 0 in full, including every branch, before phase 1"
+  ],
+  "questions": [
+   "What is the accepted risk for PROCEDURAL_DDL_UNREVIEWED?"
+  ],
+  "questions_source": "model",
+  "questions_dropped": [],
+  "policy": {
+   "include_view_changes": true,
+   "expand_contract_type_change": true,
+   "minimal_phase1": false,
+   "notes": []
+  }
+ },
+ "plan_verification": {
+  "verified": true,
+  "problems": [],
+  "replay": {
+   "materialised": true,
+   "schema_errors": [],
+   "data_errors": [],
+   "broken": [],
+   "column_drift": [],
+   "rowcount_drift": [],
+   "data_loss": [],
+   "queries_run": 19,
+   "queries_ok_before": 19,
+   "queries_ok_after": 19
+  },
+  "unmodelled": []
+ },
+ "escalated_to_human": false,
+ "coverage_gaps": [
+  "op 0 (procedural_block) not modelled structurally: DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.colu"
+ ],
+ "coverage_ledger": {
+  "gaps": [
+   {
+    "kind": "procedural_body",
+    "object": "$$ body at statement 0",
+    "object_inferred": false,
+    "statement_index": 0,
+    "statement": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns W",
+    "why": "the body holds 3 scanned statement(s) and nothing in this pipeline models a procedural block: the census below is a keyword scan, not a parse, so the packet knows that DDL is in there and not what the block does with it (branches, loops, exception handlers, dynamic SQL)",
+    "closes_with": "a reviewer reads the $$ body of statement 0 in full, including every branch, before phase 1",
+    "irreversible": true
+   }
+  ],
+  "gap_kinds": [
+   "procedural_body"
+  ],
+  "irreversible": [
+   "$$ body at statement 0"
+  ],
+  "corpus_statements": 17,
+  "parser_notes": [
+   "op 0 (procedural_block) not modelled structurally: DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.colu"
+  ]
+ },
+ "verdict_capped_by_coverage": false,
+ "change_set": {
+  "ops": [
+   {
+    "kind": "procedural_block",
+    "table": null,
+    "column": null,
+    "detail": {
+     "head": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name",
+     "bodies": [
+      "$$"
+     ]
+    },
+    "sql": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'invoices' AND column_name = 'tax_rate') THEN ALTER TABLE invoices DROP COLUMN tax_rate; END IF; END $$",
+    "index": 0
+   }
+  ],
+  "op_kinds": [
+   "procedural_block"
+  ],
+  "tables_touched": [],
+  "columns_touched": [],
+  "unmodelled": [
+   "op 0 (procedural_block) not modelled structurally: DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.colu"
+  ]
+ },
+ "attempts": 1,
+ "features": {
+  "replay": true,
+  "static": true,
+  "memory": true,
+  "verify": true,
+  "coverage": true,
+  "rule_coverage": true,
+  "text_conservation": true
+ },
+ "tool_calls": [
+  {
+   "agent": "cartographer",
+   "tool": "schema.parse",
+   "args": {
+    "sql": "CREATE TABLE customers (\n  id SERIAL PRIMARY KEY,\n  email TEXT NOT NULL,\n  full_name TEXT,\n  company_name TEXT,\n  country_code TEXT NOT NULL DEFAULT 'US',\n  plan TEXT NOT NULL DEFAULT 'free',\n  mrr_cents INTEGER NOT NULL DEFAULT 0,\n  signed_up_at TIMESTAMPTZ NOT NULL,\n  CONSTRAINT customers_plan_chk CHECK (plan IN ('free','team','business','enterprise'))\n);\n\nCREATE TABLE subscriptions (\n  id SERIA...",
+    "row_estimates": {
+     "customers": 2400000,
+     "subscriptions": 2600000,
+     "invoices": 48000000,
+     "invoice_lines": 190000000,
+     "usage_events": 900000000
+    }
+   },
+   "ms": 0.71,
+   "result_summary": "Schema"
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.parse",
+   "args": {
+    "sql": "DO $$\nBEGIN\n  IF EXISTS (SELECT 1 FROM information_schema.columns\n             WHERE table_name = 'invoices' AND column_name = 'tax_rate')\n  THEN\n    ALTER TABLE invoices DROP COLUMN tax_rate;\n  END IF;\nEND\n$$;\n"
+   },
+   "ms": 0.06,
+   "result_summary": [
+    {
+     "kind": "procedural_block",
+     "table": null,
+     "column": null,
+     "detail": {
+      "head": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name",
+      "bodies": [
+       "$$"
+      ]
+     },
+     "sql": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'invoices' AND column_name = 'tax_rat...",
+     "index": 0
+    }
+   ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "DO $$\nBEGIN\n  IF EXISTS (SELECT 1 FROM information_schema.columns\n             WHERE table_name = 'invoices' AND column_name = 'tax_rate')\n  THEN\n    ALTER TABLE invoices DROP COLUMN tax_rate;\n  END IF;\nEND\n$$;\n",
+    "ops": [
+     {
+      "kind": "procedural_block",
+      "table": null,
+      "column": null,
+      "detail": {
+       "head": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name",
+       "bodies": [
+        "$$"
+       ]
+      },
+      "sql": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'invoices' AND column_name = 'tax_rat...",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.14,
+   "result_summary": {
+    "lexed_statements": 1,
+    "ops": 1,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [
+     {
+      "statement_index": 0,
+      "tag": "$$",
+      "head": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns W",
+      "start": 3,
+      "end": 209,
+      "body_statements": 3,
+      "inner": [
+       {
+        "excerpt": "ALTER TABLE invoices DROP COLUMN tax_rate",
+        "keyword": "alter table",
+        "text": "BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'invoices' AND column_name = 'tax_rate') TH...",
+        "control_flow": false,
+        "ddl_or_dml": true,
+        "destructive": true
+       },
+       {
+        "excerpt": "END IF",
+        "keyword": "end",
+        "text": "END IF",
+        "control_flow": true,
+        "ddl_or_dml": false,
+        "destructive": false
+       },
+       {
+        "excerpt": "END",
+        "keyword": "end",
+        "text": "END",
+        "control_flow": true,
+        "ddl_or_dml": false,
+        "destructive": false
+       }
+      ],
+      "ddl_inside": [
+       "ALTER TABLE invoices DROP COLUMN tax_rate"
+      ],
+      "destructive_inside": [
+       "ALTER TABLE invoices DROP COLUMN tax_rate"
+      ]
+     }
+    ],
+    "conservation": {
+     "significant_chars": 157,
+     "attributed_chars": 157,
+     "unattributed_chars": 0
+    },
+    "clean": false
+   }
+  },
+  {
+   "agent": "cartographer",
+   "tool": "schema.apply_ops",
+   "args": {
+    "schema": "Schema",
+    "ops": [
+     {
+      "kind": "procedural_block",
+      "table": null,
+      "column": null,
+      "detail": {
+       "head": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name",
+       "bodies": [
+        "$$"
+       ]
+      },
+      "sql": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'invoices' AND column_name = 'tax_rat...",
+      "index": 0
+     }
+    ]
+   },
+   "ms": 0.04,
+   "result_summary": [
+    "Schema",
+    [
+     "op 0 (procedural_block) not modelled structurally: DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.colu"
+    ]
+   ]
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "corpus.dependents",
+   "args": {
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+9 more"
+    ],
+    "ops": [
+     {
+      "kind": "procedural_block",
+      "table": null,
+      "column": null,
+      "detail": {
+       "head": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name",
+       "bodies": [
+        "$$"
+       ]
+      },
+      "sql": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'invoices' AND column_name = 'tax_rat...",
+      "index": 0
+     }
+    ],
+    "schema": "Schema"
+   },
+   "ms": 0.07,
+   "result_summary": []
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "corpus.blast_score",
+   "args": {
+    "hits": []
+   },
+   "ms": 0.0,
+   "result_summary": 0
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "shadow.replay",
+   "args": {
+    "pre_schema": "Schema",
+    "post_schema": "Schema",
+    "ops": [
+     {
+      "kind": "procedural_block",
+      "table": null,
+      "column": null,
+      "detail": {
+       "head": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name",
+       "bodies": [
+        "$$"
+       ]
+      },
+      "sql": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'invoices' AND column_name = 'tax_rat...",
+      "index": 0
+     }
+    ],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+9 more"
+    ]
+   },
+   "ms": 1.94,
+   "result_summary": {
+    "materialised": true,
+    "schema_errors": [],
+    "data_errors": [],
+    "broken": [],
+    "column_drift": [],
+    "rowcount_drift": [],
+    "data_loss": [],
+    "queries_run": 19,
+    "queries_ok_before": 19,
+    "queries_ok_after": 19
+   }
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "PROCEDURAL_DDL_UNREVIEWED",
+    "table": "migration script"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    []
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "coverage.ledger",
+   "args": {
+    "ops": [
+     {
+      "kind": "procedural_block",
+      "table": null,
+      "column": null,
+      "detail": {
+       "head": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name",
+       "bodies": [
+        "$$"
+       ]
+      },
+      "sql": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'invoices' AND column_name = 'tax_rat...",
+      "index": 0
+     }
+    ],
+    "schema": "Schema",
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+9 more"
+    ],
+    "unmodelled_notes": [
+     "op 0 (procedural_block) not modelled structurally: DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.colu"
+    ],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 1,
+     "ops": 1,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [
+      {
+       "statement_index": 0,
+       "tag": "$$",
+       "head": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns W",
+       "start": 3,
+       "end": 209,
+       "body_statements": 3,
+       "inner": [
+        {
+         "excerpt": "ALTER TABLE invoices DROP COLUMN tax_rate",
+         "keyword": "alter table",
+         "text": "BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'invoices' AND column_name = 'tax_rate') TH...",
+         "control_flow": false,
+         "ddl_or_dml": true,
+         "destructive": true
+        },
+        {
+         "excerpt": "END IF",
+         "keyword": "end",
+         "text": "END IF",
+         "control_flow": true,
+         "ddl_or_dml": false,
+         "destructive": false
+        },
+        {
+         "excerpt": "END",
+         "keyword": "end",
+         "text": "END",
+         "control_flow": true,
+         "ddl_or_dml": false,
+         "destructive": false
+        }
+       ],
+       "ddl_inside": [
+        "ALTER TABLE invoices DROP COLUMN tax_rate"
+       ],
+       "destructive_inside": [
+        "ALTER TABLE invoices DROP COLUMN tax_rate"
+       ]
+      }
+     ],
+     "conservation": {
+      "significant_chars": 157,
+      "attributed_chars": 157,
+      "unattributed_chars": 0
+     },
+     "clean": false
+    }
+   },
+   "ms": 0.13,
+   "result_summary": {
+    "gaps": [
+     {
+      "kind": "procedural_body",
+      "object": "$$ body at statement 0",
+      "object_inferred": false,
+      "statement_index": 0,
+      "statement": "DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.columns W",
+      "why": "the body holds 3 scanned statement(s) and nothing in this pipeline models a procedural block: the census below is a keyw...",
+      "closes_with": "a reviewer reads the $$ body of statement 0 in full, including every branch, before phase 1",
+      "irreversible": true
+     }
+    ],
+    "gap_kinds": [
+     "procedural_body"
+    ],
+    "irreversible": [
+     "$$ body at statement 0"
+    ],
+    "corpus_statements": 17,
+    "parser_notes": [
+     "op 0 (procedural_block) not modelled structurally: DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.colu"
+    ]
+   }
+  },
+  {
+   "agent": "verifier",
+   "tool": "migration.parse",
+   "args": {
+    "sql": ""
+   },
+   "ms": 0.01,
+   "result_summary": []
+  },
+  {
+   "agent": "verifier",
+   "tool": "schema.apply_ops",
+   "args": {
+    "schema": "Schema",
+    "ops": []
+   },
+   "ms": 0.04,
+   "result_summary": [
+    "Schema",
+    []
+   ]
+  },
+  {
+   "agent": "verifier",
+   "tool": "shadow.replay",
+   "args": {
+    "pre_schema": "Schema",
+    "post_schema": "Schema",
+    "ops": [],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+9 more"
+    ]
+   },
+   "ms": 1.97,
+   "result_summary": {
+    "materialised": true,
+    "schema_errors": [],
+    "data_errors": [],
+    "broken": [],
+    "column_drift": [],
+    "rowcount_drift": [],
+    "data_loss": [],
+    "queries_run": 19,
+    "queries_ok_before": 19,
+    "queries_ok_after": 19
+   }
+  }
+ ],
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 3,
+  "tokens_in": 1034,
+  "tokens_out": 159,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 5.8,
+ "severity_order": [
+  "low",
+  "medium",
+  "high",
+  "blocker"
+ ]
+}

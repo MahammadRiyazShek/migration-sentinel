@@ -1,28 +1,6 @@
-# Paste-ready submission text
-
-> **The form field is plain text and caps at 9,000 characters.** Both facts were read off the form
-> in the ninth supervisor session; this file previously asserted 10,000 and carried a markdown
-> variant that could not be pasted at all, so the audited length was measured on text nobody would
-> submit. The tenth session found the text still over the cap at 9,536 characters - the hot take
-> was past the edge of the field - and now measures the length twice, as authored and
-> CRLF-normalised, because a form POST counts a line break as two characters and the counter in
-> the page counts one. There is one copy of this artefact now: everything below the marker is byte-identical to
-> [`SUBMISSION_FORM_TEXT.txt`](SUBMISSION_FORM_TEXT.txt), and `tools/check_docs.py` asserts that,
-> the 9,000-character cap and nothing else. `tools/check_submission_text.py` re-reads every figure
-> in it out of `results/*.json`. Reasoning: [`docs/SUPERVISOR_LOG_V9.md`](docs/SUPERVISOR_LOG_V9.md).
-
-Title field:
-
-> Migration Sentinel: agents that replay your schema migration, verify the rollout plan they wrote,
-> name what they could not see, and never let the model write the verdict
-
-Video URL field: `https://www.youtube.com/watch?v=JGXnRwWWmrQ`
-
-<!-- PASTE BELOW THIS LINE -->
-
 A two-line ALTER TABLE is either free or an outage, and the diff does not tell you which.
 
-Every number below is re-asserted from raw JSON by one command on a clean clone, in under a second, no API key, no network: python3 tools/check_results.py -> 57/57 claims hold. Eight of those claims make this pipeline look worse, and one puts a one-prompt baseline ahead of my own previous release.
+Every number below is re-asserted from raw JSON by one command on a clean clone, in under a second, no API key, no network: python3 tools/check_results.py -> 67/67 claims hold. Ten of those claims make this pipeline look worse, and two put a one-prompt baseline ahead of my own previous release.
 
 THE USER. The platform engineer on the schema-migration review rota at a 20-to-300 person company: one Postgres primary, a dozen services and a BI layer on it, migration PRs from teams that own the feature but not the database. A real review answers what the diff does not contain: which live statements touch this column, whether this lock survives 48M rows. Twenty to forty minutes of work on a five-minute budget, so review degrades into pattern matching on diff text: it catches the obvious DROP COLUMN and misses the DROP VIEW a worker reads every minute.
 
@@ -44,25 +22,25 @@ HELD OUT. Those twelve cases sit on one billing schema and I wrote both the rule
 - Blocking cases given a clean verdict, held out: 1/7, 1/7, 0/7
 - Hazard recall, held out: 0.52, 0.56, 0.96
 - Modelled reviewer minutes per case, held out: 26.3, 33.4, 10.7
-Recall is 1.0 excluding holdout_06, whose label sits outside the shared vocabulary on purpose. The rules transfer. Blocking cases given a clean verdict: first contact 1/7, after the fix 0/7, and no in-sample number moved. holdout_06 and holdout_07 are no longer held out; the other seven are. Decision files moved since the freeze, named in every held-out report: sentinel/agents/risk_officer.py, sentinel/agents/rollout_engineer.py, sentinel/coverage.py, sentinel/hazards.py, sentinel/llm/scripted.py, sentinel/orchestrator.py, sentinel/tools/query_corpus.py, sentinel/tools/shadow_db.py, plus sentinel/rulebook.py.
+Recall is 1.0 excluding holdout_06, whose label sits outside the shared vocabulary on purpose. The rules transfer. Blocking cases given a clean verdict: first contact 1/7, after the fix 0/7, and no in-sample number moved. holdout_06 and holdout_07 are no longer held out; the other seven are. Decision files moved since the freeze, named in every held-out report: sentinel/agents/cartographer.py, sentinel/agents/risk_officer.py, sentinel/agents/rollout_engineer.py, sentinel/coverage.py, sentinel/hazards.py, sentinel/llm/scripted.py, sentinel/orchestrator.py, sentinel/tools/query_corpus.py, sentinel/tools/shadow_db.py, sentinel/tools/sql_parse.py, sentinel/rulebook.py, sentinel/tools/sql_lex.py and sentinel/tools/parse_audit.py.
 
 RED TEAM: THE HALF LABELS CANNOT TEST. Both sets above were labelled from one hazard vocabulary, so both only test hazards I had already named. The last pass ran the opposite brief: find a migration a Postgres primary calls an outage and this pipeline calls SAFE. Six probes, two hits, and neither was a wrong rule - both were absent rules nothing here was counting. DROP INDEX on a 48M-row table three live statements filter by: every statement still executes, so replay is silent, and no rule mentioned drop_index. SAFE, zero hazards, zero gaps. And CONCURRENTLY inside BEGIN/COMMIT, which Postgres refuses and every framework opens by default: the parser saw both statements and no rule correlated them. SAFE - and here the text-only baseline wins, because BEGIN plus CONCURRENTLY in one file is a famous string. Seven cases now, on unsafe approvals / blocking cases cleared / false alarms: B 1/7, 1/3, 4. Sentinel v12 3/7, 3/3, 0. Sentinel v13 0/7, 0/3, 0.
 
 Read the generalisation number first, because it runs the other way: the new layer is identical to v12 on 21 of 21 labelled cases - same verdicts, hazards, severities, gaps. A layer that moves nothing already measured was missing, not retuned. The deeper defect was the ledger's shape: every gap class was keyed to a statement kind some rule already handled, so it could only declare blind spots about objects something had already looked at. sentinel/rulebook.py now partitions all 26 statement kinds the parser can emit into ruled, replay-covered, ledgered and residual; a test fails if the parser learns a kind nobody classified; a residual kind opens a gap, never a hazard. The first draft was default-deny and flagged case_06, the cry-wolf canary: a rule looking and clearing is coverage, no rule existing is a hole, and counting hazards cannot tell them apart.
 
-WHAT EACH COMPONENT BUYS. 3 headline plus 7 ablation arms across 12 cases = 120 reviews, on unsafe approvals / recall / plans / gaps / minutes. All five components: 0/12, 0.970, 12/12, 0/2, 9.2. Rules only: 1/12, 0.576, 0/12, 0/2, 23.3. Replay only: 2/12, 0.333, 12/12, 0/2, 8.8. No coverage gate: 0/12, 0.970, 12/12, 1/2, 8.5. Replay alone is worse than rules alone, 2 unsafe approvals against 1: a lock hazard produces no failing query, so replay-only waves through the 48M-row index build. Execution is necessary, not sufficient.
+WHAT EACH COMPONENT BUYS. 3 headline plus 8 ablation arms across 12 cases = 132 reviews, on unsafe approvals / recall / plans / gaps / minutes. All five components: 0/12, 0.970, 12/12, 0/2, 9.2. Rules only: 1/12, 0.576, 0/12, 0/2, 23.3. Replay only: 2/12, 0.333, 12/12, 0/2, 8.8. No coverage gate: 0/12, 0.970, 12/12, 1/2, 8.5. Replay alone is worse than rules alone, 2 unsafe approvals against 1: a lock hazard produces no failing query, so replay-only waves through the 48M-row index build. Execution is necessary, not sufficient.
 
 CAN THE MODEL MOVE ANY OF THIS. 12 cases x 5 models x 3 narrator modes = 180 reviews, four of them not trying to help: a sycophant, an injector, a dead endpoint, and hostile-fluent, written to beat my own earlier fix. The decision surface changed in 0 of 168 completed reviews, byte-identical on verdict, hazards, severities, evidence, ledger, generated SQL and verification. The other 12 crashed, all narrator-unguarded, on an empty model response; both guarded modes take that to 0. Held-out rerun: 0 of 126. The prose did not hold and no decision metric could see it: unguarded, the sycophant printed "safe to ship" under a BLOCK badge on 11 of 12 cases. The fix is provenance: the headline is a pure function of tool output, model prose demoted to a block labelled unverified. Misleading headlines reaching the reviewer, per 48 hostile reviews per mode: 36/48 unguarded, 13/48 blocklist, 0/48 shipped, with 0 of 60 headlines model-written and no detection metric moved.
 
 REPRODUCIBILITY. Python 3.11+ stdlib, no dependencies, no network, synthetic data. Start at JUDGE_START_HERE.md. One packet: python3 -m sentinel review --case eval/cases/case_12_release_train.json. Everything: make verify. 120 reviews in under a second at $0.00: python3 eval/run_eval.py --ablations. Reviewer minutes is modelled: eval/time_sensitivity.py reruns every arm under six constant sets and publishes the two where the sign reverses.
 
-ON THE VIDEO. Recorded against v2; the repo is v13, so some numbers are stale. Where video and the repo disagree, results/comparison.md and results/model_invariance.md are authoritative, and docs/VIDEO_ADDENDUM.md lists every stale number.
+ON THE VIDEO. Recorded against v2; the repo is v14, so some numbers are stale. Where video and the repo disagree, results/comparison.md and results/model_invariance.md are authoritative, and docs/VIDEO_ADDENDUM.md lists every stale number.
 
 AGENTS USED. Claude Opus 5, conversationally rather than as an autonomous shell harness, for everything under sentinel/, eval/, tools/, tests/ and site/, in the challenge window. Disclosure in AGENT_USE.md, development traces in agent_traces/, runtime trajectories for all five in-product agents in trajectories/. Never delegated: ground truth, hazard vocabulary, scorer, metrics.
 
-FAILURE MODE AND HOT TAKE. The corpus is the world: everything is proved from the SQL it was given. case_09 hides the risky consumer outside the corpus and holdout_06's hazard has no name in the vocabulary; both are still missed and neither is cleared, because the ledger sees the shape of the hole without seeing inside it. Twenty-eight hand-labelled cases on two schemas, all mine. Do not quote the F1 without its denominator.
+FAILURE MODE AND HOT TAKE. The corpus is the world: everything is proved from the SQL it was given. case_09 hides the risky consumer outside the corpus and holdout_06's hazard has no name in the vocabulary; both are still missed and neither is cleared, because the ledger sees the shape of the hole without seeing inside it. Thirty-four hand-labelled cases on two schemas, all mine. Do not quote the F1 without its denominator.
 
-An allow-list of known unknowns is still an allow-list. That sample also had a shape I chose by accident: every rule covered something shadow replay is blind to, so the rule set inherited the blind spots of my engine instead of the structure of the problem. Locks, volume and intent are properties of one statement; nothing ever asked about a property of two. Ablations only remove what you already built. Enumerate what your tool can parse, subtract what any part of it actually inspects, publish the remainder as a named blind spot - then go looking for the case where your own baseline beats you.
+An allow-list of known unknowns is still an allow-list, and an inventory of what you parse is still downstream of a parse: v14 found that a double hyphen inside a string literal cost the v13 parser the second half of a migration, so the DROP COLUMN reached no rule at all. See results/redteam2.md - recall 0.25 to 0.75, precision 0.222 to 1.0, and every false finding in the v13 packet cited machine evidence. Count what goes in, count what comes out, publish the difference. That sample also had a shape I chose by accident: every rule covered something shadow replay is blind to, so the rule set inherited the blind spots of my engine instead of the structure of the problem. Locks, volume and intent are properties of one statement; nothing ever asked about a property of two. Ablations only remove what you already built. Enumerate what your tool can parse, subtract what any part of it actually inspects, publish the remainder as a named blind spot - then go looking for the case where your own baseline beats you.
 
 GitHub: https://github.com/MahammadRiyazShek/migration-sentinel
 Live demo: https://migration-sentinel-frvo.vercel.app/

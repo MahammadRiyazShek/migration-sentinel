@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_03_rename_table_behind_view`
 - case: `holdout_03_rename_table_behind_view`
-- events: 34
+- events: 35
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.85 ms)
+**tool** `schema.parse` (0.73 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.06 ms)
+**tool** `migration.parse` (0.05 ms)
 
 ```json
 {
@@ -92,7 +92,59 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `migration.audit` (0.05 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE shipment_stops RENAME TO stops;\nCREATE VIEW shipment_stops AS\n  SELECT id, shipment_id, sequence_no, kind, status, address_json, arrived_at FROM stops;\n",
+  "ops": [
+   {
+    "kind": "rename_table",
+    "table": "shipment_stops",
+    "column": null,
+    "detail": {
+     "new_name": "stops"
+    },
+    "sql": "ALTER TABLE shipment_stops RENAME TO stops",
+    "index": 0
+   },
+   {
+    "kind": "create_view",
+    "table": null,
+    "column": null,
+    "detail": {
+     "name": "shipment_stops",
+     "select": "SELECT id, shipment_id, sequence_no, kind, status, address_json, arrived_at FROM stops",
+     "replace": false
+    },
+    "sql": "CREATE VIEW shipment_stops AS SELECT id, shipment_id, sequence_no, kind, status, address_json, arrived_at FROM stops",
+    "index": 1
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 2,
+ "ops": 2,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 140,
+  "attributed_chars": 140,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -174,7 +226,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.12 ms)
+**tool** `corpus.dependents` (0.08 ms)
 
 ```json
 {
@@ -303,7 +355,7 @@ _tool responded_
 11
 ```
 
-**tool** `shadow.replay` (2.99 ms)
+**tool** `shadow.replay` (2.71 ms)
 
 ```json
 {
@@ -464,7 +516,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -524,7 +576,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -566,7 +618,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.16 ms)
+**tool** `coverage.ledger` (0.12 ms)
 
 ```json
 {
@@ -758,7 +810,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.1 ms)
 
 ```json
 {
@@ -820,7 +872,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.99 ms)
+**tool** `shadow.replay` (2.18 ms)
 
 ```json
 {

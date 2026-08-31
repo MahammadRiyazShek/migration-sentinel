@@ -697,7 +697,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -715,7 +716,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.84,
+   "ms": 0.69,
    "result_summary": "Schema"
   },
   {
@@ -724,7 +725,7 @@
    "args": {
     "sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164;\nCREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id);\nALTER TABLE shipments DROP COLUMN legacy_ref;\nUPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed';\nALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk\n  FOREIGN KEY (shipment_id) REFERENCES shipments (id);\nVACUUM FULL shipments;\n"
    },
-   "ms": 0.16,
+   "ms": 0.14,
    "result_summary": [
     {
      "kind": "rename_column",
@@ -795,6 +796,97 @@
      "index": 5
     }
    ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164;\nCREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id);\nALTER TABLE shipments DROP COLUMN legacy_ref;\nUPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed';\nALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk\n  FOREIGN KEY (shipment_id) REFERENCES shipments (id);\nVACUUM FULL shipments;\n",
+    "ops": [
+     {
+      "kind": "rename_column",
+      "table": "drivers",
+      "column": "phone",
+      "detail": {
+       "new_name": "phone_e164"
+      },
+      "sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164",
+      "index": 0
+     },
+     {
+      "kind": "create_index",
+      "table": "geofence_events",
+      "column": null,
+      "detail": {
+       "name": "idx_geofence_events_shipment",
+       "unique": false,
+       "concurrently": false,
+       "columns": [
+        "shipment_id"
+       ]
+      },
+      "sql": "CREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id)",
+      "index": 1
+     },
+     {
+      "kind": "drop_column",
+      "table": "shipments",
+      "column": "legacy_ref",
+      "detail": {},
+      "sql": "ALTER TABLE shipments DROP COLUMN legacy_ref",
+      "index": 2
+     },
+     {
+      "kind": "dml_update",
+      "table": "shipment_stops",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": false
+      },
+      "sql": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed'",
+      "index": 3
+     },
+     {
+      "kind": "add_constraint",
+      "table": "carrier_invoices",
+      "column": null,
+      "detail": {
+       "constraint": "carrier_invoices_shipment_fk",
+       "constraint_kind": "foreign_key",
+       "expr": "(shipment_id) REFERENCES shipments (id)",
+       "columns": [],
+       "not_valid": false
+      },
+      "sql": "ALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk FOREIGN KEY (shipment_id) REFERENCES shipments ...",
+      "index": 4
+     },
+     {
+      "kind": "maintenance_rewrite",
+      "table": "shipments",
+      "column": null,
+      "detail": {
+       "command": "VACUUM FULL"
+      },
+      "sql": "VACUUM FULL shipments",
+      "index": 5
+     }
+    ]
+   },
+   "ms": 0.12,
+   "result_summary": {
+    "lexed_statements": 6,
+    "ops": 6,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 345,
+     "attributed_chars": 345,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
   },
   {
    "agent": "cartographer",
@@ -872,7 +964,7 @@
      }
     ]
    },
-   "ms": 0.15,
+   "ms": 0.13,
    "result_summary": [
     "Schema",
     [
@@ -1015,7 +1107,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.15,
+   "ms": 0.23,
    "result_summary": [
     {
      "query_id": "q_dispatch_create",
@@ -1194,7 +1286,7 @@
      "...+5 more"
     ]
    },
-   "ms": 0.03,
+   "ms": 0.02,
    "result_summary": 42
   },
   {
@@ -1590,7 +1682,7 @@
      "...+7 more"
     ]
    },
-   "ms": 2.97,
+   "ms": 2.24,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1681,7 +1773,7 @@
     "hazard_code": "BREAKING_QUERY",
     "table": "q_driver_profile"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     []
@@ -1694,7 +1786,7 @@
     "hazard_code": "INDEX_LOCK_NO_CONCURRENT",
     "table": "geofence_events"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     [
@@ -2208,9 +2300,22 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 6,
+     "ops": 6,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 345,
+      "attributed_chars": 345,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
-   "ms": 0.23,
+   "ms": 0.16,
    "result_summary": {
     "gaps": [
      {
@@ -2262,7 +2367,7 @@
    "args": {
     "sql": "ALTER TABLE \"drivers\" ADD COLUMN \"phone_e164\" TEXT;\nUPDATE \"drivers\" SET \"phone_e164\" = \"phone\" WHERE \"phone_e164\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"drivers\" WHERE \"phone_e164\" IS NULL LIMIT 5000);\nCREATE INDEX CONCURRENTLY \"idx_geofence_events_shipment\" ON \"geofence_events\" (\"shipment_id\");\nUPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed' AND \"id\" IN (SELECT \"id\" FROM \"sh..."
    },
-   "ms": 0.19,
+   "ms": 0.17,
    "result_summary": [
     {
      "kind": "add_column",
@@ -2402,7 +2507,7 @@
      }
     ]
    },
-   "ms": 0.1,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -2797,7 +2902,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.08,
+   "ms": 2.35,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2879,7 +2984,7 @@
   "tokens_out": 792,
   "cost_usd": 0.0
  },
- "wall_ms": 9.6,
+ "wall_ms": 7.6,
  "severity_order": [
   "low",
   "medium",

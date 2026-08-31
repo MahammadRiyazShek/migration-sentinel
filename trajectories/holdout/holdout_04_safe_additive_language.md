@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_04_safe_additive_language`
 - case: `holdout_04_safe_additive_language`
-- events: 25
+- events: 26
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.86 ms)
+**tool** `schema.parse` (0.64 ms)
 
 ```json
 {
@@ -98,7 +98,65 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `migration.audit` (0.07 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE drivers ADD COLUMN preferred_language TEXT;\nCREATE INDEX CONCURRENTLY idx_drivers_carrier ON drivers (carrier_id);\n",
+  "ops": [
+   {
+    "kind": "add_column",
+    "table": "drivers",
+    "column": "preferred_language",
+    "detail": {
+     "type": "TEXT",
+     "not_null": false,
+     "default": null,
+     "unique": false
+    },
+    "sql": "ALTER TABLE drivers ADD COLUMN preferred_language TEXT",
+    "index": 0
+   },
+   {
+    "kind": "create_index",
+    "table": "drivers",
+    "column": null,
+    "detail": {
+     "name": "idx_drivers_carrier",
+     "unique": false,
+     "concurrently": true,
+     "columns": [
+      "carrier_id"
+     ]
+    },
+    "sql": "CREATE INDEX CONCURRENTLY idx_drivers_carrier ON drivers (carrier_id)",
+    "index": 1
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 2,
+ "ops": 2,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 111,
+  "attributed_chars": 111,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.12 ms)
 
 ```json
 {
@@ -186,7 +244,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.12 ms)
+**tool** `corpus.dependents` (0.08 ms)
 
 ```json
 {
@@ -377,7 +435,7 @@ _tool responded_
 20
 ```
 
-**tool** `shadow.replay` (2.98 ms)
+**tool** `shadow.replay` (2.2 ms)
 
 ```json
 {
@@ -624,7 +682,7 @@ _note (blast_radius)_: q_etl_driver_roster gains column(s) ['preferred_language'
 
 </details>
 
-**tool** `coverage.ledger` (0.16 ms)
+**tool** `coverage.ledger` (0.11 ms)
 
 ```json
 {
@@ -760,7 +818,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.06 ms)
+**tool** `migration.parse` (0.07 ms)
 
 ```json
 {
@@ -805,7 +863,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.09 ms)
 
 ```json
 {
@@ -854,7 +912,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.93 ms)
+**tool** `shadow.replay` (2.24 ms)
 
 ```json
 {

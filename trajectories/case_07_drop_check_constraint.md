@@ -2,7 +2,7 @@
 
 - run id: `eval-case_07_drop_check_constraint`
 - case: `case_07_drop_check_constraint`
-- events: 26
+- events: 27
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.66 ms)
+**tool** `schema.parse` (0.6 ms)
 
 ```json
 {
@@ -76,7 +76,47 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `migration.audit` (0.03 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE customers DROP CONSTRAINT customers_plan_chk;\n",
+  "ops": [
+   {
+    "kind": "drop_constraint",
+    "table": "customers",
+    "column": null,
+    "detail": {
+     "constraint": "customers_plan_chk"
+    },
+    "sql": "ALTER TABLE customers DROP CONSTRAINT customers_plan_chk",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 51,
+  "attributed_chars": 51,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -332,7 +372,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.5 ms)
+**tool** `shadow.replay` (2.04 ms)
 
 ```json
 {
@@ -453,7 +493,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -473,7 +513,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.15 ms)
+**tool** `coverage.ledger` (0.13 ms)
 
 ```json
 {
@@ -656,7 +696,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.4 ms)
+**tool** `shadow.replay` (1.96 ms)
 
 ```json
 {

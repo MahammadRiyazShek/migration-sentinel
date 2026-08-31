@@ -233,7 +233,8 @@
   "memory": true,
   "verify": true,
   "coverage": true,
-  "rule_coverage": true
+  "rule_coverage": true,
+  "text_conservation": true
  },
  "tool_calls": [
   {
@@ -249,7 +250,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.68,
+   "ms": 0.56,
    "result_summary": "Schema"
   },
   {
@@ -295,6 +296,60 @@
   },
   {
    "agent": "cartographer",
+   "tool": "migration.audit",
+   "args": {
+    "migration_sql": "BEGIN;\nCREATE INDEX CONCURRENTLY idx_usage_events_customer ON usage_events (customer_id);\nCOMMIT;\n",
+    "ops": [
+     {
+      "kind": "transaction_control",
+      "table": null,
+      "column": null,
+      "detail": {},
+      "sql": "BEGIN",
+      "index": 0
+     },
+     {
+      "kind": "create_index",
+      "table": "usage_events",
+      "column": null,
+      "detail": {
+       "name": "idx_usage_events_customer",
+       "unique": false,
+       "concurrently": true,
+       "columns": [
+        "customer_id"
+       ]
+      },
+      "sql": "CREATE INDEX CONCURRENTLY idx_usage_events_customer ON usage_events (customer_id)",
+      "index": 1
+     },
+     {
+      "kind": "transaction_control",
+      "table": null,
+      "column": null,
+      "detail": {},
+      "sql": "COMMIT",
+      "index": 2
+     }
+    ]
+   },
+   "ms": 0.05,
+   "result_summary": {
+    "lexed_statements": 3,
+    "ops": 3,
+    "unterminated": [],
+    "unaccounted": [],
+    "procedural": [],
+    "conservation": {
+     "significant_chars": 86,
+     "attributed_chars": 86,
+     "unattributed_chars": 0
+    },
+    "clean": true
+   }
+  },
+  {
+   "agent": "cartographer",
    "tool": "schema.apply_ops",
    "args": {
     "schema": "Schema",
@@ -332,7 +387,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.1,
    "result_summary": [
     "Schema",
     []
@@ -436,7 +491,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.14,
+   "ms": 0.1,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -832,7 +887,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.78,
+   "ms": 2.01,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1100,7 +1155,20 @@
       }
      ]
     },
-    "rule_coverage": true
+    "rule_coverage": true,
+    "text_audit": {
+     "lexed_statements": 3,
+     "ops": 3,
+     "unterminated": [],
+     "unaccounted": [],
+     "procedural": [],
+     "conservation": {
+      "significant_chars": 86,
+      "attributed_chars": 86,
+      "unattributed_chars": 0
+     },
+     "clean": true
+    }
    },
    "ms": 0.15,
    "result_summary": {
@@ -1117,7 +1185,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_usage_events_customer\" ON \"usage_events\" (\"customer_id\");"
    },
-   "ms": 0.07,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "create_index",
@@ -1159,7 +1227,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.04,
    "result_summary": [
     "Schema",
     []
@@ -1391,7 +1459,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.69,
+   "ms": 2.0,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1414,7 +1482,7 @@
   "tokens_out": 112,
   "cost_usd": 0.0
  },
- "wall_ms": 7.5,
+ "wall_ms": 5.8,
  "severity_order": [
   "low",
   "medium",

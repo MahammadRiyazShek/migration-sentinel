@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_08_release_train_fleet`
 - case: `holdout_08_release_train_fleet`
-- events: 45
+- events: 46
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.84 ms)
+**tool** `schema.parse` (0.69 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.16 ms)
+**tool** `migration.parse` (0.14 ms)
 
 ```json
 {
@@ -138,7 +138,66 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.15 ms)
+**tool** `migration.audit` (0.12 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164;\nCREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id);\nALTER TABLE shipments DROP COLUMN legacy_ref;\nUPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed';\nALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk\n  FOREIGN KEY (shipment_id) REFERENCES shipments (id);\nVACUUM FULL shipments;\n",
+  "ops": [
+   {
+    "kind": "rename_column",
+    "table": "drivers",
+    "column": "phone",
+    "detail": {
+     "new_name": "phone_e164"
+    },
+    "sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164",
+    "index": 0
+   },
+   {
+    "kind": "create_index",
+    "table": "geofence_events",
+    "column": null,
+    "detail": {
+     "name": "idx_geofence_events_shipment",
+     "unique": false,
+     "concurrently": false,
+     "columns": [
+      "shipment_id"
+     ]
+    },
+    "sql": "CREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id)",
+    "index": 1
+   },
+   {
+    "kind": "drop_column",
+    "table": "shipments",
+    "column": "legacy_ref",
+    "detail": {},
+    "sql": "ALTER TABLE shipments DROP COLUMN legacy_ref",
+    
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 6,
+ "ops": 6,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 345,
+  "attributed_chars": 345,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.13 ms)
 
 ```json
 {
@@ -259,7 +318,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.15 ms)
+**tool** `corpus.dependents` (0.23 ms)
 
 ```json
 {
@@ -395,7 +454,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -463,7 +522,7 @@ _tool responded_
 42
 ```
 
-**tool** `shadow.replay` (2.97 ms)
+**tool** `shadow.replay` (2.24 ms)
 
 ```json
 {
@@ -732,7 +791,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -752,7 +811,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -942,7 +1001,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.23 ms)
+**tool** `coverage.ledger` (0.16 ms)
 
 ```json
 {
@@ -1250,7 +1309,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.19 ms)
+**tool** `migration.parse` (0.17 ms)
 
 ```json
 {
@@ -1331,7 +1390,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.1 ms)
+**tool** `schema.apply_ops` (0.07 ms)
 
 ```json
 {
@@ -1397,7 +1456,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.08 ms)
+**tool** `shadow.replay` (2.35 ms)
 
 ```json
 {

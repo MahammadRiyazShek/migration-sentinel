@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_05_drop_status_check`
 - case: `holdout_05_drop_status_check`
-- events: 26
+- events: 27
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.87 ms)
+**tool** `schema.parse` (0.71 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.03 ms)
 
 ```json
 {
@@ -80,7 +80,47 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `migration.audit` (0.03 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE shipments DROP CONSTRAINT shipments_status_chk;\n",
+  "ops": [
+   {
+    "kind": "drop_constraint",
+    "table": "shipments",
+    "column": null,
+    "detail": {
+     "constraint": "shipments_status_chk"
+    },
+    "sql": "ALTER TABLE shipments DROP CONSTRAINT shipments_status_chk",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 53,
+  "attributed_chars": 53,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -149,7 +189,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.08 ms)
 
 ```json
 {
@@ -251,7 +291,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.01 ms)
 
 ```json
 {
@@ -318,7 +358,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.83 ms)
+**tool** `shadow.replay` (2.15 ms)
 
 ```json
 {
@@ -448,7 +488,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -468,7 +508,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.16 ms)
+**tool** `coverage.ledger` (0.11 ms)
 
 ```json
 {
@@ -647,7 +687,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.81 ms)
+**tool** `shadow.replay` (2.08 ms)
 
 ```json
 {

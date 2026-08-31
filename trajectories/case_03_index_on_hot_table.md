@@ -2,7 +2,7 @@
 
 - run id: `eval-case_03_index_on_hot_table`
 - case: `case_03_index_on_hot_table`
-- events: 26
+- events: 27
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.67 ms)
+**tool** `schema.parse` (0.6 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.02 ms)
+**tool** `migration.parse` (0.03 ms)
 
 ```json
 {
@@ -81,7 +81,52 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `migration.audit` (0.04 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "CREATE INDEX idx_invoices_status ON invoices (status);\n",
+  "ops": [
+   {
+    "kind": "create_index",
+    "table": "invoices",
+    "column": null,
+    "detail": {
+     "name": "idx_invoices_status",
+     "unique": false,
+     "concurrently": false,
+     "columns": [
+      "status"
+     ]
+    },
+    "sql": "CREATE INDEX idx_invoices_status ON invoices (status)",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 48,
+  "attributed_chars": 48,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -154,7 +199,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.43 ms)
 
 ```json
 {
@@ -340,7 +385,7 @@ _tool responded_
 19
 ```
 
-**tool** `shadow.replay` (2.6 ms)
+**tool** `shadow.replay` (2.09 ms)
 
 ```json
 {
@@ -485,7 +530,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.13 ms)
+**tool** `coverage.ledger` (0.1 ms)
 
 ```json
 {
@@ -635,7 +680,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.03 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -667,7 +712,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -703,7 +748,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.68 ms)
+**tool** `shadow.replay` (2.0 ms)
 
 ```json
 {

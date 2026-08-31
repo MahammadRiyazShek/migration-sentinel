@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_09_drop_employment_type`
 - case: `holdout_09_drop_employment_type`
-- events: 34
+- events: 35
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.85 ms)
+**tool** `schema.parse` (0.7 ms)
 
 ```json
 {
@@ -78,7 +78,45 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `migration.audit` (0.03 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "ALTER TABLE drivers DROP COLUMN employment_type;\n",
+  "ops": [
+   {
+    "kind": "drop_column",
+    "table": "drivers",
+    "column": "employment_type",
+    "detail": {},
+    "sql": "ALTER TABLE drivers DROP COLUMN employment_type",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 42,
+  "attributed_chars": 42,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -145,7 +183,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.07 ms)
 
 ```json
 {
@@ -254,7 +292,7 @@ _tool responded_
 6
 ```
 
-**tool** `shadow.replay` (2.87 ms)
+**tool** `shadow.replay` (2.22 ms)
 
 ```json
 {
@@ -498,7 +536,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -518,7 +556,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -582,7 +620,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.16 ms)
+**tool** `coverage.ledger` (0.13 ms)
 
 ```json
 {
@@ -796,7 +834,7 @@ _tool responded_
 []
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -816,7 +854,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.88 ms)
+**tool** `shadow.replay` (2.2 ms)
 
 ```json
 {

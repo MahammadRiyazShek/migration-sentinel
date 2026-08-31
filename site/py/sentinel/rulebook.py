@@ -47,6 +47,13 @@ at them*.  Four buckets, and the invariant that makes it worth having:
     RESIDUAL          nothing above.  Reviewed, named, and declared as a gap rather
                       than passed over in silence.
 
+v14 adds one bucket that is not a bucket of kinds at all, because the defect it closes
+sits upstream of every kind: `sentinel/tools/parse_audit.py` reconciles the op list
+against the statements the scanner finds in the file.  This module is exhaustive over
+what the parser *emits*; nothing here could see a statement the splitter silently ate
+before `parse_migration` ran.  See that module's log for the three-statement migration
+that arrived as one op.
+
 `tests/test_all.py::TestRulebook` asserts the union equals every kind
 `sql_parse.parse_migration` can emit.  Teach the parser a new statement kind and the
 test fails until someone decides, in this file, which bucket it belongs to.  That is
@@ -94,6 +101,9 @@ RULED: dict[str, str] = {
     # v13, the two holes the red-team pass found:
     "drop_index": "ACCESS_PATH_REMOVED",
     "transaction_control": "CONCURRENT_DDL_IN_TRANSACTION",
+    # v14, the kind that used to arrive as `unsupported` after the splitter had already
+    # shredded it at the semicolons inside its own body:
+    "procedural_block": "PROCEDURAL_DDL_UNREVIEWED",
 }
 
 # --- kinds whose consequence shadow replay exercises directly ---------------

@@ -2,7 +2,7 @@
 
 - run id: `eval-case_05_unique_email_with_duplicates`
 - case: `case_05_unique_email_with_duplicates`
-- events: 28
+- events: 29
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.63 ms)
+**tool** `schema.parse` (0.61 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.02 ms)
+**tool** `migration.parse` (0.03 ms)
 
 ```json
 {
@@ -81,7 +81,52 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `migration.audit` (0.03 ms)
+
+```json
+{
+ "args": {
+  "migration_sql": "CREATE UNIQUE INDEX idx_customers_email ON customers (email);\n",
+  "ops": [
+   {
+    "kind": "create_index",
+    "table": "customers",
+    "column": null,
+    "detail": {
+     "name": "idx_customers_email",
+     "unique": true,
+     "concurrently": false,
+     "columns": [
+      "email"
+     ]
+    },
+    "sql": "CREATE UNIQUE INDEX idx_customers_email ON customers (email)",
+    "index": 0
+   }
+  ]
+ }
+}
+```
+
+_tool responded_
+
+```json
+{
+ "lexed_statements": 1,
+ "ops": 1,
+ "unterminated": [],
+ "unaccounted": [],
+ "procedural": [],
+ "conservation": {
+  "significant_chars": 54,
+  "attributed_chars": 54,
+  "unattributed_chars": 0
+ },
+ "clean": true
+}
+```
+
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -154,7 +199,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.12 ms)
+**tool** `corpus.dependents` (0.09 ms)
 
 ```json
 {
@@ -273,7 +318,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.05 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -346,7 +391,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.54 ms)
+**tool** `shadow.replay` (2.15 ms)
 
 ```json
 {
@@ -557,7 +602,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -579,7 +624,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.12 ms)
+**tool** `coverage.ledger` (0.1 ms)
 
 ```json
 {
@@ -775,7 +820,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -811,7 +856,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.48 ms)
+**tool** `shadow.replay` (1.99 ms)
 
 ```json
 {
