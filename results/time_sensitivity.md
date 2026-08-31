@@ -28,7 +28,7 @@ Constant sets, in the order above:
 
 ## What the band says
 
-The reduction against the *better* baseline ranges from **-12%** to **69%** across 6 constant sets. The sign never reverses, except in the flagged row, but that is the weaker claim: **2 of 6 sets shrink the advantage to under 10%**, which for practical purposes is no advantage at all.
+The reduction against the *better* baseline ranges from **-12%** to **69%** across 6 constant sets. The sign reverses in **2 of 6 sets** (flagged in the table): under those constants a baseline is *faster* than the pipeline, and the claim as written is false. And sign is the weaker test anyway: **2 of 6 sets shrink the advantage to under 10%**, which for practical purposes is no advantage at all.
 
 Reported honestly, that splits into two findings.
 

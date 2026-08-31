@@ -227,7 +227,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.61,
+   "ms": 0.66,
    "result_summary": "Schema"
   },
   {
@@ -236,7 +236,7 @@
    "args": {
     "sql": "DROP VIEW open_invoices;\nCREATE VIEW open_invoices_v2 AS\n  SELECT id, customer_id, invoice_number, amount_cents, status, issued_at\n  FROM invoices WHERE status IN ('draft','open');\n"
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "drop_view",
@@ -387,7 +387,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.1,
    "result_summary": [
     {
      "query_id": "q_dunning_open",
@@ -654,7 +654,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.61,
+   "ms": 2.94,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -865,7 +865,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.1,
    "result_summary": [
     "Schema",
     []
@@ -1094,7 +1094,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.56,
+   "ms": 2.7,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1117,7 +1117,7 @@
   "tokens_out": 257,
   "cost_usd": 0.0
  },
- "wall_ms": 7.2,
+ "wall_ms": 7.8,
  "severity_order": [
   "low",
   "medium",

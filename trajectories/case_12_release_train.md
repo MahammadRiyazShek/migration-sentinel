@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.66 ms)
+**tool** `schema.parse` (0.7 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.16 ms)
+**tool** `migration.parse` (0.21 ms)
 
 ```json
 {
@@ -148,7 +148,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `schema.apply_ops` (0.09 ms)
 
 ```json
 {
@@ -265,7 +265,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.15 ms)
+**tool** `corpus.dependents` (0.14 ms)
 
 ```json
 {
@@ -395,7 +395,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.04 ms)
+**tool** `corpus.blast_score` (0.03 ms)
 
 ```json
 {
@@ -465,7 +465,7 @@ _tool responded_
 21
 ```
 
-**tool** `shadow.replay` (2.86 ms)
+**tool** `shadow.replay` (3.05 ms)
 
 ```json
 {
@@ -817,7 +817,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.17 ms)
+**tool** `coverage.ledger` (0.16 ms)
 
 ```json
 {
@@ -1096,7 +1096,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.14 ms)
+**tool** `migration.parse` (0.13 ms)
 
 ```json
 {
@@ -1167,7 +1167,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.11 ms)
+**tool** `schema.apply_ops` (0.07 ms)
 
 ```json
 {
@@ -1232,7 +1232,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.76 ms)
+**tool** `shadow.replay` (3.01 ms)
 
 ```json
 {

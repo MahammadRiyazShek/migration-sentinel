@@ -331,7 +331,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (3.1 ms)
+**tool** `shadow.replay` (2.76 ms)
 
 ```json
 {
@@ -453,7 +453,7 @@ _tool responded_
 
 </details>
 
-**tool** `coverage.ledger` (0.15 ms)
+**tool** `coverage.ledger` (0.12 ms)
 
 ```json
 {
@@ -655,7 +655,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.5 ms)
+**tool** `shadow.replay` (2.56 ms)
 
 ```json
 {

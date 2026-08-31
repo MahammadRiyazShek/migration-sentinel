@@ -18,6 +18,7 @@ python3 -m unittest discover -s tests   # 33 tests, ~0.3 s
 python3 eval/run_eval.py --ablations    # 108 reviews (12 cases x 9 arms), < 1 s
 python3 eval/model_invariance.py        # 180 reviews, 5 models x 3 narrator modes, < 1 s
 python3 tools/check_results.py          # 27/27 published claims re-asserted from raw JSON
+python3 tools/check_docs.py             # 5 checks on what the docs claim about the repo
 ```
 
 The fourth command is the one to run if you only run one. It reads `results/*.json` and re-asserts
@@ -29,12 +30,12 @@ every number in this repository, including the three that make the pipeline look
 
 | rubric row | where it lives | the check |
 |---|---|---|
-| Problem & user value (15%) | `README.md` Â§Who has this problem, Â§The bottleneck | the user is one named person on a review rota, and the bottleneck is 20-40 min per PR against five PRs |
+| Problem & user value (15%) | `README.md` §Who has this problem, §The bottleneck | the user is one named person on a review rota, and the bottleneck is 20-40 min per PR against five PRs |
 | Agent solution & engineering (30%) | `sentinel/agents/`, prompts in `sentinel/agents/prompts/`, `sentinel/orchestrator.py` | `results/ablation.md`: 9 arms, one component removed at a time. Replay alone is **worse** than rules alone (2 unsafe vs 1) |
 | End to end quality (20%) | `results/case_12_release_train.md`, live desk below | `python3 -m sentinel review --case eval/cases/case_12_release_train.json --print-report` produces the packet a reviewer actually reads |
-| Measured improvement (15%) | `results/comparison.md`, `README.md` Â§Improvement Changelog | 10 kept iterations, 3 removed experiments, 4 rejected designs, each row tied to an arm in `results/*.json` |
-| Reproducibility (15%) | `REPRODUCTION.md` | clean clone to main result in four commands, no key, no network |
-| Hot take / insights (5%) | `README.md` Â§Hot take, `results/model_invariance.md` | the failure mode was found by writing an attacker against my own fix, not by removing a component |
+| Measured improvement (15%) | `results/comparison.md`, `README.md` §Improvement Changelog | 10 kept iterations, 3 removed experiments, 4 rejected designs, each row tied to an arm in `results/*.json` |
+| Reproducibility (15%) | `REPRODUCTION.md` | clean clone to main result in four commands, no key, no network. `tools/check_docs.py` audits the documentation itself: no dangling file reference, no stale claim count, one entry point |
+| Hot take / insights (5%) | `README.md` §Hot take, `results/model_invariance.md` | the failure mode was found by writing an attacker against my own fix, not by removing a component |
 
 ---
 

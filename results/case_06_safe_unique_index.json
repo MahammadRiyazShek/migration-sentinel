@@ -673,7 +673,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.1,
+   "ms": 2.76,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -770,7 +770,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.15,
+   "ms": 0.12,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1059,7 +1059,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.5,
+   "ms": 2.56,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1082,7 +1082,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 7.4,
+ "wall_ms": 6.9,
  "severity_order": [
   "low",
   "medium",

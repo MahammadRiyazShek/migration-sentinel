@@ -144,3 +144,62 @@ python eval/run_eval.py --ablations    # 108 reviews
 python eval/model_invariance.py        # 180 reviews, 4 hostile models, 3 narrator modes
 python tools/check_results.py          # 27/27 claims hold
 ```
+
+---
+
+## v7 - the audit that reads prose
+
+**Why:** the seventh supervisor pass could not make a number false. Everything reproduced from the
+archive on the first run: 33 tests, 108 reviews in 0.73 s, 180 invariance reviews in 1.62 s, 27/27
+claims, 12/12 recorded packets matching a fresh reference run, on Python 3.12.13 with no network. So it
+attacked the layer with no audit at all: the pages a judge reads before reaching a number.
+
+**What it found, five defects, none of them a metric:**
+
+1. **Two rival entry points.** `JUDGE_START_HERE.md` (v6) and `JUDGES_START_HERE.md` (v5), both titled
+   "Judges start here", different command lists, different runtime claims ("under a second" against
+   "under 10 seconds"). Which page a judge read depended on which filename they guessed.
+2. **Four mis-decoded glyphs**, three of them in the rubric-map table of that entry page.
+3. **`docs/SUPERVISOR_LOG_V6.md` announced `SUBMISSION_DESCRIPTION.md` under "Files added".** The file
+   was not in the archive: a claim about the repository that the repository contradicted.
+4. **A generated paragraph argued with its own table.** `results/time_sensitivity.md` read "the sign
+   never reverses, except in the flagged row" while two rows are flagged `(claim reverses)`. The
+   conditional in `eval/time_sensitivity.py` was written when one set reversed; v2's coverage gate made
+   it two and nobody re-read the sentence. The repository's worst number was being hedged about.
+5. **A tied primary metric published without its explanation.** "Blind-spot cases cleared: 0/2, 0/2,
+   0/2" reads as no improvement. The baselines tie because they request changes on 10 and 11 of 12
+   migrations, including the one that is genuinely safe, so they clear nothing and name zero blind
+   spots, while the pipeline holds 0/2 *and* approves the clean case. That was in `results/`, never in
+   the pitch.
+
+**What shipped:** `tools/check_docs.py`, five checks, stdlib, exit code 1 on failure: no mis-decoded
+characters in any authored file, every path-shaped file reference resolves, exactly one judge entry
+point at the root, the paste-ready description exists and fits the form's 10,000 characters (9,665),
+and no current-state document quotes a stale claim count (it asks `tools/check_results.py` for the
+number instead of trusting prose). Plus the four fixes, `SUBMISSION_DESCRIPTION.md`, and
+`docs/SUPERVISOR_LOG_V7.md`.
+
+The two audits stay separate on purpose. `tools/check_results.py` counts claims about measurements and
+still says **27/27**, comparable to v5 and to the video. `tools/check_docs.py` counts claims about the
+repository. Folding the second into the first would have made "27/27" mean two different things.
+
+**Evidence that nothing else moved:** 33 tests OK, 27/27 claims, unsafe approvals 0/12, strict F1
+0.970, plans 12/12, 9.2 modelled min/case, 0 of 168 completed reviews changing the decision surface.
+Nothing under `sentinel/`, `eval/cases/`, `eval/scoring.py` or `memory/` was touched. The one
+regenerated result is `results/time_sensitivity.md`, and only its prose changed: the band is still
+-12% to 69%.
+
+**The lesson, one layer out from v5's.** v5's was that a defence audited in its own vocabulary reports
+on the attacker's imagination. v7's is that **a repository that audits only its measurements is audited
+only where it already knows how to be wrong.** Point an exit code at the artefact your reader opens
+first.
+
+**How to verify from a clean clone**
+
+```bash
+python -m unittest discover -s tests   # 33 tests
+python eval/run_eval.py --ablations    # 108 reviews
+python eval/model_invariance.py        # 180 reviews, 4 hostile models, 3 narrator modes
+python tools/check_results.py          # 27/27 claims hold
+python tools/check_docs.py             # 5 documentation checks, exits 1 on any failure
+```

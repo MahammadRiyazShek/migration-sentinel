@@ -178,10 +178,13 @@ def render(arms: dict[str, list[dict]]) -> str:
     lines.append("## What the band says\n")
     lines.append(
         f"The reduction against the *better* baseline ranges from **{lo}%** to **{hi}%** across "
-        f"{len(rows_out)} constant sets. The sign never reverses"
-        + (" and no set makes a baseline faster than the pipeline"
-           if not reversed_rows else ", except in the flagged row") + ", "
-        f"but that is the weaker claim: **{len(collapsed)} of {len(rows_out)} sets shrink the "
+        f"{len(rows_out)} constant sets. "
+        + ("The sign never reverses: no set makes a baseline faster than the pipeline. "
+           if not reversed_rows else
+           f"The sign reverses in **{len(reversed_rows)} of {len(rows_out)} sets** "
+           f"(flagged in the table): under those constants a baseline is *faster* than the "
+           f"pipeline, and the claim as written is false. ")
+        + f"And sign is the weaker test anyway: **{len(collapsed)} of {len(rows_out)} sets shrink the "
         f"advantage to under {COLLAPSE_PCT}%**, which for practical purposes is no advantage at all.\n"
     )
     lines.append(

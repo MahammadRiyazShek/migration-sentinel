@@ -31,8 +31,8 @@ score Reproducibility (15%) off whatever they did read. The content is not the p
 point* is. **Fix: `JUDGE_START_HERE.md`, four commands and a rubric-row map, added without touching
 the README's body.** This is a routing fix, not a rewrite: nothing in the README is wrong.
 
-**C2 - The changelog the rubric weights at 15% exists in four places.** `README.md` Â§Improvement
-Changelog, `CHANGELOG_ADDENDUM.md`, `docs/CRITIQUE_LOG.md`, and `docs/SUPERVISOR_LOG_V3/V4/V5.md`.
+**C2 - The changelog the rubric weights at 15% exists in four places.** `README.md` §Improvement
+Changelog, `CHANGELOG_ADDENDUM.md`, `docs/CRITIQUE_LOG.md`, and `docs/SUPERVISOR_LOG_V3.md`, `docs/SUPERVISOR_LOG_V4.md` and `docs/SUPERVISOR_LOG_V5.md`.
 Each is good. Together they assume the judge reconciles them. If they open `CHANGELOG_ADDENDUM.md`
 first they get a submission-text polish log and may grade the 15% against it. **Fix: the README table
 is declared canonical from the judge entry point, and the supervisor logs are labelled as evidence

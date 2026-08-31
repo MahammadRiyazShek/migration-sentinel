@@ -6,6 +6,12 @@ proves the first phase breaks nothing.**
 
 Offline, deterministic, zero dependencies, sub-second for all 12 evaluation cases.
 
+**Judging this? Start at [`JUDGE_START_HERE.md`](JUDGE_START_HERE.md)**: four commands, a
+rubric-row map, and the two things in here to read carefully rather than generously. Two audits
+with exit codes back everything below: `python3 tools/check_results.py` re-asserts all 27
+published numbers from raw JSON, and `python3 tools/check_docs.py` re-asserts the five claims this
+documentation makes about the repository itself.
+
 **Live review desk:** <https://migration-sentinel-frvo.vercel.app/> (every recorded packet, plus a
 button that boots the pipeline inside your browser and runs it on your own SQL). Nothing is uploaded:
 the runtime is a WebAssembly CPython in the tab. Deploy your own copy in about two minutes with
@@ -392,6 +398,8 @@ in [`trajectories/`](trajectories/) and [`docs/AGENT_TRAJECTORIES.md`](docs/AGEN
 
 ## Improvement Changelog
 
+Iterations 1 to 6 are below. The later ones (v2.1 submission hardening, v3 narrator guard, v5 structural provenance, v7 documentation audit) continue in [`CHANGELOG_ADDENDUM.md`](CHANGELOG_ADDENDUM.md), each with the same evidence columns.
+
 Every row's evidence is an arm in `results/evaluation.json` or `results/ablation.json` and can be
 reproduced with the commands in `REPRODUCTION.md`. Same 12 cases and same scorer throughout.
 
@@ -535,13 +543,15 @@ memory/              incidents.jsonl (curated, fictional)
 results/             review packets, comparison.md, ablation.md, evaluation.json
 trajectories/        one markdown + jsonl trajectory per case
 site/                the review desk: index.html, generated data/ and py/ (Pyodide runtime)
-tools/               build_site.py, build_artifact.py, check_results.py
+tools/               build_site.py, build_artifact.py, check_results.py (27 claims about the numbers)
+  check_docs.py          5 claims the docs make about the repo: references, glyphs, entry point
   collect_agent_traces.py  generates agent_traces/INDEX.md, refuses on secret shapes
 agent_traces/        development-agent sessions (see AGENT_USE.md)
 AGENT_USE.md         coding-agent disclosure required by the challenge
 .github/workflows/   verify the claims, then publish the desk to GitHub Pages
-docs/                CRITIQUE_LOG.md (read first), SUPERVISOR_LOG_V3.md (read second),
-                     DESIGN_LOG.md, AGENT_TRAJECTORIES.md, VIDEO_SCRIPT.md, SUBMISSION.md
+docs/                CRITIQUE_LOG.md (read first), SUPERVISOR_LOG_V3.md to _V7.md,
+                     DESIGN_LOG.md, AGENT_TRAJECTORIES.md, VIDEO_SCRIPT.md, SUBMISSION.md,
+                     VIDEO_ADDENDUM.md (every number the video predates)
 tests/               33 stdlib tests
 ```
 

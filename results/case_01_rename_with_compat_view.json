@@ -477,7 +477,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.73,
+   "ms": 0.67,
    "result_summary": "Schema"
   },
   {
@@ -542,7 +542,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -637,7 +637,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.2,
+   "ms": 0.24,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -1008,7 +1008,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.24,
+   "ms": 3.34,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1276,7 +1276,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.13,
+   "ms": 0.12,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1291,7 +1291,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);\nCREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;"
    },
-   "ms": 0.15,
+   "ms": 0.12,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1628,7 +1628,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.19,
+   "ms": 2.82,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1713,7 +1713,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);"
    },
-   "ms": 0.09,
+   "ms": 0.08,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1773,7 +1773,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.09,
    "result_summary": [
     "Schema",
     []
@@ -2014,7 +2014,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.05,
+   "ms": 2.62,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2100,7 +2100,7 @@
   "tokens_out": 622,
   "cost_usd": 0.0
  },
- "wall_ms": 13.0,
+ "wall_ms": 12.3,
  "severity_order": [
   "low",
   "medium",

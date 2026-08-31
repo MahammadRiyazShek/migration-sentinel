@@ -250,6 +250,24 @@ deterministic headline actually contains the counts it claims, that an unknown n
 instead of silently defaulting to something lenient, and that the v3 `guard_narrator=True/False`
 argument still maps to `pattern`/`off` for older call sites.
 
+### 5a. Audit the documentation, not just the numbers
+
+```bash
+python tools/check_docs.py
+# -> PASS  no mis-decoded characters in authored text
+#    PASS  every path-shaped file reference resolves
+#    PASS  exactly one judge entry point at the root
+#    PASS  paste-ready description exists and fits the form
+#    PASS  no stale claim count in a current-state document
+#    5/5 documentation checks hold across 191 authored files
+```
+
+Exits 1 on any failure. It exists because the seventh supervisor session found five defects that
+`tools/check_results.py` structurally cannot see: a duplicate entry point, mis-decoded glyphs, a log
+announcing a file that was never committed, a generated paragraph contradicting its own table, and a
+stale claim count (`18/18`, when the audit asserts 27) in this very guide. None of them is a number, and all of them sit on the path a
+judge walks before reaching one. Reasoning in `docs/SUPERVISOR_LOG_V7.md`.
+
 ## 6. The human approval gate
 
 `review` never touches a database. To dry-run phase 1 against a throwaway in-memory sandbox:
@@ -322,7 +340,7 @@ them after the evaluation, never before.
 
 ```bash
 python eval/run_eval.py --ablations      # writes results/ and trajectories/
-python tools/check_results.py            # 18/18 claims hold  (exits 1 if one does not)
+python tools/check_results.py            # 27/27 claims hold  (exits 1 if one does not)
 python tools/build_site.py               # -> site/data/bundle.json  (~467 KB), site/py/ (38 files)
 python tools/build_artifact.py           # -> site/standalone.html   (one file, no live engine)
 python tools/test_browser_driver.py      # 12/12 parity with the recorded packets
