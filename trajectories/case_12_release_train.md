@@ -1,6 +1,6 @@
 # Trajectory - case_12_release_train
 
-- run id: `eval-case_12_release_train`
+- run id: `run-cd8ced97`
 - case: `case_12_release_train`
 - events: 46
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.85 ms)
+**tool** `schema.parse` (2.05 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.21 ms)
+**tool** `migration.parse` (3.09 ms)
 
 ```json
 {
@@ -148,7 +148,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.23 ms)
+**tool** `migration.audit` (0.24 ms)
 
 ```json
 {
@@ -206,7 +206,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.16 ms)
+**tool** `schema.apply_ops` (0.11 ms)
 
 ```json
 {
@@ -323,7 +323,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.15 ms)
+**tool** `corpus.dependents` (0.28 ms)
 
 ```json
 {
@@ -453,7 +453,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.03 ms)
 
 ```json
 {
@@ -523,7 +523,7 @@ _tool responded_
 21
 ```
 
-**tool** `shadow.replay` (2.67 ms)
+**tool** `shadow.replay` (3.26 ms)
 
 ```json
 {
@@ -773,7 +773,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -875,7 +875,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.19 ms)
+**tool** `coverage.ledger` (0.44 ms)
 
 ```json
 {
@@ -1156,7 +1156,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.16 ms)
+**tool** `migration.parse` (0.28 ms)
 
 ```json
 {
@@ -1227,7 +1227,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -1292,7 +1292,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.86 ms)
+**tool** `shadow.replay` (2.72 ms)
 
 ```json
 {
@@ -1386,7 +1386,7 @@ _tool responded_
 }
 ```
 
-**tool** `plan.audit` (6.54 ms)
+**tool** `plan.audit` (7.0 ms)
 
 ```json
 {
