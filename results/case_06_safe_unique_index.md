@@ -2,9 +2,11 @@
 
 **SAFE - no blocking hazards found**
 
-No blocking hazards found. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+No blocking hazards found. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-case_06_safe_unique_index` · case `case_06_safe_unique_index` · owning service `billing-api` · 10.2 ms · model scripted-v1 (2 calls, $0.0000)
+`run eval-case_06_safe_unique_index` · case `case_06_safe_unique_index` · owning service `billing-api` · 7.4 ms · model scripted-v1 (2 calls, $0.0000)
+
+> **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
 ## Hazards
 
@@ -47,3 +49,9 @@ python -m sentinel execute --report results/case_06_safe_unique_index.json --i-a
 ```
 
 A qualified reviewer signs off here before any deploy: ______________________
+
+## Model commentary (unverified prose, not evidence)
+
+> No blocking hazards found. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+
+The narrator wrote the paragraph above. It passed the prose guard, which is a statement about its wording and not about its truth. Nothing in it produced, removed or reordered a single finding in this packet: every hazard, severity, plan statement and verdict above comes from a tool call recorded in the trajectory.

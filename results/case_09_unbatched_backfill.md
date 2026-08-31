@@ -2,9 +2,11 @@
 
 **NOT CLEARED - coverage gap on an affected object**
 
-Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-case_09_unbatched_backfill` · case `case_09_unbatched_backfill` · owning service `billing-api` · 8.4 ms · model scripted-v1 (4 calls, $0.0000)
+`run eval-case_09_unbatched_backfill` · case `case_09_unbatched_backfill` · owning service `billing-api` · 7.6 ms · model scripted-v1 (4 calls, $0.0000)
+
+> **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
 > **Not cleared on coverage.** The hazards found here are not blocking, but 1 object(s) this migration touches sit inside a blind spot of the review. The verdict is capped rather than clean: no hazard has been invented, and nothing has been certified either. See *Coverage ledger* below.
 
@@ -49,7 +51,7 @@ UPDATE invoices SET currency = 'usd' WHERE currency IS NULL AND "id" IN (SELECT 
 - statement 1 (set_not_null) is outside the tool's model and needs manual review: ALTER TABLE invoices ALTER COLUMN currency SET NOT NULL
 - IRREVERSIBLE - coverage gap on `invoices.currency` (value_class_erased): a reviewer confirms no consumer treats invoices.currency IS NULL as meaningful, and that the pre-backfill values are captured somewhere restorable
 
-### Questions for the reviewer
+### Questions for the reviewer (drafted by the model, guarded prose, not evidence)
 
 - What is the accepted risk for NOT_NULL_NO_DEFAULT?
 - What batch size and pause has this table tolerated before?
@@ -77,3 +79,9 @@ python -m sentinel execute --report results/case_09_unbatched_backfill.json --i-
 ```
 
 A qualified reviewer signs off here before any deploy: ______________________
+
+## Model commentary (unverified prose, not evidence)
+
+> Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+
+The narrator wrote the paragraph above. It passed the prose guard, which is a statement about its wording and not about its truth. Nothing in it produced, removed or reordered a single finding in this packet: every hazard, severity, plan statement and verdict above comes from a tool call recorded in the trajectory.

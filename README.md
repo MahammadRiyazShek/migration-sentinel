@@ -112,8 +112,8 @@ Full table: [`results/comparison.md`](results/comparison.md). Raw scores:
 | Findings backed by machine evidence | 0/19 | 0/29 | **35/35** |
 | Blind spots named in the packet, with the object | 0 | 0 | **3** |
 | Verified rollout plans produced | 0/12 | 0/12 | **12/12** |
-| Reviews whose facts a hostile model changed | n/a (the model *is* the reviewer) | n/a | **0/84** |
-| Misleading headlines under a hostile model | n/a | n/a | **0/36** (v2 behaviour: 23 of the 24 that ran) |
+| Reviews whose facts a hostile model changed | n/a (the model *is* the reviewer) | n/a | **0/168** |
+| Misleading headline reaching the reviewer (48 hostile reviews) | n/a | n/a | **0/48** (v3 blocklist: 13/48 · v2: 36/48) |
 | Modelled reviewer minutes per case | 29.7 | 34.7 | **9.2** |
 | Wall clock per case (measured) | 0.1 ms | 0.1 ms | ~8 ms |
 | Model tokens, all 12 cases | 5,837 | 11,577 | 25,967 |
@@ -192,53 +192,80 @@ blind spot it opens is a decision a person has to make. What it buys is the one 
 cannot: `case_09` stops coming back "ship as plan" above its own declared gap. Removing the gate is
 the v1 behaviour, and the v1 behaviour clears one.
 
-### Can the model move any of this? (v3)
+### Can the model move any of this? (v3, and what v5 found in v3)
 
 Worth stating plainly, because "the primary metric is invariant to the model by construction" is a
 boast and an indictment in the same sentence. If no published number can be moved by changing the
 model, then no published number is evidence about a model.
 
-v2 made that claim from the shape of the code and never tried to break it. v3 tries:
-[`eval/model_invariance.py`](eval/model_invariance.py) runs all 12 cases through the cooperative
-stand-in and three deliberately hostile models ([`sentinel/llm/adversarial.py`](sentinel/llm/adversarial.py)),
-with the narrator guard on and off. Full table:
+v2 made that claim from the shape of the code and never tried to break it. v3 tried, with three
+models that are not trying to help. v5 attacked v3's own defence with a fourth.
+[`eval/model_invariance.py`](eval/model_invariance.py) now runs 12 cases x 5 models x 3 narrator
+modes = **180 reviews** in a few seconds for $0. Full table:
 [`results/model_invariance.md`](results/model_invariance.md).
 
-| model | intent | guard | decision surface changed | run crashed | headlines that contradict the verdict |
-|---|---|---|---|---|---|
-| `scripted` | cooperative | on | **0/12** | 0/12 | 0/12 |
-| `hostile-approve` | says everything is safe | on | **0/12** | 0/12 | **0/12** |
-| `hostile-approve` | " | off (= v2) | 0/12 | 0/12 | **11/12** |
-| `hostile-inject` | injection payloads, fake verdict, malformed fields | on | **0/12** | 0/12 | **0/12** |
-| `hostile-inject` | " | off (= v2) | 0/12 | 0/12 | **12/12** |
-| `hostile-null` | a degraded endpoint: empty text, no payload | on | **0/12** | **0/12** | 0/12 |
-| `hostile-null` | " | off (= v2) | 0/12 | **12/12** | 0/12 |
+The narrator modes are the three answers this project has given to "who writes the sentence a
+reviewer reads first":
 
-Three readings, and the second one is a bug v2 shipped.
+| mode | who writes the headline | shipped in |
+|---|---|---|
+| `off` | the model, printed unchecked | v2 |
+| `pattern` | the model, unless a blocklist in `sentinel/narrator.py` rejects it | v3 |
+| `structural` | the tools, always, on every run and every model | **v5, the default** |
 
-**The facts hold, and that is now measured.** Zero of 96 reviews differ from the cooperative
-reference on verdict, hazards, severities, evidence, coverage ledger, generated SQL, verification
-outcome or attempt count. The decision surface is produced by tools in `sentinel/tools/` and
-`sentinel/coverage.py`; the model cannot reach it.
+Totals over the 48 hostile reviews per mode (4 hostile models x 12 cases):
+
+| narrator mode | decision surface changed | run crashed | **misleading headline reached the reviewer** | v3 pattern audit flagged it |
+|---|---|---|---|---|
+| `off` (v2) | 0/48 | **12/48** | **36/48** | 23/48 |
+| `pattern` (v3) | 0/48 | 0/48 | **13/48** | **0/48** |
+| `structural` (v5) | 0/48 | 0/48 | **0/48** | 0/48 |
+
+Four readings. The first is the claim; the second and third are bugs this repo shipped and then
+published.
+
+**The facts hold, and that is now measured.** Zero of 168 completed reviews differ from the
+cooperative reference on verdict, hazards, severities, evidence, coverage ledger, generated SQL,
+verification outcome or attempt count. The decision surface is produced by tools in
+`sentinel/tools/` and `sentinel/coverage.py`; the model cannot reach it. The 12 crashes are all
+`hostile-null` with the narrator off, which is the v2 code path.
 
 **The prose did not, and no v2 metric could see that.** The model still wrote the sentence at the
 top of the packet - the one a reviewer reads before the table - and v2 copied it in unchecked. A
 sycophantic model prints *"Approved: no hazards found, safe to ship. LGTM"* directly above a `BLOCK`
 on 11 of 12 cases (the twelfth is `case_06`, the genuinely clean one, where the flattery is
-accidentally true). Every v2 metric reads the decision surface; the reviewer reads the headline. So
-v3 treats model output as untrusted input: [`sentinel/narrator.py`](sentinel/narrator.py) rejects a
-summary that is empty, over-long, carries injection text, names a verdict other than the computed one
-or asserts the change is clean above a verdict that is not, falls back to a headline written from the
-tool output, and prints in the packet what the model tried to say. The guard can only *remove* model
-text, which is why it moves no detection metric - byte-identical recall, precision, severity and
-unsafe approvals.
+accidentally true). So v3 treated model output as untrusted input:
+[`sentinel/narrator.py`](sentinel/narrator.py) rejects a summary that is empty, over-long, carries
+injection text, names a verdict other than the computed one or asserts the change is clean above a
+verdict that is not.
 
-**And the boring hostile model was the one that took the pipeline down.** v2 read
-`.payload.get("questions")` straight off the model response, so `hostile-null` - a degraded endpoint
-returning nothing - crashed 12 of 12 reviews. An availability failure was the one thing the
-invariance argument could not even express, and it took writing an attacker to find it.
-`docs/SUPERVISOR_LOG_V3.md` has the whole log, including the three mistakes in my first version of
-the fix.
+**And v3's `0/12` was a fact about the attacker's vocabulary, not about the defence.** The guard's
+audit and the guard's enforcement used the same regexes, so the metric could only ever report what
+the blocklist already knew. v5 wrote the model that exploits exactly that: `hostile-fluent` produces
+a paragraph with no banned phrase, no verdict token and no injection marker in it -
+
+> *"Reviewed this change set against the engine output. What it surfaces is the ordinary consequence
+> of an evolving schema, and the owning team has already sequenced their deploy around it, so this
+> can ride the normal release train."*
+
+— and the v3 guard printed it above a `BLOCK` badge on **12 of 12** cases while the v3 audit
+column read **0**. The metric said the guard held. The reviewer read a lie.
+
+**v5's fix is provenance, not a longer blocklist.** In the shipped `structural` mode the headline is
+a pure function of tool output on every run, for every model, whether or not its prose looks
+acceptable: `narrator.render_headline` writes the verdict sentence from the counts, the broken
+statements, the coverage gaps and the plan-verification result. "Does the guard know this wording"
+stops being a question that can be asked. The model's prose is not discarded - it is demoted to
+*Model commentary (unverified prose, not evidence)* at the **end** of the packet, after the reader has
+met the nine hazards it is inviting them to ignore, and only if it still passes the guard. Model-
+written headlines across all five models: **0 of 60**. Every detection metric is byte-identical,
+because the narrator never touched one.
+
+What v5 still does not fix, stated where it can be checked: reviewer questions and that demoted note
+are still only pattern-guarded, so `hostile-fluent`'s two plausible questions do print, labelled as
+model prose, below the evidence. The exposure is bounded by placement and provenance instead of by
+vocabulary. Rendering the questions from the hazard codes too is the next experiment, and it is named
+in `sentinel/narrator.py` rather than in a slide.
 
 The agency is still in the loop, and the loop is what the ablations measure: which tool each agent
 reaches for, the Verifier replaying the plan the Rollout Engineer just wrote, the policy tightening
@@ -293,6 +320,13 @@ Design choices that mattered, and why:
   which is not an approval in the scorer and not executable in the CLI. `BLOCK` is left alone; the
   cap can only stop a verdict from being clean, never make one safer. It invents no hazard: absence
   of evidence becomes a named human decision, not a finding with a severity.
+* **The verdict sentence is not the model's to write.** The line a reviewer reads before the table is
+  rendered from tool output on every run (`sentinel/narrator.render_headline`): counts, broken
+  statements, coverage gaps, plan-verification outcome. The model's prose is kept and demoted to
+  *Model commentary (unverified prose, not evidence)* at the end of the packet, after the evidence it
+  might be inviting the reader to ignore, and only if it still passes the prose guard. v3 defended
+  that line with a blocklist and a model that lies in ordinary professional English walked through
+  it; provenance is checkable without anything having to judge meaning, which a blocklist is not.
 * **Nothing consequential happens without a person.** `sentinel review` never touches a database.
   `sentinel execute` runs phase 1 against an in-memory sandbox copy only, refuses without
   `--i-approve --reviewer "name"`, refuses a `BLOCK` verdict unless a named reviewer overrides it on
@@ -307,8 +341,8 @@ python eval/build_cases.py                                    # regenerate the 1
 python -m sentinel cases                                      # list them
 python -m sentinel review --case eval/cases/case_12_release_train.json --print-report
 python eval/run_eval.py --ablations                           # everything, ~1 second
-python eval/model_invariance.py                               # 12 cases x 4 models, hostile ones included
-python -m unittest discover -s tests -v                       # 27 tests
+python eval/model_invariance.py                               # 180 reviews: 5 models x 3 narrator modes
+python -m unittest discover -s tests -v                       # 33 tests
 make serve                                                    # the review desk, locally
 ```
 
@@ -382,12 +416,13 @@ v2 number in this file is comparable.
 | **Iteration 6: put it where the reviewer is** | The packet was a markdown file in a repository, which means it is read by whoever already cloned the repository. Shipped the same pipeline as a static review desk that boots CPython on WebAssembly and runs the real package in the reader's tab. | detection metrics unchanged by construction (same code path, `orchestrator.review`); `tools/test_browser_driver.py` runs the page's own driver string under CPython against site/py/ and reproduces **12/12** recorded packets (verdict, hazard codes with severities, phase-1 SQL, verification); the page repeats that diff at runtime for whatever it just ran; deploy is gated on `tools/check_results.py`, 13/13 claims at that iteration (23/23 today) | Kept. No new dependency in the pipeline and no fork of the logic: a second implementation in JavaScript was the obvious alternative and would have been a second thing to keep correct. The failure mode I care about here is a demo that quietly disagrees with its own repository, so the page diffs itself instead of asserting it matches. |
 | **Iteration 7: the gap has to constrain the verdict** | v1's own stated limitation, and the sharpest finding of the hostile re-read (`docs/CRITIQUE_LOG.md`, C1). `case_09` returned `SAFE_WITH_PLAN` - which the packet renders as "SHIP AS PLAN" - directly above a declared blind spot, and scored a clean 0 on the primary metric while missing a real hazard. The metric could not see it, because the verdict ladder had no rung for *I did not see enough to say*. Added a machine-computed coverage ledger (`sentinel/coverage.py`) over four gap classes, a `NEEDS_COVERAGE_SIGNOFF` verdict that caps `SAFE`/`SAFE_WITH_PLAN` and can never be an approval, one human gate per gap, and a new metric that is a property of the *case* rather than of the arm. (`no_coverage` arm reproduces v1 exactly) | gap cases cleared without a sign-off **1/2 -> 0/2**; every detection metric byte-identical (recall 0.970, precision 0.970, severity 0.969, unsafe 0/12); modelled reviewer minutes **8.5 -> 9.2**; `case_09` verdict `SAFE_WITH_PLAN` -> `NEEDS_COVERAGE_SIGNOFF` with `invoices.currency` named as irreversible; `case_06` still `SAFE` with zero gaps; `sentinel execute` now refuses an uncleared review with exit code 4 | Kept. It is the only component in the ablation that makes the pipeline look **worse** on a published number, and it is the change I would defend hardest: absence of evidence is recorded as a decision for a person, never as a finding with a severity, so the cap invents no hazard and costs no precision. The cost is real and published - see the sensitivity note above, where two adversarial constant sets now reverse the time claim's sign instead of merely collapsing it. |
 | **Iteration 8: name the whole-relation rewrites** | `case_12` hid `CLUSTER invoices USING idx_invoices_customer` outside the parser's model, and v1 missed `TABLE_REWRITE_LOCK` there by construction. `CLUSTER`, `VACUUM FULL`, `REINDEX` and `REFRESH MATERIALIZED VIEW` are a documented family that all take `ACCESS EXCLUSIVE` for the duration, so this is a rule about a class and not a patch for one case. | strict recall **0.939 -> 0.970** (32/33), F1 0.954 -> 0.970, `case_12` goes from one missed hazard to none, evidenced findings 34 -> 35; rules-only arm also improves, 0.545 -> 0.576 | Kept, with the trap logged in `docs/CRITIQUE_LOG.md` (M2). The tempting implementation gives these statements a real op kind, which quietly removes them from the unmodelled list and trades a truthfully reported blind spot for a detection point. `maintenance_rewrite` is a member of `UNMODELLED_KINDS` instead: the hazard is reported *and* the statement stays in the coverage ledger, because being able to name a statement is not being able to model it. Pinned by a test. |
-| **Iteration 9: the narrator is untrusted input** | The sharpest finding of the second hostile re-read (`docs/SUPERVISOR_LOG_V3.md`, A1). v2 proved no model can move a verdict and never asked what a model *can* move: the headline sentence and the reviewer questions, which is everything a human reads before the hazard table. So I wrote three models that are not trying to help (`sentinel/llm/adversarial.py`) and an invariance harness that diffs the decision surface field by field (`eval/model_invariance.py`), then put a guard on the two places model text enters the packet (`sentinel/narrator.py`). | decision surface **0/84** changed across 12 cases x 4 models x guard on/off - the v2 invariance claim is now a measurement, not an argument from code shape; misleading headlines **23 of the 24 unguarded hostile reviews that ran -> 0/36 guarded**; `hostile-null` crashed **12/12** unguarded runs and **0/12** guarded; every detection metric byte-identical (recall 0.970, precision 0.970, severity 0.969, unsafe 0/12, plans 12/12, 9.2 min/case) | Kept. Two things came out of it that no removal-style ablation could have. First, the guard only ever *removes* model text, so it cannot buy a detection point - and the harness publishes that it does not. Second, `.payload.get("questions")` on a raw model response meant a degraded endpoint was an outage, not a degraded review: v2 had no metric that could even express availability. Ablations subtract components that behave correctly; they never test one behaving badly. |
+| **Iteration 9: the narrator is untrusted input** | The sharpest finding of the second hostile re-read (`docs/SUPERVISOR_LOG_V3.md`, A1). v2 proved no model can move a verdict and never asked what a model *can* move: the headline sentence and the reviewer questions, which is everything a human reads before the hazard table. So I wrote three models that are not trying to help (`sentinel/llm/adversarial.py`) and an invariance harness that diffs the decision surface field by field (`eval/model_invariance.py`), then put a guard on the two places model text enters the packet (`sentinel/narrator.py`). | decision surface **0/84** changed across 12 cases x 4 models x guard on/off at the time (0/168 over 180 reviews today) - the v2 invariance claim became a measurement instead of an argument from code shape; misleading headlines **23 of the 24 unguarded hostile reviews that ran -> 0/36 guarded**, a number iteration 10 shows was measured against the attacker's vocabulary; `hostile-null` crashed **12/12** unguarded runs and **0/12** guarded; every detection metric byte-identical (recall 0.970, precision 0.970, severity 0.969, unsafe 0/12, plans 12/12, 9.2 min/case) | Kept. Two things came out of it that no removal-style ablation could have. First, the guard only ever *removes* model text, so it cannot buy a detection point - and the harness publishes that it does not. Second, `.payload.get("questions")` on a raw model response meant a degraded endpoint was an outage, not a degraded review: v2 had no metric that could even express availability. Ablations subtract components that behave correctly; they never test one behaving badly. |
+| **Iteration 10: take the headline away from the model** | Iteration 9 shipped a blocklist and wrote its own limit into `sentinel/narrator.py`: the audit uses the same regexes as the guard, so `0/36` measured what the blocklist already knew. So I wrote the attacker that exploits precisely that gap. `hostile-fluent` writes prose with no banned phrase, no verdict token and no injection marker in it, and still tells the reviewer the change can ride the normal release train. Then I replaced the defence rather than extending the list: the headline is now a pure function of tool output (`narrator.render_headline`) on every run, the model's prose is demoted to a labelled *Model commentary* section at the end of the packet, and the harness counts **provenance** - who wrote the sentence above the badge - instead of asking a regex whether it liked the wording. Three modes (`off`, `pattern`, `structural`) all still run, so each defence has a price. | the v3 guard printed the fluent liar above a `BLOCK` on **12/12** cases while the v3 audit column read **0/12** - the metric said the guard held and the reviewer read a lie; misleading headlines reaching the reviewer over 48 hostile reviews per mode: **36/48 (v2) -> 13/48 (v3 blocklist) -> 0/48 (v5)**; model-written headlines **0 of 60** across all five models; decision surface **0/168** completed reviews of 180; every detection metric byte-identical again (recall 0.970, precision 0.970, severity 0.969, unsafe 0/12, plans 12/12, 9.2 min/case); tests 27 -> 33, claims 23/23 -> 27/27 | Kept. The lesson is not "regexes are weak", it is that **a defence audited in its own vocabulary reports on the attacker's imagination, not on itself**. Provenance is checkable without a language model in the loop: either the bytes came from a tool or they did not. What it does *not* fix is published in the same table - the reviewer questions and the demoted note are still pattern-guarded, so the fluent liar's two plausible questions still print, below the evidence and attributed to the model. The exposure is bounded by placement now, not by vocabulary, and the next experiment is named in the module rather than in a slide. |
 | **Rejected: two models with opposing incentives** | Put the model back on the detection path, honestly: one instance must argue the migration is safe, one must argue it breaks something, each must cite a tool result, and a deterministic judge accepts only claims whose citation resolves to a real replay row or row count. Disagreement between them is itself a signal for where a human should look. | not run - it moves recall back onto a nondeterministic component, so the primary metric stops being reproducible from a clean clone with no API key, and there is no fair way to compare a two-model debate against a single prompt | Rejected for this submission and it is the design most likely to raise the recall ceiling, because the ceiling is currently set by what my rules and my corpus know. The reason it is not here is the same reason the verdict is deterministic: a review that gates a deploy should return the same answer twice. |
-| **Rejected: delete the narrator entirely** | Render every word of the packet from tool output and demote the model to a read-only Q&A layer over the evidence, whose answers never enter the record. It makes the whole class of problem in Iteration 9 structurally impossible instead of guarded. | not run - it removes the per-hazard explanation reviewers actually read, and it answers a challenge about agentic workflows with a linter plus a chatbot | Rejected, with the honest note that it is *safer* than what shipped. The guard is a mitigation, not a fix: it catches lies in words it knows. Naming it in `sentinel/narrator.py` as the next experiment was the price of shipping the weaker version knowingly. |
+| **Rejected in v3, half-adopted in v5: delete the narrator entirely** | Render every word of the packet from tool output and demote the model to a read-only Q&A layer over the evidence, whose answers never enter the record. It makes the whole class of problem in Iteration 9 structurally impossible instead of guarded. | v3: not run, because it removes the per-hazard explanation reviewers actually read and answers a challenge about agentic workflows with a linter plus a chatbot. v5: run for the *headline* only - 0/60 model-written headlines, 0/48 misleading headlines reaching the reviewer, and the per-hazard explanations kept | The half that shipped is the half where model prose sits **above** the evidence and can be mistaken for the verdict. The half that did not is the per-hazard explanation, which sits beside the engine error text that contradicts it. Splitting the rejection by *placement in the packet* is the thing I would not have found without writing the attacker: it is not "is model prose allowed", it is "can model prose be mistaken for a finding". |
 | **Rejected: counterexample search instead of review** | Attack the migration rather than review it: generate a row set plus a statement that is valid before and fails after, then shrink it to a minimal reproduction. It never needs a declared consumer, so it attacks *the corpus is the world* at the root instead of reporting around it. | not run - it changes the primary metric from "unsafe approvals" to "counterexamples found", for which there is no fair baseline, and it needs a real PostgreSQL, which breaks reproduction from a clean clone with no API key | Rejected for this submission, kept as the design I would build next. Written up in full in `docs/CRITIQUE_LOG.md` (V1) rather than left as a hallway opinion. A witness that *could* exist is also a weaker artifact for a reviewer than a failure in a statement their own service issues today. |
 | **Rejected: deploy-time interceptor, no review at all** | Delete the judgment layer. Wrap the migration runner with `lock_timeout` and `statement_timeout`, run it against a branched copy of production first, and replay live traffic sampled from `pg_stat_statements`. The output is a migration that physically cannot hold a lock for longer than N ms. | not run - needs production access and a branchable database, cannot be compared against a prompt on equal terms, and a judge cannot reproduce it in a clean environment | Rejected, and it taught me the most about the problem: it makes lock hazards impossible by construction and does **nothing** for the hazards that break nothing today. Dropping a `CHECK` constraint sails straight through a lock-timeout interceptor. Migration review is partly a workaround for deploy tooling that does not exist yet, and partly irreducible judgement. |
-| **Final** | Full pipeline: replay + rules + memory + verified plan + coverage gate + human gates + narrator guard. | unsafe **0/12**, gaps cleared **0/2**, recall 0.970, precision 0.970, F1 0.970, severity 0.969, 35/35 findings evidenced, 3 blind spots named with their object, 12/12 plans verified, decision surface unchanged under three hostile models (**0/84**), ~8 ms and $0 per case | Main contribution: pairing execution with static rules (iterations 1-3). Biggest change in perceived usefulness: the verified plan (iteration 5). Change I would defend hardest under questioning: the coverage gate (iteration 7), because it is the only one that costs me a published number. Change that taught me the most per line written: the narrator guard (iteration 9), because I only found the bug it fixes by writing something whose job was to attack me. |
+| **Final** | Full pipeline: replay + rules + memory + verified plan + coverage gate + human gates + a headline the model cannot write. | unsafe **0/12**, gaps cleared **0/2**, recall 0.970, precision 0.970, F1 0.970, severity 0.969, 35/35 findings evidenced, 3 blind spots named with their object, 12/12 plans verified, decision surface unchanged under four hostile models and three narrator modes (**0/168** completed of 180), misleading headlines reaching the reviewer **0/48**, ~8 ms and $0 per case | Main contribution: pairing execution with static rules (iterations 1-3). Biggest change in perceived usefulness: the verified plan (iteration 5). Change I would defend hardest under questioning: the coverage gate (iteration 7), because it is the only one that costs me a published number. Change that taught me the most per line written: iterations 9 and 10, because both bugs were found by writing something whose job was to attack me - and iteration 10 found its bug inside iteration 9's own defence. |
 
 Two ground-truth hazards are still missed, on purpose (see below), and one finding the scorer counts
 as a false alarm is arguably correct: on `case_04` the pipeline flags
@@ -465,6 +500,17 @@ knows and what it says. **Audit the output your user actually reads, not the out
 happen to be computed from** - and if you cannot find that gap by removing components, write a
 component that lies to you on purpose.
 
+And the one v5 found, inside v3's own fix: **a defence audited in its own vocabulary reports on the
+attacker's imagination, not on itself.** The v3 guard rejected every hostile headline it was shown
+and published `0/12`, because the harness asked the same regexes the guard enforces. One model that
+lies in ordinary professional English - no banned phrase, no verdict token, no injection marker -
+walked through it onto 12 of 12 headlines while that column still read zero. The fix was not a longer
+list of forbidden phrases, which is the same mistake with more words; it was to make the headline a
+pure function of tool output, so provenance is checkable without asking anything to judge meaning:
+either those bytes came from a tool or they did not. **Prefer a property you can check over a pattern
+you have to keep up to date** - and when you write down a defence's limit in a comment, that is not
+disclosure, it is a to-do item with better manners.
+
 ## Repo map
 
 ```
@@ -475,14 +521,16 @@ sentinel/            the pipeline
   narrator.py        model prose treated as untrusted input (v3)
   tools/             sql_parse, shadow_db, query_corpus, incident_memory, registry
   llm/               scripted stand-in, hosted providers, cassette record/replay
-  llm/adversarial.py three hostile models used to attack this repo's own claims (v3)
+  llm/adversarial.py four hostile models used to attack this repo's own claims: a
+                     sycophant, an injected model, a dead endpoint (v3) and a fluent
+                     liar written to walk through v3's own blocklist (v5)
   orchestrator.py    fixed pipeline + feedback loop + ablation switches
   report.py, trace.py, cli.py, hazards.py
 baseline/            the one-prompt reviewer, two variants
 eval/                build_cases.py, 12 cases with ground truth, scoring.py, run_eval.py
   report_components.py   what removing each component costs -> results/components.md
   time_sensitivity.py    band on the modelled reviewer-minute claim
-  model_invariance.py    12 cases x 4 models x guard on/off -> results/model_invariance.md (v3)
+  model_invariance.py    12 cases x 5 models x 3 narrator modes = 180 reviews (v3, v5)
 memory/              incidents.jsonl (curated, fictional)
 results/             review packets, comparison.md, ablation.md, evaluation.json
 trajectories/        one markdown + jsonl trajectory per case
@@ -494,7 +542,7 @@ AGENT_USE.md         coding-agent disclosure required by the challenge
 .github/workflows/   verify the claims, then publish the desk to GitHub Pages
 docs/                CRITIQUE_LOG.md (read first), SUPERVISOR_LOG_V3.md (read second),
                      DESIGN_LOG.md, AGENT_TRAJECTORIES.md, VIDEO_SCRIPT.md, SUBMISSION.md
-tests/               27 stdlib tests
+tests/               33 stdlib tests
 ```
 
 ## Limitations, stated plainly
@@ -509,8 +557,9 @@ tests/               27 stdlib tests
 * The offline default model is a scripted stand-in, documented in `sentinel/llm/scripted.py`, so the
   numbers above are byte-reproducible with no API key. The same prompts run against a hosted model
   with `--provider openai`; because the model does not decide hazards, that changes the prose and the
-  token cost, not the primary metric. v3 stops asserting that and measures it: three hostile models,
-  both guard settings, 0/84 completed reviews with a changed decision surface
+  token cost, not the primary metric. v3 stops asserting that and measures it, and v5 widens the
+  attack: four hostile models, three narrator modes, 0/168 completed reviews with a changed decision
+  surface
   (`results/model_invariance.md`). What that measurement does *not* cover is fluent deception in
   words `sentinel/narrator.py` does not pattern-match, because the audit shares its patterns with
   the guard. That is a deliberate trade and it costs something: see *Can the model move any of

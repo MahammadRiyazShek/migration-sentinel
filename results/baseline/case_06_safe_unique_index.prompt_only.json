@@ -20,7 +20,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 0.2,
+ "wall_ms": 0.1,
  "plan": null,
  "plan_verified": false
 }

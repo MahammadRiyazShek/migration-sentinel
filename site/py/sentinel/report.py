@@ -26,10 +26,19 @@ def render(report: dict[str, Any]) -> str:
           f"({r['model_usage']['calls']} calls, ${r['model_usage']['cost_usd']:.4f})", ""]
 
     nar = r.get("narrator") or {}
+    mode = nar.get("mode", "pattern")
+    if nar.get("headline_source") == "tool" and mode == "structural":
+        L += ["> **The headline above was written by the tools, not by the model.** In this build "
+              "the narrator cannot write the sentence above the badge on any run "
+              "(`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows "
+              "cannot become the verdict sentence. The model's prose, where it survives the guard, "
+              "appears under *Model commentary* at the end, labelled unverified.", ""]
     if nar.get("summary_overridden"):
         L += ["> **The model's summary was not printed.** The narrator guard "
-              "(`sentinel/narrator.py`) rejected it and the headline above was written from the "
-              "tool output instead. Reason(s): " + "; ".join(nar["summary_reasons"])
+              "(`sentinel/narrator.py`) rejected it"
+              + (" and it was dropped from the packet entirely" if mode == "structural"
+                 else " and the headline above was written from the tool output instead")
+              + ". Reason(s): " + "; ".join(nar["summary_reasons"])
               + f'. What the model wrote: "{nar.get("model_summary", "")}"', ""]
     if nar.get("questions_dropped"):
         L += ["> **Reviewer questions were filtered.** " + "; ".join(nar["questions_dropped"])
@@ -97,7 +106,11 @@ def render(report: dict[str, Any]) -> str:
         L += ["### Human decisions required (the tool will not decide these)", ""]
         L += [f"- {g}" for g in plan["human_gates"]] + [""]
     if plan["questions"]:
-        L += ["### Questions for the reviewer", ""] + [f"- {q}" for q in plan["questions"]] + [""]
+        src = plan.get("questions_source", "model")
+        label = ("### Questions for the reviewer, written from the hazard codes"
+                 if src == "tool" else
+                 "### Questions for the reviewer (drafted by the model, guarded prose, not evidence)")
+        L += [label, ""] + [f"- {q}" for q in plan["questions"]] + [""]
 
     cov = r.get("coverage_ledger") or {"gaps": []}
     if cov["gaps"]:
@@ -127,4 +140,20 @@ def render(report: dict[str, Any]) -> str:
           f"python -m sentinel execute --report results/{r['case_id']}.json "
           "--i-approve --reviewer \"your name\"", "```", "",
           "A qualified reviewer signs off here before any deploy: ______________________", ""]
+
+    # Model prose lands here, after the evidence, never above the badge. If it was
+    # dropped by the guard the packet says so rather than hiding the fact.
+    if mode == "structural":
+        L += ["## Model commentary (unverified prose, not evidence)", ""]
+        if nar.get("model_note"):
+            L += [f"> {nar['model_note']}", "",
+                  "The narrator wrote the paragraph above. It passed the prose guard, which is a "
+                  "statement about its wording and not about its truth. Nothing in it produced, "
+                  "removed or reordered a single finding in this packet: every hazard, severity, "
+                  "plan statement and verdict above comes from a tool call recorded in the "
+                  "trajectory.", ""]
+        else:
+            L += ["The narrator's prose was rejected by the guard and is not reproduced here. "
+                  "Reason(s): " + "; ".join(nar.get("model_note_reasons") or ["none recorded"])
+                  + ".", ""]
     return "\n".join(L)

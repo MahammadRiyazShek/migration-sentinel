@@ -1,51 +1,58 @@
 # Video addendum: what changed after the recording
 
-The submitted video was recorded against v2. The repo is v3+. Nothing in the video is wrong about the
-architecture or the baseline comparison; three on-screen numbers are stale, and one component did not
-exist yet. When video and repo disagree, `results/comparison.md` and `results/model_invariance.md`
-are authoritative.
+The submitted video was recorded against v2. The repo is v5. Nothing in the video is wrong about the
+problem, the architecture, the baseline comparison or the walkthrough; some on-screen numbers are stale
+and two components did not exist yet. **When video and repo disagree, `results/comparison.md` and
+`results/model_invariance.md` are authoritative.**
 
 ## Corrections, exhaustive
 
-| on screen (v2) | in the repo now (v3) | why it moved |
+| on screen (v2) | in the repo now (v5) | why it moved |
 |---|---|---|
 | ablation table with 8 arms | 9 arms, 108 reviews | the coverage gate became its own ablation arm |
 | reviewer minutes/case **8.5** | **9.2** | the coverage gate turns every declared blind spot into a human gate, and that costs time. The number went up on purpose and is published as it fell out |
 | "coverage-gap cases cleared without sign-off" absent | second primary metric, **0/2** | v2 could say "ship as plan" above its own declared blind spot without the scorer calling it an unsafe approval |
-| no hostile-model section | `results/model_invariance.md`, 96 reviews, three hostile models | v2 argued invariance from the shape of the code; v3 measured it, found the decision surface unmoved (0/84) and the *prose* fully compromised (11/12 sycophantic headlines) |
+| no hostile-model section | `results/model_invariance.md`: **180 reviews**, 4 hostile models, 3 narrator modes | v2 argued invariance from the shape of the code. v3 measured it, found the decision surface unmoved and the *prose* fully compromised. v5 attacked v3's own guard and broke it |
+| the headline is written by the model | the headline is a pure function of tool output | a model that lies in words v3's blocklist never learned printed above a `BLOCK` badge on 12/12 cases while v3's metric for it read 0. Model prose is now demoted below the evidence and labelled |
+| 22 tests, 18 claims | **33 tests, 27 claims** | two hostile-model iterations, each pinned by tests and by `tools/check_results.py` |
 
 Everything else in the video (problem, baseline A/B, one full execution, changelog narration) still
 matches the repo.
 
-## If you re-record: 75-second delta clip script
+## If you re-record: 90-second delta clip script
 
-Total 75 s, screen recording, no editing needed. Append to the existing video or upload separately and
-link both.
+Screen recording, no editing needed. Append to the existing video or upload separately and link both.
 
-**0:00-0:12 - why there is an addendum.** "This clip covers three days of changes made after the main
-video. Two new components and one number that got worse on purpose."
+**0:00-0:10 - why there is an addendum.** "This clip covers what changed after the main video: two new
+components, one number that got worse on purpose, and a bug I found inside my own fix."
 
-**0:12-0:32 - the coverage gate.** Show `results/case_12_release_train.md`, scroll to the coverage
+**0:10-0:28 - the coverage gate.** Show `results/case_12_release_train.md`, scroll to the coverage
 ledger. "The review declares what it structurally could not observe: unmodelled statements, rows
 rewritten in place, a value class the rollback cannot restore. Any open gap caps the verdict at
-NEEDS_COVERAGE_SIGNOFF, which is not an approval and not executable. It invents no hazard, so
-precision and recall do not move, and reviewer minutes go from 8.5 to 9.2. It is the only component
-that makes this pipeline look worse on a published number."
+NEEDS_COVERAGE_SIGNOFF, which is not an approval and not executable. It invents no hazard, so precision
+and recall do not move, and reviewer minutes go from 8.5 to 9.2. It is the only component that makes
+this pipeline look worse on a published number."
 
-**0:32-0:58 - the hostile models.** Run `python3 eval/model_invariance.py`. "Three models that are
-not trying to help: a sycophant, an injected one, a dead endpoint. 96 reviews. The decision surface
-changes in zero of 84 completed reviews. But with the guard off, the sycophant printed 'Approved, safe
-to ship' under a badge reading BLOCK on 11 of 12 cases, and no metric I had could see it, because
-every metric read the decision surface and the reviewer reads the sentence at the top. The dead
-endpoint crashed 12 of 12 runs on a missing dict key."
+**0:28-0:55 - the hostile models, and the one that beat me.** Run `python3 eval/model_invariance.py`.
+"Five models, three narrator modes, 180 reviews. The decision surface changes in zero of 168 completed
+reviews. But look at hostile-fluent under the v3 guard: it writes ordinary professional English with no
+banned phrase in it, and the guard printed 'this can ride the normal release train' above a BLOCK badge
+on 12 of 12 cases - while the column that was supposed to catch that read zero, because the audit used
+the same regexes as the guard."
 
-**0:58-1:15 - the lesson and the proof.** Run `python3 tools/check_results.py`, hold on `23/23 claims
-hold`. "A system can be invariant in every number it publishes and still lie to the person reading
-it. Audit the output your user actually reads. And if removing components will not find that bug,
-write a component that lies to you on purpose."
+**0:55-1:20 - the fix.** Run `python3 -m sentinel review --case
+eval/cases/case_02_drop_column_still_read.json --provider hostile-fluent --print-report`. "Same hostile
+model, shipped build. The headline is now rendered from the tool output, so no model writes it: zero of
+sixty model-written headlines. Its paragraph is still in the packet, at the bottom, under 'Model
+commentary, unverified prose, not evidence', after the reader has met the hazards it is inviting them
+to ignore."
+
+**1:20-1:30 - the lesson and the proof.** Run `python3 tools/check_results.py`, hold on
+`27/27 claims hold`. "A defence audited in its own vocabulary reports on the attacker's imagination,
+not on itself. Prefer a property you can check over a pattern you have to keep up to date - and if
+removing components will not find that bug, write a component that lies to you on purpose."
 
 ## If you do not re-record
 
-The description already carries the disagreement notice, and this file is the exhaustive diff. That is
-enough for the completeness gate: judges are told which artifact wins before they can be misled by
-the other.
+The description carries the disagreement notice and this file is the exhaustive diff, which is what the
+completeness gate needs: judges are told which artifact wins before either can mislead them.

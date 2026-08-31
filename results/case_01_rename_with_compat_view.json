@@ -4,12 +4,16 @@
  "title": "Rename customers.full_name to name and refresh the BI view",
  "owner_service": "web",
  "verdict": "BLOCK",
- "summary": "Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "summary": "Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
  "narrator": {
+  "mode": "structural",
   "guard": true,
+  "headline_source": "tool",
   "summary_overridden": false,
   "summary_reasons": [],
   "model_summary": "Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note": "Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note_reasons": [],
   "questions_source": "model",
   "questions_dropped": []
  },
@@ -473,7 +477,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 1.07,
+   "ms": 0.73,
    "result_summary": "Schema"
   },
   {
@@ -482,7 +486,7 @@
    "args": {
     "sql": "ALTER TABLE customers RENAME COLUMN full_name TO name;\nCREATE OR REPLACE VIEW customer_billing_summary AS\n  SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;\n"
    },
-   "ms": 0.1,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "rename_column",
@@ -538,7 +542,7 @@
      }
     ]
    },
-   "ms": 0.12,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -633,7 +637,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.32,
+   "ms": 0.2,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -768,7 +772,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.03,
    "result_summary": 17
   },
   {
@@ -1004,7 +1008,7 @@
      "...+6 more"
     ]
    },
-   "ms": 4.23,
+   "ms": 3.24,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1272,7 +1276,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.17,
+   "ms": 0.13,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1287,7 +1291,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);\nCREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;"
    },
-   "ms": 0.13,
+   "ms": 0.15,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1371,7 +1375,7 @@
      }
     ]
    },
-   "ms": 0.09,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -1624,7 +1628,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.82,
+   "ms": 3.19,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1709,7 +1713,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);"
    },
-   "ms": 0.14,
+   "ms": 0.09,
    "result_summary": [
     {
      "kind": "add_column",
@@ -2010,7 +2014,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.01,
+   "ms": 3.05,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2096,7 +2100,7 @@
   "tokens_out": 622,
   "cost_usd": 0.0
  },
- "wall_ms": 15.1,
+ "wall_ms": 13.0,
  "severity_order": [
   "low",
   "medium",

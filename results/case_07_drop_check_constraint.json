@@ -4,12 +4,16 @@
  "title": "Drop the plan CHECK constraint to allow new plan names",
  "owner_service": "billing-api",
  "verdict": "SAFE_WITH_PLAN",
- "summary": "Shippable, but only as the staged plan below. 0 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "summary": "Shippable, but only as the staged plan below. 0 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
  "narrator": {
+  "mode": "structural",
   "guard": true,
+  "headline_source": "tool",
   "summary_overridden": false,
   "summary_reasons": [],
   "model_summary": "Shippable, but only as the staged plan below. 0 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note": "Shippable, but only as the staged plan below. 0 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note_reasons": [],
   "questions_source": "model",
   "questions_dropped": []
  },
@@ -209,7 +213,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.84,
+   "ms": 0.64,
    "result_summary": "Schema"
   },
   {
@@ -218,7 +222,7 @@
    "args": {
     "sql": "ALTER TABLE customers DROP CONSTRAINT customers_plan_chk;\n"
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "drop_constraint",
@@ -250,7 +254,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -333,7 +337,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.12,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -688,7 +692,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.69,
+   "ms": 2.44,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -793,7 +797,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.12,
+   "ms": 0.11,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1034,7 +1038,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.25,
+   "ms": 2.63,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1057,7 +1061,7 @@
   "tokens_out": 104,
   "cost_usd": 0.0
  },
- "wall_ms": 8.0,
+ "wall_ms": 7.0,
  "severity_order": [
   "low",
   "medium",

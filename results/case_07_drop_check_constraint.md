@@ -2,9 +2,11 @@
 
 **SHIP AS PLAN - not as written**
 
-Shippable, but only as the staged plan below. 0 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+Shippable, but only as the staged plan below. 0 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-case_07_drop_check_constraint` · case `case_07_drop_check_constraint` · owning service `billing-api` · 8.0 ms · model scripted-v1 (3 calls, $0.0000)
+`run eval-case_07_drop_check_constraint` · case `case_07_drop_check_constraint` · owning service `billing-api` · 7.0 ms · model scripted-v1 (3 calls, $0.0000)
+
+> **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
 ## Hazards
 
@@ -39,7 +41,7 @@ ALTER TABLE customers DROP CONSTRAINT customers_plan_chk;
 
 - dropping customers_plan_chk removes an invariant: the data owner must sign off and a monitoring check should replace it
 
-### Questions for the reviewer
+### Questions for the reviewer (drafted by the model, guarded prose, not evidence)
 
 - What enforces this invariant once the constraint is gone?
 
@@ -58,3 +60,9 @@ python -m sentinel execute --report results/case_07_drop_check_constraint.json -
 ```
 
 A qualified reviewer signs off here before any deploy: ______________________
+
+## Model commentary (unverified prose, not evidence)
+
+> Shippable, but only as the staged plan below. 0 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+
+The narrator wrote the paragraph above. It passed the prose guard, which is a statement about its wording and not about its truth. Nothing in it produced, removed or reordered a single finding in this packet: every hazard, severity, plan statement and verdict above comes from a tool call recorded in the trajectory.

@@ -2,9 +2,11 @@
 
 **BLOCK - do not merge**
 
-Do not ship this as written. 1 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+Do not ship this as written. 1 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-case_05_unique_email_with_duplicates` · case `case_05_unique_email_with_duplicates` · owning service `web` · 9.2 ms · model scripted-v1 (4 calls, $0.0000)
+`run eval-case_05_unique_email_with_duplicates` · case `case_05_unique_email_with_duplicates` · owning service `web` · 7.5 ms · model scripted-v1 (4 calls, $0.0000)
+
+> **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
 ## Hazards
 
@@ -60,7 +62,7 @@ DROP INDEX CONCURRENTLY "idx_customers_email_tmp_nonunique";
 
 - duplicates already exist for customers ("email"); a human must decide the dedupe rule - phase 2 promotes the index to UNIQUE only after that
 
-### Questions for the reviewer
+### Questions for the reviewer (drafted by the model, guarded prose, not evidence)
 
 - What is the acceptable write-stall window for this table?
 - Who owns cleaning the duplicate rows, and by when?
@@ -80,3 +82,9 @@ python -m sentinel execute --report results/case_05_unique_email_with_duplicates
 ```
 
 A qualified reviewer signs off here before any deploy: ______________________
+
+## Model commentary (unverified prose, not evidence)
+
+> Do not ship this as written. 1 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+
+The narrator wrote the paragraph above. It passed the prose guard, which is a statement about its wording and not about its truth. Nothing in it produced, removed or reordered a single finding in this packet: every hazard, severity, plan statement and verdict above comes from a tool call recorded in the trajectory.

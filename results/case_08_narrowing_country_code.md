@@ -2,9 +2,11 @@
 
 **BLOCK - do not merge**
 
-Do not ship this as written. 1 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+Do not ship this as written. 1 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-case_08_narrowing_country_code` · case `case_08_narrowing_country_code` · owning service `web` · 9.1 ms · model scripted-v1 (4 calls, $0.0000)
+`run eval-case_08_narrowing_country_code` · case `case_08_narrowing_country_code` · owning service `web` · 7.3 ms · model scripted-v1 (4 calls, $0.0000)
+
+> **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
 ## Hazards
 
@@ -45,7 +47,7 @@ Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the c
 
 - customers.country_code -> varchar(2) loses data for rows that exist today; a human must approve the truncation rule or widen the target type
 
-### Questions for the reviewer
+### Questions for the reviewer (drafted by the model, guarded prose, not evidence)
 
 - What is the accepted risk for TABLE_REWRITE_LOCK?
 - Is the truncated value recoverable from anywhere else?
@@ -65,3 +67,9 @@ python -m sentinel execute --report results/case_08_narrowing_country_code.json 
 ```
 
 A qualified reviewer signs off here before any deploy: ______________________
+
+## Model commentary (unverified prose, not evidence)
+
+> Do not ship this as written. 1 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+
+The narrator wrote the paragraph above. It passed the prose guard, which is a statement about its wording and not about its truth. Nothing in it produced, removed or reordered a single finding in this packet: every hazard, severity, plan statement and verdict above comes from a tool call recorded in the trajectory.

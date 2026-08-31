@@ -17,6 +17,8 @@ different thing and their runtime traces are separate: [`trajectories/`](traject
 
 | Claude Opus 5, fifth session, supervisor role (ClickUp Brain agentic assistant) | `claude-opus-5` | separate context, given the v2 source archive and the submission form text, with a sandboxed Python shell and **no network access**; same instruction as the third session | Produced [`docs/SUPERVISOR_LOG_V3.md`](docs/SUPERVISOR_LOG_V3.md) and the implementation of v3: `sentinel/narrator.py`, `sentinel/llm/adversarial.py`, `eval/model_invariance.py`, the `--no-narrator-guard` switch, five new claims in `tools/check_results.py` and the five `TestNarratorGuard` tests. It ran the eval, the invariance harness, the tests and the claim audit itself in the sandbox. It did not touch the twelve cases, the ground truth, the hazard vocabulary, the scorer or either primary metric, and no detection number moved. |
 
+| Claude Opus 5, sixth session, supervisor role (ClickUp Brain agentic assistant) | `claude-opus-5` | separate context, given the v4 source archive, the submission form text and the challenge brief, with a sandboxed Python shell and **no network access**; same instruction as the third and fifth sessions, plus "then fix what breaks" | Produced [`docs/SUPERVISOR_LOG_V5.md`](docs/SUPERVISOR_LOG_V5.md) and the implementation of v5: `sentinel/llm/adversarial.py::FluentLiarLLM` (the model that defeats v3's own guard), the `structural` narrator mode in `sentinel/narrator.py`, the provenance metrics in `eval/model_invariance.py` (180 reviews), the demoted *Model commentary* section in `sentinel/report.py`, `--narrator-mode` on the CLI, four new claims in `tools/check_results.py` and the six `TestStructuralNarrator` tests. It ran the eval, the invariance harness, the 33 tests, the claim audit and the site build itself in the sandbox. It did not touch the twelve cases, the ground truth, the hazard vocabulary, the scorer, the reviewer-minute constants or either primary metric, and no detection number moved. |
+
 | Final packaging audit, fourth session | not disclosed to participant (Genspark AI assistant) | separate context, given the v2 source archive and the submission form text | Found that `agent_traces/INDEX.md` was referenced but absent; populated `agent_traces/` from real session artefacts only, regenerated the index with `tools/collect_agent_traces.py --write`, and re-ran the eval, tests and claim audit. It did not touch pipeline code, cases, ground truth or the scorer. |
 
 No other coding agent, autocomplete or code-generation tool was used. No agent had shell access to a
@@ -41,6 +43,17 @@ crashed the review instead of degrading it. Neither finding was reachable by rem
 which is the only kind of experiment v2 ran. Three mistakes in its own first fix are logged in
 `docs/SUPERVISOR_LOG_V3.md` (M1-M3), including a version of the guard that rejected the cooperative
 narrator's own correct summary while still publishing "0 misleading headlines".
+
+**The sixth session attacked the fifth session's fix and broke it.** v3 shipped a blocklist over model
+prose and wrote its own limit into the module docstring: the audit uses the same regexes as the guard,
+so it measures what the blocklist already knows. The sixth session wrote the model that exploits that
+exactly - a paragraph in ordinary professional English with no banned phrase in it - and the v3 guard
+printed it above a `BLOCK` badge on 12 of 12 cases while v3's own metric for that failure read 0. The
+fix that shipped is provenance rather than a longer blocklist: the headline is now a pure function of
+tool output, the model's prose is demoted below the evidence and labelled, and the harness counts who
+wrote the sentence instead of asking a regex whether it approved of the wording. Three mistakes in its
+own first attempt are logged in `docs/SUPERVISOR_LOG_V5.md` (§4), including a harness that measured the
+new attack with the very function the new attack was written to defeat.
 
 ## How the work was divided
 

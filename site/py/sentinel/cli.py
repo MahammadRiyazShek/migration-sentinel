@@ -26,7 +26,8 @@ def cmd_review(args: argparse.Namespace) -> int:
     out = review(case, llm, incidents_path=args.incidents,
                  learned_path=args.learned if args.learn else None,
                  max_attempts=args.max_attempts, trace=not args.no_trace,
-                 run_id=args.run_id, guard_narrator=not args.no_narrator_guard)
+                 run_id=args.run_id,
+                 narrator_mode=("off" if args.no_narrator_guard else args.narrator_mode))
     report = out["report"]
     if args.learn:
         report["memory_written"] = record_learning(out["memory"], report)
@@ -107,6 +108,10 @@ def build_parser() -> argparse.ArgumentParser:
                         "stand-ins used to attack the model-invariance claim")
     r.add_argument("--no-narrator-guard", action="store_true",
                    help="v2 behaviour: copy the model's prose into the packet unchecked")
+    r.add_argument("--narrator-mode", default="structural",
+                   choices=["structural", "pattern", "off"],
+                   help="who writes the headline: structural (v5 default, tool output only), "
+                        "pattern (v3 blocklist) or off (v2, model prose printed unchecked)")
     r.add_argument("--model", default=None)
     r.add_argument("--cassette", default=None, help="path to a prompt cassette for offline replay")
     r.add_argument("--cassette-mode", default="replay", choices=["replay", "record"])

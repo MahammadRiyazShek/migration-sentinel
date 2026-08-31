@@ -2,9 +2,11 @@
 
 **BLOCK - do not merge**
 
-Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-case_04_not_null_without_default` · case `case_04_not_null_without_default` · owning service `billing-api` · 10.9 ms · model scripted-v1 (5 calls, $0.0000)
+`run eval-case_04_not_null_without_default` · case `case_04_not_null_without_default` · owning service `billing-api` · 7.6 ms · model scripted-v1 (5 calls, $0.0000)
+
+> **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
 ## Hazards
 
@@ -74,7 +76,7 @@ ALTER TABLE "customers" DROP COLUMN "billing_email";
 
 - customers.billing_email is NOT NULL with no default: a human must supply a backfill value before phase 2 can add the constraint
 
-### Questions for the reviewer
+### Questions for the reviewer (drafted by the model, guarded prose, not evidence)
 
 - Which deploy lands first: the query change or the schema change?
 - Has the owning team agreed to the deploy order?
@@ -95,3 +97,9 @@ python -m sentinel execute --report results/case_04_not_null_without_default.jso
 ```
 
 A qualified reviewer signs off here before any deploy: ______________________
+
+## Model commentary (unverified prose, not evidence)
+
+> Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 1 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+
+The narrator wrote the paragraph above. It passed the prose guard, which is a statement about its wording and not about its truth. Nothing in it produced, removed or reordered a single finding in this packet: every hazard, severity, plan statement and verdict above comes from a tool call recorded in the trajectory.

@@ -2,7 +2,7 @@
 
 - run id: `eval-case_12_release_train`
 - case: `case_12_release_train`
-- events: 42
+- events: 43
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.02 ms)
+**tool** `schema.parse` (0.66 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.25 ms)
+**tool** `migration.parse` (0.16 ms)
 
 ```json
 {
@@ -148,7 +148,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.13 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -265,7 +265,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.23 ms)
+**tool** `corpus.dependents` (0.15 ms)
 
 ```json
 {
@@ -395,7 +395,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.05 ms)
+**tool** `corpus.blast_score` (0.04 ms)
 
 ```json
 {
@@ -465,7 +465,7 @@ _tool responded_
 21
 ```
 
-**tool** `shadow.replay` (3.93 ms)
+**tool** `shadow.replay` (2.86 ms)
 
 ```json
 {
@@ -671,7 +671,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.05 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -693,7 +693,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -715,7 +715,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -817,7 +817,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.21 ms)
+**tool** `coverage.ledger` (0.17 ms)
 
 ```json
 {
@@ -1096,7 +1096,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.28 ms)
+**tool** `migration.parse` (0.14 ms)
 
 ```json
 {
@@ -1167,7 +1167,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.16 ms)
+**tool** `schema.apply_ops` (0.11 ms)
 
 ```json
 {
@@ -1232,7 +1232,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (4.95 ms)
+**tool** `shadow.replay` (2.76 ms)
 
 ```json
 {
@@ -1329,6 +1329,10 @@ _tool responded_
 **model** `scripted-v1` tag=`executive_summary` tokens=38/78 cost=$0.0
 
 > Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 3 blocker, 5 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+
+### Human checkpoint - narrator provenance: **HEADLINE FROM TOOLS**
+
+The sentence above the badge was rendered from the tool output. The model cannot write it in this build, so a lie in wording the guard has never seen cannot become the verdict sentence. The model's prose is printed below the evidence, labelled unverified.
 
 ### Human checkpoint - pre-execution approval: **REQUIRED**
 

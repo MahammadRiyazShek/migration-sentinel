@@ -4,12 +4,16 @@
  "title": "Add the missing invoices -> customers foreign key",
  "owner_service": "billing-api",
  "verdict": "BLOCK",
- "summary": "Do not ship this as written. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "summary": "Do not ship this as written. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
  "narrator": {
+  "mode": "structural",
   "guard": true,
+  "headline_source": "tool",
   "summary_overridden": false,
   "summary_reasons": [],
   "model_summary": "Do not ship this as written. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note": "Do not ship this as written. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note_reasons": [],
   "questions_source": "model",
   "questions_dropped": []
  },
@@ -207,7 +211,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.66,
+   "ms": 0.64,
    "result_summary": "Schema"
   },
   {
@@ -256,7 +260,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -343,7 +347,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.14,
+   "ms": 0.1,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -682,7 +686,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.79,
+   "ms": 2.69,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -793,7 +797,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.13,
+   "ms": 0.11,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -808,7 +812,7 @@
    "args": {
     "sql": "ALTER TABLE \"invoices\" ADD CONSTRAINT \"invoices_customer_fk\" FOREIGN KEY (customer_id) REFERENCES customers (id) NOT VALID;"
    },
-   "ms": 0.08,
+   "ms": 0.1,
    "result_summary": [
     {
      "kind": "add_constraint",
@@ -848,7 +852,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1102,7 +1106,7 @@
   "tokens_out": 120,
   "cost_usd": 0.0
  },
- "wall_ms": 7.4,
+ "wall_ms": 7.2,
  "severity_order": [
   "low",
   "medium",

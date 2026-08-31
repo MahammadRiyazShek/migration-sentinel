@@ -5,7 +5,7 @@ harness had been frozen. No code under `sentinel/`, `eval/`, `tools/` or
 `tests/` was changed; only how the results are presented on the submission form.
 
 Every claim below is verifiable from the committed repository with
-`python tools/check_results.py` (23/23 as of v3) on a clean clone.
+`python tools/check_results.py` (27/27 as of v5) on a clean clone.
 
 ## v2.1 — submission text hardening
 
@@ -98,4 +98,49 @@ python -m unittest discover -s tests   # 27 tests
 python eval/run_eval.py --ablations    # 108 reviews
 python eval/model_invariance.py        # 96 reviews, hostile models included
 python tools/check_results.py          # 23/23 claims hold
+```
+
+
+## v5 - the headline is not the model's to write
+
+**Why:** v3 shipped a blocklist over model prose and wrote its own limit into
+`sentinel/narrator.py`: *"the audit uses these same patterns, so it measures whether the guard catches
+what it looks for"*. Four files repeated that limit and none of them tested it.
+
+**What changed in the code** (additive; no case, label, scorer, metric definition or reviewer-minute
+constant was touched, and every detection number is byte-identical to v4):
+
+1. `sentinel/llm/adversarial.py` - a fourth hostile model, `hostile-fluent`, written against this
+   repo's own defence: no phrase in `narrator.CLEAN_CLAIM`, no token in `VERDICT_TOKENS`, nothing in
+   `INJECTION`, and it still tells the reviewer the change can ride the normal release train. Every
+   hostile class now also carries a hand-declared `misleading_prose` label.
+2. `sentinel/narrator.py` - three narrator modes. `structural` (the new default) renders the headline
+   from tool output on every run via `render_headline`; `pattern` is the v3 blocklist; `off` is v2.
+3. `sentinel/report.py` - model prose is demoted to *Model commentary (unverified prose, not
+   evidence)* after the hazard table, with a line stating it produced, removed and reordered nothing.
+4. `eval/model_invariance.py` - 12 cases x 5 models x 3 modes = **180 reviews**, and the misleading-
+   headline count is now **provenance plus a hand-declared label** rather than the guard's own regexes.
+5. `--narrator-mode {structural,pattern,off}` on `sentinel review`, so all three defences stay runnable.
+6. `tools/check_results.py`: 23 -> 27 claims. `tests/`: 27 -> 33.
+
+**What it found:** the v3 guard printed the fluent liar's headline above a `BLOCK` badge on **12/12**
+cases while the v3 audit column read **0/12** - the metric said the guard held and the reviewer read a
+lie. Misleading headlines reaching the reviewer, over the 48 hostile reviews in each mode: **36/48
+(v2) -> 13/48 (v3) -> 0/48 (v5)**. Model-written headlines in the shipped mode: **0 of 60**. Decision
+surface changed: **0 of 168** completed reviews. Detection metrics unchanged (unsafe 0/12, F1 0.970,
+severity 0.969, plans 12/12, 9.2 modelled min/case), which is the point: the narrator never touched
+one. Full log, including the three mistakes in this pass: `docs/SUPERVISOR_LOG_V5.md`.
+
+**What it did not fix, published rather than buried:** the reviewer questions and the demoted note are
+still only pattern-guarded, so the fluent liar's two plausible questions print - below the evidence,
+labelled as model prose. The verdict sentence is unreachable by any model; the rest is bounded by
+placement, not by proof.
+
+**How to verify from a clean clone**
+
+```bash
+python -m unittest discover -s tests   # 33 tests
+python eval/run_eval.py --ablations    # 108 reviews
+python eval/model_invariance.py        # 180 reviews, 4 hostile models, 3 narrator modes
+python tools/check_results.py          # 27/27 claims hold
 ```

@@ -4,12 +4,16 @@
  "title": "Add a concurrent unique index on invoices.invoice_number",
  "owner_service": "billing-api",
  "verdict": "SAFE",
- "summary": "No blocking hazards found. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "summary": "No blocking hazards found. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
  "narrator": {
+  "mode": "structural",
   "guard": true,
+  "headline_source": "tool",
   "summary_overridden": false,
   "summary_reasons": [],
   "model_summary": "No blocking hazards found. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note": "No blocking hazards found. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note_reasons": [],
   "questions_source": "model",
   "questions_dropped": []
  },
@@ -186,7 +190,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 1.5,
+   "ms": 0.65,
    "result_summary": "Schema"
   },
   {
@@ -195,7 +199,7 @@
    "args": {
     "sql": "CREATE UNIQUE INDEX CONCURRENTLY idx_invoices_number ON invoices (invoice_number);\n"
    },
-   "ms": 0.06,
+   "ms": 0.03,
    "result_summary": [
     {
      "kind": "create_index",
@@ -237,7 +241,7 @@
      }
     ]
    },
-   "ms": 0.11,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -325,7 +329,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.21,
+   "ms": 0.11,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -440,7 +444,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.02,
    "result_summary": 16
   },
   {
@@ -669,7 +673,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.81,
+   "ms": 3.1,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -766,7 +770,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.16,
+   "ms": 0.15,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -781,7 +785,7 @@
    "args": {
     "sql": "CREATE UNIQUE INDEX CONCURRENTLY \"idx_invoices_number\" ON \"invoices\" (\"invoice_number\");"
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "create_index",
@@ -823,7 +827,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1055,7 +1059,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.25,
+   "ms": 2.5,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1078,7 +1082,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 10.2,
+ "wall_ms": 7.4,
  "severity_order": [
   "low",
   "medium",

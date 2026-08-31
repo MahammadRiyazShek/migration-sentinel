@@ -4,12 +4,16 @@
  "title": "Backfill invoices.currency and make it NOT NULL",
  "owner_service": "billing-api",
  "verdict": "NEEDS_COVERAGE_SIGNOFF",
- "summary": "Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+ "summary": "Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
  "narrator": {
+  "mode": "structural",
   "guard": true,
+  "headline_source": "tool",
   "summary_overridden": false,
   "summary_reasons": [],
   "model_summary": "Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken ",
+  "model_note": "Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 2 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note_reasons": [],
   "questions_source": "model",
   "questions_dropped": []
  },
@@ -244,7 +248,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.69,
+   "ms": 0.64,
    "result_summary": "Schema"
   },
   {
@@ -253,7 +257,7 @@
    "args": {
     "sql": "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL;\nALTER TABLE invoices ALTER COLUMN currency SET NOT NULL;\n"
    },
-   "ms": 0.07,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "dml_update",
@@ -395,7 +399,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.12,
+   "ms": 0.11,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -508,7 +512,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": 16
   },
   {
@@ -741,7 +745,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.35,
+   "ms": 2.72,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -868,7 +872,7 @@
     ],
     "unmodelled_notes": []
    },
-   "ms": 0.16,
+   "ms": 0.15,
    "result_summary": {
     "gaps": [
      {
@@ -897,7 +901,7 @@
    "args": {
     "sql": "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE currency IS NULL LIMIT 5000);"
    },
-   "ms": 0.07,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "dml_update",
@@ -931,7 +935,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1159,7 +1163,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.69,
+   "ms": 2.7,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1182,7 +1186,7 @@
   "tokens_out": 204,
   "cost_usd": 0.0
  },
- "wall_ms": 8.4,
+ "wall_ms": 7.6,
  "severity_order": [
   "low",
   "medium",

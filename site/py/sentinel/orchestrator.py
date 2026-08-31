@@ -68,13 +68,28 @@ def build_registry(memory: IncidentMemory, tracer: Tracer) -> ToolRegistry:
 def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | None = None,
            max_attempts: int = MAX_ATTEMPTS, trace: bool = True,
            run_id: str | None = None, features: str | dict[str, bool] = "full",
-           guard_narrator: bool = True) -> dict[str, Any]:
+           narrator_mode: str = "structural",
+           guard_narrator: bool | None = None) -> dict[str, Any]:
     """Run the five agents over one case.
 
-    `guard_narrator=False` reproduces the v2 behaviour: model prose is copied into
-    the packet unchecked. It exists so `eval/model_invariance.py` can show what a
-    hostile narrator prints when nothing is guarding the headline.
+    `narrator_mode` decides who owns the sentence a reviewer reads first:
+
+      "structural"  v5, shipped. The headline is a pure function of tool output on
+                    every run. Model prose is demoted to a labelled note under the
+                    evidence, and only if it passes the guard.
+      "pattern"     v3. A blocklist in `sentinel/narrator.py` decides whether the
+                    model's headline is printed. `eval/model_invariance.py` shows
+                    `hostile-fluent` walking straight through it.
+      "off"         v2. Model prose is copied into the packet unchecked.
+
+    `guard_narrator` is the v3 argument, kept so older call sites keep working:
+    True maps to "pattern", False to "off".
     """
+    if guard_narrator is not None:
+        narrator_mode = "pattern" if guard_narrator else "off"
+    if narrator_mode not in narrator_tools.NARRATOR_MODES:
+        raise ValueError(f"unknown narrator mode {narrator_mode!r}")
+    guarded = narrator_mode != "off"
     feat = FEATURE_SETS[features] if isinstance(features, str) else features
     started = time.perf_counter()
     run_id = run_id or f"run-{uuid.uuid4().hex[:8]}"
@@ -89,7 +104,7 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
                                                use_coverage=feat.get("coverage", True))
 
     engineer = RolloutEngineer(tools, llm, tracer)
-    engineer.guard_narrator = guard_narrator
+    engineer.guard_narrator = guarded
     verifier = Verifier(tools, llm, tracer)
     policy = Policy()
     attempt, plan, check = 1, None, None
@@ -145,24 +160,29 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
     narrator_facts = {"counts": risk["counts"], "broken_queries": len(blast["replay"].broken),
                       "coverage_gaps": len(risk["coverage_ledger"]["gaps"]),
                       "plan_verified": check["verified"]}
-    if guard_narrator:
-        summary, summary_reasons = narrator_tools.guard_summary(
-            raw_summary, risk["verdict"], narrator_facts)
-    else:
-        summary, summary_reasons = raw_summary, []
-    if summary_reasons:
+    narrator_info = narrator_tools.compose_summary(
+        raw_summary, risk["verdict"], narrator_facts, mode=narrator_mode)
+    summary = narrator_info.pop("summary")
+    summary_reasons = narrator_info["summary_reasons"]
+    if narrator_mode == "structural":
+        tracer.checkpoint("narrator provenance", "HEADLINE FROM TOOLS",
+                          "The sentence above the badge was rendered from the tool output. The "
+                          "model cannot write it in this build, so a lie in wording the guard has "
+                          "never seen cannot become the verdict sentence. "
+                          + ("The model's prose also failed the guard and was dropped entirely "
+                             "(reasons: " + "; ".join(summary_reasons) + ")."
+                             if summary_reasons else
+                             "The model's prose is printed below the evidence, labelled "
+                             "unverified."))
+    elif summary_reasons:
         tracer.checkpoint("narrator guard", "SUMMARY REJECTED",
                           "The model's headline was not printed. Reasons: "
                           + "; ".join(summary_reasons)
                           + ". The packet shows a summary written from the tool output instead.")
-    narrator_info = {
-        "guard": guard_narrator,
-        "summary_overridden": bool(summary_reasons),
-        "summary_reasons": summary_reasons,
-        "model_summary": narrator_tools.sanitise(raw_summary, 300),
+    narrator_info.update({
         "questions_source": plan.get("questions_source", "model"),
         "questions_dropped": plan.get("questions_dropped", []),
-    }
+    })
 
     if risk["verdict_capped_by_coverage"]:
         tracer.checkpoint("coverage sign-off", "REQUIRED",

@@ -2,7 +2,7 @@
 
 - run id: `eval-case_02_drop_column_still_read`
 - case: `case_02_drop_column_still_read`
-- events: 33
+- events: 34
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.72 ms)
+**tool** `schema.parse` (0.76 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.03 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -74,7 +74,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.14 ms)
+**tool** `schema.apply_ops` (0.11 ms)
 
 ```json
 {
@@ -140,7 +140,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.21 ms)
+**tool** `corpus.dependents` (0.13 ms)
 
 ```json
 {
@@ -257,7 +257,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.05 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -330,7 +330,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (4.49 ms)
+**tool** `shadow.replay` (2.6 ms)
 
 ```json
 {
@@ -655,7 +655,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -697,7 +697,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.14 ms)
+**tool** `coverage.ledger` (0.12 ms)
 
 ```json
 {
@@ -912,7 +912,7 @@ _tool responded_
 []
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.04 ms)
 
 ```json
 {
@@ -932,7 +932,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.11 ms)
+**tool** `shadow.replay` (3.2 ms)
 
 ```json
 {
@@ -1035,6 +1035,10 @@ _tool responded_
 **model** `scripted-v1` tag=`executive_summary` tokens=38/60 cost=$0.0
 
 > Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 1 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+
+### Human checkpoint - narrator provenance: **HEADLINE FROM TOOLS**
+
+The sentence above the badge was rendered from the tool output. The model cannot write it in this build, so a lie in wording the guard has never seen cannot become the verdict sentence. The model's prose is printed below the evidence, labelled unverified.
 
 ### Human checkpoint - pre-execution approval: **REQUIRED**
 

@@ -275,5 +275,71 @@ class TestNarratorGuard(unittest.TestCase):
             self.assertEqual(narrator.audit_summary(got["summary"], got["verdict"]), [], provider)
 
 
+class TestStructuralNarrator(unittest.TestCase):
+    """v5: the headline is tool output, so the model's *wording* stops being the defence."""
+
+    CASE = "case_02_drop_column_still_read"
+
+    def test_the_fluent_liar_defeats_the_v3_pattern_guard(self):
+        """The attack v3 named and never ran. If this test starts failing because the
+        blocklist grew, the point still stands: write a lie the new list does not know."""
+        from sentinel.llm.adversarial import FluentLiarLLM
+        self.assertEqual(narrator.audit_summary(FluentLiarLLM.SUMMARY, "BLOCK"), [])
+        out = review(case(self.CASE), get_llm("hostile-fluent"), incidents_path=str(INCIDENTS),
+                     learned_path=None, trace=False, run_id="test-fluent-pattern",
+                     narrator_mode="pattern")
+        r = out["report"]
+        self.assertEqual(r["verdict"], "BLOCK")
+        self.assertEqual(r["narrator"]["headline_source"], "model")
+        self.assertIn("normal release train", r["summary"])
+
+    def test_structural_mode_takes_the_headline_away_from_every_model(self):
+        ref = run(self.CASE)["report"]
+        for provider in ("scripted", "hostile-approve", "hostile-inject", "hostile-null",
+                         "hostile-fluent"):
+            out = review(case(self.CASE), get_llm(provider), incidents_path=str(INCIDENTS),
+                         learned_path=None, trace=False, run_id=f"test-struct-{provider}")
+            r = out["report"]
+            self.assertEqual(r["narrator"]["mode"], "structural", provider)
+            self.assertEqual(r["narrator"]["headline_source"], "tool", provider)
+            self.assertEqual(r["summary"], ref["summary"], provider)
+            self.assertEqual(narrator.audit_summary(r["summary"], r["verdict"]), [], provider)
+            self.assertNotIn("release train", r["summary"], provider)
+
+    def test_the_liars_prose_is_kept_but_demoted_below_the_evidence(self):
+        from sentinel import report as report_mod
+        out = review(case(self.CASE), get_llm("hostile-fluent"), incidents_path=str(INCIDENTS),
+                     learned_path=None, trace=False, run_id="test-fluent-structural")
+        r = out["report"]
+        self.assertIn("normal release train", r["narrator"]["model_note"])
+        md = report_mod.render(r)
+        headline_at = md.index(r["summary"])
+        note_at = md.index("normal release train")
+        self.assertLess(headline_at, note_at, "model prose must sit below the tool headline")
+        self.assertIn("Model commentary (unverified prose, not evidence)", md)
+        self.assertLess(md.index("## Hazards"), note_at,
+                        "the reader must meet the evidence before the model's opinion")
+
+    def test_the_deterministic_headline_carries_the_numbers_it_claims(self):
+        facts = {"counts": {"blocker": 3, "high": 5, "medium": 1, "low": 0},
+                 "broken_queries": 1, "coverage_gaps": 2, "plan_verified": True}
+        line = narrator.render_headline("BLOCK", facts)
+        for token in ("3 blocker", "5 high", "1 statement(s)", "2 coverage gap(s)"):
+            self.assertIn(token, line)
+
+    def test_an_unknown_narrator_mode_is_refused_rather_than_defaulted(self):
+        with self.assertRaises(ValueError):
+            review(case(self.CASE), get_llm("scripted"), incidents_path=str(INCIDENTS),
+                   learned_path=None, trace=False, narrator_mode="lenient")
+
+    def test_the_v3_call_signature_still_means_what_it_meant(self):
+        on = review(case(self.CASE), get_llm("scripted"), incidents_path=str(INCIDENTS),
+                    learned_path=None, trace=False, guard_narrator=True)["report"]
+        off = review(case(self.CASE), get_llm("scripted"), incidents_path=str(INCIDENTS),
+                     learned_path=None, trace=False, guard_narrator=False)["report"]
+        self.assertEqual(on["narrator"]["mode"], "pattern")
+        self.assertEqual(off["narrator"]["mode"], "off")
+
+
 if __name__ == "__main__":
     unittest.main()

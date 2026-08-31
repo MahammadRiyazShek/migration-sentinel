@@ -32,11 +32,35 @@ Both guards can only *remove* model text.  Neither can invent a hazard, move a
 severity or change a verdict, so turning the guard on cannot improve any detection
 number - and `eval/model_invariance.py` publishes that it does not.
 
-What this does NOT prove: the audit in `eval/model_invariance.py` uses these same
-patterns, so it measures "the guard catches what it looks for", not "no lie can
-get through".  A model that lies fluently in words this file does not know about
-still reaches the reviewer.  The structural fix is to stop letting a model write
-the headline at all; that is the next experiment, not this one.
+v5 - THE NEXT EXPERIMENT, RUN
+-----------------------------
+v3 shipped the pattern guard described above and wrote down its own limit: the audit
+uses the same patterns as the guard, so it measures "the guard catches what it looks
+for", not "no lie can get through".  v5 built the model that exploits exactly that
+gap.  `sentinel/llm/adversarial.py::FluentLiarLLM` writes a paragraph with no banned
+phrase, no verdict token and no injection marker in it, and still tells the reviewer
+to let the change ride the normal release train.  The pattern guard accepts it on 12
+of 12 cases (see `results/model_invariance.md`), so v3's `0/12` was a measurement of
+the attacker's vocabulary rather than of the defence.
+
+The fix is provenance, not a longer blocklist.  In the shipped `structural` mode the
+headline is a pure function of tool output - `render_headline` - on every run, for
+every model, whether or not the model's prose happens to look acceptable.  Model
+prose is not thrown away: it is demoted to `model_note`, printed below the evidence
+and labelled unverified, where a lie sits beside the engine error text that
+contradicts it.
+
+Three modes, all runnable, so the report can price each one:
+
+  off          v2. Model prose is copied into the packet unchecked.
+  pattern      v3. The blocklist below decides. Beaten by a lie it does not know.
+  structural   v5, the shipped default. The model cannot write the headline at all,
+               so "does the guard know this wording" stops being a question.
+
+What v5 still does NOT prove: `model_note` and the reviewer questions are still only
+pattern-guarded, so a fluent lie can still reach the packet - just never as the
+sentence above the badge, and never unlabelled.  The remaining exposure is bounded by
+placement and provenance instead of by vocabulary, which is the whole point.
 """
 from __future__ import annotations
 
@@ -101,8 +125,22 @@ def audit_summary(text: Any, verdict: str) -> list[str]:
     return reasons
 
 
-def deterministic_summary(verdict: str, facts: dict[str, Any]) -> str:
-    """The headline, written from tool output only. Used when the narrator is rejected."""
+REJECTED_NOTE = ("(Written from the tool output: the model's summary was rejected by the narrator "
+                 "guard.)")
+STRUCTURAL_NOTE = ("(Written from the tool output. In this build the model never writes this line, "
+                   "whatever it returns.)")
+
+NARRATOR_MODES = ("off", "pattern", "structural")
+
+
+def render_headline(verdict: str, facts: dict[str, Any], note: str = STRUCTURAL_NOTE) -> str:
+    """The headline as a pure function of tool output. No model text can reach it."""
+    return deterministic_summary(verdict, facts, note=note)
+
+
+def deterministic_summary(verdict: str, facts: dict[str, Any],
+                          note: str = REJECTED_NOTE) -> str:
+    """The headline, written from tool output only."""
     counts = facts.get("counts") or {}
     head = {
         "BLOCK": "Do not ship this as written.",
@@ -125,9 +163,49 @@ def deterministic_summary(verdict: str, facts: dict[str, Any]) -> str:
     elif facts.get("plan_verified") is False:
         bits.append("The rewritten plan still breaks at least one statement, so a human has to "
                     "decide the sequencing.")
-    bits.append("(Written from the tool output: the model's summary was rejected by the narrator "
-                "guard.)")
+    if note:
+        bits.append(note)
     return " ".join(bits)
+
+
+def compose_summary(raw: Any, verdict: str, facts: dict[str, Any],
+                    mode: str = "structural") -> dict[str, Any]:
+    """Decide what sentence sits above the badge, and where the model's prose goes.
+
+    Returns the narrator block recorded in the packet. `headline_source` is the field
+    that matters: `eval/model_invariance.py` counts model-written headlines, and in
+    `structural` mode that count is zero by construction rather than by blocklist.
+    """
+    if mode not in NARRATOR_MODES:
+        raise ValueError(f"unknown narrator mode {mode!r}; expected one of {NARRATOR_MODES}")
+    reasons = audit_summary(raw, verdict)
+    model_text = sanitise(raw, 300)
+
+    if mode == "off":
+        # v2. Whatever the model said, printed as the verdict sentence.
+        return {"mode": mode, "guard": False, "headline_source": "model",
+                "summary": raw, "summary_overridden": False, "summary_reasons": [],
+                "model_summary": model_text, "model_note": "", "model_note_reasons": []}
+
+    if mode == "pattern":
+        # v3. The blocklist decides whether the model owns the headline.
+        if reasons:
+            return {"mode": mode, "guard": True, "headline_source": "tool",
+                    "summary": deterministic_summary(verdict, facts, note=REJECTED_NOTE),
+                    "summary_overridden": True, "summary_reasons": reasons,
+                    "model_summary": model_text, "model_note": "", "model_note_reasons": []}
+        return {"mode": mode, "guard": True, "headline_source": "model",
+                "summary": sanitise(raw), "summary_overridden": False, "summary_reasons": [],
+                "model_summary": model_text, "model_note": "", "model_note_reasons": []}
+
+    # v5, shipped. The headline is tool output on every run; the model's prose is
+    # demoted to a labelled note under the evidence, and only if it passes the guard.
+    return {"mode": mode, "guard": True, "headline_source": "tool",
+            "summary": render_headline(verdict, facts),
+            "summary_overridden": bool(reasons), "summary_reasons": reasons,
+            "model_summary": model_text,
+            "model_note": "" if reasons else sanitise(raw),
+            "model_note_reasons": reasons}
 
 
 def guard_summary(text: Any, verdict: str, facts: dict[str, Any]) -> tuple[str, list[str]]:
