@@ -4,7 +4,8 @@
  "title": "Change the default plan for new signups",
  "owner_service": "billing-api",
  "verdict": "NEEDS_COVERAGE_SIGNOFF",
- "summary": "Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
+ "input_verdict": "NEEDS_COVERAGE_SIGNOFF",
+ "summary": "Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches, or a defect in the plan it generated. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
  "narrator": {
   "mode": "structural",
   "guard": true,
@@ -140,6 +141,27 @@
   },
   "unmodelled": []
  },
+ "plan_audit": {
+  "statements_audited": 0,
+  "scripts": {
+   "phase1": 0,
+   "phase2": 0,
+   "rollback": 0
+  },
+  "findings": [],
+  "finding_codes": [],
+  "gaps": [],
+  "gap_kinds": [],
+  "kind_inventory": [],
+  "gates_trusted": 0,
+  "replay": {
+   "ran": true,
+   "scripts": {},
+   "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is published so the reviewer can check that every break has a code step, rather than being told it does."
+  },
+  "clean": true
+ },
+ "verdict_capped_by_plan_audit": false,
  "escalated_to_human": false,
  "coverage_gaps": [],
  "coverage_ledger": {
@@ -195,7 +217,8 @@
   "verify": true,
   "coverage": true,
   "rule_coverage": true,
-  "text_conservation": true
+  "text_conservation": true,
+  "plan_audit": true
  },
  "tool_calls": [
   {
@@ -211,7 +234,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.79,
+   "ms": 0.91,
    "result_summary": "Schema"
   },
   {
@@ -285,7 +308,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -727,7 +750,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.98,
+   "ms": 3.03,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -976,7 +999,7 @@
      "clean": true
     }
    },
-   "ms": 0.15,
+   "ms": 0.16,
    "result_summary": {
     "gaps": [
      {
@@ -1014,7 +1037,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.05,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -1243,6 +1266,257 @@
     "queries_ok_before": 19,
     "queries_ok_after": 19
    }
+  },
+  {
+   "agent": "verifier",
+   "tool": "plan.audit",
+   "args": {
+    "plan": {
+     "attempt": 1,
+     "phase1_sql": [],
+     "phase2_sql": [],
+     "rollback_sql": [],
+     "code_steps": [],
+     "human_gates": [
+      "statement 0 (set_default) is outside the tool's model and needs manual review: ALTER TABLE customers ALTER COLUMN plan S...",
+      "coverage gap on `customers:set_default` (unruled_statement): a reviewer decides by hand what statement 0 changes for fut..."
+     ],
+     "questions": [],
+     "questions_source": "model",
+     "questions_dropped": [],
+     "policy": {
+      "include_view_changes": true,
+      "expand_contract_type_change": true,
+      "minimal_phase1": false,
+      "notes": []
+     }
+    },
+    "schema": "Schema",
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+9 more"
+    ],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "replay_tool": "function"
+   },
+   "ms": 0.21,
+   "result_summary": {
+    "statements_audited": 0,
+    "scripts": {
+     "phase1": 0,
+     "phase2": 0,
+     "rollback": 0
+    },
+    "findings": [],
+    "finding_codes": [],
+    "gaps": [],
+    "gap_kinds": [],
+    "kind_inventory": [],
+    "gates_trusted": 0,
+    "replay": {
+     "ran": true,
+     "scripts": {},
+     "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+    },
+    "clean": true
+   }
   }
  ],
  "model_usage": {
@@ -1253,7 +1527,7 @@
   "tokens_out": 78,
   "cost_usd": 0.0
  },
- "wall_ms": 7.8,
+ "wall_ms": 8.2,
  "severity_order": [
   "low",
   "medium",

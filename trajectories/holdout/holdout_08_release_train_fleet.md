@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_08_release_train_fleet`
 - case: `holdout_08_release_train_fleet`
-- events: 46
+- events: 49
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.02 ms)
+**tool** `schema.parse` (1.1 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.2 ms)
+**tool** `migration.parse` (0.21 ms)
 
 ```json
 {
@@ -138,7 +138,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.22 ms)
+**tool** `migration.audit` (0.19 ms)
 
 ```json
 {
@@ -197,7 +197,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.15 ms)
+**tool** `schema.apply_ops` (0.22 ms)
 
 ```json
 {
@@ -318,7 +318,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.28 ms)
+**tool** `corpus.dependents` (0.16 ms)
 
 ```json
 {
@@ -522,7 +522,7 @@ _tool responded_
 42
 ```
 
-**tool** `shadow.replay` (3.33 ms)
+**tool** `shadow.replay` (3.41 ms)
 
 ```json
 {
@@ -1309,7 +1309,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.25 ms)
+**tool** `migration.parse` (0.29 ms)
 
 ```json
 {
@@ -1456,7 +1456,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.4 ms)
+**tool** `shadow.replay` (3.51 ms)
 
 ```json
 {
@@ -1669,6 +1669,91 @@ _tool responded_
  "unmodelled": []
 }
 ```
+
+**tool** `plan.audit` (8.51 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "ALTER TABLE \"drivers\" ADD COLUMN \"phone_e164\" TEXT;",
+    "UPDATE \"drivers\" SET \"phone_e164\" = \"phone\" WHERE \"phone_e164\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"drivers\" WHERE \"ph...",
+    "CREATE INDEX CONCURRENTLY \"idx_geofence_events_shipment\" ON \"geofence_events\" (\"shipment_id\");",
+    "-- repeat until zero rows are affected (batch size 5000):",
+    "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed' AND \"id\" IN (SELECT \"id\" FROM \"shipment_stops\" WHER...",
+    "ALTER TABLE \"carrier_invoices\" ADD CONSTRAINT \"carrier_invoices_shipment_fk\" FOREIGN KEY (shipment_id) REFERENCES shipme..."
+   ],
+   "phase2_sql": [
+    "ALTER TABLE \"drivers\" DROP COLUMN \"phone\";",
+    "ALTER TABLE \"shipments\" DROP COLUMN \"legacy_ref\";",
+    "ALTER TABLE \"carrier_invoices\" VALIDATE CONSTRAINT \"carrier_invoices_shipment_fk\";"
+   ],
+   "rollback_sql": [
+    "ALTER TABLE \"drivers\" DROP COLUMN \"phone_e164\";",
+    "DROP INDEX CONCURRENTLY \"idx_geofence_events_shipment\";",
+    "ALTER TABLE \"carrier_invoices\" DROP CONSTRAINT \"carrier_invoices_shipment_fk\";"
+   ],
+   "cod
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 11,
+ "scripts": {
+  "phase1": 5,
+  "phase2": 3,
+  "rollback": 3
+ },
+ "findings": [
+  {
+   "code": "CONTRACT_STEP_UNGATED",
+   "title": "A contract step this pipeline generated has no human gate",
+   "script": "phase2",
+   "statement_index": 2,
+   "statement": "ALTER TABLE \"carrier_invoices\" VALIDATE CONSTRAINT \"carrier_invoices_shipment_fk\"",
+   "objects": [
+    "carrier_invoices",
+    "carrier_invoices_shipment_fk"
+   ],
+   "why": "a `validate_constraint` this pipeline wrote into phase 2 is not named by any human gate, so the packet asks someone to r...",
+   "closes_with": "the plan carries a gate naming this object, or the statement moves out of the generated script",
+   "evidence": [
+    "generated phase 2 statement 2: ALTER TABLE \"carrier_invoices\" VALIDATE CONSTRAINT \"carrier_invoices_shipment_fk\"",
+    "human gates in this packet: 6, none naming carrier_invoices",
+    "rule inventory: `validate_constraint` is RESIDUAL on the input side - the second half of a NOT VALID split takes its own..."
+   ]
+  },
+  {
+   "code": "ROLLBACK_WINDOW_UNSTATED",
+   "title": "The rollback is only valid before a code step this same packet asks for",
+   "script": "rollback",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"drivers\" DROP COLUMN \"phone_e164\"",
+   "objects": [
+    "drivers.phone_e164",
+    "drivers",
+    "phone_e164"
+   ],
+   "why": "the rollback removes `drivers.phone_e164`, and a code step in this same packet asks the team to start using it; run them...",
+   "closes_with": "the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead",
+   "evidence": [
+    "generated rollback statement 0: ALTER TABLE \"drivers\" DROP COLUMN \"phone_e164\"",
+    "generated code step: deploy code that writes both drivers.phone and drivers.phone_e164, and reads drivers.phone_e164",
+    "shadow replay of this rollback breaks 0 corpus statements, which is why replay alone reports it as safe"
+  
+```
+
+### Human checkpoint - plan self-audit: **PLAN DEFECT**
+
+CONTRACT_STEP_UNGATED in the generated phase2 script: a `validate_constraint` this pipeline wrote into phase 2 is not named by any human gate, so the packet asks someone to run a destructive statement it never asked anyone to decide about Closes when: the plan carries a gate naming this object, or the statement moves out of the generated script
+
+### Human checkpoint - plan self-audit: **PLAN DEFECT**
+
+ROLLBACK_WINDOW_UNSTATED in the generated rollback script: the rollback removes `drivers.phone_e164`, and a code step in this same packet asks the team to start using it; run them in the printed order and the rollback breaks the deploy the packet asked for. The corpus cannot show this: the statements that break are the ones this packet is asking someone to write Closes when: the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead
 
 **model** `scripted-v1` tag=`executive_summary` tokens=38/78 cost=$0.0
 

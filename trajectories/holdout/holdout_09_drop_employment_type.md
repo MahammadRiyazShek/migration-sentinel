@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_09_drop_employment_type`
 - case: `holdout_09_drop_employment_type`
-- events: 35
+- events: 36
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.07 ms)
+**tool** `schema.parse` (1.06 ms)
 
 ```json
 {
@@ -183,7 +183,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.14 ms)
+**tool** `corpus.dependents` (0.11 ms)
 
 ```json
 {
@@ -292,7 +292,7 @@ _tool responded_
 6
 ```
 
-**tool** `shadow.replay` (3.24 ms)
+**tool** `shadow.replay` (3.32 ms)
 
 ```json
 {
@@ -536,7 +536,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -854,7 +854,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.22 ms)
+**tool** `shadow.replay` (3.28 ms)
 
 ```json
 {
@@ -959,6 +959,100 @@ _tool responded_
   "queries_ok_after": 17
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.45 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [],
+   "phase2_sql": [
+    "ALTER TABLE \"drivers\" DROP COLUMN \"employment_type\";"
+   ],
+   "rollback_sql": [],
+   "code_steps": [
+    "remove every read and write of drivers.employment_type, then wait one full deploy cycle"
+   ],
+   "human_gates": [
+    "confirm drivers.employment_type has had zero reads for the agreed observation window before phase 2",
+    "no rollback could be generated automatically; write one before shipping",
+    "coverage gap on `drivers.employment_type` (uncovered_object): a reviewer greps the real consumers for employment_type be..."
+   ],
+   "questions": [
+    "Has the owning team agreed to the deploy order?",
+    "What is the accepted risk for DESTRUCTIVE_NO_EXPAND_CONTRACT?",
+    "What is the accepted risk for MISSING_ROLLBACK?",
+    "Do any consumers read this result set positionally or serialise it whole?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_dispatch_create",
+    
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 1,
+ "scripts": {
+  "phase1": 0,
+  "phase2": 1,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "drivers.employment_type",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"drivers\" DROP COLUMN \"employment_type\"",
+   "why": "this step is treated as gated because a human gate names `drivers.employment_type`; this audit read the name, not the qu...",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  }
+ ],
+ "gap_kinds": [
+  "audit_gate_text_only"
+ ],
+ "kind_inventory": [
+  {
+   "script": "phase2",
+   "statement_index": 0,
+   "kind": "drop_column",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 1,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "phase2": {
+    "queries_run": 17,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_02_composite_unique_invoices`
 - case: `holdout_02_composite_unique_invoices`
-- events: 29
+- events: 30
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.05 ms)
+**tool** `schema.parse` (1.16 ms)
 
 ```json
 {
@@ -132,7 +132,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `schema.apply_ops` (0.14 ms)
 
 ```json
 {
@@ -382,7 +382,7 @@ _tool responded_
 14
 ```
 
-**tool** `shadow.replay` (3.27 ms)
+**tool** `shadow.replay` (3.32 ms)
 
 ```json
 {
@@ -756,7 +756,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -793,7 +793,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.34 ms)
+**tool** `shadow.replay` (3.43 ms)
 
 ```json
 {
@@ -891,6 +891,104 @@ _tool responded_
   "queries_ok_after": 17
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (7.03 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "CREATE INDEX CONCURRENTLY \"idx_carrier_invoices_number_tmp_nonunique\" ON \"carrier_invoices\" (\"carrier_id\", \"invoice_numb..."
+   ],
+   "phase2_sql": [
+    "CREATE UNIQUE INDEX CONCURRENTLY \"idx_carrier_invoices_number\" ON \"carrier_invoices\" (\"carrier_id\", \"invoice_number\");"
+   ],
+   "rollback_sql": [
+    "DROP INDEX CONCURRENTLY \"idx_carrier_invoices_number_tmp_nonunique\";"
+   ],
+   "code_steps": [],
+   "human_gates": [
+    "duplicates already exist for carrier_invoices (\"carrier_id\", \"invoice_number\"); a human must decide the dedupe rule - ph..."
+   ],
+   "questions": [
+    "What is the acceptable write-stall window for this table?",
+    "Who owns cleaning the duplicate rows, and by when?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_dispatch_create",
+    "service": "dispatch-api",
+    "criticality": "critical",
+    "label": "shipment creation",
+    "sql": "INSERT INTO shipments
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 3,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 1,
+  "rollback": 1
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "create_index",
+   "bucket": "RULED"
+  },
+  {
+   "script": "phase2",
+   "statement_index": 0,
+   "kind": "create_index",
+   "bucket": "RULED"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 0,
+   "kind": "drop_index",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "phase2": {
+    "queries_run": 17,
+    "broken_after": 0,
+    "broken_query_ids": []
+   },
+   "rollback": {
+    "queries_run": 17,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

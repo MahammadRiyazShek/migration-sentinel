@@ -2,9 +2,9 @@
 
 **BLOCK - do not merge**
 
-Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 blocker, 0 high, 0 medium, 0 low. The rewritten plan still breaks at least one statement, so a human has to decide the sequencing. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
+Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 blocker, 0 high, 0 medium, 0 low. 1 defect(s) in the SQL this packet generated: see the plan self-audit before running any of it. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-rt2_03_unterminated_literal` · case `rt2_03_unterminated_literal` · owning service `platform` · 12.0 ms · model scripted-v1 (4 calls, $0.0000)
+`run eval-rt2_03_unterminated_literal` · case `rt2_03_unterminated_literal` · owning service `platform` · 12.6 ms · model scripted-v1 (4 calls, $0.0000)
 
 > **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
@@ -32,6 +32,8 @@ ALTER TABLE invoices DROP COLUMN tax_rate;`
 
 ## Recommended rollout
 
+> **This is not runnable SQL and must not be treated as a recommendation.** The generated phase1 script contains a construct this pipeline cannot read back, which means it was built from a parse of the input that is already known to be unreliable. It is printed for the reviewer's information only. See *Plan self-audit*.
+
 Plan generated on attempt 2 of 2; phase 1 **not verified** - see the escalation above.
 
 ### Phase 1 - expand (safe to run now)
@@ -46,10 +48,28 @@ UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUM
 - phase 1 was reduced to additive statements only; the rest needs a human to choose the deploy order
 - coverage gap on `invoices.status` (in_place_data_mutation): a reviewer confirms which consumers of invoices.status depend on the current values
 - coverage gap on `characters 29 onward` (unreviewable_text): the script is fixed and resubmitted; there is nothing here for a reviewer to sign off, because there is nothing here that runs
+- PLAN DEFECT (GENERATED_TEXT_UNPARSED) in the generated phase1 script: a reviewer reads the generated script by hand before running it
 
 ### Questions for the reviewer (drafted by the model, guarded prose, not evidence)
 
 - What is the accepted risk for MIGRATION_TEXT_UNPARSED?
+
+## Plan self-audit
+
+The three scripts above are output from this pipeline, so they are reviewed like any other artefact it is handed: 1 generated statement(s) parsed, partitioned by the rule inventory in `sentinel/rulebook.py`, cross-checked against the code steps, and replayed. A defect here is a defect in *our* SQL, not in the migration under review, so it never enters the hazard table - it caps the verdict and becomes a human gate.
+
+| # | defect | script | statement |
+|---|---|---|---|
+| 1 | **GENERATED_TEXT_UNPARSED** | phase1 | `{'kind': 'string', 'start': 29, 'end': 200, 'text': '\'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND` |
+
+### 1. This pipeline emitted SQL it cannot itself read back
+
+an unterminated construct in the generated script, which Postgres would refuse, so this packet is printing SQL it did not fully model.
+
+- evidence: tools/parse_audit.py on the generated phase1 script: an unterminated construct in the generated script, which Postgres would refuse
+- evidence: statements lexed 1, ops produced 1
+- closes when: a reviewer reads the generated script by hand before running it
+
 
 ## Coverage ledger
 

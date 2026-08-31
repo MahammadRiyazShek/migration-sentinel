@@ -2,7 +2,7 @@
 
 - run id: `eval-case_08_narrowing_country_code`
 - case: `case_08_narrowing_country_code`
-- events: 29
+- events: 30
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.79 ms)
+**tool** `schema.parse` (0.8 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.06 ms)
+**tool** `migration.parse` (0.05 ms)
 
 ```json
 {
@@ -76,7 +76,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.05 ms)
+**tool** `migration.audit` (0.04 ms)
 
 ```json
 {
@@ -374,7 +374,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.77 ms)
+**tool** `shadow.replay` (2.71 ms)
 
 ```json
 {
@@ -758,7 +758,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.53 ms)
+**tool** `shadow.replay` (2.5 ms)
 
 ```json
 {
@@ -855,6 +855,77 @@ _tool responded_
   "queries_ok_after": 16
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (0.17 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [],
+   "phase2_sql": [
+    "-- blocked pending human decision: ALTER TABLE customers ALTER COLUMN country_code TYPE varchar(2);"
+   ],
+   "rollback_sql": [],
+   "code_steps": [],
+   "human_gates": [
+    "customers.country_code -> varchar(2) loses data for rows that exist today; a human must approve the truncation rule or w..."
+   ],
+   "questions": [
+    "What is the accepted risk for TABLE_REWRITE_LOCK?",
+    "Is the truncated value recoverable from anywhere else?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Perso
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 0,
+ "scripts": {
+  "phase1": 0,
+  "phase2": 0,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {},
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

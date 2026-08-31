@@ -4,7 +4,7 @@
 
 Do not ship this as written. 1 coverage gap(s) need a named sign-off before this can be called safe. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-rt2_02_do_block_hides_the_drop` · case `rt2_02_do_block_hides_the_drop` · owning service `platform` · 9.0 ms · model scripted-v1 (3 calls, $0.0000)
+`run eval-rt2_02_do_block_hides_the_drop` · case `rt2_02_do_block_hides_the_drop` · owning service `platform` · 8.6 ms · model scripted-v1 (3 calls, $0.0000)
 
 > **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
@@ -29,7 +29,7 @@ Do not ship this as written. 1 coverage gap(s) need a named sign-off before this
 
 ## Recommended rollout
 
-Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the corpus still passes after phase 1.
+Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the corpus still passes after phase 1. That is a statement about phase 1 and about today's corpus only - the audit of all three generated scripts is the section below.
 
 ### Human decisions required (the tool will not decide these)
 
@@ -39,6 +39,13 @@ Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the c
 ### Questions for the reviewer (drafted by the model, guarded prose, not evidence)
 
 - What is the accepted risk for PROCEDURAL_DDL_UNREVIEWED?
+
+## Plan self-audit
+
+The three scripts above are output from this pipeline, so they are reviewed like any other artefact it is handed: 0 generated statement(s) parsed, partitioned by the rule inventory in `sentinel/rulebook.py`, cross-checked against the code steps, and replayed. A defect here is a defect in *our* SQL, not in the migration under review, so it never enters the hazard table - it caps the verdict and becomes a human gate.
+
+No defect found in the generated SQL: every destructive contract step is named by a human gate, no rollback statement removes something a code step in this packet asks the team to start using, and every generated statement has a kind something in this pipeline inspects.
+
 
 ## Coverage ledger
 

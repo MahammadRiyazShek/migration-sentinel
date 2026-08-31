@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_06_audit_trigger`
 - case: `holdout_06_audit_trigger`
-- events: 28
+- events: 29
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.05 ms)
+**tool** `schema.parse` (1.54 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.17 ms)
+**tool** `migration.parse` (0.16 ms)
 
 ```json
 {
@@ -220,7 +220,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.16 ms)
 
 ```json
 {
@@ -287,7 +287,7 @@ _tool responded_
 0
 ```
 
-**tool** `shadow.replay` (3.35 ms)
+**tool** `shadow.replay` (3.57 ms)
 
 ```json
 {
@@ -410,7 +410,7 @@ _tool responded_
 
 </details>
 
-**tool** `coverage.ledger` (0.19 ms)
+**tool** `coverage.ledger` (0.2 ms)
 
 ```json
 {
@@ -558,7 +558,7 @@ _note (risk_officer)_: verdict capped to NEEDS_COVERAGE_SIGNOFF: 1 coverage gap(
 
 </details>
 
-**tool** `migration.parse` (0.12 ms)
+**tool** `migration.parse` (0.15 ms)
 
 ```json
 {
@@ -616,7 +616,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.2 ms)
+**tool** `shadow.replay` (3.24 ms)
 
 ```json
 {
@@ -716,6 +716,81 @@ _tool responded_
   "queries_ok_after": 17
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (0.47 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "CREATE TABLE stop_status_audit ( id SERIAL PRIMARY KEY, stop_id INTEGER NOT NULL, old_status TEXT, new_status TEXT, chan..."
+   ],
+   "phase2_sql": [],
+   "rollback_sql": [],
+   "code_steps": [],
+   "human_gates": [
+    "statement 1 (unsupported) is outside the tool's model and needs manual review: CREATE TRIGGER trg_stop_status_audit AFTE...",
+    "coverage gap on `shipment_stops` (unmodelled_statement): a reviewer confirms by hand what statement 1 does to shipment_s..."
+   ],
+   "questions": [],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_dispatch_create",
+    "service": "dispatch-api",
+    "criticality": "critical",
+    "label": "shipment creation",
+    "sql": "INSERT INTO shipments (carrier_id, reference, status, weight_kg, promised_at) VALUES (7,'SHP-77001','planned',1200,'2026..."
+   },
+   {
+    "id": "q_dispatch_board",
+    "service": "dispatch-api",
+    "criticality": "critical",
+    "label": "dis
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 1,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 0,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "create_table",
+   "bucket": "REPLAY_COVERED"
+  }
+ ],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {},
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

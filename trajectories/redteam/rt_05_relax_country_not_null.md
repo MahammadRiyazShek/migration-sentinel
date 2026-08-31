@@ -2,7 +2,7 @@
 
 - run id: `eval-rt_05_relax_country_not_null`
 - case: `rt_05_relax_country_not_null`
-- events: 27
+- events: 28
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.84 ms)
+**tool** `schema.parse` (0.92 ms)
 
 ```json
 {
@@ -74,7 +74,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.04 ms)
+**tool** `migration.audit` (0.05 ms)
 
 ```json
 {
@@ -112,7 +112,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.1 ms)
 
 ```json
 {
@@ -178,7 +178,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.15 ms)
+**tool** `corpus.dependents` (0.14 ms)
 
 ```json
 {
@@ -368,7 +368,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.97 ms)
+**tool** `shadow.replay` (3.24 ms)
 
 ```json
 {
@@ -488,7 +488,7 @@ _tool responded_
 
 </details>
 
-**tool** `coverage.ledger` (0.15 ms)
+**tool** `coverage.ledger` (0.21 ms)
 
 ```json
 {
@@ -674,7 +674,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.87 ms)
+**tool** `shadow.replay` (2.99 ms)
 
 ```json
 {
@@ -771,6 +771,78 @@ _tool responded_
   "queries_ok_after": 19
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (0.21 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [],
+   "phase2_sql": [],
+   "rollback_sql": [],
+   "code_steps": [],
+   "human_gates": [
+    "statement 0 (drop_not_null) is outside the tool's model and needs manual review: ALTER TABLE customers ALTER COLUMN coun...",
+    "coverage gap on `customers:drop_not_null` (unruled_statement): a reviewer decides by hand what statement 0 changes for f..."
+   ],
+   "questions": [],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criti
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 0,
+ "scripts": {
+  "phase1": 0,
+  "phase2": 0,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {},
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

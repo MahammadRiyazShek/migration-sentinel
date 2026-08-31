@@ -44,6 +44,13 @@ def render(report: dict[str, Any]) -> str:
         L += ["> **Reviewer questions were filtered.** " + "; ".join(nar["questions_dropped"])
               + ".", ""]
 
+    if r.get("verdict_capped_by_plan_audit"):
+        L += ["> **Not cleared on this pipeline's own output.** The migration itself carries no "
+              f"blocking hazard, and {len(r['plan_audit']['findings'])} statement(s) in the SQL "
+              "this packet generated were never reviewed by anything until now. The verdict is "
+              "capped rather than clean: no hazard has been invented and nothing has been "
+              "certified. See *Plan self-audit* below.", ""]
+
     if r.get("verdict_capped_by_coverage"):
         gaps = r["coverage_ledger"]["gaps"]
         L += [f"> **Not cleared on coverage.** The hazards found here are not blocking, but "
@@ -89,9 +96,21 @@ def render(report: dict[str, Any]) -> str:
         L.append("")
 
     plan = r["plan"]
-    L += ["## Recommended rollout", "",
+    pa_pre = r.get("plan_audit") or {}
+    unreadable = sorted({f["script"] for f in (pa_pre.get("findings") or [])
+                         if f["code"] == "GENERATED_TEXT_UNPARSED"})
+    L += ["## Recommended rollout", ""]
+    if unreadable:
+        L += ["> **This is not runnable SQL and must not be treated as a recommendation.** The "
+              f"generated {', '.join(unreadable)} script contains a construct this pipeline cannot "
+              "read back, which means it was built from a parse of the input that is already known "
+              "to be unreliable. It is printed for the reviewer's information only. See *Plan "
+              "self-audit*.", ""]
+    L += [
           f"Plan generated on attempt {plan['attempt']} of {r['attempts']}; phase 1 "
-          + ("**verified**: every statement in the corpus still passes after phase 1."
+          + ("**verified**: every statement in the corpus still passes after phase 1. That is a "
+             "statement about phase 1 and about today's corpus only - the audit of all three "
+             "generated scripts is the section below."
              if r["plan_verification"]["verified"]
              else "**not verified** - see the escalation above."), ""]
     for label, key in [("Phase 1 - expand (safe to run now)", "phase1_sql"),
@@ -111,6 +130,50 @@ def render(report: dict[str, Any]) -> str:
                  if src == "tool" else
                  "### Questions for the reviewer (drafted by the model, guarded prose, not evidence)")
         L += [label, ""] + [f"- {q}" for q in plan["questions"]] + [""]
+
+    pa = r.get("plan_audit") or {}
+    if pa and not pa.get("disabled"):
+        L += ["## Plan self-audit", "",
+              f"The three scripts above are output from this pipeline, so they are reviewed like "
+              f"any other artefact it is handed: {pa['statements_audited']} generated statement(s) "
+              f"parsed, partitioned by the rule inventory in `sentinel/rulebook.py`, cross-checked "
+              f"against the code steps, and replayed. A defect here is a defect in *our* SQL, not "
+              f"in the migration under review, so it never enters the hazard table - it caps the "
+              f"verdict and becomes a human gate.", ""]
+        if pa["findings"]:
+            L += ["| # | defect | script | statement |", "|---|---|---|---|"]
+            for i, f in enumerate(pa["findings"], 1):
+                L.append(f"| {i} | **{f['code']}** | {f['script']} | `{f['statement']}` |")
+            L.append("")
+            for i, f in enumerate(pa["findings"], 1):
+                L += [f"### {i}. {f['title']}", "", f["why"] + ".", ""]
+                for ev in f["evidence"]:
+                    L.append(f"- evidence: {ev}")
+                L += [f"- closes when: {f['closes_with']}", ""]
+        else:
+            L += ["No defect found in the generated SQL: every destructive contract step is named "
+                  "by a human gate, no rollback statement removes something a code step in this "
+                  "packet asks the team to start using, and every generated statement has a kind "
+                  "something in this pipeline inspects.", ""]
+        if pa["gaps"]:
+            L += ["What this audit trusted rather than checked:", ""]
+            for g in pa["gaps"]:
+                L.append(f"- `{g['object']}` ({g['kind']}, generated {g['script']}): {g['why']}")
+            L.append("")
+        rep_pa = pa.get("replay") or {}
+        if rep_pa.get("ran"):
+            for script, fig in sorted((rep_pa.get("scripts") or {}).items()):
+                L.append(f"- shadow replay of the generated {script} script against the "
+                         f"post-phase-1 schema: {fig['broken_after']} of {fig['queries_run']} "
+                         f"corpus statement(s) break"
+                         + (f" ({', '.join(fig['broken_query_ids'])})" if fig["broken_query_ids"]
+                            else "")
+                         + (" - expected for a contract step, which is what the code steps above "
+                            "are for; the number is printed so it can be checked rather than "
+                            "assumed" if script == "phase2" and fig["broken_after"] else ""))
+            L.append("")
+        elif rep_pa.get("why"):
+            L += [f"- the generated scripts were not replayed: {rep_pa['why']}", ""]
 
     cov = r.get("coverage_ledger") or {"gaps": []}
     if cov["gaps"]:

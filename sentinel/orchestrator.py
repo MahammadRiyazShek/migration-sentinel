@@ -26,6 +26,7 @@ from .agents.rollout_engineer import Policy, RolloutEngineer
 from .agents.verifier import Verifier
 from . import coverage as coverage_tools
 from . import narrator as narrator_tools
+from . import plan_audit as plan_audit_tools
 from .hazards import SEVERITY_ORDER
 from .tools import parse_audit, query_corpus, shadow_db, sql_parse
 from .tools.incident_memory import IncidentMemory
@@ -38,19 +39,19 @@ MAX_ATTEMPTS = 3
 # changelog can point at a number instead of a feeling.
 FEATURE_SETS = {
     "full": {"replay": True, "static": True, "memory": True, "verify": True, "coverage": True,
-             "rule_coverage": True, "text_conservation": True},
+             "rule_coverage": True, "text_conservation": True, "plan_audit": True},
     "no_replay": {"replay": False, "static": True, "memory": True, "verify": False,
-                  "coverage": True, "rule_coverage": True, "text_conservation": True},
+                  "coverage": True, "rule_coverage": True, "text_conservation": True, "plan_audit": True},
     "no_static": {"replay": True, "static": False, "memory": True, "verify": True,
-                  "coverage": True, "rule_coverage": True, "text_conservation": True},
+                  "coverage": True, "rule_coverage": True, "text_conservation": True, "plan_audit": True},
     "no_memory": {"replay": True, "static": True, "memory": False, "verify": True,
-                  "coverage": True, "rule_coverage": True, "text_conservation": True},
+                  "coverage": True, "rule_coverage": True, "text_conservation": True, "plan_audit": True},
     "no_verify": {"replay": True, "static": True, "memory": True, "verify": False,
-                  "coverage": True, "rule_coverage": True, "text_conservation": True},
+                  "coverage": True, "rule_coverage": True, "text_conservation": True, "plan_audit": True},
     # v2 component. `no_coverage` reproduces the v1 behaviour exactly: gaps are
     # still reported, they just do not constrain the verdict.
     "no_coverage": {"replay": True, "static": True, "memory": True, "verify": True,
-                    "coverage": False, "rule_coverage": True, "text_conservation": True},
+                    "coverage": False, "rule_coverage": True, "text_conservation": True, "plan_audit": True},
     # v13 component. `no_rule_coverage` reproduces v12 exactly: the two rules the
     # red-team pass found missing are off, and the ledger goes back to declaring blind
     # spots only about objects some rule had already looked at. It is identical to
@@ -58,7 +59,8 @@ FEATURE_SETS = {
     # this layer was absent rather than retuned - and it is 2/6 unsafe approvals on
     # eval/redteam, where `full` is 0/6.
     "no_rule_coverage": {"replay": True, "static": True, "memory": True, "verify": True,
-                         "coverage": True, "rule_coverage": False, "text_conservation": True},
+                         "coverage": True, "rule_coverage": False, "text_conservation": True,
+                         "plan_audit": True},
     # v14 component. `no_text_conservation` reproduces v13 exactly, splitter included: the
     # migration is split by the retired regex stripper, and the reconciliation between the
     # op list and the file does not run. It is identical to `full` on all 28 labelled cases
@@ -66,7 +68,18 @@ FEATURE_SETS = {
     # was absent rather than retuned - and it loses two thirds of a migration on
     # eval/redteam2/rt2_01 without reporting anything.
     "no_text_conservation": {"replay": True, "static": True, "memory": True, "verify": True,
-                             "coverage": True, "rule_coverage": True, "text_conservation": False},
+                             "coverage": True, "rule_coverage": True, "text_conservation": False,
+                             "plan_audit": True},
+    # v16 component. `no_plan_audit` reproduces v15 exactly: the three scripts this
+    # pipeline generates are never parsed, partitioned, cross-checked against the code
+    # steps or replayed, and "plan verified" means phase 1 broke no corpus statement. It
+    # is identical to `full` on every verdict, hazard and severity in all 34 labelled
+    # cases - the plan audit cannot touch the hazard list by construction - and it ships
+    # 6 unreviewed plan defects on the 21 cases in eval/cases and eval/holdout, where
+    # `full` ships 0. See sentinel/plan_audit.py and results/redteam3.md.
+    "no_plan_audit": {"replay": True, "static": True, "memory": True, "verify": True,
+                      "coverage": True, "rule_coverage": True, "text_conservation": True,
+                      "plan_audit": False},
 }
 
 
@@ -95,6 +108,10 @@ def build_registry(memory: IncidentMemory, tracer: Tracer,
     reg.register("memory.recall", memory.recall, "Full prior-incident records for a hazard code.")
     reg.register("corpus.access_path_users", query_corpus.access_path_users,
                  "Statements that use given columns as a lookup, sort or grouping key.")
+    reg.register("plan.audit", plan_audit_tools.audit,
+                 "Review the SQL this pipeline generated: parse all three scripts, partition every "
+                 "generated statement by the rule inventory, cross-check the rollback against the "
+                 "code steps, and replay the two scripts the verifier never ran.")
     reg.register("coverage.ledger", coverage_tools.ledger,
                  "Enumerate what this review structurally could not see, per affected object.")
     return reg
@@ -176,6 +193,37 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
         attempt += 1
         tracer.retry(engineer.NAME, attempt, reason)
 
+    # v16: the plan is an artefact this pipeline produced, so it gets reviewed like any
+    # other artefact this pipeline was handed. Findings cap the verdict and become human
+    # gates; they never enter the hazard list, because the hazard list is a statement
+    # about the migration under review and this is a statement about our own output.
+    if feat.get("plan_audit", True) and plan is not None:
+        plan_review = tools.call("plan.audit", agent="verifier", plan=plan, schema=parsed["schema"],
+                                 queries=case["queries"], seed=case.get("seed", {}),
+                                 replay_tool=shadow_db.replay)
+        new_gates = plan_audit_tools.gates(plan_review)
+        if new_gates:
+            plan["human_gates"] = list(dict.fromkeys(list(plan["human_gates"]) + new_gates))
+        for f in plan_review["findings"]:
+            tracer.checkpoint("plan self-audit", "PLAN DEFECT",
+                              f"{f['code']} in the generated {f['script']} script: {f['why']} "
+                              f"Closes when: {f['closes_with']}")
+    else:
+        plan_review = {"statements_audited": 0, "scripts": {}, "findings": [],
+                       "finding_codes": [], "gaps": [], "gap_kinds": [], "kind_inventory": [],
+                       "gates_trusted": 0, "clean": None,
+                       "replay": {"ran": False, "why": "plan audit disabled for this run"},
+                       "disabled": True}
+
+    verdict, capped_by_plan_audit = plan_audit_tools.cap(risk["verdict"], plan_review)
+    if capped_by_plan_audit:
+        tracer.checkpoint("plan self-audit sign-off", "REQUIRED",
+                          "The verdict is capped at NEEDS_COVERAGE_SIGNOFF by this pipeline's audit "
+                          "of its own output: the migration itself carries no blocking hazard, but "
+                          f"{len(plan_review['findings'])} statement(s) in the SQL this packet is "
+                          "asking someone to run were never reviewed by anything. No hazard has "
+                          "been invented and nothing has been cleared.")
+
     escalated = feat["verify"] and not check["verified"]
     if escalated:
         tracer.checkpoint("plan verification", "ESCALATED",
@@ -185,9 +233,9 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
 
     raw_summary = llm.complete(
         "You write the two-sentence verdict at the top of a database migration review.",
-        f"verdict={risk['verdict']} counts={risk['counts']} broken={len(blast['replay'].broken)}",
+        f"verdict={verdict} counts={risk['counts']} broken={len(blast['replay'].broken)}",
         tag="executive_summary",
-        payload={"verdict": risk["verdict"], "counts": risk["counts"],
+        payload={"verdict": verdict, "counts": risk["counts"],
                  "broken_queries": len(blast["replay"].broken),
                  "coverage_gaps": len(risk["coverage_ledger"]["gaps"]),
                  "plan_verified": check["verified"]}).text
@@ -198,9 +246,10 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
     # it cannot invent a hazard, move a severity or change a verdict.
     narrator_facts = {"counts": risk["counts"], "broken_queries": len(blast["replay"].broken),
                       "coverage_gaps": len(risk["coverage_ledger"]["gaps"]),
-                      "plan_verified": check["verified"]}
+                      "plan_verified": check["verified"],
+                      "plan_defects": len(plan_review["findings"])}
     narrator_info = narrator_tools.compose_summary(
-        raw_summary, risk["verdict"], narrator_facts, mode=narrator_mode)
+        raw_summary, verdict, narrator_facts, mode=narrator_mode)
     summary = narrator_info.pop("summary")
     summary_reasons = narrator_info["summary_reasons"]
     if narrator_mode == "structural":
@@ -242,7 +291,8 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
         "case_id": case["id"],
         "title": case.get("title", ""),
         "owner_service": case.get("owner_service"),
-        "verdict": risk["verdict"],
+        "verdict": verdict,
+        "input_verdict": risk["verdict"],
         "summary": summary,
         "narrator": narrator_info,
         "counts": risk["counts"],
@@ -254,6 +304,8 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
         },
         "plan": plan,
         "plan_verification": check,
+        "plan_audit": plan_review,
+        "verdict_capped_by_plan_audit": capped_by_plan_audit,
         "escalated_to_human": escalated,
         "coverage_gaps": risk["coverage_gaps"] + check.get("unmodelled", []),
         "coverage_ledger": risk["coverage_ledger"],

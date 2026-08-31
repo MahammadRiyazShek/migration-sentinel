@@ -2,7 +2,7 @@
 
 - run id: `eval-rt2_03_unterminated_literal`
 - case: `rt2_03_unterminated_literal`
-- events: 41
+- events: 43
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.83 ms)
+**tool** `schema.parse` (0.85 ms)
 
 ```json
 {
@@ -197,7 +197,7 @@ _note (cartographer)_: parse conservation: the scanner finds 1 statement(s) in t
 
 </details>
 
-**tool** `corpus.dependents` (0.19 ms)
+**tool** `corpus.dependents` (0.13 ms)
 
 ```json
 {
@@ -401,7 +401,7 @@ _tool responded_
 25
 ```
 
-**tool** `shadow.replay` (2.93 ms)
+**tool** `shadow.replay` (3.41 ms)
 
 ```json
 {
@@ -554,7 +554,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.19 ms)
+**tool** `coverage.ledger` (0.18 ms)
 
 ```json
 {
@@ -759,7 +759,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.09 ms)
 
 ```json
 {
@@ -791,7 +791,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.93 ms)
+**tool** `shadow.replay` (2.87 ms)
 
 ```json
 {
@@ -955,7 +955,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.07 ms)
+**tool** `migration.parse` (0.09 ms)
 
 ```json
 {
@@ -983,7 +983,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -1015,7 +1015,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.37 ms)
+**tool** `shadow.replay` (3.04 ms)
 
 ```json
 {
@@ -1119,6 +1119,99 @@ _tool responded_
 ```
 
 **feedback into next step (attempt 2)** phase 1 is not safe yet: phase-1 data step failed: migration DML failed (stmt 0): unrecognized token: "'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND "id" IN (SELECT "id" FROM "invoices" WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate LIMIT 5000);" :: UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate. Tightening the policy and regenerating.
+
+**tool** `plan.audit` (0.36 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 2,
+   "phase1_sql": [
+    "-- repeat until zero rows are affected (batch size 5000):",
+    "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM..."
+   ],
+   "phase2_sql": [],
+   "rollback_sql": [],
+   "code_steps": [],
+   "human_gates": [
+    "phase 1 was reduced to additive statements only; the rest needs a human to choose the deploy order",
+    "coverage gap on `invoices.status` (in_place_data_mutation): a reviewer confirms which consumers of invoices.status depen...",
+    "coverage gap on `characters 29 onward` (unreviewable_text): the script is fixed and resubmitted; there is nothing here f..."
+   ],
+   "questions": [
+    "What is the accepted risk for MIGRATION_TEXT_UNPARSED?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": true,
+    "notes": [
+     "fell back to a minimal additive phase 1: everything not provably backwards compatible moved to phase 2"
+    ]
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+   
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 1,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 0,
+  "rollback": 0
+ },
+ "findings": [
+  {
+   "code": "GENERATED_TEXT_UNPARSED",
+   "title": "This pipeline emitted SQL it cannot itself read back",
+   "script": "phase1",
+   "statement_index": null,
+   "statement": "{'kind': 'string', 'start': 29, 'end': 200, 'text': '\\'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND",
+   "objects": [],
+   "why": "an unterminated construct in the generated script, which Postgres would refuse, so this packet is printing SQL it did no...",
+   "closes_with": "a reviewer reads the generated script by hand before running it",
+   "evidence": [
+    "tools/parse_audit.py on the generated phase1 script: an unterminated construct in the generated script, which Postgres w...",
+    "statements lexed 1, ops produced 1"
+   ]
+  }
+ ],
+ "finding_codes": [
+  "GENERATED_TEXT_UNPARSED"
+ ],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "dml_update",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {},
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": false
+}
+```
+
+### Human checkpoint - plan self-audit: **PLAN DEFECT**
+
+GENERATED_TEXT_UNPARSED in the generated phase1 script: an unterminated construct in the generated script, which Postgres would refuse, so this packet is printing SQL it did not fully model Closes when: a reviewer reads the generated script by hand before running it
 
 ### Human checkpoint - plan verification: **ESCALATED**
 

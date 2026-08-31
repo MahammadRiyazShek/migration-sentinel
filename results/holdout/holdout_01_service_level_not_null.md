@@ -4,7 +4,7 @@
 
 Do not ship this as written. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-holdout_01_service_level_not_null` · case `holdout_01_service_level_not_null` · owning service `dispatch-api` · 10.3 ms · model scripted-v1 (4 calls, $0.0000)
+`run eval-holdout_01_service_level_not_null` · case `holdout_01_service_level_not_null` · owning service `dispatch-api` · 14.5 ms · model scripted-v1 (4 calls, $0.0000)
 
 > **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
@@ -44,7 +44,7 @@ Existing rows cannot satisfy NOT NULL on shipments.service_level
 
 ## Recommended rollout
 
-Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the corpus still passes after phase 1.
+Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the corpus still passes after phase 1. That is a statement about phase 1 and about today's corpus only - the audit of all three generated scripts is the section below.
 
 ### Phase 1 - expand (safe to run now)
 
@@ -72,6 +72,18 @@ ALTER TABLE "shipments" DROP COLUMN "service_level";
 
 - Which deploy lands first: the query change or the schema change?
 - What is the accepted risk for NOT_NULL_NO_DEFAULT?
+
+## Plan self-audit
+
+The three scripts above are output from this pipeline, so they are reviewed like any other artefact it is handed: 2 generated statement(s) parsed, partitioned by the rule inventory in `sentinel/rulebook.py`, cross-checked against the code steps, and replayed. A defect here is a defect in *our* SQL, not in the migration under review, so it never enters the hazard table - it caps the verdict and becomes a human gate.
+
+No defect found in the generated SQL: every destructive contract step is named by a human gate, no rollback statement removes something a code step in this packet asks the team to start using, and every generated statement has a kind something in this pipeline inspects.
+
+What this audit trusted rather than checked:
+
+- `shipments.service_level` (audit_gate_text_only, generated rollback): this step is treated as gated because a human gate names `shipments.service_level`; this audit read the name, not the question
+
+- shadow replay of the generated rollback script against the post-phase-1 schema: 0 of 17 corpus statement(s) break
 
 ## What this review did not check
 

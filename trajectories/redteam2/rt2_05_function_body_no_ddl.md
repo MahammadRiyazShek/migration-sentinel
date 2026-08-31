@@ -2,7 +2,7 @@
 
 - run id: `eval-rt2_05_function_body_no_ddl`
 - case: `rt2_05_function_body_no_ddl`
-- events: 29
+- events: 30
 
 ## Agent: cartographer
 
@@ -185,7 +185,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.09 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -482,7 +482,7 @@ _tool responded_
 25
 ```
 
-**tool** `shadow.replay` (3.04 ms)
+**tool** `shadow.replay` (3.02 ms)
 
 ```json
 {
@@ -599,7 +599,7 @@ _tool responded_
 
 </details>
 
-**tool** `coverage.ledger` (0.19 ms)
+**tool** `coverage.ledger` (0.21 ms)
 
 ```json
 {
@@ -750,7 +750,7 @@ _note (risk_officer)_: verdict capped to NEEDS_COVERAGE_SIGNOFF: 1 coverage gap(
 
 </details>
 
-**tool** `migration.parse` (0.06 ms)
+**tool** `migration.parse` (0.07 ms)
 
 ```json
 {
@@ -814,7 +814,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.88 ms)
+**tool** `shadow.replay` (2.86 ms)
 
 ```json
 {
@@ -910,6 +910,96 @@ _tool responded_
   "queries_ok_after": 19
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.32 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "ALTER TABLE \"invoices\" ADD COLUMN \"dunning_stamped_at\" TIMESTAMPTZ;"
+   ],
+   "phase2_sql": [],
+   "rollback_sql": [
+    "ALTER TABLE \"invoices\" DROP COLUMN \"dunning_stamped_at\";"
+   ],
+   "code_steps": [],
+   "human_gates": [
+    "statement 1 (procedural_block) is outside the tool's model and needs manual review: CREATE OR REPLACE FUNCTION stamp_dun...",
+    "coverage gap on `$fn$ body at statement 1` (procedural_body): a reviewer reads the $fn$ body of statement 1 in full, inc..."
+   ],
+   "questions": [],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name,
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 2,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 0,
+  "rollback": 1
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "add_column",
+   "bucket": "RULED"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 0,
+   "kind": "drop_column",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "rollback": {
+    "queries_run": 19,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

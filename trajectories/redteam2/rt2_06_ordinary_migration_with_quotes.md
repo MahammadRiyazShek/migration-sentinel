@@ -2,7 +2,7 @@
 
 - run id: `eval-rt2_06_ordinary_migration_with_quotes`
 - case: `rt2_06_ordinary_migration_with_quotes`
-- events: 25
+- events: 26
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.83 ms)
+**tool** `schema.parse` (0.79 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.09 ms)
+**tool** `migration.parse` (0.08 ms)
 
 ```json
 {
@@ -94,7 +94,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.1 ms)
+**tool** `migration.audit` (0.12 ms)
 
 ```json
 {
@@ -375,7 +375,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.05 ms)
+**tool** `corpus.blast_score` (0.03 ms)
 
 ```json
 {
@@ -562,7 +562,7 @@ _tool responded_
 
 </details>
 
-**tool** `coverage.ledger` (0.15 ms)
+**tool** `coverage.ledger` (0.14 ms)
 
 ```json
 {
@@ -741,7 +741,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -790,7 +790,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.97 ms)
+**tool** `shadow.replay` (2.95 ms)
 
 ```json
 {
@@ -883,6 +883,110 @@ _tool responded_
   "queries_ok_after": 19
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.5 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "ALTER TABLE \"invoices\" ADD COLUMN \"dunning_note\" TEXT DEFAULT 'not attempted -- see runbook';",
+    "CREATE INDEX CONCURRENTLY \"idx_invoices_dunning_note\" ON \"invoices\" (\"dunning_note\");"
+   ],
+   "phase2_sql": [],
+   "rollback_sql": [
+    "ALTER TABLE \"invoices\" DROP COLUMN \"dunning_note\";",
+    "DROP INDEX CONCURRENTLY \"idx_invoices_dunning_note\";"
+   ],
+   "code_steps": [],
+   "human_gates": [],
+   "questions": [],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+   
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 4,
+ "scripts": {
+  "phase1": 2,
+  "phase2": 0,
+  "rollback": 2
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "add_column",
+   "bucket": "RULED"
+  },
+  {
+   "script": "phase1",
+   "statement_index": 1,
+   "kind": "create_index",
+   "bucket": "RULED"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 0,
+   "kind": "drop_column",
+   "bucket": "RULED"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 1,
+   "kind": "drop_index",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "rollback": {
+    "queries_run": 19,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

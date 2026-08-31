@@ -51,9 +51,9 @@
     "findings": 6,
     "evidenced_findings": 6,
     "plan_verified": true,
-    "human_gates": 1,
-    "modelled_reviewer_minutes": 8,
-    "wall_ms": 11.5,
+    "human_gates": 2,
+    "modelled_reviewer_minutes": 11,
+    "wall_ms": 17.1,
     "tokens": 4324,
     "cost_usd": 0.0
    },
@@ -109,7 +109,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.8,
+    "wall_ms": 10.4,
     "tokens": 3220,
     "cost_usd": 0.0
    },
@@ -148,7 +148,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 8.2,
+    "wall_ms": 10.3,
     "tokens": 1081,
     "cost_usd": 0.0
    },
@@ -197,7 +197,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.8,
+    "wall_ms": 10.4,
     "tokens": 2404,
     "cost_usd": 0.0
    },
@@ -240,7 +240,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.6,
+    "wall_ms": 13.0,
     "tokens": 1678,
     "cost_usd": 0.0
    },
@@ -269,7 +269,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.2,
+    "wall_ms": 10.1,
     "tokens": 545,
     "cost_usd": 0.0
    },
@@ -308,7 +308,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.5,
+    "wall_ms": 10.0,
     "tokens": 1083,
     "cost_usd": 0.0
    },
@@ -352,7 +352,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.3,
+    "wall_ms": 7.4,
     "tokens": 1541,
     "cost_usd": 0.0
    },
@@ -401,7 +401,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.6,
+    "wall_ms": 7.8,
     "tokens": 1588,
     "cost_usd": 0.0
    },
@@ -438,9 +438,9 @@
     "findings": 1,
     "evidenced_findings": 1,
     "plan_verified": true,
-    "human_gates": 0,
-    "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.4,
+    "human_gates": 1,
+    "modelled_reviewer_minutes": 8,
+    "wall_ms": 12.9,
     "tokens": 1114,
     "cost_usd": 0.0
    },
@@ -488,7 +488,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.6,
+    "wall_ms": 10.6,
     "tokens": 2066,
     "cost_usd": 0.0
    },
@@ -556,9 +556,9 @@
     "findings": 9,
     "evidenced_findings": 9,
     "plan_verified": true,
-    "human_gates": 6,
-    "modelled_reviewer_minutes": 23,
-    "wall_ms": 8.8,
+    "human_gates": 7,
+    "modelled_reviewer_minutes": 26,
+    "wall_ms": 15.1,
     "tokens": 5323,
     "cost_usd": 0.0
    }
@@ -592,9 +592,9 @@
    "cases_with_coverage_gaps": 2,
    "declared_coverage_gaps": 3,
    "gap_cases_cleared_without_signoff": 0,
-   "modelled_reviewer_minutes_total": 111,
-   "modelled_reviewer_minutes_per_case": 9.2,
-   "wall_ms_per_case": 8.0,
+   "modelled_reviewer_minutes_total": 120,
+   "modelled_reviewer_minutes_per_case": 10.0,
+   "wall_ms_per_case": 11.3,
    "tokens_total": 25967,
    "cost_usd_total": 0.0
   }
@@ -603,10 +603,10 @@
   "per_case": [
    {
     "case_id": "case_01_rename_with_compat_view",
-    "verdict": "SAFE_WITH_PLAN",
+    "verdict": "NEEDS_COVERAGE_SIGNOFF",
     "case_coverage_gaps": 0,
     "declared_coverage_gaps": 0,
-    "coverage_signoff_required": false,
+    "coverage_signoff_required": true,
     "gap_case_cleared_without_signoff": false,
     "gt_blocking": true,
     "gt_codes": [
@@ -643,14 +643,14 @@
     ],
     "unsafe_approval": false,
     "false_alarm_on_clean_case": false,
-    "clean_verdict_on_blocking_case": true,
+    "clean_verdict_on_blocking_case": false,
     "findings": 2,
     "evidenced_findings": 2,
     "plan_verified": false,
-    "human_gates": 1,
+    "human_gates": 2,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 1.9,
-    "tokens": 1531,
+    "wall_ms": 7.8,
+    "tokens": 1553,
     "cost_usd": 0.0
    },
    {
@@ -701,7 +701,7 @@
     "plan_verified": false,
     "human_gates": 2,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 1.8,
+    "wall_ms": 4.7,
     "tokens": 1528,
     "cost_usd": 0.0
    },
@@ -740,7 +740,7 @@
     "plan_verified": false,
     "human_gates": 0,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 1.7,
+    "wall_ms": 4.8,
     "tokens": 1086,
     "cost_usd": 0.0
    },
@@ -784,7 +784,7 @@
     "plan_verified": false,
     "human_gates": 1,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 1.7,
+    "wall_ms": 4.7,
     "tokens": 1049,
     "cost_usd": 0.0
    },
@@ -826,7 +826,7 @@
     "plan_verified": false,
     "human_gates": 0,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 1.7,
+    "wall_ms": 4.7,
     "tokens": 1095,
     "cost_usd": 0.0
    },
@@ -855,7 +855,7 @@
     "plan_verified": false,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 1.5,
+    "wall_ms": 4.7,
     "tokens": 550,
     "cost_usd": 0.0
    },
@@ -894,16 +894,16 @@
     "plan_verified": false,
     "human_gates": 1,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 1.6,
+    "wall_ms": 4.7,
     "tokens": 1088,
     "cost_usd": 0.0
    },
    {
     "case_id": "case_08_narrowing_country_code",
-    "verdict": "SAFE_WITH_PLAN",
+    "verdict": "NEEDS_COVERAGE_SIGNOFF",
     "case_coverage_gaps": 0,
     "declared_coverage_gaps": 0,
-    "coverage_signoff_required": false,
+    "coverage_signoff_required": true,
     "gap_case_cleared_without_signoff": false,
     "gt_blocking": true,
     "gt_codes": [
@@ -932,14 +932,14 @@
     ],
     "unsafe_approval": false,
     "false_alarm_on_clean_case": false,
-    "clean_verdict_on_blocking_case": true,
+    "clean_verdict_on_blocking_case": false,
     "findings": 1,
     "evidenced_findings": 1,
     "plan_verified": false,
-    "human_gates": 0,
+    "human_gates": 2,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 1.7,
-    "tokens": 1065,
+    "wall_ms": 7.8,
+    "tokens": 1087,
     "cost_usd": 0.0
    },
    {
@@ -987,7 +987,7 @@
     "plan_verified": false,
     "human_gates": 2,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 1.9,
+    "wall_ms": 2.3,
     "tokens": 1593,
     "cost_usd": 0.0
    },
@@ -1024,9 +1024,9 @@
     "findings": 1,
     "evidenced_findings": 1,
     "plan_verified": false,
-    "human_gates": 0,
+    "human_gates": 1,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 1.7,
+    "wall_ms": 7.5,
     "tokens": 1119,
     "cost_usd": 0.0
    },
@@ -1072,7 +1072,7 @@
     "plan_verified": false,
     "human_gates": 2,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 1.7,
+    "wall_ms": 4.9,
     "tokens": 1002,
     "cost_usd": 0.0
    },
@@ -1138,9 +1138,9 @@
     "findings": 7,
     "evidenced_findings": 7,
     "plan_verified": false,
-    "human_gates": 5,
+    "human_gates": 6,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 2.6,
+    "wall_ms": 9.1,
     "tokens": 4186,
     "cost_usd": 0.0
    }
@@ -1149,7 +1149,7 @@
    "cases": 12,
    "unsafe_approvals": 1,
    "blocking_cases": 9,
-   "clean_verdicts_on_blocking_cases": 5,
+   "clean_verdicts_on_blocking_cases": 3,
    "false_alarms_on_clean_cases": 0,
    "strict": {
     "precision": 1.0,
@@ -1176,8 +1176,8 @@
    "gap_cases_cleared_without_signoff": 0,
    "modelled_reviewer_minutes_total": 280,
    "modelled_reviewer_minutes_per_case": 23.3,
-   "wall_ms_per_case": 1.8,
-   "tokens_total": 16892,
+   "wall_ms_per_case": 5.6,
+   "tokens_total": 16936,
    "cost_usd_total": 0.0
   }
  },
@@ -1229,9 +1229,9 @@
     "findings": 3,
     "evidenced_findings": 3,
     "plan_verified": true,
-    "human_gates": 1,
-    "modelled_reviewer_minutes": 8,
-    "wall_ms": 11.1,
+    "human_gates": 2,
+    "modelled_reviewer_minutes": 11,
+    "wall_ms": 16.7,
     "tokens": 2787,
     "cost_usd": 0.0
    },
@@ -1283,7 +1283,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.3,
+    "wall_ms": 10.2,
     "tokens": 1729,
     "cost_usd": 0.0
    },
@@ -1318,7 +1318,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.2,
+    "wall_ms": 10.1,
     "tokens": 545,
     "cost_usd": 0.0
    },
@@ -1362,7 +1362,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.5,
+    "wall_ms": 10.5,
     "tokens": 1883,
     "cost_usd": 0.0
    },
@@ -1406,7 +1406,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.5,
+    "wall_ms": 13.0,
     "tokens": 1139,
     "cost_usd": 0.0
    },
@@ -1435,7 +1435,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.2,
+    "wall_ms": 10.2,
     "tokens": 545,
     "cost_usd": 0.0
    },
@@ -1470,7 +1470,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 6.9,
+    "wall_ms": 9.7,
     "tokens": 545,
     "cost_usd": 0.0
    },
@@ -1514,7 +1514,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.2,
+    "wall_ms": 7.4,
     "tokens": 1032,
     "cost_usd": 0.0
    },
@@ -1555,16 +1555,16 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.4,
+    "wall_ms": 7.6,
     "tokens": 593,
     "cost_usd": 0.0
    },
    {
     "case_id": "case_10_add_fk_constraint",
-    "verdict": "SAFE",
+    "verdict": "NEEDS_COVERAGE_SIGNOFF",
     "case_coverage_gaps": 0,
     "declared_coverage_gaps": 0,
-    "coverage_signoff_required": false,
+    "coverage_signoff_required": true,
     "gap_case_cleared_without_signoff": false,
     "gt_blocking": true,
     "gt_codes": [
@@ -1582,16 +1582,16 @@
      "operational_lock"
     ],
     "severity_matches": [],
-    "unsafe_approval": true,
+    "unsafe_approval": false,
     "false_alarm_on_clean_case": false,
-    "clean_verdict_on_blocking_case": true,
+    "clean_verdict_on_blocking_case": false,
     "findings": 0,
     "evidenced_findings": 0,
     "plan_verified": true,
-    "human_gates": 0,
-    "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.1,
-    "tokens": 545,
+    "human_gates": 1,
+    "modelled_reviewer_minutes": 8,
+    "wall_ms": 12.8,
+    "tokens": 575,
     "cost_usd": 0.0
    },
    {
@@ -1636,7 +1636,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.4,
+    "wall_ms": 10.4,
     "tokens": 1097,
     "cost_usd": 0.0
    },
@@ -1694,18 +1694,18 @@
     "findings": 2,
     "evidenced_findings": 2,
     "plan_verified": true,
-    "human_gates": 6,
-    "modelled_reviewer_minutes": 23,
-    "wall_ms": 8.4,
+    "human_gates": 7,
+    "modelled_reviewer_minutes": 26,
+    "wall_ms": 14.9,
     "tokens": 1732,
     "cost_usd": 0.0
    }
   ],
   "aggregate": {
    "cases": 12,
-   "unsafe_approvals": 2,
+   "unsafe_approvals": 1,
    "blocking_cases": 9,
-   "clean_verdicts_on_blocking_cases": 2,
+   "clean_verdicts_on_blocking_cases": 1,
    "false_alarms_on_clean_cases": 0,
    "strict": {
     "precision": 1.0,
@@ -1730,10 +1730,10 @@
    "cases_with_coverage_gaps": 2,
    "declared_coverage_gaps": 3,
    "gap_cases_cleared_without_signoff": 0,
-   "modelled_reviewer_minutes_total": 105,
-   "modelled_reviewer_minutes_per_case": 8.8,
-   "wall_ms_per_case": 7.7,
-   "tokens_total": 14172,
+   "modelled_reviewer_minutes_total": 114,
+   "modelled_reviewer_minutes_per_case": 9.5,
+   "wall_ms_per_case": 11.1,
+   "tokens_total": 14202,
    "cost_usd_total": 0.0
   }
  },
@@ -1789,9 +1789,9 @@
     "findings": 6,
     "evidenced_findings": 6,
     "plan_verified": true,
-    "human_gates": 1,
-    "modelled_reviewer_minutes": 8,
-    "wall_ms": 11.0,
+    "human_gates": 2,
+    "modelled_reviewer_minutes": 11,
+    "wall_ms": 16.9,
     "tokens": 4298,
     "cost_usd": 0.0
    },
@@ -1847,7 +1847,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.4,
+    "wall_ms": 10.3,
     "tokens": 3196,
     "cost_usd": 0.0
    },
@@ -1886,7 +1886,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.3,
+    "wall_ms": 10.2,
     "tokens": 1070,
     "cost_usd": 0.0
    },
@@ -1935,7 +1935,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.5,
+    "wall_ms": 10.4,
     "tokens": 2404,
     "cost_usd": 0.0
    },
@@ -1978,7 +1978,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.4,
+    "wall_ms": 13.2,
     "tokens": 1655,
     "cost_usd": 0.0
    },
@@ -2007,7 +2007,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.2,
+    "wall_ms": 10.1,
     "tokens": 545,
     "cost_usd": 0.0
    },
@@ -2046,7 +2046,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.1,
+    "wall_ms": 9.9,
     "tokens": 1083,
     "cost_usd": 0.0
    },
@@ -2090,7 +2090,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.3,
+    "wall_ms": 7.4,
     "tokens": 1541,
     "cost_usd": 0.0
    },
@@ -2139,16 +2139,16 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.4,
+    "wall_ms": 7.8,
     "tokens": 1588,
     "cost_usd": 0.0
    },
    {
     "case_id": "case_10_add_fk_constraint",
-    "verdict": "SAFE_WITH_PLAN",
+    "verdict": "NEEDS_COVERAGE_SIGNOFF",
     "case_coverage_gaps": 0,
     "declared_coverage_gaps": 0,
-    "coverage_signoff_required": false,
+    "coverage_signoff_required": true,
     "gap_case_cleared_without_signoff": false,
     "gt_blocking": true,
     "gt_codes": [
@@ -2170,14 +2170,14 @@
     "severity_matches": [],
     "unsafe_approval": false,
     "false_alarm_on_clean_case": false,
-    "clean_verdict_on_blocking_case": true,
+    "clean_verdict_on_blocking_case": false,
     "findings": 1,
     "evidenced_findings": 1,
     "plan_verified": true,
-    "human_gates": 0,
-    "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.2,
-    "tokens": 1090,
+    "human_gates": 1,
+    "modelled_reviewer_minutes": 8,
+    "wall_ms": 12.8,
+    "tokens": 1112,
     "cost_usd": 0.0
    },
    {
@@ -2224,7 +2224,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.5,
+    "wall_ms": 10.4,
     "tokens": 2066,
     "cost_usd": 0.0
    },
@@ -2292,9 +2292,9 @@
     "findings": 9,
     "evidenced_findings": 9,
     "plan_verified": true,
-    "human_gates": 6,
-    "modelled_reviewer_minutes": 23,
-    "wall_ms": 8.7,
+    "human_gates": 7,
+    "modelled_reviewer_minutes": 26,
+    "wall_ms": 15.3,
     "tokens": 5276,
     "cost_usd": 0.0
    }
@@ -2303,7 +2303,7 @@
    "cases": 12,
    "unsafe_approvals": 0,
    "blocking_cases": 9,
-   "clean_verdicts_on_blocking_cases": 1,
+   "clean_verdicts_on_blocking_cases": 0,
    "false_alarms_on_clean_cases": 0,
    "strict": {
     "precision": 0.97,
@@ -2328,10 +2328,10 @@
    "cases_with_coverage_gaps": 2,
    "declared_coverage_gaps": 3,
    "gap_cases_cleared_without_signoff": 0,
-   "modelled_reviewer_minutes_total": 111,
-   "modelled_reviewer_minutes_per_case": 9.2,
-   "wall_ms_per_case": 7.8,
-   "tokens_total": 25812,
+   "modelled_reviewer_minutes_total": 120,
+   "modelled_reviewer_minutes_per_case": 10.0,
+   "wall_ms_per_case": 11.2,
+   "tokens_total": 25834,
    "cost_usd_total": 0.0
   }
  },
@@ -2387,9 +2387,9 @@
     "findings": 6,
     "evidenced_findings": 6,
     "plan_verified": false,
-    "human_gates": 1,
+    "human_gates": 2,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 5.0,
+    "wall_ms": 10.8,
     "tokens": 3750,
     "cost_usd": 0.0
    },
@@ -2445,7 +2445,7 @@
     "plan_verified": false,
     "human_gates": 2,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 4.7,
+    "wall_ms": 7.6,
     "tokens": 3225,
     "cost_usd": 0.0
    },
@@ -2484,7 +2484,7 @@
     "plan_verified": false,
     "human_gates": 0,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 4.5,
+    "wall_ms": 7.4,
     "tokens": 1086,
     "cost_usd": 0.0
    },
@@ -2533,7 +2533,7 @@
     "plan_verified": false,
     "human_gates": 1,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 4.6,
+    "wall_ms": 7.7,
     "tokens": 2409,
     "cost_usd": 0.0
    },
@@ -2576,7 +2576,7 @@
     "plan_verified": false,
     "human_gates": 1,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 4.6,
+    "wall_ms": 10.3,
     "tokens": 1683,
     "cost_usd": 0.0
    },
@@ -2605,7 +2605,7 @@
     "plan_verified": false,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 4.4,
+    "wall_ms": 7.6,
     "tokens": 550,
     "cost_usd": 0.0
    },
@@ -2644,7 +2644,7 @@
     "plan_verified": false,
     "human_gates": 1,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 4.5,
+    "wall_ms": 7.2,
     "tokens": 1088,
     "cost_usd": 0.0
    },
@@ -2688,7 +2688,7 @@
     "plan_verified": false,
     "human_gates": 1,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 4.4,
+    "wall_ms": 4.6,
     "tokens": 1546,
     "cost_usd": 0.0
    },
@@ -2737,7 +2737,7 @@
     "plan_verified": false,
     "human_gates": 2,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 4.6,
+    "wall_ms": 4.9,
     "tokens": 1593,
     "cost_usd": 0.0
    },
@@ -2774,9 +2774,9 @@
     "findings": 1,
     "evidenced_findings": 1,
     "plan_verified": false,
-    "human_gates": 0,
+    "human_gates": 1,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 4.4,
+    "wall_ms": 10.1,
     "tokens": 1119,
     "cost_usd": 0.0
    },
@@ -2824,7 +2824,7 @@
     "plan_verified": false,
     "human_gates": 2,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 4.6,
+    "wall_ms": 7.7,
     "tokens": 2071,
     "cost_usd": 0.0
    },
@@ -2892,9 +2892,9 @@
     "findings": 9,
     "evidenced_findings": 9,
     "plan_verified": false,
-    "human_gates": 6,
+    "human_gates": 7,
     "modelled_reviewer_minutes": 25,
-    "wall_ms": 5.8,
+    "wall_ms": 12.2,
     "tokens": 5328,
     "cost_usd": 0.0
    }
@@ -2930,7 +2930,7 @@
    "gap_cases_cleared_without_signoff": 0,
    "modelled_reviewer_minutes_total": 280,
    "modelled_reviewer_minutes_per_case": 23.3,
-   "wall_ms_per_case": 4.7,
+   "wall_ms_per_case": 8.2,
    "tokens_total": 25448,
    "cost_usd_total": 0.0
   }
@@ -2987,9 +2987,9 @@
     "findings": 6,
     "evidenced_findings": 6,
     "plan_verified": true,
-    "human_gates": 1,
-    "modelled_reviewer_minutes": 8,
-    "wall_ms": 10.9,
+    "human_gates": 2,
+    "modelled_reviewer_minutes": 11,
+    "wall_ms": 16.7,
     "tokens": 4324,
     "cost_usd": 0.0
    },
@@ -3045,7 +3045,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.5,
+    "wall_ms": 10.3,
     "tokens": 3220,
     "cost_usd": 0.0
    },
@@ -3084,7 +3084,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.2,
+    "wall_ms": 10.1,
     "tokens": 1081,
     "cost_usd": 0.0
    },
@@ -3133,7 +3133,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.4,
+    "wall_ms": 10.3,
     "tokens": 2404,
     "cost_usd": 0.0
    },
@@ -3176,7 +3176,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.7,
+    "wall_ms": 13.0,
     "tokens": 1678,
     "cost_usd": 0.0
    },
@@ -3205,7 +3205,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.1,
+    "wall_ms": 9.9,
     "tokens": 545,
     "cost_usd": 0.0
    },
@@ -3244,7 +3244,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.0,
+    "wall_ms": 9.7,
     "tokens": 1083,
     "cost_usd": 0.0
    },
@@ -3288,7 +3288,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.2,
+    "wall_ms": 7.3,
     "tokens": 1541,
     "cost_usd": 0.0
    },
@@ -3374,9 +3374,9 @@
     "findings": 1,
     "evidenced_findings": 1,
     "plan_verified": true,
-    "human_gates": 0,
-    "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.2,
+    "human_gates": 1,
+    "modelled_reviewer_minutes": 8,
+    "wall_ms": 12.7,
     "tokens": 1114,
     "cost_usd": 0.0
    },
@@ -3424,7 +3424,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.5,
+    "wall_ms": 13.2,
     "tokens": 2066,
     "cost_usd": 0.0
    },
@@ -3492,9 +3492,9 @@
     "findings": 9,
     "evidenced_findings": 9,
     "plan_verified": true,
-    "human_gates": 4,
-    "modelled_reviewer_minutes": 17,
-    "wall_ms": 8.8,
+    "human_gates": 5,
+    "modelled_reviewer_minutes": 20,
+    "wall_ms": 15.1,
     "tokens": 5305,
     "cost_usd": 0.0
    }
@@ -3528,9 +3528,9 @@
    "cases_with_coverage_gaps": 2,
    "declared_coverage_gaps": 0,
    "gap_cases_cleared_without_signoff": 1,
-   "modelled_reviewer_minutes_total": 102,
-   "modelled_reviewer_minutes_per_case": 8.5,
-   "wall_ms_per_case": 7.8,
+   "modelled_reviewer_minutes_total": 111,
+   "modelled_reviewer_minutes_per_case": 9.2,
+   "wall_ms_per_case": 11.3,
    "tokens_total": 25909,
    "cost_usd_total": 0.0
   }
@@ -3587,9 +3587,9 @@
     "findings": 6,
     "evidenced_findings": 6,
     "plan_verified": true,
-    "human_gates": 1,
-    "modelled_reviewer_minutes": 8,
-    "wall_ms": 11.8,
+    "human_gates": 2,
+    "modelled_reviewer_minutes": 11,
+    "wall_ms": 17.1,
     "tokens": 4324,
     "cost_usd": 0.0
    },
@@ -3645,7 +3645,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.9,
+    "wall_ms": 10.3,
     "tokens": 3220,
     "cost_usd": 0.0
    },
@@ -3684,7 +3684,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.7,
+    "wall_ms": 10.2,
     "tokens": 1081,
     "cost_usd": 0.0
    },
@@ -3733,7 +3733,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.5,
+    "wall_ms": 10.5,
     "tokens": 2404,
     "cost_usd": 0.0
    },
@@ -3776,7 +3776,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.5,
+    "wall_ms": 13.1,
     "tokens": 1678,
     "cost_usd": 0.0
    },
@@ -3805,7 +3805,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.2,
+    "wall_ms": 10.1,
     "tokens": 545,
     "cost_usd": 0.0
    },
@@ -3844,7 +3844,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.1,
+    "wall_ms": 9.9,
     "tokens": 1083,
     "cost_usd": 0.0
    },
@@ -3888,7 +3888,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.7,
+    "wall_ms": 7.4,
     "tokens": 1541,
     "cost_usd": 0.0
    },
@@ -3937,7 +3937,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.7,
+    "wall_ms": 7.9,
     "tokens": 1588,
     "cost_usd": 0.0
    },
@@ -3974,9 +3974,9 @@
     "findings": 1,
     "evidenced_findings": 1,
     "plan_verified": true,
-    "human_gates": 0,
-    "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.5,
+    "human_gates": 1,
+    "modelled_reviewer_minutes": 8,
+    "wall_ms": 12.8,
     "tokens": 1114,
     "cost_usd": 0.0
    },
@@ -4024,7 +4024,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.6,
+    "wall_ms": 10.6,
     "tokens": 2066,
     "cost_usd": 0.0
    },
@@ -4092,9 +4092,9 @@
     "findings": 9,
     "evidenced_findings": 9,
     "plan_verified": true,
-    "human_gates": 6,
-    "modelled_reviewer_minutes": 23,
-    "wall_ms": 8.9,
+    "human_gates": 7,
+    "modelled_reviewer_minutes": 26,
+    "wall_ms": 15.5,
     "tokens": 5323,
     "cost_usd": 0.0
    }
@@ -4128,9 +4128,9 @@
    "cases_with_coverage_gaps": 2,
    "declared_coverage_gaps": 3,
    "gap_cases_cleared_without_signoff": 0,
-   "modelled_reviewer_minutes_total": 111,
-   "modelled_reviewer_minutes_per_case": 9.2,
-   "wall_ms_per_case": 8.0,
+   "modelled_reviewer_minutes_total": 120,
+   "modelled_reviewer_minutes_per_case": 10.0,
+   "wall_ms_per_case": 11.3,
    "tokens_total": 25967,
    "cost_usd_total": 0.0
   }
@@ -4187,9 +4187,9 @@
     "findings": 6,
     "evidenced_findings": 6,
     "plan_verified": true,
-    "human_gates": 1,
-    "modelled_reviewer_minutes": 8,
-    "wall_ms": 11.0,
+    "human_gates": 2,
+    "modelled_reviewer_minutes": 11,
+    "wall_ms": 16.8,
     "tokens": 4324,
     "cost_usd": 0.0
    },
@@ -4245,7 +4245,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.7,
+    "wall_ms": 10.2,
     "tokens": 3220,
     "cost_usd": 0.0
    },
@@ -4284,7 +4284,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.6,
+    "wall_ms": 10.3,
     "tokens": 1081,
     "cost_usd": 0.0
    },
@@ -4333,7 +4333,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.6,
+    "wall_ms": 10.4,
     "tokens": 2404,
     "cost_usd": 0.0
    },
@@ -4376,7 +4376,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 8.0,
+    "wall_ms": 13.2,
     "tokens": 1678,
     "cost_usd": 0.0
    },
@@ -4405,7 +4405,607 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.2,
+    "wall_ms": 10.1,
+    "tokens": 545,
+    "cost_usd": 0.0
+   },
+   {
+    "case_id": "case_07_drop_check_constraint",
+    "verdict": "SAFE_WITH_PLAN",
+    "case_coverage_gaps": 0,
+    "declared_coverage_gaps": 0,
+    "coverage_signoff_required": false,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": false,
+    "gt_codes": [
+     "INTEGRITY_CONSTRAINT_REMOVED"
+    ],
+    "pred_codes": [
+     "INTEGRITY_CONSTRAINT_REMOVED"
+    ],
+    "tp": [
+     "INTEGRITY_CONSTRAINT_REMOVED"
+    ],
+    "fp": [],
+    "fn": [],
+    "fam_tp": [
+     "data_integrity"
+    ],
+    "fam_fp": [],
+    "fam_fn": [],
+    "severity_matches": [
+     "INTEGRITY_CONSTRAINT_REMOVED"
+    ],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 1,
+    "evidenced_findings": 1,
+    "plan_verified": true,
+    "human_gates": 1,
+    "modelled_reviewer_minutes": 8,
+    "wall_ms": 9.9,
+    "tokens": 1083,
+    "cost_usd": 0.0
+   },
+   {
+    "case_id": "case_08_narrowing_country_code",
+    "verdict": "BLOCK",
+    "case_coverage_gaps": 0,
+    "declared_coverage_gaps": 0,
+    "coverage_signoff_required": false,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": true,
+    "gt_codes": [
+     "TABLE_REWRITE_LOCK",
+     "TYPE_NARROWING_DATA_LOSS"
+    ],
+    "pred_codes": [
+     "TABLE_REWRITE_LOCK",
+     "TYPE_NARROWING_DATA_LOSS"
+    ],
+    "tp": [
+     "TABLE_REWRITE_LOCK",
+     "TYPE_NARROWING_DATA_LOSS"
+    ],
+    "fp": [],
+    "fn": [],
+    "fam_tp": [
+     "data_integrity",
+     "operational_lock"
+    ],
+    "fam_fp": [],
+    "fam_fn": [],
+    "severity_matches": [
+     "TABLE_REWRITE_LOCK",
+     "TYPE_NARROWING_DATA_LOSS"
+    ],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 2,
+    "evidenced_findings": 2,
+    "plan_verified": true,
+    "human_gates": 1,
+    "modelled_reviewer_minutes": 8,
+    "wall_ms": 7.4,
+    "tokens": 1541,
+    "cost_usd": 0.0
+   },
+   {
+    "case_id": "case_09_unbatched_backfill",
+    "verdict": "NEEDS_COVERAGE_SIGNOFF",
+    "case_coverage_gaps": 1,
+    "declared_coverage_gaps": 1,
+    "coverage_signoff_required": true,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": false,
+    "gt_codes": [
+     "CROSS_SERVICE_UNCOORDINATED",
+     "NOT_NULL_NO_DEFAULT",
+     "UNBATCHED_BACKFILL"
+    ],
+    "pred_codes": [
+     "NOT_NULL_NO_DEFAULT",
+     "UNBATCHED_BACKFILL"
+    ],
+    "tp": [
+     "NOT_NULL_NO_DEFAULT",
+     "UNBATCHED_BACKFILL"
+    ],
+    "fp": [],
+    "fn": [
+     "CROSS_SERVICE_UNCOORDINATED"
+    ],
+    "fam_tp": [
+     "data_integrity",
+     "operational_lock"
+    ],
+    "fam_fp": [],
+    "fam_fn": [
+     "process"
+    ],
+    "severity_matches": [
+     "NOT_NULL_NO_DEFAULT",
+     "UNBATCHED_BACKFILL"
+    ],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 2,
+    "evidenced_findings": 2,
+    "plan_verified": true,
+    "human_gates": 2,
+    "modelled_reviewer_minutes": 11,
+    "wall_ms": 7.7,
+    "tokens": 1588,
+    "cost_usd": 0.0
+   },
+   {
+    "case_id": "case_10_add_fk_constraint",
+    "verdict": "BLOCK",
+    "case_coverage_gaps": 0,
+    "declared_coverage_gaps": 0,
+    "coverage_signoff_required": false,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": true,
+    "gt_codes": [
+     "CONSTRAINT_VALIDATION_LOCK"
+    ],
+    "pred_codes": [
+     "CONSTRAINT_VALIDATION_LOCK"
+    ],
+    "tp": [
+     "CONSTRAINT_VALIDATION_LOCK"
+    ],
+    "fp": [],
+    "fn": [],
+    "fam_tp": [
+     "operational_lock"
+    ],
+    "fam_fp": [],
+    "fam_fn": [],
+    "severity_matches": [
+     "CONSTRAINT_VALIDATION_LOCK"
+    ],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 1,
+    "evidenced_findings": 1,
+    "plan_verified": true,
+    "human_gates": 1,
+    "modelled_reviewer_minutes": 8,
+    "wall_ms": 12.7,
+    "tokens": 1114,
+    "cost_usd": 0.0
+   },
+   {
+    "case_id": "case_11_swap_view_used_by_worker",
+    "verdict": "BLOCK",
+    "case_coverage_gaps": 0,
+    "declared_coverage_gaps": 0,
+    "coverage_signoff_required": false,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": true,
+    "gt_codes": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "MISSING_ROLLBACK"
+    ],
+    "pred_codes": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "MISSING_ROLLBACK"
+    ],
+    "tp": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "MISSING_ROLLBACK"
+    ],
+    "fp": [],
+    "fn": [],
+    "fam_tp": [
+     "consumer_breakage",
+     "process"
+    ],
+    "fam_fp": [],
+    "fam_fn": [],
+    "severity_matches": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "MISSING_ROLLBACK"
+    ],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 3,
+    "evidenced_findings": 3,
+    "plan_verified": true,
+    "human_gates": 2,
+    "modelled_reviewer_minutes": 11,
+    "wall_ms": 10.6,
+    "tokens": 2066,
+    "cost_usd": 0.0
+   },
+   {
+    "case_id": "case_12_release_train",
+    "verdict": "BLOCK",
+    "case_coverage_gaps": 2,
+    "declared_coverage_gaps": 2,
+    "coverage_signoff_required": false,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": true,
+    "gt_codes": [
+     "BREAKING_QUERY",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "INDEX_LOCK_NO_CONCURRENT",
+     "INTEGRITY_CONSTRAINT_REMOVED",
+     "MISSING_ROLLBACK",
+     "TABLE_REWRITE_LOCK",
+     "UNBATCHED_BACKFILL",
+     "UNIQUE_VIOLATION_EXISTING_DATA"
+    ],
+    "pred_codes": [
+     "BREAKING_QUERY",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "INDEX_LOCK_NO_CONCURRENT",
+     "INTEGRITY_CONSTRAINT_REMOVED",
+     "MISSING_ROLLBACK",
+     "TABLE_REWRITE_LOCK",
+     "UNBATCHED_BACKFILL",
+     "UNIQUE_VIOLATION_EXISTING_DATA"
+    ],
+    "tp": [
+     "BREAKING_QUERY",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "INDEX_LOCK_NO_CONCURRENT",
+     "INTEGRITY_CONSTRAINT_REMOVED",
+     "MISSING_ROLLBACK",
+     "TABLE_REWRITE_LOCK",
+     "UNBATCHED_BACKFILL",
+     "UNIQUE_VIOLATION_EXISTING_DATA"
+    ],
+    "fp": [],
+    "fn": [],
+    "fam_tp": [
+     "consumer_breakage",
+     "data_integrity",
+     "operational_lock",
+     "process"
+    ],
+    "fam_fp": [],
+    "fam_fn": [],
+    "severity_matches": [
+     "BREAKING_QUERY",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "INDEX_LOCK_NO_CONCURRENT",
+     "INTEGRITY_CONSTRAINT_REMOVED",
+     "MISSING_ROLLBACK",
+     "TABLE_REWRITE_LOCK",
+     "UNBATCHED_BACKFILL",
+     "UNIQUE_VIOLATION_EXISTING_DATA"
+    ],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 9,
+    "evidenced_findings": 9,
+    "plan_verified": true,
+    "human_gates": 7,
+    "modelled_reviewer_minutes": 26,
+    "wall_ms": 15.0,
+    "tokens": 5323,
+    "cost_usd": 0.0
+   }
+  ],
+  "aggregate": {
+   "cases": 12,
+   "unsafe_approvals": 0,
+   "blocking_cases": 9,
+   "clean_verdicts_on_blocking_cases": 0,
+   "false_alarms_on_clean_cases": 0,
+   "strict": {
+    "precision": 0.97,
+    "recall": 0.97,
+    "f1": 0.97,
+    "tp": 32,
+    "fp": 1,
+    "fn": 1
+   },
+   "lenient_family": {
+    "precision": 0.955,
+    "recall": 0.955,
+    "f1": 0.955,
+    "tp": 21,
+    "fp": 1,
+    "fn": 1
+   },
+   "severity_agreement": 0.969,
+   "findings_total": 35,
+   "findings_with_evidence": 35,
+   "verified_plans": 12,
+   "cases_with_coverage_gaps": 2,
+   "declared_coverage_gaps": 3,
+   "gap_cases_cleared_without_signoff": 0,
+   "modelled_reviewer_minutes_total": 120,
+   "modelled_reviewer_minutes_per_case": 10.0,
+   "wall_ms_per_case": 11.2,
+   "tokens_total": 25967,
+   "cost_usd_total": 0.0
+  }
+ },
+ "no_plan_audit": {
+  "per_case": [
+   {
+    "case_id": "case_01_rename_with_compat_view",
+    "verdict": "BLOCK",
+    "case_coverage_gaps": 0,
+    "declared_coverage_gaps": 0,
+    "coverage_signoff_required": false,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": true,
+    "gt_codes": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "MISSING_ROLLBACK",
+     "SELECT_STAR_DRIFT"
+    ],
+    "pred_codes": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "MISSING_ROLLBACK",
+     "SELECT_STAR_DRIFT"
+    ],
+    "tp": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "MISSING_ROLLBACK",
+     "SELECT_STAR_DRIFT"
+    ],
+    "fp": [],
+    "fn": [],
+    "fam_tp": [
+     "consumer_breakage",
+     "process"
+    ],
+    "fam_fp": [],
+    "fam_fn": [],
+    "severity_matches": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "MISSING_ROLLBACK",
+     "SELECT_STAR_DRIFT"
+    ],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 6,
+    "evidenced_findings": 6,
+    "plan_verified": true,
+    "human_gates": 1,
+    "modelled_reviewer_minutes": 8,
+    "wall_ms": 11.3,
+    "tokens": 4324,
+    "cost_usd": 0.0
+   },
+   {
+    "case_id": "case_02_drop_column_still_read",
+    "verdict": "BLOCK",
+    "case_coverage_gaps": 0,
+    "declared_coverage_gaps": 0,
+    "coverage_signoff_required": false,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": true,
+    "gt_codes": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "MISSING_ROLLBACK",
+     "SELECT_STAR_DRIFT"
+    ],
+    "pred_codes": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "MISSING_ROLLBACK",
+     "SELECT_STAR_DRIFT"
+    ],
+    "tp": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "MISSING_ROLLBACK",
+     "SELECT_STAR_DRIFT"
+    ],
+    "fp": [],
+    "fn": [],
+    "fam_tp": [
+     "consumer_breakage",
+     "process"
+    ],
+    "fam_fp": [],
+    "fam_fn": [],
+    "severity_matches": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+     "MISSING_ROLLBACK",
+     "SELECT_STAR_DRIFT"
+    ],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 5,
+    "evidenced_findings": 5,
+    "plan_verified": true,
+    "human_gates": 2,
+    "modelled_reviewer_minutes": 11,
+    "wall_ms": 7.5,
+    "tokens": 3220,
+    "cost_usd": 0.0
+   },
+   {
+    "case_id": "case_03_index_on_hot_table",
+    "verdict": "BLOCK",
+    "case_coverage_gaps": 0,
+    "declared_coverage_gaps": 0,
+    "coverage_signoff_required": false,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": true,
+    "gt_codes": [
+     "INDEX_LOCK_NO_CONCURRENT"
+    ],
+    "pred_codes": [
+     "INDEX_LOCK_NO_CONCURRENT"
+    ],
+    "tp": [
+     "INDEX_LOCK_NO_CONCURRENT"
+    ],
+    "fp": [],
+    "fn": [],
+    "fam_tp": [
+     "operational_lock"
+    ],
+    "fam_fp": [],
+    "fam_fn": [],
+    "severity_matches": [
+     "INDEX_LOCK_NO_CONCURRENT"
+    ],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 1,
+    "evidenced_findings": 1,
+    "plan_verified": true,
+    "human_gates": 0,
+    "modelled_reviewer_minutes": 5,
+    "wall_ms": 7.3,
+    "tokens": 1081,
+    "cost_usd": 0.0
+   },
+   {
+    "case_id": "case_04_not_null_without_default",
+    "verdict": "BLOCK",
+    "case_coverage_gaps": 0,
+    "declared_coverage_gaps": 0,
+    "coverage_signoff_required": false,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": true,
+    "gt_codes": [
+     "BREAKING_QUERY",
+     "NOT_NULL_NO_DEFAULT"
+    ],
+    "pred_codes": [
+     "BREAKING_QUERY",
+     "CROSS_SERVICE_UNCOORDINATED",
+     "NOT_NULL_NO_DEFAULT"
+    ],
+    "tp": [
+     "BREAKING_QUERY",
+     "NOT_NULL_NO_DEFAULT"
+    ],
+    "fp": [
+     "CROSS_SERVICE_UNCOORDINATED"
+    ],
+    "fn": [],
+    "fam_tp": [
+     "consumer_breakage",
+     "data_integrity"
+    ],
+    "fam_fp": [
+     "process"
+    ],
+    "fam_fn": [],
+    "severity_matches": [
+     "BREAKING_QUERY",
+     "NOT_NULL_NO_DEFAULT"
+    ],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 3,
+    "evidenced_findings": 3,
+    "plan_verified": true,
+    "human_gates": 1,
+    "modelled_reviewer_minutes": 8,
+    "wall_ms": 7.5,
+    "tokens": 2404,
+    "cost_usd": 0.0
+   },
+   {
+    "case_id": "case_05_unique_email_with_duplicates",
+    "verdict": "BLOCK",
+    "case_coverage_gaps": 0,
+    "declared_coverage_gaps": 0,
+    "coverage_signoff_required": false,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": true,
+    "gt_codes": [
+     "INDEX_LOCK_NO_CONCURRENT",
+     "UNIQUE_VIOLATION_EXISTING_DATA"
+    ],
+    "pred_codes": [
+     "INDEX_LOCK_NO_CONCURRENT",
+     "UNIQUE_VIOLATION_EXISTING_DATA"
+    ],
+    "tp": [
+     "INDEX_LOCK_NO_CONCURRENT",
+     "UNIQUE_VIOLATION_EXISTING_DATA"
+    ],
+    "fp": [],
+    "fn": [],
+    "fam_tp": [
+     "data_integrity",
+     "operational_lock"
+    ],
+    "fam_fp": [],
+    "fam_fn": [],
+    "severity_matches": [
+     "UNIQUE_VIOLATION_EXISTING_DATA"
+    ],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 2,
+    "evidenced_findings": 2,
+    "plan_verified": true,
+    "human_gates": 1,
+    "modelled_reviewer_minutes": 8,
+    "wall_ms": 7.5,
+    "tokens": 1678,
+    "cost_usd": 0.0
+   },
+   {
+    "case_id": "case_06_safe_unique_index",
+    "verdict": "SAFE",
+    "case_coverage_gaps": 0,
+    "declared_coverage_gaps": 0,
+    "coverage_signoff_required": false,
+    "gap_case_cleared_without_signoff": false,
+    "gt_blocking": false,
+    "gt_codes": [],
+    "pred_codes": [],
+    "tp": [],
+    "fp": [],
+    "fn": [],
+    "fam_tp": [],
+    "fam_fp": [],
+    "fam_fn": [],
+    "severity_matches": [],
+    "unsafe_approval": false,
+    "false_alarm_on_clean_case": false,
+    "clean_verdict_on_blocking_case": false,
+    "findings": 0,
+    "evidenced_findings": 0,
+    "plan_verified": true,
+    "human_gates": 0,
+    "modelled_reviewer_minutes": 5,
+    "wall_ms": 7.1,
     "tokens": 545,
     "cost_usd": 0.0
    },
@@ -4488,7 +5088,7 @@
     "plan_verified": true,
     "human_gates": 1,
     "modelled_reviewer_minutes": 8,
-    "wall_ms": 7.2,
+    "wall_ms": 7.3,
     "tokens": 1541,
     "cost_usd": 0.0
    },
@@ -4537,7 +5137,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.6,
+    "wall_ms": 7.5,
     "tokens": 1588,
     "cost_usd": 0.0
    },
@@ -4576,7 +5176,7 @@
     "plan_verified": true,
     "human_gates": 0,
     "modelled_reviewer_minutes": 5,
-    "wall_ms": 7.6,
+    "wall_ms": 7.3,
     "tokens": 1114,
     "cost_usd": 0.0
    },
@@ -4624,7 +5224,7 @@
     "plan_verified": true,
     "human_gates": 2,
     "modelled_reviewer_minutes": 11,
-    "wall_ms": 7.7,
+    "wall_ms": 7.6,
     "tokens": 2066,
     "cost_usd": 0.0
    },
@@ -4694,7 +5294,7 @@
     "plan_verified": true,
     "human_gates": 6,
     "modelled_reviewer_minutes": 23,
-    "wall_ms": 8.6,
+    "wall_ms": 8.8,
     "tokens": 5323,
     "cost_usd": 0.0
    }
@@ -4730,7 +5330,7 @@
    "gap_cases_cleared_without_signoff": 0,
    "modelled_reviewer_minutes_total": 111,
    "modelled_reviewer_minutes_per_case": 9.2,
-   "wall_ms_per_case": 7.9,
+   "wall_ms_per_case": 7.8,
    "tokens_total": 25967,
    "cost_usd_total": 0.0
   }

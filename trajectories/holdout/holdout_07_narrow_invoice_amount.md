@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_07_narrow_invoice_amount`
 - case: `holdout_07_narrow_invoice_amount`
-- events: 31
+- events: 33
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.01 ms)
+**tool** `schema.parse` (1.07 ms)
 
 ```json
 {
@@ -80,7 +80,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.05 ms)
+**tool** `migration.audit` (0.04 ms)
 
 ```json
 {
@@ -302,7 +302,7 @@ _tool responded_
 5
 ```
 
-**tool** `shadow.replay` (3.29 ms)
+**tool** `shadow.replay` (3.4 ms)
 
 ```json
 {
@@ -496,7 +496,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.28 ms)
+**tool** `coverage.ledger` (0.23 ms)
 
 ```json
 {
@@ -756,7 +756,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.45 ms)
+**tool** `shadow.replay` (3.23 ms)
 
 ```json
 {
@@ -854,6 +854,107 @@ _tool responded_
  "unmodelled": []
 }
 ```
+
+**tool** `plan.audit` (7.2 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "ALTER TABLE \"carrier_invoices\" ADD COLUMN \"amount_new\" numeric(8,2);",
+    "UPDATE \"carrier_invoices\" SET \"amount_new\" = \"amount\" WHERE \"amount_new\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"carrier_..."
+   ],
+   "phase2_sql": [
+    "ALTER TABLE \"carrier_invoices\" DROP COLUMN \"amount\";",
+    "ALTER TABLE \"carrier_invoices\" RENAME COLUMN \"amount_new\" TO \"amount\";"
+   ],
+   "rollback_sql": [
+    "ALTER TABLE \"carrier_invoices\" DROP COLUMN \"amount_new\";"
+   ],
+   "code_steps": [
+    "deploy code that dual-writes carrier_invoices.amount and carrier_invoices.amount_new"
+   ],
+   "human_gates": [
+    "IRREVERSIBLE - coverage gap on `carrier_invoices.amount` (fixture_bounded_value_scan): a reviewer counts the real offend..."
+   ],
+   "questions": [
+    "What is the accepted risk for TABLE_REWRITE_LOCK?",
+    "Is the truncated value recoverable from anywhere else?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 5,
+ "scripts": {
+  "phase1": 2,
+  "phase2": 2,
+  "rollback": 1
+ },
+ "findings": [
+  {
+   "code": "ROLLBACK_WINDOW_UNSTATED",
+   "title": "The rollback is only valid before a code step this same packet asks for",
+   "script": "rollback",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"carrier_invoices\" DROP COLUMN \"amount_new\"",
+   "objects": [
+    "carrier_invoices.amount_new",
+    "carrier_invoices",
+    "amount_new"
+   ],
+   "why": "the rollback removes `carrier_invoices.amount_new`, and a code step in this same packet asks the team to start using it;...",
+   "closes_with": "the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead",
+   "evidence": [
+    "generated rollback statement 0: ALTER TABLE \"carrier_invoices\" DROP COLUMN \"amount_new\"",
+    "generated code step: deploy code that dual-writes carrier_invoices.amount and carrier_invoices.amount_new",
+    "shadow replay of this rollback breaks 0 corpus statements, which is why replay alone reports it as safe"
+   ]
+  }
+ ],
+ "finding_codes": [
+  "ROLLBACK_WINDOW_UNSTATED"
+ ],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "carrier_invoices.amount",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"carrier_invoices\" DROP COLUMN \"amount\"",
+   "why": "this step is treated as gated because a human gate names `carrier_invoices.amount`; this audit read the name, not the qu...",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  },
+  {
+   "kind": "audit_gate_text_only",
+   "object": "carrier_invoices",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 1,
+   "statement": "ALTER TABLE \"carrier_invoices\" RENAME COLUMN \"amount_new\" TO \"amount\"",
+   "why": "this step is treated as gated because a human gate names `carrier_invoices`; this audit read the
+```
+
+### Human checkpoint - plan self-audit: **PLAN DEFECT**
+
+ROLLBACK_WINDOW_UNSTATED in the generated rollback script: the rollback removes `carrier_invoices.amount_new`, and a code step in this same packet asks the team to start using it; run them in the printed order and the rollback breaks the deploy the packet asked for. The corpus cannot show this: the statements that break are the ones this packet is asking someone to write Closes when: the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead
 
 **model** `scripted-v1` tag=`executive_summary` tokens=43/77 cost=$0.0
 

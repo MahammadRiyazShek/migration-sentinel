@@ -9,10 +9,13 @@ decision-code freeze: POST-FREEZE (34 files hashed under sentinel/)
   changed: sentinel/coverage.py
   changed: sentinel/hazards.py
   changed: sentinel/llm/scripted.py
+  changed: sentinel/narrator.py
   changed: sentinel/orchestrator.py
+  changed: sentinel/report.py
   changed: sentinel/tools/query_corpus.py
   changed: sentinel/tools/shadow_db.py
   changed: sentinel/tools/sql_parse.py
+  added: sentinel/plan_audit.py
   added: sentinel/rulebook.py
   added: sentinel/tools/parse_audit.py
   added: sentinel/tools/sql_lex.py
@@ -37,7 +40,7 @@ Held out: 9 cases, a freight/logistics schema with its own corpus, its own row e
 | Verified expand/contract plans | 12/12 | 9/9 | 0/9 |
 | Blind spots named, with the object | 3 | 6 | 0 |
 | Gap cases cleared without a sign-off | 0/2 | 0/4 | 1/4 |
-| Modelled reviewer minutes per case | 9.2 | 10.7 | 33.4 |
+| Modelled reviewer minutes per case | 10.0 | 11.7 | 33.4 |
 
 Read the recall row with its neighbour. `holdout_06` carries `TRIGGER_WRITE_AMPLIFICATION`, a hazard code deliberately outside the shared vocabulary, so no arm can name it and every arm loses the same recall point on it. Excluding it, the pipeline finds every held-out label; including it, the honest figure is 0.96. A held-out set whose labels all fit the tool's vocabulary would have tested the rules and quietly exempted the vocabulary.
 
@@ -51,7 +54,7 @@ Precision is *higher* out of sample (1.0 vs 0.97) and severity agreement is slig
 | **Blocking cases given a clean verdict** | 1/7 | 0/7 |
 | Blind spots named, with the object | 5 | 6 |
 | Gap objects named `unknown` | 1 | 0 |
-| Modelled reviewer minutes per case | 10.3 | 10.7 |
+| Modelled reviewer minutes per case | 10.3 | 11.7 |
 
 Two defects, both invisible in sample, both fixed in `sentinel/coverage.py` and `sentinel/tools/shadow_db.py`:
 
@@ -64,15 +67,15 @@ Neither fix moves an in-sample number: `tools/check_results.py` still asserts th
 
 | configuration | unsafe approvals | blocking cases given a clean verdict | recall | verified plans | gaps cleared | minutes/case |
 |---|---|---|---|---|---|---|
-| `full` | 0/9 | 0/7 | 0.96 | 9/9 | 0/4 | 10.7 |
+| `full` | 0/9 | 0/7 | 0.96 | 9/9 | 0/4 | 11.7 |
 | `no_replay` | 0/9 | 1/7 | 0.56 | 0/9 | 0/4 | 22.8 |
-| `no_static` | 0/9 | 0/7 | 0.32 | 9/9 | 0/4 | 10.0 |
-| `no_memory` | 0/9 | 0/7 | 0.96 | 9/9 | 0/4 | 10.7 |
+| `no_static` | 0/9 | 0/7 | 0.32 | 9/9 | 0/4 | 11.0 |
+| `no_memory` | 0/9 | 0/7 | 0.96 | 9/9 | 0/4 | 11.7 |
 | `no_verify` | 0/9 | 0/7 | 0.96 | 0/9 | 0/4 | 22.8 |
-| `no_coverage` | 1/9 | 3/7 | 0.96 | 9/9 | 3/4 | 8.7 |
-| `no_rule_coverage` | 0/9 | 0/7 | 0.96 | 9/9 | 0/4 | 10.7 |
+| `no_coverage` | 1/9 | 2/7 | 0.96 | 9/9 | 2/4 | 10.0 |
+| `no_rule_coverage` | 0/9 | 0/7 | 0.96 | 9/9 | 0/4 | 11.7 |
 
-**The one component that looked like a tax in sample pays for itself out of sample.** Removing the coverage gate costs nothing in sample - 0 unsafe approvals either way - and saves 0.7 modelled minutes a case, which is why it is the only component whose removal makes a published in-sample number look better. Out of sample, removing it costs 1 unsafe approval and lets 3 of 7 blocking migrations reach a clean verdict: on `holdout_06` the hazard is a statement class the parser cannot model and the vocabulary cannot name, so refusing to certify it is the *only* correct behaviour available, and the gate is the only thing that does it.
+**The one component that looked like a tax in sample pays for itself out of sample.** Removing the coverage gate costs nothing in sample - 0 unsafe approvals either way - and saves 0.7 modelled minutes a case, which is why it is the only component whose removal makes a published in-sample number look better. Out of sample, removing it costs 1 unsafe approval and lets 2 of 7 blocking migrations reach a clean verdict: on `holdout_06` the hazard is a statement class the parser cannot model and the vocabulary cannot name, so refusing to certify it is the *only* correct behaviour available, and the gate is the only thing that does it.
 
 **And the one component that is worth nothing here says so.** `no_memory` is identical to `full` on every metric out of sample (recall 0.96, unsafe 0/9). The incident log is the billing team's; a second team's tables have no history, so the memory layer contributes exactly zero. That is the correct value for a schema-specific component on a new schema, and no in-sample ablation could ever have told us.
 

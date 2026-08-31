@@ -11,7 +11,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from sentinel import cli, narrator, coverage, rulebook  # noqa: E402
+from sentinel import cli, narrator, coverage, plan_audit, rulebook  # noqa: E402
 from sentinel.llm import get_llm  # noqa: E402
 from sentinel.orchestrator import review  # noqa: E402
 from sentinel.tools import parse_audit, shadow_db, sql_lex, sql_parse  # noqa: E402
@@ -21,11 +21,12 @@ CASES = ROOT / "eval" / "cases"
 HOLDOUT = ROOT / "eval" / "holdout"
 REDTEAM = ROOT / "eval" / "redteam"
 REDTEAM2 = ROOT / "eval" / "redteam2"
+REDTEAM3 = ROOT / "eval" / "redteam3"
 INCIDENTS = ROOT / "memory" / "incidents.jsonl"
 
 
 def case(name: str) -> dict:
-    for directory in (CASES, HOLDOUT, REDTEAM, REDTEAM2):
+    for directory in (CASES, HOLDOUT, REDTEAM, REDTEAM2, REDTEAM3):
         path = directory / f"{name}.json"
         if path.exists():
             return json.loads(path.read_text())
@@ -1030,7 +1031,7 @@ class TestLexerParity(unittest.TestCase):
     """
 
     def _scripts(self):
-        for directory in (CASES, HOLDOUT, REDTEAM, REDTEAM2):
+        for directory in (CASES, HOLDOUT, REDTEAM, REDTEAM2, REDTEAM3):
             for path in sorted(directory.glob("*.json")):
                 doc = json.loads(path.read_text())
                 for key in ("schema_sql", "migration_sql", "rollback_sql"):
@@ -1203,3 +1204,90 @@ class TestTextConservationRules(unittest.TestCase):
         par = json.loads(path.read_text())["in_sample_parity"]
         self.assertEqual(par["cases_moved"], 0, par["moved_ids"])
         self.assertEqual(par["labelled_cases_compared"], 28)
+
+
+class TestPlanAudit(unittest.TestCase):
+    """v16: the pipeline reviewing the SQL it writes itself.
+
+    The first four tests are the layer working. The last two are the two ways this layer
+    could be worse than the hole it closes: leaking into the hazard list, and crying wolf
+    on every additive migration in the world.
+    """
+
+    def test_a_rollback_that_removes_what_a_code_step_asks_for_is_a_defect(self):
+        report = run("rt3_01_additive_column_with_dependent_rollback")["report"]
+        codes = report["plan_audit"]["finding_codes"]
+        self.assertIn("ROLLBACK_WINDOW_UNSTATED", codes)
+        self.assertIn("CONTRACT_STEP_UNGATED", codes)
+        # the migration itself is safe, and the packet still must not read as clean
+        self.assertEqual(report["hazards"], [])
+        self.assertEqual(report["input_verdict"], "SAFE")
+        self.assertEqual(report["verdict"], "NEEDS_COVERAGE_SIGNOFF")
+        self.assertTrue(report["verdict_capped_by_plan_audit"])
+
+    def test_the_generated_validate_constraint_needs_a_named_human(self):
+        report = run("rt3_02_validate_constraint_ungated")["report"]
+        self.assertEqual(report["plan_audit"]["finding_codes"], ["CONTRACT_STEP_UNGATED"])
+        self.assertEqual(report["verdict"], "NEEDS_COVERAGE_SIGNOFF")
+
+    def test_a_plan_defect_becomes_a_human_gate(self):
+        report = run("rt3_01_additive_column_with_dependent_rollback")["report"]
+        gates = [g for g in report["plan"]["human_gates"] if g.startswith("PLAN DEFECT")]
+        self.assertEqual(len(gates), len(report["plan_audit"]["findings"]))
+
+    def test_every_gate_this_audit_trusted_is_declared(self):
+        report = run("case_12_release_train")["report"]
+        pa = report["plan_audit"]
+        self.assertEqual(pa["gates_trusted"],
+                         sum(1 for g in pa["gaps"] if g["kind"] == "audit_gate_text_only"))
+        self.assertGreater(pa["gates_trusted"], 0)
+
+    def test_the_audit_never_touches_the_hazard_list(self):
+        for name in ("case_01_rename_with_compat_view", "case_10_add_fk_constraint",
+                     "holdout_08_release_train_fleet", "rt_01_drop_index_still_used"):
+            with_audit = run(name)["report"]
+            without = run(name, features="no_plan_audit")["report"]
+            self.assertEqual([h["code"] for h in with_audit["hazards"]],
+                             [h["code"] for h in without["hazards"]], name)
+            self.assertEqual([h["severity"] for h in with_audit["hazards"]],
+                             [h["severity"] for h in without["hazards"]], name)
+            self.assertEqual(with_audit["input_verdict"], without["input_verdict"], name)
+            self.assertEqual(len(with_audit["coverage_ledger"]["gaps"]),
+                             len(without["coverage_ledger"]["gaps"]), name)
+
+    def test_a_rollback_nobody_depends_on_yet_is_not_a_defect(self):
+        report = run("rt3_03_additive_column_nobody_depends_on")["report"]
+        self.assertEqual(report["plan_audit"]["findings"], [])
+        self.assertEqual(report["plan_audit"]["gaps"], [])
+        self.assertEqual(report["verdict"], "SAFE")
+
+    def test_a_plan_defect_cannot_make_a_verdict_safer(self):
+        defective = {"findings": [{"code": "CONTRACT_STEP_UNGATED", "script": "phase2",
+                                   "closes_with": "x"}]}
+        self.assertEqual(plan_audit.cap("BLOCK", defective), ("BLOCK", False))
+        self.assertEqual(plan_audit.cap("SAFE", defective), ("NEEDS_COVERAGE_SIGNOFF", True))
+        self.assertEqual(plan_audit.cap("SAFE", {"findings": []}), ("SAFE", False))
+
+    def test_generated_statement_kinds_are_all_classified_by_the_rule_inventory(self):
+        """The v13 invariant, applied to the SQL this pipeline writes rather than reads."""
+        seen = set()
+        for name in ("case_01_rename_with_compat_view", "case_10_add_fk_constraint",
+                     "case_12_release_train", "holdout_07_narrow_invoice_amount"):
+            for entry in run(name)["report"]["plan_audit"]["kind_inventory"]:
+                seen.add(entry["kind"])
+                self.assertIn(entry["bucket"], rulebook.BUCKETS, entry)
+        self.assertTrue(seen <= rulebook.known_kinds(), seen - rulebook.known_kinds())
+
+    def test_an_unreadable_generated_script_is_never_offered_as_runnable(self):
+        report = run("rt2_03_unterminated_literal")["report"]
+        self.assertIn("GENERATED_TEXT_UNPARSED", report["plan_audit"]["finding_codes"])
+        packet = __import__("sentinel.report", fromlist=["render"]).render(report)
+        self.assertIn("must not be treated as a recommendation", packet)
+
+    def test_the_ablation_arm_reproduces_v15_on_every_labelled_case(self):
+        path = ROOT / "results" / "redteam3.json"
+        if not path.exists():
+            self.skipTest("run eval/run_redteam3.py first")
+        lab = json.loads(path.read_text())["labelled"]
+        self.assertEqual(lab["cases_moved"], 0, lab["moved_ids"])
+        self.assertEqual(lab["cases_compared"], 34)

@@ -4,7 +4,8 @@
  "title": "Rename customers.full_name to name and refresh the BI view",
  "owner_service": "web",
  "verdict": "BLOCK",
- "summary": "Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
+ "input_verdict": "BLOCK",
+ "summary": "Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. 1 defect(s) in the SQL this packet generated: see the plan self-audit before running any of it. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
  "narrator": {
   "mode": "structural",
   "guard": true,
@@ -308,7 +309,8 @@
    "point readers at the new definition of customer_billing_summary before phase 2 replaces it"
   ],
   "human_gates": [
-   "confirm no consumer still reads customers.full_name before phase 2 drops it"
+   "confirm no consumer still reads customers.full_name before phase 2 drops it",
+   "PLAN DEFECT (ROLLBACK_WINDOW_UNSTATED) in the generated rollback script: the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead"
   ],
   "questions": [
    "Which deploy lands first: the query change or the schema change?",
@@ -408,6 +410,119 @@
   },
   "unmodelled": []
  },
+ "plan_audit": {
+  "statements_audited": 5,
+  "scripts": {
+   "phase1": 2,
+   "phase2": 2,
+   "rollback": 1
+  },
+  "findings": [
+   {
+    "code": "ROLLBACK_WINDOW_UNSTATED",
+    "title": "The rollback is only valid before a code step this same packet asks for",
+    "script": "rollback",
+    "statement_index": 0,
+    "statement": "ALTER TABLE \"customers\" DROP COLUMN \"name\"",
+    "objects": [
+     "customers.name",
+     "customers",
+     "name"
+    ],
+    "why": "the rollback removes `customers.name`, and a code step in this same packet asks the team to start using it; run them in the printed order and the rollback breaks the deploy the packet asked for. The corpus cannot show this: the statements that break are the ones this packet is asking someone to write",
+    "closes_with": "the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead",
+    "evidence": [
+     "generated rollback statement 0: ALTER TABLE \"customers\" DROP COLUMN \"name\"",
+     "generated code step: deploy code that writes both customers.full_name and customers.name, and reads customers.name",
+     "shadow replay of this rollback breaks 0 corpus statements, which is why replay alone reports it as safe"
+    ]
+   }
+  ],
+  "finding_codes": [
+   "ROLLBACK_WINDOW_UNSTATED"
+  ],
+  "gaps": [
+   {
+    "kind": "audit_gate_text_only",
+    "object": "customers.full_name",
+    "object_inferred": false,
+    "script": "phase2",
+    "statement_index": 0,
+    "statement": "ALTER TABLE \"customers\" DROP COLUMN \"full_name\"",
+    "why": "this step is treated as gated because a human gate names `customers.full_name`; this audit read the name, not the question",
+    "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+    "irreversible": false
+   },
+   {
+    "kind": "audit_gate_text_only",
+    "object": "customers",
+    "object_inferred": false,
+    "script": "rollback",
+    "statement_index": 0,
+    "statement": "ALTER TABLE \"customers\" DROP COLUMN \"name\"",
+    "why": "this step is treated as gated because a human gate names `customers`; this audit read the name, not the question",
+    "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+    "irreversible": false
+   }
+  ],
+  "gap_kinds": [
+   "audit_gate_text_only"
+  ],
+  "kind_inventory": [
+   {
+    "script": "phase1",
+    "statement_index": 0,
+    "kind": "add_column",
+    "bucket": "RULED"
+   },
+   {
+    "script": "phase1",
+    "statement_index": 1,
+    "kind": "dml_update",
+    "bucket": "RULED"
+   },
+   {
+    "script": "phase2",
+    "statement_index": 0,
+    "kind": "drop_column",
+    "bucket": "RULED"
+   },
+   {
+    "script": "phase2",
+    "statement_index": 1,
+    "kind": "create_view",
+    "bucket": "REPLAY_COVERED"
+   },
+   {
+    "script": "rollback",
+    "statement_index": 0,
+    "kind": "drop_column",
+    "bucket": "RULED"
+   }
+  ],
+  "gates_trusted": 2,
+  "replay": {
+   "ran": true,
+   "scripts": {
+    "phase2": {
+     "queries_run": 16,
+     "broken_after": 2,
+     "broken_query_ids": [
+      "q_web_profile",
+      "q_web_signup"
+     ]
+    },
+    "rollback": {
+     "queries_run": 16,
+     "broken_after": 0,
+     "broken_query_ids": []
+    }
+   },
+   "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is published so the reviewer can check that every break has a code step, rather than being told it does."
+  },
+  "clean": false
+ },
+ "verdict_capped_by_plan_audit": false,
  "escalated_to_human": false,
  "coverage_gaps": [],
  "coverage_ledger": {
@@ -463,7 +578,8 @@
   "verify": true,
   "coverage": true,
   "rule_coverage": true,
-  "text_conservation": true
+  "text_conservation": true,
+  "plan_audit": true
  },
  "tool_calls": [
   {
@@ -479,7 +595,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.82,
+   "ms": 0.88,
    "result_summary": "Schema"
   },
   {
@@ -819,7 +935,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": 17
   },
   {
@@ -1055,7 +1171,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.23,
+   "ms": 3.13,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1171,7 +1287,7 @@
     "hazard_code": "BREAKING_QUERY",
     "table": "q_web_signup"
    },
-   "ms": 0.01,
+   "ms": 0.0,
    "result_summary": [
     0,
     []
@@ -1495,7 +1611,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);\nCREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;"
    },
-   "ms": 0.15,
+   "ms": 0.19,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1579,7 +1695,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -1832,7 +1948,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.73,
+   "ms": 2.76,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2218,7 +2334,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.76,
+   "ms": 2.71,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2294,6 +2410,367 @@
     "queries_ok_before": 16,
     "queries_ok_after": 16
    }
+  },
+  {
+   "agent": "verifier",
+   "tool": "plan.audit",
+   "args": {
+    "plan": {
+     "attempt": 2,
+     "phase1_sql": [
+      "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;",
+      "UPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" ..."
+     ],
+     "phase2_sql": [
+      "ALTER TABLE \"customers\" DROP COLUMN \"full_name\";",
+      "CREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, ..."
+     ],
+     "rollback_sql": [
+      "ALTER TABLE \"customers\" DROP COLUMN \"name\";"
+     ],
+     "code_steps": [
+      "deploy code that writes both customers.full_name and customers.name, and reads customers.name",
+      "point readers at the new definition of customer_billing_summary before phase 2 replaces it"
+     ],
+     "human_gates": [
+      "confirm no consumer still reads customers.full_name before phase 2 drops it"
+     ],
+     "questions": [
+      "Which deploy lands first: the query change or the schema change?",
+      "Has the owning team agreed to the deploy order?",
+      "What is the accepted risk for DESTRUCTIVE_NO_EXPAND_CONTRACT?",
+      "What is the accepted risk for MISSING_ROLLBACK?",
+      "Do any consumers read this result set positionally or serialise it whole?"
+     ],
+     "questions_source": "model",
+     "questions_dropped": [],
+     "policy": {
+      "include_view_changes": false,
+      "expand_contract_type_change": true,
+      "minimal_phase1": false,
+      "notes": [
+       "view redefinitions moved to phase 2: replacing a view in phase 1 changed the column set a live consumer depends on"
+      ]
+     }
+    },
+    "schema": "Schema",
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+6 more"
+    ],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "replay_tool": "function"
+   },
+   "ms": 6.07,
+   "result_summary": {
+    "statements_audited": 5,
+    "scripts": {
+     "phase1": 2,
+     "phase2": 2,
+     "rollback": 1
+    },
+    "findings": [
+     {
+      "code": "ROLLBACK_WINDOW_UNSTATED",
+      "title": "The rollback is only valid before a code step this same packet asks for",
+      "script": "rollback",
+      "statement_index": 0,
+      "statement": "ALTER TABLE \"customers\" DROP COLUMN \"name\"",
+      "objects": [
+       "customers.name",
+       "customers",
+       "name"
+      ],
+      "why": "the rollback removes `customers.name`, and a code step in this same packet asks the team to start using it; run them in ...",
+      "closes_with": "the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead",
+      "evidence": [
+       "generated rollback statement 0: ALTER TABLE \"customers\" DROP COLUMN \"name\"",
+       "generated code step: deploy code that writes both customers.full_name and customers.name, and reads customers.name",
+       "shadow replay of this rollback breaks 0 corpus statements, which is why replay alone reports it as safe"
+      ]
+     }
+    ],
+    "finding_codes": [
+     "ROLLBACK_WINDOW_UNSTATED"
+    ],
+    "gaps": [
+     {
+      "kind": "audit_gate_text_only",
+      "object": "customers.full_name",
+      "object_inferred": false,
+      "script": "phase2",
+      "statement_index": 0,
+      "statement": "ALTER TABLE \"customers\" DROP COLUMN \"full_name\"",
+      "why": "this step is treated as gated because a human gate names `customers.full_name`; this audit read the name, not the questi...",
+      "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+      "irreversible": false
+     },
+     {
+      "kind": "audit_gate_text_only",
+      "object": "customers",
+      "object_inferred": false,
+      "script": "rollback",
+      "statement_index": 0,
+      "statement": "ALTER TABLE \"customers\" DROP COLUMN \"name\"",
+      "why": "this step is treated as gated because a human gate names `customers`; this audit read the name, not the question",
+      "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+      "irreversible": false
+     }
+    ],
+    "gap_kinds": [
+     "audit_gate_text_only"
+    ],
+    "kind_inventory": [
+     {
+      "script": "phase1",
+      "statement_index": 0,
+      "kind": "add_column",
+      "bucket": "RULED"
+     },
+     {
+      "script": "phase1",
+      "statement_index": 1,
+      "kind": "dml_update",
+      "bucket": "RULED"
+     },
+     {
+      "script": "phase2",
+      "statement_index": 0,
+      "kind": "drop_column",
+      "bucket": "RULED"
+     },
+     {
+      "script": "phase2",
+      "statement_index": 1,
+      "kind": "create_view",
+      "bucket": "REPLAY_COVERED"
+     },
+     {
+      "script": "rollback",
+      "statement_index": 0,
+      "kind": "drop_column",
+      "bucket": "RULED"
+     }
+    ],
+    "gates_trusted": 2,
+    "replay": {
+     "ran": true,
+     "scripts": {
+      "phase2": {
+       "queries_run": 16,
+       "broken_after": 2,
+       "broken_query_ids": [
+        "q_web_profile",
+        "q_web_signup"
+       ]
+      },
+      "rollback": {
+       "queries_run": 16,
+       "broken_after": 0,
+       "broken_query_ids": []
+      }
+     },
+     "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+    },
+    "clean": false
+   }
   }
  ],
  "model_usage": {
@@ -2304,7 +2781,7 @@
   "tokens_out": 622,
   "cost_usd": 0.0
  },
- "wall_ms": 12.4,
+ "wall_ms": 18.6,
  "severity_order": [
   "low",
   "medium",

@@ -1,4 +1,4 @@
-.PHONY: help cases review baseline eval invariance holdout redteam redteam2 test site artifact serve verify docs form determinism crossversion clean
+.PHONY: help cases review baseline eval invariance holdout redteam redteam2 redteam3 test site artifact serve verify docs form determinism crossversion clean
 
 help:
 	@echo "make cases     regenerate the 12 evaluation cases"
@@ -9,6 +9,7 @@ help:
 	@echo "make holdout   9 held-out cases on the second schema, three arms"
 	@echo "make redteam   7 cases written to make this pipeline approve an outage"
 	@echo "make redteam2  6 cases the parser itself gets wrong (v14)"
+	@echo "make redteam3  3 probes aimed at the SQL this pipeline writes itself (v16)"
 	@echo "make test      stdlib tests"
 	@echo "make verify    eval + assert every claim the README and the docs make"
 	@echo "make docs      audit the documentation only (references, glyphs, stale counts)"
@@ -47,6 +48,9 @@ redteam:
 redteam2:
 	python3 eval/run_redteam2.py
 
+redteam3:
+	python3 eval/run_redteam3.py
+
 # v10: verify used to skip the tests and the held-out run, so a red suite and a failing
 # submission-text audit could both sit outside the one command the docs tell you to run.
 # v11: and it skipped the determinism proof, so "a rerun changes only the clock" was a sentence
@@ -59,7 +63,9 @@ redteam2:
 # v14: and the round-2 set is here for the same reason. `redteam2` also recomputes what the
 # retired splitter did to each file, so "the parse is a sample of the text" is an exit code
 # rather than a paragraph.
-verify: eval invariance holdout redteam redteam2
+# v16: and it skipped the round-3 set, so the audit of this pipeline's own output was
+# green in a document rather than in the one command the docs tell you to run.
+verify: eval invariance holdout redteam redteam2 redteam3
 	python3 -m unittest discover -s tests
 	python3 tools/check_results.py
 	python3 tools/check_docs.py

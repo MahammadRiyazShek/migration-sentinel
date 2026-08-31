@@ -2,9 +2,9 @@
 
 **BLOCK - do not merge**
 
-Do not ship this as written. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
+Do not ship this as written. 1 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. 1 defect(s) in the SQL this packet generated: see the plan self-audit before running any of it. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-case_10_add_fk_constraint` · case `case_10_add_fk_constraint` · owning service `billing-api` · 7.6 ms · model scripted-v1 (3 calls, $0.0000)
+`run eval-case_10_add_fk_constraint` · case `case_10_add_fk_constraint` · owning service `billing-api` · 13.2 ms · model scripted-v1 (3 calls, $0.0000)
 
 > **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
@@ -30,7 +30,7 @@ invoices_customer_fk is added without NOT VALID, so validation scans all 48,000,
 
 ## Recommended rollout
 
-Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the corpus still passes after phase 1.
+Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the corpus still passes after phase 1. That is a statement about phase 1 and about today's corpus only - the audit of all three generated scripts is the section below.
 
 ### Phase 1 - expand (safe to run now)
 
@@ -50,9 +50,37 @@ ALTER TABLE "invoices" VALIDATE CONSTRAINT "invoices_customer_fk";
 ALTER TABLE "invoices" DROP CONSTRAINT "invoices_customer_fk";
 ```
 
+### Human decisions required (the tool will not decide these)
+
+- PLAN DEFECT (CONTRACT_STEP_UNGATED) in the generated phase2 script: the plan carries a gate naming this object, or the statement moves out of the generated script
+
 ### Questions for the reviewer (drafted by the model, guarded prose, not evidence)
 
 - What is the accepted risk for CONSTRAINT_VALIDATION_LOCK?
+
+## Plan self-audit
+
+The three scripts above are output from this pipeline, so they are reviewed like any other artefact it is handed: 3 generated statement(s) parsed, partitioned by the rule inventory in `sentinel/rulebook.py`, cross-checked against the code steps, and replayed. A defect here is a defect in *our* SQL, not in the migration under review, so it never enters the hazard table - it caps the verdict and becomes a human gate.
+
+| # | defect | script | statement |
+|---|---|---|---|
+| 1 | **CONTRACT_STEP_UNGATED** | phase2 | `ALTER TABLE "invoices" VALIDATE CONSTRAINT "invoices_customer_fk"` |
+
+### 1. A contract step this pipeline generated has no human gate
+
+a `validate_constraint` this pipeline wrote into phase 2 is not named by any human gate, so the packet asks someone to run a destructive statement it never asked anyone to decide about.
+
+- evidence: generated phase 2 statement 0: ALTER TABLE "invoices" VALIDATE CONSTRAINT "invoices_customer_fk"
+- evidence: human gates in this packet: 0, none naming invoices
+- evidence: rule inventory: `validate_constraint` is RESIDUAL on the input side - the second half of a NOT VALID split takes its own lock over the whole relation and no rule prices it against the row estimate
+- closes when: the plan carries a gate naming this object, or the statement moves out of the generated script
+
+What this audit trusted rather than checked:
+
+- `invoices` (unruled_generated_statement, generated phase2): this pipeline generated a statement of a kind nothing in this pipeline inspects: the second half of a NOT VALID split takes its own lock over the whole relation and no rule prices it against the row estimate
+
+- shadow replay of the generated phase2 script against the post-phase-1 schema: 0 of 16 corpus statement(s) break
+- shadow replay of the generated rollback script against the post-phase-1 schema: 0 of 16 corpus statement(s) break
 
 ## What this review did not check
 

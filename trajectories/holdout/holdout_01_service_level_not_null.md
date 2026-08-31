@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_01_service_level_not_null`
 - case: `holdout_01_service_level_not_null`
-- events: 29
+- events: 30
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.05 ms)
+**tool** `schema.parse` (1.07 ms)
 
 ```json
 {
@@ -126,7 +126,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `schema.apply_ops` (0.09 ms)
 
 ```json
 {
@@ -198,7 +198,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.2 ms)
+**tool** `corpus.dependents` (0.3 ms)
 
 ```json
 {
@@ -300,7 +300,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.07 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -367,7 +367,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (3.84 ms)
+**tool** `shadow.replay` (3.86 ms)
 
 ```json
 {
@@ -607,7 +607,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.18 ms)
+**tool** `coverage.ledger` (0.17 ms)
 
 ```json
 {
@@ -764,7 +764,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -794,7 +794,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -828,7 +828,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.46 ms)
+**tool** `shadow.replay` (3.48 ms)
 
 ```json
 {
@@ -931,6 +931,110 @@ _tool responded_
   "queries_ok_after": 17
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.92 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "ALTER TABLE \"shipments\" ADD COLUMN \"service_level\" TEXT;"
+   ],
+   "phase2_sql": [
+    "-- after backfill: ALTER TABLE \"shipments\" ALTER COLUMN \"service_level\" SET NOT NULL;"
+   ],
+   "rollback_sql": [
+    "ALTER TABLE \"shipments\" DROP COLUMN \"service_level\";"
+   ],
+   "code_steps": [],
+   "human_gates": [
+    "shipments.service_level is NOT NULL with no default: a human must supply a backfill value before phase 2 can add the con..."
+   ],
+   "questions": [
+    "Which deploy lands first: the query change or the schema change?",
+    "What is the accepted risk for NOT_NULL_NO_DEFAULT?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_dispatch_create",
+    "service": "dispatch-api",
+    "criticality": "critical",
+    "label": "shipment creation",
+    "sql": "INSERT INTO shipments (carrier_id, reference, status, weight_kg, promised_at) VALUES (7,'SHP-77001','planned',1200,'2026..."
+   },
+   {
+   
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 2,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 0,
+  "rollback": 1
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "shipments.service_level",
+   "object_inferred": false,
+   "script": "rollback",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"shipments\" DROP COLUMN \"service_level\"",
+   "why": "this step is treated as gated because a human gate names `shipments.service_level`; this audit read the name, not the qu...",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  }
+ ],
+ "gap_kinds": [
+  "audit_gate_text_only"
+ ],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "add_column",
+   "bucket": "RULED"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 0,
+   "kind": "drop_column",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 1,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "rollback": {
+    "queries_run": 17,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

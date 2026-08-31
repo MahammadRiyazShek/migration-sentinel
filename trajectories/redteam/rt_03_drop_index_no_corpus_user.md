@@ -2,7 +2,7 @@
 
 - run id: `eval-rt_03_drop_index_no_corpus_user`
 - case: `rt_03_drop_index_no_corpus_user`
-- events: 28
+- events: 29
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.83 ms)
+**tool** `schema.parse` (0.9 ms)
 
 ```json
 {
@@ -253,7 +253,7 @@ _tool responded_
 0
 ```
 
-**tool** `shadow.replay` (2.94 ms)
+**tool** `shadow.replay` (3.39 ms)
 
 ```json
 {
@@ -430,7 +430,7 @@ _tool responded_
 []
 ```
 
-**tool** `coverage.ledger` (0.23 ms)
+**tool** `coverage.ledger` (0.24 ms)
 
 ```json
 {
@@ -641,7 +641,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.84 ms)
+**tool** `shadow.replay` (2.83 ms)
 
 ```json
 {
@@ -738,6 +738,88 @@ _tool responded_
   "queries_ok_after": 19
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (0.25 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "DROP INDEX CONCURRENTLY idx_customers_company;"
+   ],
+   "phase2_sql": [],
+   "rollback_sql": [],
+   "code_steps": [],
+   "human_gates": [
+    "coverage gap on `customers(company_name)` (unused_access_path): a reviewer reads pg_stat_user_indexes.idx_scan for idx_c..."
+   ],
+   "questions": [],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "high",
+    "label": "support customer lookup",
+    "sql": "SELEC
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 1,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 0,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "drop_index",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {},
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

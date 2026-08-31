@@ -2,7 +2,7 @@
 
 - run id: `eval-case_04_not_null_without_default`
 - case: `case_04_not_null_without_default`
-- events: 32
+- events: 33
 
 ## Agent: cartographer
 
@@ -193,7 +193,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.12 ms)
 
 ```json
 {
@@ -381,7 +381,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.72 ms)
+**tool** `shadow.replay` (2.69 ms)
 
 ```json
 {
@@ -908,7 +908,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.62 ms)
+**tool** `shadow.replay` (2.6 ms)
 
 ```json
 {
@@ -1131,6 +1131,111 @@ _tool responded_
   "queries_ok_after": 16
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (2.96 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "ALTER TABLE \"customers\" ADD COLUMN \"billing_email\" TEXT;"
+   ],
+   "phase2_sql": [
+    "-- after backfill: ALTER TABLE \"customers\" ALTER COLUMN \"billing_email\" SET NOT NULL;"
+   ],
+   "rollback_sql": [
+    "ALTER TABLE \"customers\" DROP COLUMN \"billing_email\";"
+   ],
+   "code_steps": [],
+   "human_gates": [
+    "customers.billing_email is NOT NULL with no default: a human must supply a backfill value before phase 2 can add the con..."
+   ],
+   "questions": [
+    "Which deploy lands first: the query change or the schema change?",
+    "Has the owning team agreed to the deploy order?",
+    "What is the accepted risk for NOT_NULL_NO_DEFAULT?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_si
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 2,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 0,
+  "rollback": 1
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "customers.billing_email",
+   "object_inferred": false,
+   "script": "rollback",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"customers\" DROP COLUMN \"billing_email\"",
+   "why": "this step is treated as gated because a human gate names `customers.billing_email`; this audit read the name, not the qu...",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  }
+ ],
+ "gap_kinds": [
+  "audit_gate_text_only"
+ ],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "add_column",
+   "bucket": "RULED"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 0,
+   "kind": "drop_column",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 1,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "rollback": {
+    "queries_run": 16,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

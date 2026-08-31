@@ -147,7 +147,8 @@ def deterministic_summary(verdict: str, facts: dict[str, Any],
         "SAFE_WITH_PLAN": "Shippable, but only as the staged plan below.",
         "SAFE": "No blocking hazards found.",
         "NEEDS_COVERAGE_SIGNOFF": "Not cleared: the hazards found are not blocking, but this review "
-                                  "has a declared blind spot on an object the migration touches.",
+                                  "has a declared blind spot on an object the migration touches, or "
+                                  "a defect in the plan it generated.",
     }.get(verdict, f"Verdict: {verdict}.")
     bits = [head]
     if facts.get("coverage_gaps"):
@@ -160,6 +161,11 @@ def deterministic_summary(verdict: str, facts: dict[str, Any],
                 f"{counts.get('medium', 0)} medium, {counts.get('low', 0)} low.")
     if facts.get("plan_verified") is True:
         bits.append("The rewritten phase-1 plan passes shadow replay with zero broken statements.")
+    # v16: "phase 1 replays clean" is not "the plan is reviewed", and until this sentence
+    # existed the packet printed the first and the reviewer read the second.
+    if facts.get("plan_defects"):
+        bits.append(f"{facts['plan_defects']} defect(s) in the SQL this packet generated: see the "
+                    f"plan self-audit before running any of it.")
     elif facts.get("plan_verified") is False:
         bits.append("The rewritten plan still breaks at least one statement, so a human has to "
                     "decide the sequencing.")

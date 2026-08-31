@@ -66,6 +66,9 @@ REGENERATORS = [
     ["eval/run_holdout.py", "--ablations"],
     ["eval/model_invariance.py"],
     ["eval/report_components.py"],
+    # v16: the plan audit is a new pure function inside every review, so the file it writes
+    # belongs in the rerun proof like every other generator.
+    ["eval/run_redteam3.py"],
 ]
 
 # Wall-clock, and only wall-clock. Each pattern names the field it is allowed to blur, so the

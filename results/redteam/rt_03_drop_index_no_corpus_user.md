@@ -2,9 +2,9 @@
 
 **NOT CLEARED - coverage gap on an affected object**
 
-Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
+Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches, or a defect in the plan it generated. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-rt_03_drop_index_no_corpus_user` · case `rt_03_drop_index_no_corpus_user` · owning service `platform` · 8.0 ms · model scripted-v1 (2 calls, $0.0000)
+`run eval-rt_03_drop_index_no_corpus_user` · case `rt_03_drop_index_no_corpus_user` · owning service `platform` · 8.8 ms · model scripted-v1 (2 calls, $0.0000)
 
 > **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
@@ -22,7 +22,7 @@ No hazards found by execution or by the static rules.
 
 ## Recommended rollout
 
-Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the corpus still passes after phase 1.
+Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the corpus still passes after phase 1. That is a statement about phase 1 and about today's corpus only - the audit of all three generated scripts is the section below.
 
 ### Phase 1 - expand (safe to run now)
 
@@ -33,6 +33,13 @@ DROP INDEX CONCURRENTLY idx_customers_company;
 ### Human decisions required (the tool will not decide these)
 
 - coverage gap on `customers(company_name)` (unused_access_path): a reviewer reads pg_stat_user_indexes.idx_scan for idx_customers_company over a full business cycle before phase 2
+
+## Plan self-audit
+
+The three scripts above are output from this pipeline, so they are reviewed like any other artefact it is handed: 1 generated statement(s) parsed, partitioned by the rule inventory in `sentinel/rulebook.py`, cross-checked against the code steps, and replayed. A defect here is a defect in *our* SQL, not in the migration under review, so it never enters the hazard table - it caps the verdict and becomes a human gate.
+
+No defect found in the generated SQL: every destructive contract step is named by a human gate, no rollback statement removes something a code step in this packet asks the team to start using, and every generated statement has a kind something in this pipeline inspects.
+
 
 ## Coverage ledger
 

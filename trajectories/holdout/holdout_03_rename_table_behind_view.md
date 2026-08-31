@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_03_rename_table_behind_view`
 - case: `holdout_03_rename_table_behind_view`
-- events: 35
+- events: 36
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.09 ms)
+**tool** `schema.parse` (1.26 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.07 ms)
+**tool** `migration.parse` (0.08 ms)
 
 ```json
 {
@@ -144,7 +144,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.12 ms)
 
 ```json
 {
@@ -226,7 +226,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.14 ms)
+**tool** `corpus.dependents` (0.12 ms)
 
 ```json
 {
@@ -355,7 +355,7 @@ _tool responded_
 11
 ```
 
-**tool** `shadow.replay` (3.71 ms)
+**tool** `shadow.replay` (3.34 ms)
 
 ```json
 {
@@ -536,7 +536,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -576,7 +576,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -618,7 +618,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.2 ms)
+**tool** `coverage.ledger` (0.18 ms)
 
 ```json
 {
@@ -810,7 +810,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -872,7 +872,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.31 ms)
+**tool** `shadow.replay` (3.37 ms)
 
 ```json
 {
@@ -973,6 +973,112 @@ _tool responded_
   "queries_ok_after": 18
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.66 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "CREATE VIEW shipment_stops AS SELECT id, shipment_id, sequence_no, kind, status, address_json, arrived_at FROM stops;"
+   ],
+   "phase2_sql": [
+    "ALTER TABLE shipment_stops RENAME TO stops;"
+   ],
+   "rollback_sql": [],
+   "code_steps": [
+    "switch all readers from shipment_stops to stops"
+   ],
+   "human_gates": [
+    "renaming shipment_stops is not backwards compatible; confirm the cutover window",
+    "no rollback could be generated automatically; write one before shipping"
+   ],
+   "questions": [
+    "Which deploy lands first: the query change or the schema change?",
+    "Has the owning team agreed to the deploy order?",
+    "What is the accepted risk for DESTRUCTIVE_NO_EXPAND_CONTRACT?",
+    "What is the accepted risk for MISSING_ROLLBACK?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_dispatch_create",
+    "service": "dispatch-api",
+    "criticality": "critical",
+    "label": "shipment crea
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 2,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 1,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "shipment_stops",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "ALTER TABLE shipment_stops RENAME TO stops",
+   "why": "this step is treated as gated because a human gate names `shipment_stops`; this audit read the name, not the question",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  }
+ ],
+ "gap_kinds": [
+  "audit_gate_text_only"
+ ],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "create_view",
+   "bucket": "REPLAY_COVERED"
+  },
+  {
+   "script": "phase2",
+   "statement_index": 0,
+   "kind": "rename_table",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 1,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "phase2": {
+    "queries_run": 18,
+    "broken_after": 2,
+    "broken_query_ids": [
+     "q_dispatch_stop_progress",
+     "q_driver_stop_arrive"
+    ]
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

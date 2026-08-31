@@ -57,8 +57,8 @@ Run from a clean extract of the packaged tree, CPython 3.12.13, no network, no A
 
 ```
 make verify                          -> exit 0
-python3 tools/check_results.py       -> 67/67 claims hold
-python3 -m unittest discover -s tests-> Ran 129 tests, OK
+python3 tools/check_results.py       -> 75/75 claims hold
+python3 -m unittest discover -s tests-> Ran 139 tests, OK
 python3 tools/check_docs.py          -> 9/9 documentation checks, 453 authored files
 python3 tools/check_submission_text.py -> 7/7 submission-text checks
 python3 tools/check_determinism.py   -> PASS, 236 files, 0 decision differences

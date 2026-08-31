@@ -2,7 +2,7 @@
 
 - run id: `eval-case_10_add_fk_constraint`
 - case: `case_10_add_fk_constraint`
-- events: 27
+- events: 29
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.79 ms)
+**tool** `schema.parse` (0.78 ms)
 
 ```json
 {
@@ -124,7 +124,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -369,7 +369,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (2.74 ms)
+**tool** `shadow.replay` (2.66 ms)
 
 ```json
 {
@@ -508,7 +508,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.17 ms)
+**tool** `coverage.ledger` (0.16 ms)
 
 ```json
 {
@@ -653,7 +653,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.09 ms)
+**tool** `migration.parse` (0.08 ms)
 
 ```json
 {
@@ -719,7 +719,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.7 ms)
+**tool** `shadow.replay` (2.71 ms)
 
 ```json
 {
@@ -812,6 +812,128 @@ _tool responded_
  "unmodelled": []
 }
 ```
+
+**tool** `plan.audit` (5.73 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "ALTER TABLE \"invoices\" ADD CONSTRAINT \"invoices_customer_fk\" FOREIGN KEY (customer_id) REFERENCES customers (id) NOT VAL..."
+   ],
+   "phase2_sql": [
+    "ALTER TABLE \"invoices\" VALIDATE CONSTRAINT \"invoices_customer_fk\";"
+   ],
+   "rollback_sql": [
+    "ALTER TABLE \"invoices\" DROP CONSTRAINT \"invoices_customer_fk\";"
+   ],
+   "code_steps": [],
+   "human_gates": [],
+   "questions": [
+    "What is the accepted risk for CONSTRAINT_VALIDATION_LOCK?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person'
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 3,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 1,
+  "rollback": 1
+ },
+ "findings": [
+  {
+   "code": "CONTRACT_STEP_UNGATED",
+   "title": "A contract step this pipeline generated has no human gate",
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"invoices\" VALIDATE CONSTRAINT \"invoices_customer_fk\"",
+   "objects": [
+    "invoices",
+    "invoices_customer_fk"
+   ],
+   "why": "a `validate_constraint` this pipeline wrote into phase 2 is not named by any human gate, so the packet asks someone to r...",
+   "closes_with": "the plan carries a gate naming this object, or the statement moves out of the generated script",
+   "evidence": [
+    "generated phase 2 statement 0: ALTER TABLE \"invoices\" VALIDATE CONSTRAINT \"invoices_customer_fk\"",
+    "human gates in this packet: 0, none naming invoices",
+    "rule inventory: `validate_constraint` is RESIDUAL on the input side - the second half of a NOT VALID split takes its own..."
+   ]
+  }
+ ],
+ "finding_codes": [
+  "CONTRACT_STEP_UNGATED"
+ ],
+ "gaps": [
+  {
+   "kind": "unruled_generated_statement",
+   "object": "invoices",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"invoices\" VALIDATE CONSTRAINT \"invoices_customer_fk\"",
+   "why": "this pipeline generated a statement of a kind nothing in this pipeline inspects: the second half of a NOT VALID split ta...",
+   "closes_with": "a reviewer prices this statement by hand against the row estimate before running the script it sits in",
+   "irreversible": false
+  }
+ ],
+ "gap_kinds": [
+  "unruled_generated_statement"
+ ],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "add_constraint",
+   "bucket": "RULED"
+  },
+  {
+   "script": "phase2",
+   "statement_index": 0,
+   "kind": "validate_constraint",
+   "bucket": "RESIDUAL"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 0,
+   "kind": "drop_constraint",
+   "bucket": "RULED"
+  }
+ ]
+```
+
+### Human checkpoint - plan self-audit: **PLAN DEFECT**
+
+CONTRACT_STEP_UNGATED in the generated phase2 script: a `validate_constraint` this pipeline wrote into phase 2 is not named by any human gate, so the packet asks someone to run a destructive statement it never asked anyone to decide about Closes when: the plan carries a gate naming this object, or the statement moves out of the generated script
 
 **model** `scripted-v1` tag=`executive_summary` tokens=38/35 cost=$0.0
 

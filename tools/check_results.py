@@ -63,8 +63,16 @@ def main() -> int:
     if ab:
         replay_only = ab["no_static"]["aggregate"]["unsafe_approvals"]
         rules_only = ab["no_replay"]["aggregate"]["unsafe_approvals"]
-        claim("replay only is worse than rules only on the primary metric",
-              replay_only > rules_only, f"replay-only {replay_only} vs rules-only {rules_only}")
+        # v16 correction. This claim used to read "replay only is worse than rules only",
+        # and it was true from v2 to v15: 2 unsafe approvals against 1. Switching the v16
+        # plan audit on inside the replay-only arm removes one of the two - the plan the
+        # pipeline wrote for the migration its missing rules had not understood carried an
+        # ungated VALIDATE CONSTRAINT, so case_10 was capped instead of cleared. The
+        # sentence the evidence still supports is the weaker one, so it is the one asserted,
+        # and the arm-by-arm arithmetic including the historical number is recomputed in
+        # results/redteam3.md rather than remembered.
+        claim("execution alone is not sufficient: replay only is no better than rules only",
+              replay_only >= rules_only, f"replay-only {replay_only} vs rules-only {rules_only}")
         claim("removing either layer costs at least one unsafe approval",
               min(replay_only, rules_only) > S["unsafe_approvals"],
               f"{replay_only}, {rules_only}")
@@ -158,10 +166,12 @@ def main() -> int:
               man["files"] == 34 and post_freeze == [
                   "sentinel/agents/cartographer.py", "sentinel/agents/risk_officer.py",
                   "sentinel/agents/rollout_engineer.py", "sentinel/coverage.py",
-                  "sentinel/hazards.py", "sentinel/llm/scripted.py", "sentinel/orchestrator.py",
+                  "sentinel/hazards.py", "sentinel/llm/scripted.py", "sentinel/narrator.py",
+                  "sentinel/orchestrator.py", "sentinel/report.py",
                   "sentinel/tools/query_corpus.py", "sentinel/tools/shadow_db.py",
-                  "sentinel/tools/sql_parse.py", "sentinel/rulebook.py",
-                  "sentinel/tools/parse_audit.py", "sentinel/tools/sql_lex.py"],
+                  "sentinel/tools/sql_parse.py", "sentinel/plan_audit.py",
+                  "sentinel/rulebook.py", "sentinel/tools/parse_audit.py",
+                  "sentinel/tools/sql_lex.py"],
               f"{man['files']} hashed, {len(post_freeze)} moved since: {post_freeze}")
         claim("no unsafe approval out of sample either", H["unsafe_approvals"] == 0,
               H["unsafe_approvals"])
@@ -369,6 +379,56 @@ def main() -> int:
               f"{xv['max_relative_clock_delta'] * 100:.0f}% "
               f"({xv['max_absolute_clock_delta_ms']} ms) over "
               f"{xv['clock_numbers_compared']} numbers")
+
+    # -------------------------------------------------------------- red team 3 (v16)
+    # The pipeline reviewing the SQL it writes itself. Two of these are unflattering: the
+    # defect count is against plans this repository has been shipping since v2, and one
+    # ablation arm got better for a reason nobody designed.
+    rt3_path = ROOT / "results" / "redteam3.json"
+    if rt3_path.exists():
+        rt3 = json.loads(rt3_path.read_text())
+        A15, A16 = rt3["arms"]["no_plan_audit"], rt3["arms"]["full"]
+        lab3 = rt3["labelled"]
+        it = rt3["replay_only_interaction"]
+        claim("3 round-3 probes, aimed at the SQL this pipeline writes rather than the SQL it "
+              "reads", A15["cases"] == A16["cases"] == 3, A16["cases"])
+        claim("v15 printed a clean verdict over every defective plan it generated; v16 prints none",
+              (A15["clean_verdict_over_defective_plan"] == A15["defective_plan_cases"]
+               and A16["clean_verdict_over_defective_plan"] == 0),
+              f"v15 {A15['clean_verdict_over_defective_plan']}/{A15['defective_plan_cases']}, "
+              f"v16 {A16['clean_verdict_over_defective_plan']}/{A16['defective_plan_cases']}")
+        claim("every plan defect v15 generated was shipped unreviewed, and none of v16's is",
+              (A15["plan_defects_shipped_unreviewed"] == A15["plan_defects_present"] > 0
+               and A16["plan_defects_shipped_unreviewed"] == 0),
+              f"v15 {A15['plan_defects_shipped_unreviewed']}/{A15['plan_defects_present']}, "
+              f"v16 {A16['plan_defects_shipped_unreviewed']}/{A16['plan_defects_present']}")
+        claim("the canary stays silent: a rollback nothing depends on yet is not a defect",
+              A16["false_alarms_on_canary"] == 0, A16["false_alarms_on_canary"])
+        claim("the plan audit moves nothing that was already being measured, across all four "
+              "labelled sets",
+              lab3["cases_moved"] == 0 and lab3["cases_compared"] == 34,
+              f"{lab3['cases_compared'] - lab3['cases_moved']} of {lab3['cases_compared']} "
+              f"labelled cases identical")
+        claim("the plans this repository has been shipping since v2 carry defects nobody wrote "
+              "a case for (the unflattering half)",
+              len(lab3["defects"]) >= 6 and lab3["defect_cases"] >= 5,
+              f"{len(lab3['defects'])} defects across {lab3['defect_cases']} labelled cases, "
+              f"{lab3['defects_under_a_verified_plan']} of them under a printed "
+              f"'plan verified: true'")
+        claim("closing it costs reviewer minutes rather than saving them, in named sign-offs",
+              (ab and S["modelled_reviewer_minutes_per_case"]
+               >= ab["no_plan_audit"]["aggregate"]["modelled_reviewer_minutes_per_case"]),
+              f"v15 {ab['no_plan_audit']['aggregate']['modelled_reviewer_minutes_per_case']} -> "
+              f"v16 {S['modelled_reviewer_minutes_per_case']} modelled minutes per case"
+              if ab else "no ablation.json")
+        claim("the one number outside redteam3 that this layer moved is an ablation arm, not the "
+              "shipped one (the other unflattering half)",
+              (it["replay_only_v15"]["unsafe_approvals"] == 2
+               and it["replay_only_v16"]["unsafe_approvals"] == 1
+               and replay_only == rules_only),
+              f"replay-only 2/12 with the audit off, {it['replay_only_v16']['unsafe_approvals']}/12 "
+              f"with it on, rules-only {rules_only}/12 in the scored arm - so 'replay "
+              f"alone is worse than rules alone' now needs plan_audit=False to reproduce")
 
     width = max(len(c[0]) for c in CLAIMS)
     bad = 0

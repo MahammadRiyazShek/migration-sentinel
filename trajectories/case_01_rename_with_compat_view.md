@@ -2,7 +2,7 @@
 
 - run id: `eval-case_01_rename_with_compat_view`
 - case: `case_01_rename_with_compat_view`
-- events: 47
+- events: 49
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.82 ms)
+**tool** `schema.parse` (0.88 ms)
 
 ```json
 {
@@ -339,7 +339,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.03 ms)
 
 ```json
 {
@@ -411,7 +411,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (3.23 ms)
+**tool** `shadow.replay` (3.13 ms)
 
 ```json
 {
@@ -713,7 +713,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -1026,7 +1026,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.15 ms)
+**tool** `migration.parse` (0.19 ms)
 
 ```json
 {
@@ -1079,7 +1079,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -1136,7 +1136,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.73 ms)
+**tool** `shadow.replay` (2.76 ms)
 
 ```json
 {
@@ -1516,7 +1516,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.76 ms)
+**tool** `shadow.replay` (2.71 ms)
 
 ```json
 {
@@ -1740,6 +1740,100 @@ _tool responded_
  "unmodelled": []
 }
 ```
+
+**tool** `plan.audit` (6.07 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 2,
+   "phase1_sql": [
+    "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;",
+    "UPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" ..."
+   ],
+   "phase2_sql": [
+    "ALTER TABLE \"customers\" DROP COLUMN \"full_name\";",
+    "CREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, ..."
+   ],
+   "rollback_sql": [
+    "ALTER TABLE \"customers\" DROP COLUMN \"name\";"
+   ],
+   "code_steps": [
+    "deploy code that writes both customers.full_name and customers.name, and reads customers.name",
+    "point readers at the new definition of customer_billing_summary before phase 2 replaces it"
+   ],
+   "human_gates": [
+    "confirm no consumer still reads customers.full_name before phase 2 drops it"
+   ],
+   "questions": [
+    "Which deploy lands first: the query change or the schema change?",
+    "Has the owning team agreed to the deploy order?",
+    "What is the accepted risk for DESTRUCTIVE_NO_EXPAND_CONTRACT?",
+    "What is the accepted risk for MISSING_ROLLBACK?",
+    "Do any consumers read this 
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 5,
+ "scripts": {
+  "phase1": 2,
+  "phase2": 2,
+  "rollback": 1
+ },
+ "findings": [
+  {
+   "code": "ROLLBACK_WINDOW_UNSTATED",
+   "title": "The rollback is only valid before a code step this same packet asks for",
+   "script": "rollback",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"customers\" DROP COLUMN \"name\"",
+   "objects": [
+    "customers.name",
+    "customers",
+    "name"
+   ],
+   "why": "the rollback removes `customers.name`, and a code step in this same packet asks the team to start using it; run them in ...",
+   "closes_with": "the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead",
+   "evidence": [
+    "generated rollback statement 0: ALTER TABLE \"customers\" DROP COLUMN \"name\"",
+    "generated code step: deploy code that writes both customers.full_name and customers.name, and reads customers.name",
+    "shadow replay of this rollback breaks 0 corpus statements, which is why replay alone reports it as safe"
+   ]
+  }
+ ],
+ "finding_codes": [
+  "ROLLBACK_WINDOW_UNSTATED"
+ ],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "customers.full_name",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"customers\" DROP COLUMN \"full_name\"",
+   "why": "this step is treated as gated because a human gate names `customers.full_name`; this audit read the name, not the questi...",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  },
+  {
+   "kind": "audit_gate_text_only",
+   "object": "customers",
+   "object_inferred": false,
+   "script": "rollback",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"customers\" DROP COLUMN \"name\"",
+   "why": "this step is treated as gated because a human gate names `customers`; this audit read the name, not the question",
+   "closes_with": "a reviewer confirms the gate on this object act
+```
+
+### Human checkpoint - plan self-audit: **PLAN DEFECT**
+
+ROLLBACK_WINDOW_UNSTATED in the generated rollback script: the rollback removes `customers.name`, and a code step in this same packet asks the team to start using it; run them in the printed order and the rollback breaks the deploy the packet asked for. The corpus cannot show this: the statements that break are the ones this packet is asking someone to write Closes when: the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead
 
 **model** `scripted-v1` tag=`executive_summary` tokens=38/60 cost=$0.0
 

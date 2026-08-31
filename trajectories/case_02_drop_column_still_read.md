@@ -2,7 +2,7 @@
 
 - run id: `eval-case_02_drop_column_still_read`
 - case: `case_02_drop_column_still_read`
-- events: 35
+- events: 36
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.76 ms)
+**tool** `schema.parse` (0.77 ms)
 
 ```json
 {
@@ -74,7 +74,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.05 ms)
+**tool** `migration.audit` (0.04 ms)
 
 ```json
 {
@@ -112,7 +112,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.11 ms)
+**tool** `schema.apply_ops` (0.1 ms)
 
 ```json
 {
@@ -295,7 +295,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -368,7 +368,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.82 ms)
+**tool** `shadow.replay` (2.69 ms)
 
 ```json
 {
@@ -735,7 +735,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.17 ms)
+**tool** `coverage.ledger` (0.16 ms)
 
 ```json
 {
@@ -950,7 +950,7 @@ _tool responded_
 []
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -1067,6 +1067,104 @@ _tool responded_
   "queries_ok_after": 16
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (2.86 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [],
+   "phase2_sql": [
+    "ALTER TABLE \"customers\" DROP COLUMN \"company_name\";"
+   ],
+   "rollback_sql": [],
+   "code_steps": [
+    "remove every read and write of customers.company_name, then wait one full deploy cycle"
+   ],
+   "human_gates": [
+    "confirm customers.company_name has had zero reads for the agreed observation window before phase 2",
+    "no rollback could be generated automatically; write one before shipping"
+   ],
+   "questions": [
+    "Which deploy lands first: the query change or the schema change?",
+    "Has the owning team agreed to the deploy order?",
+    "What is the accepted risk for DESTRUCTIVE_NO_EXPAND_CONTRACT?",
+    "What is the accepted risk for MISSING_ROLLBACK?",
+    "Do any consumers read this result set positionally or serialise it whole?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "cus
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 1,
+ "scripts": {
+  "phase1": 0,
+  "phase2": 1,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "customers.company_name",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"customers\" DROP COLUMN \"company_name\"",
+   "why": "this step is treated as gated because a human gate names `customers.company_name`; this audit read the name, not the que...",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  }
+ ],
+ "gap_kinds": [
+  "audit_gate_text_only"
+ ],
+ "kind_inventory": [
+  {
+   "script": "phase2",
+   "statement_index": 0,
+   "kind": "drop_column",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 1,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "phase2": {
+    "queries_run": 16,
+    "broken_after": 1,
+    "broken_query_ids": [
+     "q_support_lookup"
+    ]
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

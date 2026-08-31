@@ -2,7 +2,7 @@
 
 - run id: `eval-rt_07_index_swap_done_right`
 - case: `rt_07_index_swap_done_right`
-- events: 27
+- events: 28
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.79 ms)
+**tool** `schema.parse` (0.9 ms)
 
 ```json
 {
@@ -92,7 +92,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.15 ms)
+**tool** `migration.audit` (0.07 ms)
 
 ```json
 {
@@ -233,7 +233,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.14 ms)
+**tool** `corpus.dependents` (0.22 ms)
 
 ```json
 {
@@ -446,7 +446,7 @@ _tool responded_
 28
 ```
 
-**tool** `shadow.replay` (2.98 ms)
+**tool** `shadow.replay` (2.93 ms)
 
 ```json
 {
@@ -795,7 +795,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.13 ms)
+**tool** `migration.parse` (0.07 ms)
 
 ```json
 {
@@ -885,7 +885,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.79 ms)
+**tool** `shadow.replay` (2.97 ms)
 
 ```json
 {
@@ -982,6 +982,106 @@ _tool responded_
   "queries_ok_after": 19
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.28 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "DROP INDEX CONCURRENTLY idx_invoices_customer;",
+    "CREATE INDEX CONCURRENTLY \"idx_invoices_customer_status\" ON \"invoices\" (\"customer_id\", \"status\");"
+   ],
+   "phase2_sql": [],
+   "rollback_sql": [
+    "DROP INDEX CONCURRENTLY \"idx_invoices_customer_status\";"
+   ],
+   "code_steps": [],
+   "human_gates": [],
+   "questions": [],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "high",
+    "label
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 3,
+ "scripts": {
+  "phase1": 2,
+  "phase2": 0,
+  "rollback": 1
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "drop_index",
+   "bucket": "RULED"
+  },
+  {
+   "script": "phase1",
+   "statement_index": 1,
+   "kind": "create_index",
+   "bucket": "RULED"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 0,
+   "kind": "drop_index",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "rollback": {
+    "queries_run": 19,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

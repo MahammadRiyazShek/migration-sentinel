@@ -2,7 +2,7 @@
 
 - run id: `eval-case_09_unbatched_backfill`
 - case: `case_09_unbatched_backfill`
-- events: 31
+- events: 32
 
 ## Agent: cartographer
 
@@ -387,7 +387,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (2.94 ms)
+**tool** `shadow.replay` (2.71 ms)
 
 ```json
 {
@@ -728,7 +728,7 @@ _note (risk_officer)_: verdict capped to NEEDS_COVERAGE_SIGNOFF: 1 coverage gap(
 
 </details>
 
-**tool** `migration.parse` (0.08 ms)
+**tool** `migration.parse` (0.07 ms)
 
 ```json
 {
@@ -788,7 +788,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.64 ms)
+**tool** `shadow.replay` (2.57 ms)
 
 ```json
 {
@@ -882,6 +882,79 @@ _tool responded_
   "queries_ok_after": 16
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (0.34 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "-- repeat until zero rows are affected (batch size 5000):",
+    "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE currency IS N..."
+   ],
+   "phase2_sql": [],
+   "rollback_sql": [],
+   "code_steps": [],
+   "human_gates": [
+    "statement 1 (set_not_null) is outside the tool's model and needs manual review: ALTER TABLE invoices ALTER COLUMN curren...",
+    "IRREVERSIBLE - coverage gap on `invoices.currency` (value_class_erased): a reviewer confirms no consumer treats invoices..."
+   ],
+   "questions": [
+    "What is the accepted risk for NOT_NULL_NO_DEFAULT?",
+    "What batch size and pause has this table tolerated before?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE i
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 1,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 0,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "dml_update",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {},
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

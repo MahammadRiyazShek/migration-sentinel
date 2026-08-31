@@ -4,7 +4,8 @@
  "title": "Release train: six changes in one migration",
  "owner_service": "billing-api",
  "verdict": "BLOCK",
- "summary": "Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 3 blocker, 5 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
+ "input_verdict": "BLOCK",
+ "summary": "Do not ship this as written. 2 coverage gap(s) need a named sign-off before this can be called safe. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 3 blocker, 5 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. 1 defect(s) in the SQL this packet generated: see the plan self-audit before running any of it. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
  "narrator": {
   "mode": "structural",
   "guard": true,
@@ -322,7 +323,8 @@
    "dropping subscriptions_seats_chk removes an invariant: the data owner must sign off and a monitoring check should replace it",
    "statement 6 (maintenance_rewrite) is outside the tool's model and needs manual review: CLUSTER invoices USING idx_invoices_customer",
    "coverage gap on `invoices.status` (in_place_data_mutation): a reviewer confirms which consumers of invoices.status depend on the current values",
-   "coverage gap on `invoices` (unmodelled_statement): a reviewer confirms by hand what statement 6 does to invoices and to anything reading it"
+   "coverage gap on `invoices` (unmodelled_statement): a reviewer confirms by hand what statement 6 does to invoices and to anything reading it",
+   "PLAN DEFECT (ROLLBACK_WINDOW_UNSTATED) in the generated rollback script: the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead"
   ],
   "questions": [
    "Which deploy lands first: the query change or the schema change?",
@@ -358,6 +360,176 @@
   },
   "unmodelled": []
  },
+ "plan_audit": {
+  "statements_audited": 11,
+  "scripts": {
+   "phase1": 4,
+   "phase2": 4,
+   "rollback": 3
+  },
+  "findings": [
+   {
+    "code": "ROLLBACK_WINDOW_UNSTATED",
+    "title": "The rollback is only valid before a code step this same packet asks for",
+    "script": "rollback",
+    "statement_index": 0,
+    "statement": "ALTER TABLE \"subscriptions\" DROP COLUMN \"billing_interval\"",
+    "objects": [
+     "subscriptions.billing_interval",
+     "subscriptions",
+     "billing_interval"
+    ],
+    "why": "the rollback removes `subscriptions.billing_interval`, and a code step in this same packet asks the team to start using it; run them in the printed order and the rollback breaks the deploy the packet asked for. The corpus cannot show this: the statements that break are the ones this packet is asking someone to write",
+    "closes_with": "the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead",
+    "evidence": [
+     "generated rollback statement 0: ALTER TABLE \"subscriptions\" DROP COLUMN \"billing_interval\"",
+     "generated code step: deploy code that always writes subscriptions.billing_interval",
+     "shadow replay of this rollback breaks 0 corpus statements, which is why replay alone reports it as safe"
+    ]
+   }
+  ],
+  "finding_codes": [
+   "ROLLBACK_WINDOW_UNSTATED"
+  ],
+  "gaps": [
+   {
+    "kind": "audit_gate_text_only",
+    "object": "subscriptions",
+    "object_inferred": false,
+    "script": "phase2",
+    "statement_index": 0,
+    "statement": "ALTER TABLE \"subscriptions\" ALTER COLUMN \"billing_interval\" SET NOT NULL",
+    "why": "this step is treated as gated because a human gate names `subscriptions`; this audit read the name, not the question",
+    "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+    "irreversible": false
+   },
+   {
+    "kind": "audit_gate_text_only",
+    "object": "invoices.tax_rate",
+    "object_inferred": false,
+    "script": "phase2",
+    "statement_index": 2,
+    "statement": "ALTER TABLE \"invoices\" DROP COLUMN \"tax_rate\"",
+    "why": "this step is treated as gated because a human gate names `invoices.tax_rate`; this audit read the name, not the question",
+    "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+    "irreversible": false
+   },
+   {
+    "kind": "audit_gate_text_only",
+    "object": "subscriptions",
+    "object_inferred": false,
+    "script": "phase2",
+    "statement_index": 3,
+    "statement": "ALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk",
+    "why": "this step is treated as gated because a human gate names `subscriptions`; this audit read the name, not the question",
+    "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+    "irreversible": false
+   },
+   {
+    "kind": "audit_gate_text_only",
+    "object": "subscriptions",
+    "object_inferred": false,
+    "script": "rollback",
+    "statement_index": 0,
+    "statement": "ALTER TABLE \"subscriptions\" DROP COLUMN \"billing_interval\"",
+    "why": "this step is treated as gated because a human gate names `subscriptions`; this audit read the name, not the question",
+    "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+    "irreversible": false
+   }
+  ],
+  "gap_kinds": [
+   "audit_gate_text_only"
+  ],
+  "kind_inventory": [
+   {
+    "script": "phase1",
+    "statement_index": 0,
+    "kind": "add_column",
+    "bucket": "RULED"
+   },
+   {
+    "script": "phase1",
+    "statement_index": 1,
+    "kind": "create_index",
+    "bucket": "RULED"
+   },
+   {
+    "script": "phase1",
+    "statement_index": 2,
+    "kind": "create_index",
+    "bucket": "RULED"
+   },
+   {
+    "script": "phase1",
+    "statement_index": 3,
+    "kind": "dml_update",
+    "bucket": "RULED"
+   },
+   {
+    "script": "phase2",
+    "statement_index": 0,
+    "kind": "set_not_null",
+    "bucket": "RULED"
+   },
+   {
+    "script": "phase2",
+    "statement_index": 1,
+    "kind": "create_index",
+    "bucket": "RULED"
+   },
+   {
+    "script": "phase2",
+    "statement_index": 2,
+    "kind": "drop_column",
+    "bucket": "RULED"
+   },
+   {
+    "script": "phase2",
+    "statement_index": 3,
+    "kind": "drop_constraint",
+    "bucket": "RULED"
+   },
+   {
+    "script": "rollback",
+    "statement_index": 0,
+    "kind": "drop_column",
+    "bucket": "RULED"
+   },
+   {
+    "script": "rollback",
+    "statement_index": 1,
+    "kind": "drop_index",
+    "bucket": "RULED"
+   },
+   {
+    "script": "rollback",
+    "statement_index": 2,
+    "kind": "drop_index",
+    "bucket": "RULED"
+   }
+  ],
+  "gates_trusted": 4,
+  "replay": {
+   "ran": true,
+   "scripts": {
+    "phase2": {
+     "queries_run": 16,
+     "broken_after": 1,
+     "broken_query_ids": [
+      "q_billing_tax"
+     ]
+    },
+    "rollback": {
+     "queries_run": 16,
+     "broken_after": 0,
+     "broken_query_ids": []
+    }
+   },
+   "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is published so the reviewer can check that every break has a code step, rather than being told it does."
+  },
+  "clean": false
+ },
+ "verdict_capped_by_plan_audit": false,
  "escalated_to_human": false,
  "coverage_gaps": [
   "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
@@ -510,7 +682,8 @@
   "verify": true,
   "coverage": true,
   "rule_coverage": true,
-  "text_conservation": true
+  "text_conservation": true,
+  "plan_audit": true
  },
  "tool_calls": [
   {
@@ -526,7 +699,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.77,
+   "ms": 0.8,
    "result_summary": "Schema"
   },
   {
@@ -711,7 +884,7 @@
      }
     ]
    },
-   "ms": 0.22,
+   "ms": 0.21,
    "result_summary": {
     "lexed_statements": 7,
     "ops": 7,
@@ -816,7 +989,7 @@
      }
     ]
    },
-   "ms": 0.1,
+   "ms": 0.16,
    "result_summary": [
     "Schema",
     [
@@ -973,7 +1146,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.22,
+   "ms": 0.15,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -1132,7 +1305,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.02,
    "result_summary": 21
   },
   {
@@ -1428,7 +1601,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.83,
+   "ms": 2.68,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1541,7 +1714,7 @@
     "hazard_code": "INTEGRITY_CONSTRAINT_REMOVED",
     "table": "subscriptions"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -1895,7 +2068,7 @@
      "clean": true
     }
    },
-   "ms": 0.22,
+   "ms": 0.31,
    "result_summary": {
     "gaps": [
      {
@@ -1936,7 +2109,7 @@
    "args": {
     "sql": "ALTER TABLE \"subscriptions\" ADD COLUMN \"billing_interval\" TEXT DEFAULT 'monthly';\nCREATE INDEX CONCURRENTLY \"idx_subscriptions_customer_tmp_nonunique\" ON \"subscriptions\" (\"customer_id\");\nCREATE INDEX CONCURRENTLY \"idx_usage_events_name\" ON \"usage_events\" (\"event_name\");\nUPDATE invoices SET status = 'open' WHERE status = 'draft' AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE status = 'draft' LIMIT ..."
    },
-   "ms": 0.17,
+   "ms": 0.19,
    "result_summary": [
     {
      "kind": "add_column",
@@ -2056,7 +2229,7 @@
      }
     ]
    },
-   "ms": 0.11,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -2327,7 +2500,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.81,
+   "ms": 2.74,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2340,6 +2513,418 @@
     "queries_ok_before": 16,
     "queries_ok_after": 16
    }
+  },
+  {
+   "agent": "verifier",
+   "tool": "plan.audit",
+   "args": {
+    "plan": {
+     "attempt": 1,
+     "phase1_sql": [
+      "ALTER TABLE \"subscriptions\" ADD COLUMN \"billing_interval\" TEXT DEFAULT 'monthly';",
+      "CREATE INDEX CONCURRENTLY \"idx_subscriptions_customer_tmp_nonunique\" ON \"subscriptions\" (\"customer_id\");",
+      "CREATE INDEX CONCURRENTLY \"idx_usage_events_name\" ON \"usage_events\" (\"event_name\");",
+      "-- repeat until zero rows are affected (batch size 5000):",
+      "UPDATE invoices SET status = 'open' WHERE status = 'draft' AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE status = 'draf..."
+     ],
+     "phase2_sql": [
+      "ALTER TABLE \"subscriptions\" ALTER COLUMN \"billing_interval\" SET NOT NULL;",
+      "CREATE UNIQUE INDEX CONCURRENTLY \"idx_subscriptions_customer\" ON \"subscriptions\" (\"customer_id\");",
+      "ALTER TABLE \"invoices\" DROP COLUMN \"tax_rate\";",
+      "ALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk;"
+     ],
+     "rollback_sql": [
+      "ALTER TABLE \"subscriptions\" DROP COLUMN \"billing_interval\";",
+      "DROP INDEX CONCURRENTLY \"idx_subscriptions_customer_tmp_nonunique\";",
+      "DROP INDEX CONCURRENTLY \"idx_usage_events_name\";"
+     ],
+     "code_steps": [
+      "deploy code that always writes subscriptions.billing_interval",
+      "remove every read and write of invoices.tax_rate, then wait one full deploy cycle"
+     ],
+     "human_gates": [
+      "duplicates already exist for subscriptions (\"customer_id\"); a human must decide the dedupe rule - phase 2 promotes the i...",
+      "confirm invoices.tax_rate has had zero reads for the agreed observation window before phase 2",
+      "dropping subscriptions_seats_chk removes an invariant: the data owner must sign off and a monitoring check should replac...",
+      "statement 6 (maintenance_rewrite) is outside the tool's model and needs manual review: CLUSTER invoices USING idx_invoic...",
+      "coverage gap on `invoices.status` (in_place_data_mutation): a reviewer confirms which consumers of invoices.status depen...",
+      "coverage gap on `invoices` (unmodelled_statement): a reviewer confirms by hand what statement 6 does to invoices and to ..."
+     ],
+     "questions": [
+      "Which deploy lands first: the query change or the schema change?",
+      "What is the accepted risk for DESTRUCTIVE_NO_EXPAND_CONTRACT?",
+      "What is the acceptable write-stall window for this table?",
+      "What enforces this invariant once the constraint is gone?",
+      "What is the accepted risk for MISSING_ROLLBACK?",
+      "What is the accepted risk for TABLE_REWRITE_LOCK?"
+     ],
+     "questions_source": "model",
+     "questions_dropped": [],
+     "policy": {
+      "include_view_changes": true,
+      "expand_contract_type_change": true,
+      "minimal_phase1": false,
+      "notes": []
+     }
+    },
+    "schema": "Schema",
+    "queries": [
+     {
+      "id": "q_web_profile",
+      "service": "web",
+      "criticality": "critical",
+      "label": "customer profile page",
+      "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+     },
+     {
+      "id": "q_web_signup",
+      "service": "web",
+      "criticality": "critical",
+      "label": "signup insert",
+      "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+     },
+     {
+      "id": "q_support_lookup",
+      "service": "support-admin",
+      "criticality": "high",
+      "label": "support customer lookup",
+      "sql": "SELECT id, email, company_name FROM customers WHERE email = 'ada@corp.example'"
+     },
+     {
+      "id": "q_bi_summary",
+      "service": "bi",
+      "criticality": "high",
+      "label": "dbt model stg_customers",
+      "sql": "SELECT * FROM customer_billing_summary"
+     },
+     {
+      "id": "q_bi_mrr",
+      "service": "bi",
+      "criticality": "medium",
+      "label": "MRR by plan",
+      "sql": "SELECT plan, SUM(mrr_cents) AS mrr FROM customers GROUP BY plan"
+     },
+     {
+      "id": "q_bi_country",
+      "service": "bi",
+      "criticality": "low",
+      "label": "customers by country",
+      "sql": "SELECT country_code, COUNT(*) AS n FROM customers GROUP BY country_code"
+     },
+     {
+      "id": "q_billing_invoice_create",
+      "service": "billing-api",
+      "criticality": "critical",
+      "label": "invoice creation",
+      "sql": "INSERT INTO invoices (customer_id, invoice_number, amount_cents, issued_at) VALUES (1,'INV-9001',1000,'2026-02-01')"
+     },
+     {
+      "id": "q_billing_tax",
+      "service": "billing-api",
+      "criticality": "high",
+      "label": "invoice tax display",
+      "sql": "SELECT invoice_number, amount_cents, tax_rate FROM invoices WHERE id = 1"
+     },
+     "...+6 more"
+    ],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    },
+    "replay_tool": "function"
+   },
+   "ms": 6.48,
+   "result_summary": {
+    "statements_audited": 11,
+    "scripts": {
+     "phase1": 4,
+     "phase2": 4,
+     "rollback": 3
+    },
+    "findings": [
+     {
+      "code": "ROLLBACK_WINDOW_UNSTATED",
+      "title": "The rollback is only valid before a code step this same packet asks for",
+      "script": "rollback",
+      "statement_index": 0,
+      "statement": "ALTER TABLE \"subscriptions\" DROP COLUMN \"billing_interval\"",
+      "objects": [
+       "subscriptions.billing_interval",
+       "subscriptions",
+       "billing_interval"
+      ],
+      "why": "the rollback removes `subscriptions.billing_interval`, and a code step in this same packet asks the team to start using ...",
+      "closes_with": "the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead",
+      "evidence": [
+       "generated rollback statement 0: ALTER TABLE \"subscriptions\" DROP COLUMN \"billing_interval\"",
+       "generated code step: deploy code that always writes subscriptions.billing_interval",
+       "shadow replay of this rollback breaks 0 corpus statements, which is why replay alone reports it as safe"
+      ]
+     }
+    ],
+    "finding_codes": [
+     "ROLLBACK_WINDOW_UNSTATED"
+    ],
+    "gaps": [
+     {
+      "kind": "audit_gate_text_only",
+      "object": "subscriptions",
+      "object_inferred": false,
+      "script": "phase2",
+      "statement_index": 0,
+      "statement": "ALTER TABLE \"subscriptions\" ALTER COLUMN \"billing_interval\" SET NOT NULL",
+      "why": "this step is treated as gated because a human gate names `subscriptions`; this audit read the name, not the question",
+      "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+      "irreversible": false
+     },
+     {
+      "kind": "audit_gate_text_only",
+      "object": "invoices.tax_rate",
+      "object_inferred": false,
+      "script": "phase2",
+      "statement_index": 2,
+      "statement": "ALTER TABLE \"invoices\" DROP COLUMN \"tax_rate\"",
+      "why": "this step is treated as gated because a human gate names `invoices.tax_rate`; this audit read the name, not the question",
+      "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+      "irreversible": false
+     },
+     {
+      "kind": "audit_gate_text_only",
+      "object": "subscriptions",
+      "object_inferred": false,
+      "script": "phase2",
+      "statement_index": 3,
+      "statement": "ALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk",
+      "why": "this step is treated as gated because a human gate names `subscriptions`; this audit read the name, not the question",
+      "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+      "irreversible": false
+     },
+     {
+      "kind": "audit_gate_text_only",
+      "object": "subscriptions",
+      "object_inferred": false,
+      "script": "rollback",
+      "statement_index": 0,
+      "statement": "ALTER TABLE \"subscriptions\" DROP COLUMN \"billing_interval\"",
+      "why": "this step is treated as gated because a human gate names `subscriptions`; this audit read the name, not the question",
+      "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+      "irreversible": false
+     }
+    ],
+    "gap_kinds": [
+     "audit_gate_text_only"
+    ],
+    "kind_inventory": [
+     {
+      "script": "phase1",
+      "statement_index": 0,
+      "kind": "add_column",
+      "bucket": "RULED"
+     },
+     {
+      "script": "phase1",
+      "statement_index": 1,
+      "kind": "create_index",
+      "bucket": "RULED"
+     },
+     {
+      "script": "phase1",
+      "statement_index": 2,
+      "kind": "create_index",
+      "bucket": "RULED"
+     },
+     {
+      "script": "phase1",
+      "statement_index": 3,
+      "kind": "dml_update",
+      "bucket": "RULED"
+     },
+     {
+      "script": "phase2",
+      "statement_index": 0,
+      "kind": "set_not_null",
+      "bucket": "RULED"
+     },
+     {
+      "script": "phase2",
+      "statement_index": 1,
+      "kind": "create_index",
+      "bucket": "RULED"
+     },
+     {
+      "script": "phase2",
+      "statement_index": 2,
+      "kind": "drop_column",
+      "bucket": "RULED"
+     },
+     {
+      "script": "phase2",
+      "statement_index": 3,
+      "kind": "drop_constraint",
+      "bucket": "RULED"
+     },
+     "...+3 more"
+    ],
+    "gates_trusted": 4,
+    "replay": {
+     "ran": true,
+     "scripts": {
+      "phase2": {
+       "queries_run": 16,
+       "broken_after": 1,
+       "broken_query_ids": [
+        "q_billing_tax"
+       ]
+      },
+      "rollback": {
+       "queries_run": 16,
+       "broken_after": 0,
+       "broken_query_ids": []
+      }
+     },
+     "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+    },
+    "clean": false
+   }
   }
  ],
  "model_usage": {
@@ -2350,7 +2935,7 @@
   "tokens_out": 705,
   "cost_usd": 0.0
  },
- "wall_ms": 9.2,
+ "wall_ms": 15.7,
  "severity_order": [
   "low",
   "medium",

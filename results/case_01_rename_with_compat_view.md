@@ -2,9 +2,9 @@
 
 **BLOCK - do not merge**
 
-Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
+Do not ship this as written. 2 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 3 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. 1 defect(s) in the SQL this packet generated: see the plan self-audit before running any of it. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-case_01_rename_with_compat_view` · case `case_01_rename_with_compat_view` · owning service `web` · 12.4 ms · model scripted-v1 (9 calls, $0.0000)
+`run eval-case_01_rename_with_compat_view` · case `case_01_rename_with_compat_view` · owning service `web` · 18.6 ms · model scripted-v1 (9 calls, $0.0000)
 
 > **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
@@ -74,7 +74,7 @@ the change ships without a rollback script
 
 ## Recommended rollout
 
-Plan generated on attempt 2 of 2; phase 1 **verified**: every statement in the corpus still passes after phase 1.
+Plan generated on attempt 2 of 2; phase 1 **verified**: every statement in the corpus still passes after phase 1. That is a statement about phase 1 and about today's corpus only - the audit of all three generated scripts is the section below.
 
 ### Phase 1 - expand (safe to run now)
 
@@ -104,6 +104,7 @@ ALTER TABLE "customers" DROP COLUMN "name";
 ### Human decisions required (the tool will not decide these)
 
 - confirm no consumer still reads customers.full_name before phase 2 drops it
+- PLAN DEFECT (ROLLBACK_WINDOW_UNSTATED) in the generated rollback script: the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead
 
 ### Questions for the reviewer (drafted by the model, guarded prose, not evidence)
 
@@ -112,6 +113,31 @@ ALTER TABLE "customers" DROP COLUMN "name";
 - What is the accepted risk for DESTRUCTIVE_NO_EXPAND_CONTRACT?
 - What is the accepted risk for MISSING_ROLLBACK?
 - Do any consumers read this result set positionally or serialise it whole?
+
+## Plan self-audit
+
+The three scripts above are output from this pipeline, so they are reviewed like any other artefact it is handed: 5 generated statement(s) parsed, partitioned by the rule inventory in `sentinel/rulebook.py`, cross-checked against the code steps, and replayed. A defect here is a defect in *our* SQL, not in the migration under review, so it never enters the hazard table - it caps the verdict and becomes a human gate.
+
+| # | defect | script | statement |
+|---|---|---|---|
+| 1 | **ROLLBACK_WINDOW_UNSTATED** | rollback | `ALTER TABLE "customers" DROP COLUMN "name"` |
+
+### 1. The rollback is only valid before a code step this same packet asks for
+
+the rollback removes `customers.name`, and a code step in this same packet asks the team to start using it; run them in the printed order and the rollback breaks the deploy the packet asked for. The corpus cannot show this: the statements that break are the ones this packet is asking someone to write.
+
+- evidence: generated rollback statement 0: ALTER TABLE "customers" DROP COLUMN "name"
+- evidence: generated code step: deploy code that writes both customers.full_name and customers.name, and reads customers.name
+- evidence: shadow replay of this rollback breaks 0 corpus statements, which is why replay alone reports it as safe
+- closes when: the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead
+
+What this audit trusted rather than checked:
+
+- `customers.full_name` (audit_gate_text_only, generated phase2): this step is treated as gated because a human gate names `customers.full_name`; this audit read the name, not the question
+- `customers` (audit_gate_text_only, generated rollback): this step is treated as gated because a human gate names `customers`; this audit read the name, not the question
+
+- shadow replay of the generated phase2 script against the post-phase-1 schema: 2 of 16 corpus statement(s) break (q_web_profile, q_web_signup) - expected for a contract step, which is what the code steps above are for; the number is printed so it can be checked rather than assumed
+- shadow replay of the generated rollback script against the post-phase-1 schema: 0 of 16 corpus statement(s) break
 
 ## What this review did not check
 

@@ -2,7 +2,7 @@
 
 - run id: `eval-case_12_release_train`
 - case: `case_12_release_train`
-- events: 44
+- events: 46
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.77 ms)
+**tool** `schema.parse` (0.8 ms)
 
 ```json
 {
@@ -148,7 +148,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.22 ms)
+**tool** `migration.audit` (0.21 ms)
 
 ```json
 {
@@ -206,7 +206,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.1 ms)
+**tool** `schema.apply_ops` (0.16 ms)
 
 ```json
 {
@@ -323,7 +323,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.22 ms)
+**tool** `corpus.dependents` (0.15 ms)
 
 ```json
 {
@@ -453,7 +453,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -523,7 +523,7 @@ _tool responded_
 21
 ```
 
-**tool** `shadow.replay` (2.83 ms)
+**tool** `shadow.replay` (2.68 ms)
 
 ```json
 {
@@ -795,7 +795,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -875,7 +875,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.22 ms)
+**tool** `coverage.ledger` (0.31 ms)
 
 ```json
 {
@@ -1156,7 +1156,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.17 ms)
+**tool** `migration.parse` (0.19 ms)
 
 ```json
 {
@@ -1227,7 +1227,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.11 ms)
+**tool** `schema.apply_ops` (0.07 ms)
 
 ```json
 {
@@ -1292,7 +1292,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.81 ms)
+**tool** `shadow.replay` (2.74 ms)
 
 ```json
 {
@@ -1385,6 +1385,96 @@ _tool responded_
  "unmodelled": []
 }
 ```
+
+**tool** `plan.audit` (6.48 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "ALTER TABLE \"subscriptions\" ADD COLUMN \"billing_interval\" TEXT DEFAULT 'monthly';",
+    "CREATE INDEX CONCURRENTLY \"idx_subscriptions_customer_tmp_nonunique\" ON \"subscriptions\" (\"customer_id\");",
+    "CREATE INDEX CONCURRENTLY \"idx_usage_events_name\" ON \"usage_events\" (\"event_name\");",
+    "-- repeat until zero rows are affected (batch size 5000):",
+    "UPDATE invoices SET status = 'open' WHERE status = 'draft' AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE status = 'draf..."
+   ],
+   "phase2_sql": [
+    "ALTER TABLE \"subscriptions\" ALTER COLUMN \"billing_interval\" SET NOT NULL;",
+    "CREATE UNIQUE INDEX CONCURRENTLY \"idx_subscriptions_customer\" ON \"subscriptions\" (\"customer_id\");",
+    "ALTER TABLE \"invoices\" DROP COLUMN \"tax_rate\";",
+    "ALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk;"
+   ],
+   "rollback_sql": [
+    "ALTER TABLE \"subscriptions\" DROP COLUMN \"billing_interval\";",
+    "DROP INDEX CONCURRENTLY \"idx_subscriptions_customer_tmp_nonunique\";",
+    "DROP INDEX CONCURRENTLY \"idx_usage_events_name\";"
+   ],
+   "code_steps": [
+    "deploy code that
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 11,
+ "scripts": {
+  "phase1": 4,
+  "phase2": 4,
+  "rollback": 3
+ },
+ "findings": [
+  {
+   "code": "ROLLBACK_WINDOW_UNSTATED",
+   "title": "The rollback is only valid before a code step this same packet asks for",
+   "script": "rollback",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"subscriptions\" DROP COLUMN \"billing_interval\"",
+   "objects": [
+    "subscriptions.billing_interval",
+    "subscriptions",
+    "billing_interval"
+   ],
+   "why": "the rollback removes `subscriptions.billing_interval`, and a code step in this same packet asks the team to start using ...",
+   "closes_with": "the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead",
+   "evidence": [
+    "generated rollback statement 0: ALTER TABLE \"subscriptions\" DROP COLUMN \"billing_interval\"",
+    "generated code step: deploy code that always writes subscriptions.billing_interval",
+    "shadow replay of this rollback breaks 0 corpus statements, which is why replay alone reports it as safe"
+   ]
+  }
+ ],
+ "finding_codes": [
+  "ROLLBACK_WINDOW_UNSTATED"
+ ],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "subscriptions",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"subscriptions\" ALTER COLUMN \"billing_interval\" SET NOT NULL",
+   "why": "this step is treated as gated because a human gate names `subscriptions`; this audit read the name, not the question",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  },
+  {
+   "kind": "audit_gate_text_only",
+   "object": "invoices.tax_rate",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 2,
+   "statement": "ALTER TABLE \"invoices\" DROP COLUMN \"tax_rate\"",
+   "why": "this step is treated as gated because a human gate names `invoices.tax_rate`; this audit read the name, not the question",
+   "
+```
+
+### Human checkpoint - plan self-audit: **PLAN DEFECT**
+
+ROLLBACK_WINDOW_UNSTATED in the generated rollback script: the rollback removes `subscriptions.billing_interval`, and a code step in this same packet asks the team to start using it; run them in the printed order and the rollback breaks the deploy the packet asked for. The corpus cannot show this: the statements that break are the ones this packet is asking someone to write Closes when: the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead
 
 **model** `scripted-v1` tag=`executive_summary` tokens=38/78 cost=$0.0
 

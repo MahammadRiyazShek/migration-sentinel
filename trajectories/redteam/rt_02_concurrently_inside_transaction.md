@@ -2,7 +2,7 @@
 
 - run id: `eval-rt_02_concurrently_inside_transaction`
 - case: `rt_02_concurrently_inside_transaction`
-- events: 27
+- events: 28
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.81 ms)
+**tool** `schema.parse` (0.84 ms)
 
 ```json
 {
@@ -97,7 +97,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.1 ms)
+**tool** `migration.audit` (0.14 ms)
 
 ```json
 {
@@ -158,7 +158,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.13 ms)
+**tool** `schema.apply_ops` (0.1 ms)
 
 ```json
 {
@@ -248,7 +248,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.14 ms)
+**tool** `corpus.dependents` (0.25 ms)
 
 ```json
 {
@@ -442,7 +442,7 @@ _tool responded_
 22
 ```
 
-**tool** `shadow.replay` (2.98 ms)
+**tool** `shadow.replay` (3.36 ms)
 
 ```json
 {
@@ -586,7 +586,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.17 ms)
+**tool** `coverage.ledger` (0.26 ms)
 
 ```json
 {
@@ -740,7 +740,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.08 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -808,7 +808,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.99 ms)
+**tool** `shadow.replay` (3.11 ms)
 
 ```json
 {
@@ -905,6 +905,97 @@ _tool responded_
   "queries_ok_after": 19
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.28 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "CREATE INDEX CONCURRENTLY \"idx_usage_events_customer\" ON \"usage_events\" (\"customer_id\");"
+   ],
+   "phase2_sql": [],
+   "rollback_sql": [
+    "DROP INDEX CONCURRENTLY \"idx_usage_events_customer\";"
+   ],
+   "code_steps": [
+    "run phase 1 with the framework's DDL transaction disabled (Rails disable_ddl_transaction!, Django atomic = False, Alembi..."
+   ],
+   "human_gates": [],
+   "questions": [
+    "What is the accepted risk for CONCURRENT_DDL_IN_TRANSACTION?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 2,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 0,
+  "rollback": 1
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "create_index",
+   "bucket": "RULED"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 0,
+   "kind": "drop_index",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "rollback": {
+    "queries_run": 19,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

@@ -2,7 +2,7 @@
 
 - run id: `eval-case_05_unique_email_with_duplicates`
 - case: `case_05_unique_email_with_duplicates`
-- events: 29
+- events: 30
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.79 ms)
+**tool** `schema.parse` (0.77 ms)
 
 ```json
 {
@@ -81,7 +81,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.05 ms)
+**tool** `migration.audit` (0.04 ms)
 
 ```json
 {
@@ -126,7 +126,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -318,7 +318,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.11 ms)
 
 ```json
 {
@@ -391,7 +391,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.76 ms)
+**tool** `shadow.replay` (2.62 ms)
 
 ```json
 {
@@ -624,7 +624,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.13 ms)
+**tool** `coverage.ledger` (0.16 ms)
 
 ```json
 {
@@ -788,7 +788,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -820,7 +820,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -856,7 +856,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.63 ms)
+**tool** `shadow.replay` (2.59 ms)
 
 ```json
 {
@@ -953,6 +953,108 @@ _tool responded_
   "queries_ok_after": 16
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (5.65 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "CREATE INDEX CONCURRENTLY \"idx_customers_email_tmp_nonunique\" ON \"customers\" (\"email\");"
+   ],
+   "phase2_sql": [
+    "CREATE UNIQUE INDEX CONCURRENTLY \"idx_customers_email\" ON \"customers\" (\"email\");"
+   ],
+   "rollback_sql": [
+    "DROP INDEX CONCURRENTLY \"idx_customers_email_tmp_nonunique\";"
+   ],
+   "code_steps": [],
+   "human_gates": [
+    "duplicates already exist for customers (\"email\"); a human must decide the dedupe rule - phase 2 promotes the index to UN..."
+   ],
+   "questions": [
+    "What is the acceptable write-stall window for this table?",
+    "Who owns cleaning the duplicate rows, and by when?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "w
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 3,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 1,
+  "rollback": 1
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "create_index",
+   "bucket": "RULED"
+  },
+  {
+   "script": "phase2",
+   "statement_index": 0,
+   "kind": "create_index",
+   "bucket": "RULED"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 0,
+   "kind": "drop_index",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "phase2": {
+    "queries_run": 16,
+    "broken_after": 0,
+    "broken_query_ids": []
+   },
+   "rollback": {
+    "queries_run": 16,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

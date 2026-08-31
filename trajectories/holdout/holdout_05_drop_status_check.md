@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_05_drop_status_check`
 - case: `holdout_05_drop_status_check`
-- events: 27
+- events: 28
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.09 ms)
+**tool** `schema.parse` (1.05 ms)
 
 ```json
 {
@@ -80,7 +80,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.04 ms)
+**tool** `migration.audit` (0.05 ms)
 
 ```json
 {
@@ -189,7 +189,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.15 ms)
+**tool** `corpus.dependents` (0.14 ms)
 
 ```json
 {
@@ -358,7 +358,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (3.29 ms)
+**tool** `shadow.replay` (3.21 ms)
 
 ```json
 {
@@ -667,7 +667,7 @@ _tool responded_
 []
 ```
 
-**tool** `schema.apply_ops` (0.09 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -687,7 +687,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.24 ms)
+**tool** `shadow.replay` (3.32 ms)
 
 ```json
 {
@@ -792,6 +792,106 @@ _tool responded_
   "queries_ok_after": 17
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.68 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [],
+   "phase2_sql": [
+    "ALTER TABLE shipments DROP CONSTRAINT shipments_status_chk;"
+   ],
+   "rollback_sql": [],
+   "code_steps": [],
+   "human_gates": [
+    "dropping shipments_status_chk removes an invariant: the data owner must sign off and a monitoring check should replace i..."
+   ],
+   "questions": [
+    "What enforces this invariant once the constraint is gone?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_dispatch_create",
+    "service": "dispatch-api",
+    "criticality": "critical",
+    "label": "shipment creation",
+    "sql": "INSERT INTO shipments (carrier_id, reference, status, weight_kg, promised_at) VALUES (7,'SHP-77001','planned',1200,'2026..."
+   },
+   {
+    "id": "q_dispatch_board",
+    "service": "dispatch-api",
+    "criticality": "critical",
+    "label": "dispatch board",
+    "sql": "SELECT id, reference, status, promised_at FROM shipments WHERE status = 'in_transit'"
+   },
+   {
+    
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 1,
+ "scripts": {
+  "phase1": 0,
+  "phase2": 1,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "shipments",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "ALTER TABLE shipments DROP CONSTRAINT shipments_status_chk",
+   "why": "this step is treated as gated because a human gate names `shipments`; this audit read the name, not the question",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  }
+ ],
+ "gap_kinds": [
+  "audit_gate_text_only"
+ ],
+ "kind_inventory": [
+  {
+   "script": "phase2",
+   "statement_index": 0,
+   "kind": "drop_constraint",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 1,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "phase2": {
+    "queries_run": 17,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

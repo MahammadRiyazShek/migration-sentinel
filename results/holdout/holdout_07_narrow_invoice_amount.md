@@ -2,9 +2,9 @@
 
 **NOT CLEARED - coverage gap on an affected object**
 
-Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 1 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
+Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches, or a defect in the plan it generated. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 1 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. 1 defect(s) in the SQL this packet generated: see the plan self-audit before running any of it. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-holdout_07_narrow_invoice_amount` · case `holdout_07_narrow_invoice_amount` · owning service `finance-ops` · 9.4 ms · model scripted-v1 (4 calls, $0.0000)
+`run eval-holdout_07_narrow_invoice_amount` · case `holdout_07_narrow_invoice_amount` · owning service `finance-ops` · 16.6 ms · model scripted-v1 (4 calls, $0.0000)
 
 > **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
@@ -37,7 +37,7 @@ carrier_invoices.amount NUMERIC(12,2) -> numeric(8,2) would not survive 0/5 fixt
 
 ## Recommended rollout
 
-Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the corpus still passes after phase 1.
+Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the corpus still passes after phase 1. That is a statement about phase 1 and about today's corpus only - the audit of all three generated scripts is the section below.
 
 ### Phase 1 - expand (safe to run now)
 
@@ -66,11 +66,38 @@ ALTER TABLE "carrier_invoices" DROP COLUMN "amount_new";
 ### Human decisions required (the tool will not decide these)
 
 - IRREVERSIBLE - coverage gap on `carrier_invoices.amount` (fixture_bounded_value_scan): a reviewer counts the real offenders before phase 2: SELECT count(*) FROM carrier_invoices WHERE amount would not fit numeric(8,2)
+- PLAN DEFECT (ROLLBACK_WINDOW_UNSTATED) in the generated rollback script: the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead
 
 ### Questions for the reviewer (drafted by the model, guarded prose, not evidence)
 
 - What is the accepted risk for TABLE_REWRITE_LOCK?
 - Is the truncated value recoverable from anywhere else?
+
+## Plan self-audit
+
+The three scripts above are output from this pipeline, so they are reviewed like any other artefact it is handed: 5 generated statement(s) parsed, partitioned by the rule inventory in `sentinel/rulebook.py`, cross-checked against the code steps, and replayed. A defect here is a defect in *our* SQL, not in the migration under review, so it never enters the hazard table - it caps the verdict and becomes a human gate.
+
+| # | defect | script | statement |
+|---|---|---|---|
+| 1 | **ROLLBACK_WINDOW_UNSTATED** | rollback | `ALTER TABLE "carrier_invoices" DROP COLUMN "amount_new"` |
+
+### 1. The rollback is only valid before a code step this same packet asks for
+
+the rollback removes `carrier_invoices.amount_new`, and a code step in this same packet asks the team to start using it; run them in the printed order and the rollback breaks the deploy the packet asked for. The corpus cannot show this: the statements that break are the ones this packet is asking someone to write.
+
+- evidence: generated rollback statement 0: ALTER TABLE "carrier_invoices" DROP COLUMN "amount_new"
+- evidence: generated code step: deploy code that dual-writes carrier_invoices.amount and carrier_invoices.amount_new
+- evidence: shadow replay of this rollback breaks 0 corpus statements, which is why replay alone reports it as safe
+- closes when: the plan states the window - roll back phase 1 only before the code step, and after it use a forward fix instead
+
+What this audit trusted rather than checked:
+
+- `carrier_invoices.amount` (audit_gate_text_only, generated phase2): this step is treated as gated because a human gate names `carrier_invoices.amount`; this audit read the name, not the question
+- `carrier_invoices` (audit_gate_text_only, generated phase2): this step is treated as gated because a human gate names `carrier_invoices`; this audit read the name, not the question
+- `carrier_invoices` (audit_gate_text_only, generated rollback): this step is treated as gated because a human gate names `carrier_invoices`; this audit read the name, not the question
+
+- shadow replay of the generated phase2 script against the post-phase-1 schema: 0 of 17 corpus statement(s) break
+- shadow replay of the generated rollback script against the post-phase-1 schema: 0 of 17 corpus statement(s) break
 
 ## Coverage ledger
 

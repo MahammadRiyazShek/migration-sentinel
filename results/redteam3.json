@@ -1,0 +1,220 @@
+{
+  "per_case": [
+    {
+      "case_id": "rt3_01_additive_column_with_dependent_rollback",
+      "title": "A genuinely safe additive column, and the rollback the tool writes for it",
+      "expected_plan_defects": [
+        "ROLLBACK_WINDOW_UNSTATED",
+        "CONTRACT_STEP_UNGATED"
+      ],
+      "v15": {
+        "verdict": "SAFE",
+        "plan_verified": true,
+        "defects_reported": 0,
+        "defects_present": 2,
+        "defect_codes": [
+          "CONTRACT_STEP_UNGATED",
+          "ROLLBACK_WINDOW_UNSTATED"
+        ],
+        "human_gates": 0
+      },
+      "v16": {
+        "verdict": "NEEDS_COVERAGE_SIGNOFF",
+        "plan_verified": true,
+        "defects_reported": 2,
+        "defects_present": 2,
+        "defect_codes": [
+          "CONTRACT_STEP_UNGATED",
+          "ROLLBACK_WINDOW_UNSTATED"
+        ],
+        "gates_trusted": 0,
+        "human_gates": 2
+      }
+    },
+    {
+      "case_id": "rt3_02_validate_constraint_ungated",
+      "title": "A correctly split CHECK constraint, and the unpriced lock in phase 2",
+      "expected_plan_defects": [
+        "CONTRACT_STEP_UNGATED"
+      ],
+      "v15": {
+        "verdict": "SAFE",
+        "plan_verified": true,
+        "defects_reported": 0,
+        "defects_present": 1,
+        "defect_codes": [
+          "CONTRACT_STEP_UNGATED"
+        ],
+        "human_gates": 0
+      },
+      "v16": {
+        "verdict": "NEEDS_COVERAGE_SIGNOFF",
+        "plan_verified": true,
+        "defects_reported": 1,
+        "defects_present": 1,
+        "defect_codes": [
+          "CONTRACT_STEP_UNGATED"
+        ],
+        "gates_trusted": 0,
+        "human_gates": 1
+      }
+    },
+    {
+      "case_id": "rt3_03_additive_column_nobody_depends_on",
+      "title": "The canary: an additive column, no code step, and a rollback that is fine",
+      "expected_plan_defects": [],
+      "v15": {
+        "verdict": "SAFE",
+        "plan_verified": true,
+        "defects_reported": 0,
+        "defects_present": 0,
+        "defect_codes": [],
+        "human_gates": 0
+      },
+      "v16": {
+        "verdict": "SAFE",
+        "plan_verified": true,
+        "defects_reported": 0,
+        "defects_present": 0,
+        "defect_codes": [],
+        "gates_trusted": 0,
+        "human_gates": 0
+      }
+    }
+  ],
+  "arms": {
+    "no_plan_audit": {
+      "cases": 3,
+      "plan_defects_present": 3,
+      "plan_defects_reported": 0,
+      "plan_defects_shipped_unreviewed": 3,
+      "clean_verdict_over_defective_plan": 2,
+      "defective_plan_cases": 2,
+      "false_alarms_on_canary": 0,
+      "human_gates_total": 0
+    },
+    "full": {
+      "cases": 3,
+      "plan_defects_present": 3,
+      "plan_defects_reported": 3,
+      "plan_defects_shipped_unreviewed": 0,
+      "clean_verdict_over_defective_plan": 0,
+      "defective_plan_cases": 2,
+      "false_alarms_on_canary": 0,
+      "human_gates_total": 3
+    }
+  },
+  "labelled": {
+    "cases_compared": 34,
+    "cases_moved": 0,
+    "moved_ids": [],
+    "per_set": {
+      "cases": {
+        "cases": 12,
+        "plan_defects": 3
+      },
+      "holdout": {
+        "cases": 9,
+        "plan_defects": 3
+      },
+      "redteam": {
+        "cases": 7,
+        "plan_defects": 0
+      },
+      "redteam2": {
+        "cases": 6,
+        "plan_defects": 1
+      }
+    },
+    "defects": [
+      {
+        "case_id": "case_01_rename_with_compat_view",
+        "set": "cases",
+        "code": "ROLLBACK_WINDOW_UNSTATED",
+        "script": "rollback",
+        "statement": "ALTER TABLE \"customers\" DROP COLUMN \"name\"",
+        "v15_verdict": "BLOCK",
+        "v15_plan_verified": true
+      },
+      {
+        "case_id": "case_10_add_fk_constraint",
+        "set": "cases",
+        "code": "CONTRACT_STEP_UNGATED",
+        "script": "phase2",
+        "statement": "ALTER TABLE \"invoices\" VALIDATE CONSTRAINT \"invoices_customer_fk\"",
+        "v15_verdict": "BLOCK",
+        "v15_plan_verified": true
+      },
+      {
+        "case_id": "case_12_release_train",
+        "set": "cases",
+        "code": "ROLLBACK_WINDOW_UNSTATED",
+        "script": "rollback",
+        "statement": "ALTER TABLE \"subscriptions\" DROP COLUMN \"billing_interval\"",
+        "v15_verdict": "BLOCK",
+        "v15_plan_verified": true
+      },
+      {
+        "case_id": "holdout_07_narrow_invoice_amount",
+        "set": "holdout",
+        "code": "ROLLBACK_WINDOW_UNSTATED",
+        "script": "rollback",
+        "statement": "ALTER TABLE \"carrier_invoices\" DROP COLUMN \"amount_new\"",
+        "v15_verdict": "NEEDS_COVERAGE_SIGNOFF",
+        "v15_plan_verified": true
+      },
+      {
+        "case_id": "holdout_08_release_train_fleet",
+        "set": "holdout",
+        "code": "CONTRACT_STEP_UNGATED",
+        "script": "phase2",
+        "statement": "ALTER TABLE \"carrier_invoices\" VALIDATE CONSTRAINT \"carrier_invoices_shipment_fk\"",
+        "v15_verdict": "BLOCK",
+        "v15_plan_verified": true
+      },
+      {
+        "case_id": "holdout_08_release_train_fleet",
+        "set": "holdout",
+        "code": "ROLLBACK_WINDOW_UNSTATED",
+        "script": "rollback",
+        "statement": "ALTER TABLE \"drivers\" DROP COLUMN \"phone_e164\"",
+        "v15_verdict": "BLOCK",
+        "v15_plan_verified": true
+      },
+      {
+        "case_id": "rt2_03_unterminated_literal",
+        "set": "redteam2",
+        "code": "GENERATED_TEXT_UNPARSED",
+        "script": "phase1",
+        "statement": "{'kind': 'string', 'start': 29, 'end': 200, 'text': '\\'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND",
+        "v15_verdict": "BLOCK",
+        "v15_plan_verified": false
+      }
+    ],
+    "defect_cases": 6,
+    "defects_under_a_verified_plan": 6
+  },
+  "replay_only_interaction": {
+    "replay_only_v15": {
+      "unsafe_approvals": 2,
+      "cases": [
+        "case_03_index_on_hot_table",
+        "case_10_add_fk_constraint"
+      ]
+    },
+    "replay_only_v16": {
+      "unsafe_approvals": 1,
+      "cases": [
+        "case_03_index_on_hot_table"
+      ]
+    },
+    "rules_only_v16": {
+      "unsafe_approvals": 3,
+      "cases": [
+        "case_02_drop_column_still_read",
+        "case_05_unique_email_with_duplicates",
+        "case_11_swap_view_used_by_worker"
+      ]
+    }
+  }
+}

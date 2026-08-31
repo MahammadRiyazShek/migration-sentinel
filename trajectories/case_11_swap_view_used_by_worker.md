@@ -2,7 +2,7 @@
 
 - run id: `eval-case_11_swap_view_used_by_worker`
 - case: `case_11_swap_view_used_by_worker`
-- events: 32
+- events: 33
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.79 ms)
+**tool** `schema.parse` (0.84 ms)
 
 ```json
 {
@@ -219,7 +219,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.1 ms)
+**tool** `corpus.dependents` (0.11 ms)
 
 ```json
 {
@@ -312,7 +312,7 @@ _tool responded_
 4
 ```
 
-**tool** `shadow.replay` (2.72 ms)
+**tool** `shadow.replay` (2.61 ms)
 
 ```json
 {
@@ -468,7 +468,7 @@ _note (blast_radius)_: view open_invoices breakage folded into the corpus statem
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -726,7 +726,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -759,7 +759,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.66 ms)
+**tool** `shadow.replay` (2.63 ms)
 
 ```json
 {
@@ -848,6 +848,115 @@ _tool responded_
   "queries_ok_after": 17
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.11 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "CREATE VIEW open_invoices_v2 AS SELECT id, customer_id, invoice_number, amount_cents, status, issued_at FROM invoices WH..."
+   ],
+   "phase2_sql": [
+    "DROP VIEW open_invoices;"
+   ],
+   "rollback_sql": [],
+   "code_steps": [],
+   "human_gates": [
+    "confirm nothing reads open_invoices before phase 2 removes it",
+    "no rollback could be generated automatically; write one before shipping"
+   ],
+   "questions": [
+    "Which deploy lands first: the query change or the schema change?",
+    "Has the owning team agreed to the deploy order?",
+    "What is the accepted risk for MISSING_ROLLBACK?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critic
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 2,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 1,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "open_invoices",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "DROP VIEW open_invoices",
+   "why": "this step is treated as gated because a human gate names `open_invoices`; this audit read the name, not the question",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  }
+ ],
+ "gap_kinds": [
+  "audit_gate_text_only"
+ ],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "create_view",
+   "bucket": "REPLAY_COVERED"
+  },
+  {
+   "script": "phase2",
+   "statement_index": 0,
+   "kind": "drop_view",
+   "bucket": "REPLAY_COVERED"
+  }
+ ],
+ "gates_trusted": 1,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "phase2": {
+    "queries_run": 16,
+    "broken_after": 2,
+    "broken_query_ids": [
+     "__view__open_invoices",
+     "q_dunning_open"
+    ]
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

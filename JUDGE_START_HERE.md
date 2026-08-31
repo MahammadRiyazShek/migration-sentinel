@@ -20,13 +20,13 @@ python3 tools/check_results.py          # <- if you run one command, run this on
 
 It reads `results/*.json` and re-asserts every number in this repository, including the ten that
 make the pipeline look worse - among them the case where the text-only baseline beats the previous
-release, and the case where every false finding in that release cited machine evidence. Expect `67/67 claims hold`, in under a second, with no key and no
+release, and the case where every false finding in that release cited machine evidence. Expect `75/75 claims hold`, in under a second, with no key and no
 network.
 
 The rest, in the order they build on each other:
 
 ```bash
-python3 -m unittest discover -s tests   # 129 tests, ~0.3 s
+python3 -m unittest discover -s tests   # 139 tests, ~0.3 s
 python3 eval/run_eval.py --ablations    # 120 reviews (12 cases x 9 arms), < 1 s
 python3 eval/run_holdout.py --ablations # the second schema: 9 held-out cases, rules frozen
 python3 eval/run_redteam.py             # 7 cases written to make this pipeline approve an outage
@@ -147,7 +147,7 @@ read it: [`docs/SUPERVISOR_LOG_V10.md`](docs/SUPERVISOR_LOG_V10.md).
 
 ## The video is older than the repo
 
-The submitted video was recorded against v2. The repository is v15. The problem, architecture,
+The submitted video was recorded against v2. The repository is v16. The problem, architecture,
 baseline comparison and walkthrough all still match; some on-screen numbers are stale and three
 components (the coverage gate, the structural narrator and the held-out world) did not exist yet.
 

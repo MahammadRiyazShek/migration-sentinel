@@ -2,7 +2,7 @@
 
 - run id: `eval-holdout_04_safe_additive_language`
 - case: `holdout_04_safe_additive_language`
-- events: 26
+- events: 27
 
 ## Agent: cartographer
 
@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (1.9 ms)
+**tool** `schema.parse` (1.09 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.1 ms)
+**tool** `migration.parse` (0.09 ms)
 
 ```json
 {
@@ -98,7 +98,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.16 ms)
+**tool** `migration.audit` (0.07 ms)
 
 ```json
 {
@@ -156,7 +156,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.23 ms)
+**tool** `schema.apply_ops` (0.15 ms)
 
 ```json
 {
@@ -244,7 +244,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.21 ms)
+**tool** `corpus.dependents` (0.13 ms)
 
 ```json
 {
@@ -366,7 +366,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.05 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -435,7 +435,7 @@ _tool responded_
 20
 ```
 
-**tool** `shadow.replay` (4.16 ms)
+**tool** `shadow.replay` (3.29 ms)
 
 ```json
 {
@@ -682,7 +682,7 @@ _note (blast_radius)_: q_etl_driver_roster gains column(s) ['preferred_language'
 
 </details>
 
-**tool** `coverage.ledger` (0.21 ms)
+**tool** `coverage.ledger` (0.2 ms)
 
 ```json
 {
@@ -863,7 +863,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `schema.apply_ops` (0.07 ms)
 
 ```json
 {
@@ -912,7 +912,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.41 ms)
+**tool** `shadow.replay` (3.65 ms)
 
 ```json
 {
@@ -1129,6 +1129,107 @@ _tool responded_
   "queries_ok_after": 17
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.87 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "ALTER TABLE \"drivers\" ADD COLUMN \"preferred_language\" TEXT;",
+    "CREATE INDEX CONCURRENTLY \"idx_drivers_carrier\" ON \"drivers\" (\"carrier_id\");"
+   ],
+   "phase2_sql": [],
+   "rollback_sql": [
+    "ALTER TABLE \"drivers\" DROP COLUMN \"preferred_language\";",
+    "DROP INDEX CONCURRENTLY \"idx_drivers_carrier\";"
+   ],
+   "code_steps": [],
+   "human_gates": [],
+   "questions": [],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_dispatch_create",
+    "service": "dispatch-api",
+    "criticality": "critical",
+    "label": "shipment creation",
+    "sql": "INSERT INTO shipments (carrier_id, reference, status, weight_kg, promised_at) VALUES (7,'SHP-77001','planned',1200,'2026..."
+   },
+   {
+    "id": "q_dispatch_board",
+    "service": "dispatch-api",
+    "criticality": "critical",
+    "label": "dispatch board",
+    "sql": "SELECT id, reference, status, promised_at FROM shipments WHERE status = 'in_transit
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 4,
+ "scripts": {
+  "phase1": 2,
+  "phase2": 0,
+  "rollback": 2
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [],
+ "gap_kinds": [],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "add_column",
+   "bucket": "RULED"
+  },
+  {
+   "script": "phase1",
+   "statement_index": 1,
+   "kind": "create_index",
+   "bucket": "RULED"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 0,
+   "kind": "drop_column",
+   "bucket": "RULED"
+  },
+  {
+   "script": "rollback",
+   "statement_index": 1,
+   "kind": "drop_index",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 0,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "rollback": {
+    "queries_run": 17,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

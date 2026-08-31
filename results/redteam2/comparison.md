@@ -18,7 +18,7 @@
 | **Coverage-gap cases cleared without a sign-off** (lower is better) | 0/2 | 0/2 | 0/2 |
 | Blind spots named in the packet, with the object | 0 | 0 | 5 |
 | Modelled reviewer minutes per case | 22.3 | 33.0 | 11.3 |
-| Wall clock per case (ms, measured) | 0.2 | 0.1 | 9.2 |
+| Wall clock per case (ms, measured) | 0.3 | 0.2 | 11.6 |
 | Model tokens for all cases (measured) | 3452 | 6513 | 7226 |
 
 Reviewer minutes are **modelled**, not measured, from these assumptions: read_review_minutes=5, verify_unevidenced_claim_minutes=4, write_expand_contract_plan_minutes=20, decide_human_gate_minutes=3. Wall clock and tokens are measured.

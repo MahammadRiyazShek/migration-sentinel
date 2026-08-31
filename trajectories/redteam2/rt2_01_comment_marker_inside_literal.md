@@ -2,7 +2,7 @@
 
 - run id: `eval-rt2_01_comment_marker_inside_literal`
 - case: `rt2_01_comment_marker_inside_literal`
-- events: 33
+- events: 34
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.85 ms)
+**tool** `schema.parse` (0.82 ms)
 
 ```json
 {
@@ -212,7 +212,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.21 ms)
+**tool** `corpus.dependents` (0.2 ms)
 
 ```json
 {
@@ -418,7 +418,7 @@ _tool responded_
 25
 ```
 
-**tool** `shadow.replay` (3.56 ms)
+**tool** `shadow.replay` (3.6 ms)
 
 ```json
 {
@@ -644,7 +644,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.18 ms)
+**tool** `coverage.ledger` (0.19 ms)
 
 ```json
 {
@@ -905,7 +905,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.04 ms)
+**tool** `shadow.replay` (2.97 ms)
 
 ```json
 {
@@ -999,6 +999,102 @@ _tool responded_
   "queries_ok_after": 19
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.78 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [
+    "-- repeat until zero rows are affected (batch size 5000):",
+    "UPDATE invoices SET currency = 'usd -- legacy default' WHERE currency IS NULL AND \"id\" IN (SELECT \"id\" FROM \"invoices\" W..."
+   ],
+   "phase2_sql": [
+    "ALTER TABLE \"invoices\" DROP COLUMN \"tax_rate\";"
+   ],
+   "rollback_sql": [],
+   "code_steps": [
+    "remove every read and write of invoices.tax_rate, then wait one full deploy cycle"
+   ],
+   "human_gates": [
+    "confirm invoices.tax_rate has had zero reads for the agreed observation window before phase 2",
+    "coverage gap on `invoices.currency` (in_place_data_mutation): a reviewer confirms which consumers of invoices.currency d..."
+   ],
+   "questions": [
+    "Which deploy lands first: the query change or the schema change?",
+    "Has the owning team agreed to the deploy order?",
+    "What is the accepted risk for DESTRUCTIVE_NO_EXPAND_CONTRACT?",
+    "What batch size and pause has this table tolerated before?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": 
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 2,
+ "scripts": {
+  "phase1": 1,
+  "phase2": 1,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "invoices.tax_rate",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "ALTER TABLE \"invoices\" DROP COLUMN \"tax_rate\"",
+   "why": "this step is treated as gated because a human gate names `invoices.tax_rate`; this audit read the name, not the question",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  }
+ ],
+ "gap_kinds": [
+  "audit_gate_text_only"
+ ],
+ "kind_inventory": [
+  {
+   "script": "phase1",
+   "statement_index": 0,
+   "kind": "dml_update",
+   "bucket": "RULED"
+  },
+  {
+   "script": "phase2",
+   "statement_index": 0,
+   "kind": "drop_column",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 1,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "phase2": {
+    "queries_run": 19,
+    "broken_after": 1,
+    "broken_query_ids": [
+     "q_billing_tax"
+    ]
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 

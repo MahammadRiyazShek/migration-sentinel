@@ -2,7 +2,7 @@
 
 - run id: `eval-rt_01_drop_index_still_used`
 - case: `rt_01_drop_index_still_used`
-- events: 28
+- events: 29
 
 ## Agent: cartographer
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.89 ms)
+**tool** `schema.parse` (0.86 ms)
 
 ```json
 {
@@ -76,7 +76,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.04 ms)
+**tool** `migration.audit` (0.05 ms)
 
 ```json
 {
@@ -182,7 +182,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.17 ms)
+**tool** `corpus.dependents` (0.2 ms)
 
 ```json
 {
@@ -253,7 +253,7 @@ _tool responded_
 0
 ```
 
-**tool** `shadow.replay` (3.42 ms)
+**tool** `shadow.replay` (4.03 ms)
 
 ```json
 {
@@ -481,7 +481,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.32 ms)
+**tool** `coverage.ledger` (0.33 ms)
 
 ```json
 {
@@ -666,7 +666,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.02 ms)
+**tool** `shadow.replay` (3.03 ms)
 
 ```json
 {
@@ -763,6 +763,108 @@ _tool responded_
   "queries_ok_after": 19
  },
  "unmodelled": []
+}
+```
+
+**tool** `plan.audit` (3.49 ms)
+
+```json
+{
+ "args": {
+  "plan": {
+   "attempt": 1,
+   "phase1_sql": [],
+   "phase2_sql": [
+    "DROP INDEX CONCURRENTLY idx_invoices_customer;"
+   ],
+   "rollback_sql": [],
+   "code_steps": [],
+   "human_gates": [
+    "read pg_stat_user_indexes.idx_scan for idx_invoices_customer over a full business cycle and confirm it is unused before ..."
+   ],
+   "questions": [
+    "What is the accepted risk for ACCESS_PATH_REMOVED?"
+   ],
+   "questions_source": "model",
+   "questions_dropped": [],
+   "policy": {
+    "include_view_changes": true,
+    "expand_contract_type_change": true,
+    "minimal_phase1": false,
+    "notes": []
+   }
+  },
+  "schema": "Schema",
+  "queries": [
+   {
+    "id": "q_web_profile",
+    "service": "web",
+    "criticality": "critical",
+    "label": "customer profile page",
+    "sql": "SELECT id, email, full_name, plan FROM customers WHERE id = 1"
+   },
+   {
+    "id": "q_web_signup",
+    "service": "web",
+    "criticality": "critical",
+    "label": "signup insert",
+    "sql": "INSERT INTO customers (email, full_name, signed_up_at) VALUES ('new@corp.example','New Person','2026-02-01')"
+   },
+   {
+    "id": "q_support_lookup",
+    "service": "support-admin",
+    "criticality": "hig
+```
+
+_tool responded_
+
+```json
+{
+ "statements_audited": 1,
+ "scripts": {
+  "phase1": 0,
+  "phase2": 1,
+  "rollback": 0
+ },
+ "findings": [],
+ "finding_codes": [],
+ "gaps": [
+  {
+   "kind": "audit_gate_text_only",
+   "object": "idx_invoices_customer",
+   "object_inferred": false,
+   "script": "phase2",
+   "statement_index": 0,
+   "statement": "DROP INDEX CONCURRENTLY idx_invoices_customer",
+   "why": "this step is treated as gated because a human gate names `idx_invoices_customer`; this audit read the name, not the ques...",
+   "closes_with": "a reviewer confirms the gate on this object actually asks about this statement",
+   "irreversible": false
+  }
+ ],
+ "gap_kinds": [
+  "audit_gate_text_only"
+ ],
+ "kind_inventory": [
+  {
+   "script": "phase2",
+   "statement_index": 0,
+   "kind": "drop_index",
+   "bucket": "RULED"
+  }
+ ],
+ "gates_trusted": 1,
+ "replay": {
+  "ran": true,
+  "scripts": {
+   "phase2": {
+    "queries_run": 19,
+    "broken_after": 0,
+    "broken_query_ids": []
+   }
+  },
+  "note": "the generated phase 2 is expected to break today's statements - that is what the code steps are for. The number is publi..."
+ },
+ "clean": true
 }
 ```
 
