@@ -54,3 +54,40 @@ arm; and the v16 lesson folded into the hot take.
 `python3 tools/check_results.py` 75/75 - `python3 tools/check_submission_text.py` 7/7 -
 `python3 tools/check_docs.py` 9/9 - `make verify` green. `SUBMISSION_FORM_TEXT.txt` and the
 text below the marker in `SUBMISSION_DESCRIPTION.md` are byte-identical, enforced.
+
+---
+
+# Second pass: the string nobody was counting (no code change, no result change)
+
+The description above passed every audit in this repository and the platform refused it:
+
+    description_text: Ensure this field has no more than 10000 characters.
+
+The text was 8,952 plain characters against a limit of 10,000, and both numbers were right.
+The field is a rich-text editor. What the server counts is `description_text`, the HTML the
+editor emits, and a styled paste of that text renders roughly 12,100 characters: a block
+wrapper and a style attribute per paragraph, an empty paragraph per blank line, and an anchor
+around each bare URL. Roughly 3,100 characters of markup nobody typed and no checker measured.
+
+This is the v9/v10 defect one layer further out, for the third time. v9 asserted a cap it had
+never read off the field. v10 measured a length it had already declared legal. v16 measured the
+authored string and the CRLF string, and the server sees neither.
+
+**Fixed.** `tools/check_fits_the_form` now models the rendered string and enforces the only
+number the platform has ever volunteered - 10,000, quoted from its own rejection rather than
+from a label that has already moved once. It reports all three counts and the styled-paste
+figure, and it prints the paste mode that makes the difference.
+
+**Also cut.** About 300 characters of prose that were not carrying evidence, so the rendered
+plain-text paste lands at 9,217 of 10,000 with 783 to spare instead of fitting by luck. No
+figure, no load-bearing claim and no required disclosure was removed: all 9 claim regexes, the
+12 post-freeze filenames and every audited arm still match raw JSON.
+
+**How to paste it.** Ctrl+Shift+V, or paste into a plain editor first. A normal Ctrl+V from a
+rendered page carries the style attributes that caused the rejection, and no amount of cutting
+survives a paste that adds 90 characters of markup per paragraph.
+
+**Lesson, same shape as the rest of this repository.** Every checker measures a string, and the
+string it measures is a choice. Ask which one the thing that can reject you is counting, then
+measure that one. An audit of the artefact you authored is not an audit of the artefact you
+submit.

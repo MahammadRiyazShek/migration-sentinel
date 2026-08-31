@@ -699,7 +699,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.81,
+   "ms": 0.87,
    "result_summary": "Schema"
   },
   {
@@ -708,7 +708,7 @@
    "args": {
     "sql": "ALTER TABLE subscriptions ADD COLUMN billing_interval TEXT NOT NULL DEFAULT 'monthly';\nCREATE UNIQUE INDEX idx_subscriptions_customer ON subscriptions (customer_id);\nALTER TABLE invoices DROP COLUMN tax_rate;\nCREATE INDEX idx_usage_events_name ON usage_events (event_name);\nALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk;\nUPDATE invoices SET status = 'open' WHERE status = 'draft';..."
    },
-   "ms": 0.26,
+   "ms": 0.42,
    "result_summary": [
     {
      "kind": "add_column",
@@ -884,7 +884,7 @@
      }
     ]
    },
-   "ms": 0.22,
+   "ms": 0.28,
    "result_summary": {
     "lexed_statements": 7,
     "ops": 7,
@@ -989,7 +989,7 @@
      }
     ]
    },
-   "ms": 0.19,
+   "ms": 0.17,
    "result_summary": [
     "Schema",
     [
@@ -1146,7 +1146,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.15,
+   "ms": 0.16,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -1601,7 +1601,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.65,
+   "ms": 2.85,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1699,7 +1699,7 @@
     "hazard_code": "INDEX_LOCK_NO_CONCURRENT",
     "table": "subscriptions"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     [
@@ -2068,7 +2068,7 @@
      "clean": true
     }
    },
-   "ms": 0.19,
+   "ms": 0.2,
    "result_summary": {
     "gaps": [
      {
@@ -2109,7 +2109,7 @@
    "args": {
     "sql": "ALTER TABLE \"subscriptions\" ADD COLUMN \"billing_interval\" TEXT DEFAULT 'monthly';\nCREATE INDEX CONCURRENTLY \"idx_subscriptions_customer_tmp_nonunique\" ON \"subscriptions\" (\"customer_id\");\nCREATE INDEX CONCURRENTLY \"idx_usage_events_name\" ON \"usage_events\" (\"event_name\");\nUPDATE invoices SET status = 'open' WHERE status = 'draft' AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE status = 'draft' LIMIT ..."
    },
-   "ms": 0.23,
+   "ms": 0.2,
    "result_summary": [
     {
      "kind": "add_column",
@@ -2229,7 +2229,7 @@
      }
     ]
    },
-   "ms": 0.11,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -2500,7 +2500,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.96,
+   "ms": 2.81,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2935,7 +2935,7 @@
   "tokens_out": 705,
   "cost_usd": 0.0
  },
- "wall_ms": 16.2,
+ "wall_ms": 16.4,
  "severity_order": [
   "low",
   "medium",

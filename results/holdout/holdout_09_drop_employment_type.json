@@ -353,7 +353,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 1.05,
+   "ms": 1.06,
    "result_summary": "Schema"
   },
   {
@@ -421,7 +421,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -502,7 +502,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.15,
    "result_summary": [
     {
      "query_id": "q_driver_profile",
@@ -889,7 +889,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.3,
+   "ms": 3.25,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1361,7 +1361,7 @@
      "clean": true
     }
    },
-   "ms": 0.17,
+   "ms": 0.18,
    "result_summary": {
     "gaps": [
      {
@@ -1729,7 +1729,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.28,
+   "ms": 3.2,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2096,7 +2096,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.57,
+   "ms": 3.48,
    "result_summary": {
     "statements_audited": 1,
     "scripts": {

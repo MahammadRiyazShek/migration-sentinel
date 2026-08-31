@@ -388,7 +388,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.83,
+   "ms": 0.84,
    "result_summary": "Schema"
   },
   {
@@ -489,7 +489,7 @@
      }
     ]
    },
-   "ms": 0.13,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -581,7 +581,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.2,
+   "ms": 0.23,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -987,7 +987,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.73,
+   "ms": 3.58,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1598,7 +1598,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.01,
+   "ms": 2.98,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1853,7 +1853,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.49,
+   "ms": 3.55,
    "result_summary": {
     "statements_audited": 2,
     "scripts": {
@@ -1919,7 +1919,7 @@
   "tokens_out": 385,
   "cost_usd": 0.0
  },
- "wall_ms": 13.6,
+ "wall_ms": 13.4,
  "severity_order": [
   "low",
   "medium",

@@ -274,7 +274,7 @@
    "args": {
     "sql": "CREATE INDEX idx_invoices_status ON invoices (status);\n"
    },
-   "ms": 0.03,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "create_index",
@@ -804,7 +804,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.67,
+   "ms": 2.75,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1073,7 +1073,7 @@
      "clean": true
     }
    },
-   "ms": 0.16,
+   "ms": 0.14,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1088,7 +1088,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_invoices_status\" ON \"invoices\" (\"status\");"
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "create_index",
@@ -1130,7 +1130,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -1362,7 +1362,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.7,
+   "ms": 2.77,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1608,7 +1608,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 2.88,
+   "ms": 2.93,
    "result_summary": {
     "statements_audited": 2,
     "scripts": {
@@ -1658,7 +1658,7 @@
   "tokens_out": 109,
   "cost_usd": 0.0
  },
- "wall_ms": 10.5,
+ "wall_ms": 10.7,
  "severity_order": [
   "low",
   "medium",

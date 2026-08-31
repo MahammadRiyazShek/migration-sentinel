@@ -595,7 +595,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.87,
+   "ms": 0.79,
    "result_summary": "Schema"
   },
   {
@@ -604,7 +604,7 @@
    "args": {
     "sql": "ALTER TABLE customers RENAME COLUMN full_name TO name;\nCREATE OR REPLACE VIEW customer_billing_summary AS\n  SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;\n"
    },
-   "ms": 0.09,
+   "ms": 0.11,
    "result_summary": [
     {
      "kind": "rename_column",
@@ -800,7 +800,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.21,
+   "ms": 0.18,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -1171,7 +1171,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.22,
+   "ms": 3.2,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1596,7 +1596,7 @@
      "clean": true
     }
    },
-   "ms": 0.18,
+   "ms": 0.22,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1611,7 +1611,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);\nCREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;"
    },
-   "ms": 0.15,
+   "ms": 0.16,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1695,7 +1695,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.11,
    "result_summary": [
     "Schema",
     []
@@ -1948,7 +1948,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.83,
+   "ms": 2.75,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2033,7 +2033,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);"
    },
-   "ms": 0.13,
+   "ms": 0.11,
    "result_summary": [
     {
      "kind": "add_column",
@@ -2334,7 +2334,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.66,
+   "ms": 2.78,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2658,7 +2658,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 6.15,
+   "ms": 6.16,
    "result_summary": {
     "statements_audited": 5,
     "scripts": {

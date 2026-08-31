@@ -198,7 +198,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.85,
+   "ms": 0.86,
    "result_summary": "Schema"
   },
   {
@@ -245,7 +245,7 @@
      }
     ]
    },
-   "ms": 0.28,
+   "ms": 0.29,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -410,7 +410,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.12,
    "result_summary": []
   },
   {
@@ -646,7 +646,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.92,
+   "ms": 2.94,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -954,7 +954,7 @@
      "clean": false
     }
    },
-   "ms": 0.22,
+   "ms": 0.19,
    "result_summary": {
     "gaps": [
      {
@@ -1212,7 +1212,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.04,
+   "ms": 2.94,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1457,7 +1457,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 0.16,
+   "ms": 0.19,
    "result_summary": {
     "statements_audited": 0,
     "scripts": {

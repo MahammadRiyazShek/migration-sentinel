@@ -209,7 +209,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.8,
+   "ms": 0.85,
    "result_summary": "Schema"
   },
   {
@@ -250,7 +250,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -366,7 +366,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.17,
+   "ms": 0.2,
    "result_summary": []
   },
   {
@@ -599,7 +599,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.54,
+   "ms": 3.53,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -963,7 +963,7 @@
      "clean": true
     }
    },
-   "ms": 0.28,
+   "ms": 0.29,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -988,7 +988,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.08,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1204,7 +1204,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.93,
+   "ms": 3.01,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1450,7 +1450,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.32,
+   "ms": 3.4,
    "result_summary": {
     "statements_audited": 1,
     "scripts": {
@@ -1508,7 +1508,7 @@
   "tokens_out": 131,
   "cost_usd": 0.0
  },
- "wall_ms": 12.7,
+ "wall_ms": 12.9,
  "severity_order": [
   "low",
   "medium",

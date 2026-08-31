@@ -41,7 +41,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
-     "wall_ms": 0.8,
+     "wall_ms": 0.9,
      "tokens": 537,
      "cost_usd": 0.0
     },
@@ -437,7 +437,7 @@
      "plan_verified": false,
      "human_gates": 0,
      "modelled_reviewer_minutes": 29,
-     "wall_ms": 0.1,
+     "wall_ms": 0.2,
      "tokens": 1030,
      "cost_usd": 0.0
     },
@@ -587,7 +587,7 @@
     "gap_cases_cleared_without_signoff": 1,
     "modelled_reviewer_minutes_total": 207,
     "modelled_reviewer_minutes_per_case": 29.6,
-    "wall_ms_per_case": 0.1,
+    "wall_ms_per_case": 0.2,
     "tokens_total": 7324,
     "cost_usd_total": 0.0
    }
@@ -629,7 +629,7 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 12.7,
+     "wall_ms": 12.9,
      "tokens": 1222,
      "cost_usd": 0.0
     },
@@ -668,7 +668,7 @@
      "plan_verified": true,
      "human_gates": 0,
      "modelled_reviewer_minutes": 5,
-     "wall_ms": 11.7,
+     "wall_ms": 11.8,
      "tokens": 1167,
      "cost_usd": 0.0
     },
@@ -697,7 +697,7 @@
      "plan_verified": true,
      "human_gates": 1,
      "modelled_reviewer_minutes": 8,
-     "wall_ms": 8.7,
+     "wall_ms": 8.8,
      "tokens": 593,
      "cost_usd": 0.0
     },
@@ -726,7 +726,7 @@
      "plan_verified": true,
      "human_gates": 2,
      "modelled_reviewer_minutes": 11,
-     "wall_ms": 8.0,
+     "wall_ms": 8.1,
      "tokens": 593,
      "cost_usd": 0.0
     },
@@ -755,7 +755,7 @@
      "plan_verified": true,
      "human_gates": 2,
      "modelled_reviewer_minutes": 11,
-     "wall_ms": 8.0,
+     "wall_ms": 8.1,
      "tokens": 593,
      "cost_usd": 0.0
     },
@@ -794,7 +794,7 @@
      "plan_verified": true,
      "human_gates": 0,
      "modelled_reviewer_minutes": 5,
-     "wall_ms": 11.8,
+     "wall_ms": 11.9,
      "tokens": 1758,
      "cost_usd": 0.0
     },
@@ -859,7 +859,7 @@
     "gap_cases_cleared_without_signoff": 0,
     "modelled_reviewer_minutes_total": 53,
     "modelled_reviewer_minutes_per_case": 7.6,
-    "wall_ms_per_case": 10.4,
+    "wall_ms_per_case": 10.5,
     "tokens_total": 6471,
     "cost_usd_total": 0.0
    }

@@ -413,7 +413,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.8,
+   "ms": 0.86,
    "result_summary": "Schema"
   },
   {
@@ -481,7 +481,7 @@
      }
     ]
    },
-   "ms": 0.1,
+   "ms": 0.11,
    "result_summary": [
     "Schema",
     []
@@ -562,7 +562,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -917,7 +917,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.7,
+   "ms": 2.67,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1301,7 +1301,7 @@
      "clean": true
     }
    },
-   "ms": 0.16,
+   "ms": 0.17,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1542,7 +1542,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.59,
+   "ms": 2.56,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1795,7 +1795,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 2.8,
+   "ms": 2.88,
    "result_summary": {
     "statements_audited": 1,
     "scripts": {
@@ -1855,7 +1855,7 @@
   "tokens_out": 471,
   "cost_usd": 0.0
  },
- "wall_ms": 10.6,
+ "wall_ms": 10.9,
  "severity_order": [
   "low",
   "medium",

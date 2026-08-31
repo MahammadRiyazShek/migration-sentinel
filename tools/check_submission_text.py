@@ -39,6 +39,13 @@ v15: the field's label now reads "under 10000". The enforced number is unchanged
 longer described as a quotation of it - see the comment on FORM_LIMIT. An audit that calls its
 own policy a measurement is the v9 defect wearing the other shoe.
 
+v17: the platform answered a question this file had been guessing at for eight releases. A
+paste of 8,952 plain characters - inside both counts above - was refused with
+"description_text: Ensure this field has no more than 10000 characters", because the field is a
+rich-text editor and the counted string is the HTML it emits. A styled paste of that text
+renders about 12,100 characters. So the length check now measures three strings: the authored
+one, the CRLF one, and the rendered one the server actually counts.
+
 The claim count is no longer hardcoded either. It used to read `27/27` in a regex; the count
 is produced by `tools/check_results.py`, so it is asked rather than restated.
 
@@ -65,6 +72,23 @@ FORM_TEXT = ROOT / "SUBMISSION_FORM_TEXT.txt"
 # field label that moved once can move again between the last green run and the paste, and the
 # count that decides the outcome is the CRLF one below, which no counter in the page reports.
 FORM_LIMIT = 9000
+# v17: the field is a rich-text editor, and the server counts the HTML it produces, not the
+# text you typed. This number is not a policy and not a label: it is quoted from the only
+# measurement the platform has ever volunteered, its own rejection -
+#     "description_text: Ensure this field has no more than 10000 characters."
+# raised on a paste whose plain text was 8,952 characters. Every previous release measured the
+# authored string, which the server never sees. The same defect class as v9 and v10, one layer
+# further out: a checker that measures a string nobody counts.
+HTML_LIMIT = 10000
+# Markup the editor adds that the author never typed: a block wrapper per paragraph, a
+# non-breaking-space paragraph per blank line, and an anchor around every bare URL. Styled
+# pastes (Ctrl+V from a rendered page) also carry a style attribute per block, which is what
+# actually blew the limit, so it is modelled and reported rather than assumed away.
+BLOCK_MARKUP = len("<p></p>")
+BLANK_MARKUP = len("<p>&nbsp;</p>")
+ANCHOR_MARKUP = len('<a href="" target="_blank" rel="noopener"></a>')
+STYLED_ATTR = 90
+URL_RE = re.compile(r"https?://\S+")
 
 ARMS = ("baseline_prompt_only", "baseline_prompt_with_schema", "agent_pipeline")
 
@@ -83,23 +107,42 @@ def _load(rel):
 
 # ---------------------------------------------------------------- 1. fits the form
 
+def _rendered_html_length(text, per_block_attr=0):
+    """Model the string the server counts: the editor's HTML, not the author's text."""
+    total = 0
+    for line in text.split("\n"):
+        if not line.strip():
+            total += BLANK_MARKUP
+            continue
+        total += BLOCK_MARKUP + per_block_attr + len(line)
+        for url in set(URL_RE.findall(line)):
+            total += ANCHOR_MARKUP + len(url)
+    return total
+
+
 def check_fits_the_form(text):
-    """Two counts, because the field and the browser do not agree on what a line break is.
+    """Three counts, because the author, the browser and the server disagree on the string.
 
     v10: the committed text was 9,536 characters against a 9,000-character field, so the
     submitted description was truncated somewhere inside the hot take - the 5% rubric row -
     and no repository check could see it, because the previous release measured a length it
-    had already declared legal. It is measured here twice:
+    had already declared legal.
 
-      * as authored, one byte per newline, which is what a JavaScript character counter in
-        the page reports;
-      * CRLF-normalised, two bytes per newline, which is what a form POST actually carries
-        (HTML form submission normalises textarea line breaks to CRLF).
+    v17: the same defect one layer further out. The text fit both counts below at 8,952
+    characters and the platform rejected it anyway, with the only number it has ever
+    published: 10000, over `description_text`. That field is the editor's HTML. Nobody
+    counts what the author typed, so it is measured here three ways:
 
-    The text has 50 line breaks, so the two counts differ by 50. A description that fits one
-    and not the other is a description whose fate depends on where it is counted.
+      * as authored, one byte per newline, which is what a character counter in a page reports;
+      * CRLF-normalised, two bytes per newline, which is what a plain form POST carries;
+      * rendered, which is what a rich-text editor sends and the server measures.
+
+    A description that fits the first two and not the third is a description that passes every
+    audit in this repository and never reaches a judge.
     """
     crlf = len(text) + text.count("\n")
+    plain_paste = _rendered_html_length(text)
+    styled_paste = _rendered_html_length(text, STYLED_ATTR)
     problems = []
     if len(text) > FORM_LIMIT:
         problems.append(f"{len(text)} characters, over the form's {FORM_LIMIT} limit by "
@@ -109,10 +152,18 @@ def check_fits_the_form(text):
                         f"line breaks to CRLF, over the form's {FORM_LIMIT} limit by "
                         f"{crlf - FORM_LIMIT}: it fits the counter in the page and not the "
                         f"POST body")
+    if plain_paste > HTML_LIMIT:
+        problems.append(f"{plain_paste} characters once the rich-text editor wraps it, over "
+                        f"description_text's {HTML_LIMIT} limit by {plain_paste - HTML_LIMIT}: "
+                        f"the server counts the markup, and a plain-text paste already "
+                        f"exceeds it")
     if problems:
         return problems
     print(f"        {len(text)} of {FORM_LIMIT} characters as authored, {crlf} CRLF-normalised, "
           f"{FORM_LIMIT - crlf} spare on the stricter count")
+    print(f"        {plain_paste} of {HTML_LIMIT} in description_text after a plain-text paste, "
+          f"{HTML_LIMIT - plain_paste} spare; a styled paste renders {styled_paste} and is "
+          f"rejected, so paste unstyled (Ctrl+Shift+V)")
     return []
 
 
