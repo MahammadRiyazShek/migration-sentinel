@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.74 ms)
+**tool** `schema.parse` (0.65 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -177,7 +177,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.2 ms)
+**tool** `corpus.dependents` (0.17 ms)
 
 ```json
 {
@@ -390,7 +390,7 @@ _tool responded_
 28
 ```
 
-**tool** `shadow.replay` (3.29 ms)
+**tool** `shadow.replay` (2.61 ms)
 
 ```json
 {
@@ -513,7 +513,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.access_path_users` (0.2 ms)
+**tool** `corpus.access_path_users` (0.18 ms)
 
 ```json
 {
@@ -601,7 +601,7 @@ _tool responded_
 
 _note (risk_officer)_: idx_invoices_customer is dropped but statement 1 creates idx_invoices_customer_status on invoices(customer_id, status), whose leading columns still serve invoices(customer_id). The access path survives, so no ACCESS_PATH_REMOVED is raised.
 
-**tool** `coverage.ledger` (0.23 ms)
+**tool** `coverage.ledger` (0.14 ms)
 
 ```json
 {
@@ -739,7 +739,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.07 ms)
+**tool** `migration.parse` (0.05 ms)
 
 ```json
 {
@@ -782,7 +782,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -829,7 +829,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.06 ms)
+**tool** `shadow.replay` (2.63 ms)
 
 ```json
 {

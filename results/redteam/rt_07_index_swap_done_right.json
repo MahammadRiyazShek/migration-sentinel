@@ -250,7 +250,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.74,
+   "ms": 0.65,
    "result_summary": "Schema"
   },
   {
@@ -259,7 +259,7 @@
    "args": {
     "sql": "DROP INDEX CONCURRENTLY idx_invoices_customer;\nCREATE INDEX CONCURRENTLY idx_invoices_customer_status ON invoices (customer_id, status);\n"
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "drop_index",
@@ -422,7 +422,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.2,
+   "ms": 0.17,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -849,7 +849,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.29,
+   "ms": 2.61,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -931,7 +931,7 @@
      "customer_id"
     ]
    },
-   "ms": 0.2,
+   "ms": 0.18,
    "result_summary": [
     {
      "query_id": "q_billing_customer_invoices",
@@ -1203,7 +1203,7 @@
     },
     "rule_coverage": true
    },
-   "ms": 0.23,
+   "ms": 0.14,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1218,7 +1218,7 @@
    "args": {
     "sql": "DROP INDEX CONCURRENTLY idx_invoices_customer;\nCREATE INDEX CONCURRENTLY \"idx_invoices_customer_status\" ON \"invoices\" (\"customer_id\", \"status\");"
    },
-   "ms": 0.07,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "drop_index",
@@ -1282,7 +1282,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1525,7 +1525,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.06,
+   "ms": 2.63,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1548,7 +1548,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 8.9,
+ "wall_ms": 7.3,
  "severity_order": [
   "low",
   "medium",

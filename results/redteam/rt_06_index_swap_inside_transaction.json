@@ -308,7 +308,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.74,
+   "ms": 0.67,
    "result_summary": "Schema"
   },
   {
@@ -317,7 +317,7 @@
    "args": {
     "sql": "BEGIN;\nDROP INDEX CONCURRENTLY idx_invoices_customer;\nCREATE INDEX CONCURRENTLY idx_invoices_customer_status ON invoices (customer_id, status);\nCOMMIT;\n"
    },
-   "ms": 0.05,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "transaction_control",
@@ -413,7 +413,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -971,7 +971,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.26,
+   "ms": 2.67,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1367,7 +1367,7 @@
     },
     "rule_coverage": true
    },
-   "ms": 0.16,
+   "ms": 0.19,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1382,7 +1382,7 @@
    "args": {
     "sql": "DROP INDEX CONCURRENTLY idx_invoices_customer;\nCREATE INDEX CONCURRENTLY \"idx_invoices_customer_status\" ON \"invoices\" (\"customer_id\", \"status\");"
    },
-   "ms": 0.07,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "drop_index",
@@ -1446,7 +1446,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1689,7 +1689,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.12,
+   "ms": 2.61,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1712,7 +1712,7 @@
   "tokens_out": 174,
   "cost_usd": 0.0
  },
- "wall_ms": 9.0,
+ "wall_ms": 7.6,
  "severity_order": [
   "low",
   "medium",

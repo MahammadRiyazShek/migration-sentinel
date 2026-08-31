@@ -212,7 +212,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.71,
+   "ms": 0.65,
    "result_summary": "Schema"
   },
   {
@@ -221,7 +221,7 @@
    "args": {
     "sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id);\n"
    },
-   "ms": 0.07,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "add_constraint",
@@ -261,7 +261,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -687,7 +687,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.98,
+   "ms": 2.43,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -942,7 +942,7 @@
     },
     "rule_coverage": true
    },
-   "ms": 0.2,
+   "ms": 0.24,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -957,7 +957,7 @@
    "args": {
     "sql": "ALTER TABLE \"invoices\" ADD CONSTRAINT \"invoices_customer_fk\" FOREIGN KEY (customer_id) REFERENCES customers (id) NOT VALID;"
    },
-   "ms": 0.09,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "add_constraint",
@@ -997,7 +997,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1228,7 +1228,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.71,
+   "ms": 2.37,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1251,7 +1251,7 @@
   "tokens_out": 120,
   "cost_usd": 0.0
  },
- "wall_ms": 7.9,
+ "wall_ms": 6.8,
  "severity_order": [
   "low",
   "medium",

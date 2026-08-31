@@ -278,7 +278,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.7,
+   "ms": 0.63,
    "result_summary": "Schema"
   },
   {
@@ -287,7 +287,7 @@
    "args": {
     "sql": "CREATE UNIQUE INDEX idx_customers_email ON customers (email);\n"
    },
-   "ms": 0.03,
+   "ms": 0.02,
    "result_summary": [
     {
      "kind": "create_index",
@@ -329,7 +329,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -554,7 +554,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.05,
    "result_summary": 17
   },
   {
@@ -783,7 +783,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.98,
+   "ms": 2.54,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -850,7 +850,7 @@
     "hazard_code": "INDEX_LOCK_NO_CONCURRENT",
     "table": "customers"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     [
@@ -1085,7 +1085,7 @@
     },
     "rule_coverage": true
    },
-   "ms": 0.17,
+   "ms": 0.12,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1100,7 +1100,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_customers_email_tmp_nonunique\" ON \"customers\" (\"email\");"
    },
-   "ms": 0.07,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "create_index",
@@ -1374,7 +1374,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.87,
+   "ms": 2.48,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1397,7 +1397,7 @@
   "tokens_out": 221,
   "cost_usd": 0.0
  },
- "wall_ms": 8.1,
+ "wall_ms": 7.0,
  "severity_order": [
   "low",
   "medium",

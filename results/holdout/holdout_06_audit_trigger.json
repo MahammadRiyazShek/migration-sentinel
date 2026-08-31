@@ -164,7 +164,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.91,
+   "ms": 0.85,
    "result_summary": "Schema"
   },
   {
@@ -221,7 +221,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     [
@@ -314,7 +314,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.1,
    "result_summary": []
   },
   {
@@ -669,7 +669,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.51,
+   "ms": 2.93,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1029,7 +1029,7 @@
     },
     "rule_coverage": true
    },
-   "ms": 0.2,
+   "ms": 0.17,
    "result_summary": {
     "gaps": [
      {
@@ -1059,7 +1059,7 @@
    "args": {
     "sql": "CREATE TABLE stop_status_audit ( id SERIAL PRIMARY KEY, stop_id INTEGER NOT NULL, old_status TEXT, new_status TEXT, changed_at TIMESTAMPTZ NOT NULL );"
    },
-   "ms": 0.12,
+   "ms": 0.1,
    "result_summary": [
     {
      "kind": "create_table",
@@ -1091,7 +1091,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1432,7 +1432,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.52,
+   "ms": 2.91,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1455,7 +1455,7 @@
   "tokens_out": 78,
   "cost_usd": 0.0
  },
- "wall_ms": 9.5,
+ "wall_ms": 8.0,
  "severity_order": [
   "low",
   "medium",

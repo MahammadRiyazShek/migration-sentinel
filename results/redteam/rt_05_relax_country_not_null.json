@@ -207,7 +207,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.77,
+   "ms": 0.68,
    "result_summary": "Schema"
   },
   {
@@ -216,7 +216,7 @@
    "args": {
     "sql": "ALTER TABLE customers ALTER COLUMN country_code DROP NOT NULL;\n"
    },
-   "ms": 0.06,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "drop_not_null",
@@ -244,7 +244,7 @@
      }
     ]
    },
-   "ms": 0.09,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -325,7 +325,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.13,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -680,7 +680,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.23,
+   "ms": 2.61,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -914,7 +914,7 @@
     },
     "rule_coverage": true
    },
-   "ms": 0.15,
+   "ms": 0.14,
    "result_summary": {
     "gaps": [
      {
@@ -952,7 +952,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.08,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1168,7 +1168,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.01,
+   "ms": 2.65,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1191,7 +1191,7 @@
   "tokens_out": 78,
   "cost_usd": 0.0
  },
- "wall_ms": 8.4,
+ "wall_ms": 7.0,
  "severity_order": [
   "low",
   "medium",

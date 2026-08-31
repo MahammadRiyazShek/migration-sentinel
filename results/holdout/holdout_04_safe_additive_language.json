@@ -347,7 +347,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.88,
+   "ms": 0.86,
    "result_summary": "Schema"
   },
   {
@@ -424,7 +424,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -525,7 +525,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.21,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_dispatch_create",
@@ -1032,7 +1032,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.48,
+   "ms": 2.98,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1459,7 +1459,7 @@
     },
     "rule_coverage": true
    },
-   "ms": 0.2,
+   "ms": 0.16,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1474,7 +1474,7 @@
    "args": {
     "sql": "ALTER TABLE \"drivers\" ADD COLUMN \"preferred_language\" TEXT;\nCREATE INDEX CONCURRENTLY \"idx_drivers_carrier\" ON \"drivers\" (\"carrier_id\");"
    },
-   "ms": 0.07,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1542,7 +1542,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -1901,7 +1901,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.47,
+   "ms": 2.93,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1983,7 +1983,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 9.4,
+ "wall_ms": 8.0,
  "severity_order": [
   "low",
   "medium",

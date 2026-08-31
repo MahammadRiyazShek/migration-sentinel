@@ -4,7 +4,7 @@
 
 Do not ship this as written. 3 coverage gap(s) need a named sign-off before this can be called safe. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 7 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-holdout_08_release_train_fleet` · case `holdout_08_release_train_fleet` · owning service `dispatch-api` · 11.5 ms · model scripted-v1 (12 calls, $0.0000)
+`run eval-holdout_08_release_train_fleet` · case `holdout_08_release_train_fleet` · owning service `dispatch-api` · 9.6 ms · model scripted-v1 (12 calls, $0.0000)
 
 > **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 
