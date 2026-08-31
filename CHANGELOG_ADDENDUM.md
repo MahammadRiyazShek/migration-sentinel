@@ -203,3 +203,102 @@ python eval/model_invariance.py        # 180 reviews, 4 hostile models, 3 narrat
 python tools/check_results.py          # 27/27 claims hold
 python tools/check_docs.py             # 5 documentation checks, exits 1 on any failure
 ```
+
+---
+
+## v8 - the audit that reads the submission form
+
+**Why:** an eighth fresh-context supervisor session, given the v7 archive, the rubric and the text as
+actually pasted into the micro1 form, with one instruction: make a published number false, then fix
+what breaks. It could not make a number false - 38 tests (after its own additions), 108 + 180 reviews,
+27/27 claims, 12/12 packets, 6/6 documentation checks, Python 3.12.13, offline, first attempt. So it
+asked the question v7's success made available: **which artefact does a judge see that no checker in
+this repository can reach?**
+
+Four: the submission form, the uploaded archive, the video and the live demo. Of those, the form's
+Description field is the only one every judge reads *before opening anything*.
+
+**What it found.** The field is capped at 10,000 characters and specifies plain text. The verified
+`SUBMISSION_DESCRIPTION.md` leads with a nine-row markdown table, so it cannot be pasted as written.
+It was flattened by hand - the one edit in this submission that happens outside the repository, and
+therefore the one edit no tool could see. `tools/check_docs.py` asserted the description *fit* the
+field. Nothing asserted what it *contained*. Five load-bearing things had been lost:
+
+1. **The verification lede.** `python tools/check_results.py -> 27/27 claims hold` was the second
+   sentence of the verified text. In the form it sat mid-paragraph, behind the nine results it exists
+   to guarantee. Reproducibility is 15% of the rubric and the second tie-break; the strongest sentence
+   in the submission was reading as a footnote to the numbers rather than the licence to trust them.
+2. **The explicit baseline-and-advanced framing.** "Baseline vs advanced. A: one model call on the
+   diff. B: ... Sentinel: five agents over ..." had collapsed to "Arms: A, B, Sentinel". The rules
+   require every valid entry to *present* both. A judge ticking that box wants the sentence.
+3. **The enumeration behind "byte-identical."** "byte-identical on verdict, hazards, severities,
+   evidence, ledger, generated SQL and verification" had become "byte-identical throughout". The
+   enumeration is the claim; "throughout" is an assertion with no size.
+4. **The pointer to `trajectories/`.** The form cited `agent_traces/` alone, which is the *development*
+   traces. Deliverable 04 is the runtime trajectories of the five in-product agents. The submission was
+   pointing the trace check at the wrong directory.
+5. **"An agent that grades its own work has graded itself."** The line that makes the never-delegated
+   list mean anything.
+
+Plus a smaller one: "9 arms x 12 cases = 108 reviews, one component removed at a time" - three of the
+nine are the headline arms and have no component removed. Right arithmetic, wrong sentence.
+
+**Two variations considered and rejected**, both in `docs/SUPERVISOR_LOG_V8.md` §4. Generating the
+description from a template over `results/*.json` makes drift structurally impossible and hands the
+most persuasive 10,000 characters in the submission to a renderer, which is the failure mode this
+project's hot take is about: generate what is a fact, author what is a judgement. Submitting the raw
+markdown and letting the field mangle it removes the transform and pays a real presentation cost on a
+20% rubric row. What shipped is the third option those two made visible: keep the human flattening,
+commit its output verbatim, audit the transform.
+
+**What shipped:** `SUBMISSION_FORM_TEXT.txt`, the exact text in the form, committed so it is auditable
+at all. `tools/check_submission_text.py`, six checks, stdlib, exit code 1 on failure: it fits the
+field (9,4xx of 10,000); it is 7-bit ASCII with no markdown a plain-text field would render literally;
+every headline figure matches `results/evaluation.json` arm for arm; every ablation figure and the
+108-review arithmetic match `results/ablation.json`; the invariance arithmetic, the 0/168 decision
+surface, the 12 declared crashes, the 36/13/0 provenance progression and the 0-of-60 model-written
+headlines match `results/model_invariance.json`; and seven named load-bearing sentences are present,
+with the verification lede inside the first 1,200 characters. Plus a sixth check in
+`tools/check_docs.py` for stale *test* counts - a stale claim count survived two releases before v7
+caught it, and the test count sat in six current-state documents with nothing reading it.
+
+**Evidence the audit is load-bearing.** Run against the text as originally submitted: 4/6, and it names
+all five losses. Against the corrected text: 6/6. Both runs are in
+`agent_traces/session-08-supervisor-form-text-audit.md`. And
+`tests/test_all.py::TestSubmissionText` deletes each of the seven protected sentences in turn and
+asserts the audit fails every time, plus one test that *demotes* the verification lede to the end of
+the text rather than deleting it, because a demotion is what actually happened.
+
+**Four mistakes of its own**, logged in `docs/SUPERVISOR_LOG_V8.md` §6. The one worth reading is M2: the
+invariance check summed a JSON key that does not exist, `.get(..., 0)` meant it did not raise, and it
+computed "0 of 0" and reported a failure against a claim the text stated correctly. **A checker with a
+default can pass while reading nothing**, which is worse than a missing check because it looks like
+evidence. Rewritten with subscripts so a renamed field is a `KeyError`.
+
+**Evidence that nothing else moved:** `results/` is byte-identical to the archive. 27/27 claims, unsafe
+approvals 0/12, strict recall and precision 0.970, severity agreement 0.969, plans 12/12, gap cases
+cleared 0/2, evidenced findings 35/35, 9.2 modelled min/case, 0 of 168 completed reviews changing the
+decision surface, 12/12 packets reproducing through the browser driver. Nothing under `sentinel/`,
+`eval/cases/`, `eval/scoring.py` or `memory/` was touched, and `tools/check_results.py` is unchanged,
+so **"27/27" still means in v8 what it means in the video.** The counts that moved are all counts of
+audits: tests 33 -> 38, documentation checks 5 -> 6, and 6 new submission-text checks.
+
+**The lesson, one layer out from v7's.** v5: a defence audited in its own vocabulary reports on the
+attacker's imagination. v7: a repository that audits only its measurements is audited only where it
+already knows how to be wrong. v8: **every lossy transform on the way to your user needs a statement of
+what has to survive it, or the transform decides for you and every gate upstream stays green.** The
+repository was 27/27, 5/5 and 12/12 while the first paragraph a judge would read had lost the sentence
+that makes all three worth anything. The pipeline does not end at the last component you wrote; it ends
+at the last edit before a human reads it, and that edit is usually a person reformatting something
+under a constraint your tests have never heard of.
+
+**How to verify from a clean clone**
+
+```bash
+python -m unittest discover -s tests    # 38 tests
+python eval/run_eval.py --ablations     # 108 reviews
+python eval/model_invariance.py         # 180 reviews, 4 hostile models, 3 narrator modes
+python tools/check_results.py           # 27/27 claims hold
+python tools/check_docs.py              # 6 documentation checks, exits 1 on any failure
+python tools/check_submission_text.py   # 6 checks on the description in the submission form
+```

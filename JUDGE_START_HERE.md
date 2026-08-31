@@ -14,11 +14,12 @@ Whole evaluation is under a second and costs $0.00.**
 
 ```bash
 git clone https://github.com/MahammadRiyazShek/migration-sentinel && cd migration-sentinel
-python3 -m unittest discover -s tests   # 33 tests, ~0.3 s
+python3 -m unittest discover -s tests   # 38 tests, ~0.3 s
 python3 eval/run_eval.py --ablations    # 108 reviews (12 cases x 9 arms), < 1 s
 python3 eval/model_invariance.py        # 180 reviews, 5 models x 3 narrator modes, < 1 s
 python3 tools/check_results.py          # 27/27 published claims re-asserted from raw JSON
-python3 tools/check_docs.py             # 5 checks on what the docs claim about the repo
+python3 tools/check_docs.py             # 6 checks on what the docs claim about the repo
+python3 tools/check_submission_text.py  # 6 checks on the description in the submission form
 ```
 
 The fourth command is the one to run if you only run one. It reads `results/*.json` and re-asserts
@@ -34,7 +35,7 @@ every number in this repository, including the three that make the pipeline look
 | Agent solution & engineering (30%) | `sentinel/agents/`, prompts in `sentinel/agents/prompts/`, `sentinel/orchestrator.py` | `results/ablation.md`: 9 arms, one component removed at a time. Replay alone is **worse** than rules alone (2 unsafe vs 1) |
 | End to end quality (20%) | `results/case_12_release_train.md`, live desk below | `python3 -m sentinel review --case eval/cases/case_12_release_train.json --print-report` produces the packet a reviewer actually reads |
 | Measured improvement (15%) | `results/comparison.md`, `README.md` §Improvement Changelog | 10 kept iterations, 3 removed experiments, 4 rejected designs, each row tied to an arm in `results/*.json` |
-| Reproducibility (15%) | `REPRODUCTION.md` | clean clone to main result in four commands, no key, no network. `tools/check_docs.py` audits the documentation itself: no dangling file reference, no stale claim count, one entry point |
+| Reproducibility (15%) | `REPRODUCTION.md` | clean clone to main result in four commands, no key, no network. `tools/check_docs.py` audits the documentation itself: no dangling file reference, no stale claim or test count, one entry point. `tools/check_submission_text.py` audits the description in the submission form, which is the one artefact that lives outside this repository |
 | Hot take / insights (5%) | `README.md` §Hot take, `results/model_invariance.md` | the failure mode was found by writing an attacker against my own fix, not by removing a component |
 
 ---
@@ -78,6 +79,29 @@ F1 without its denominator.
 
 ---
 
+## The description in the form is committed here too
+
+The form's Description field is plain text, so the verified `SUBMISSION_DESCRIPTION.md` - which
+leads with a markdown table - cannot be pasted into it as written. That flattening is the one
+edit in this submission that happens outside the repository, which means it was the one edit no
+checker could see. So the exact text submitted to the form is committed verbatim as
+[`SUBMISSION_FORM_TEXT.txt`](SUBMISSION_FORM_TEXT.txt) and audited:
+
+```bash
+python3 tools/check_submission_text.py
+```
+
+Six checks: it fits 10,000 characters, it is 7-bit ASCII with no markdown a plain-text field
+would render literally, every headline / ablation / hostile-model figure in it is read back out
+of `results/*.json` arm for arm, and seven named load-bearing sentences are still present and
+still in position. `tests/test_all.py::TestSubmissionText` deletes each of those seven in turn
+and asserts the audit fails, so none of them is a regex nobody is defending.
+
+The first version of that text lost four of the seven, including the one command that proves
+every number in the submission. Details in [`docs/SUPERVISOR_LOG_V8.md`](docs/SUPERVISOR_LOG_V8.md).
+
+---
+
 ## The video is older than the repo
 
 The submitted video was recorded against v2. The repository is v5. The problem, architecture,
@@ -87,6 +111,9 @@ components (the coverage gate and the structural narrator) did not exist yet.
 **Where the video and the repository disagree, `results/comparison.md` and
 `results/model_invariance.md` are authoritative.** An exhaustive, line-by-line correction table is in
 [`docs/VIDEO_ADDENDUM.md`](docs/VIDEO_ADDENDUM.md) - every stale number, what it moved to, and why.
+A single-take script written against v5, for the re-record, is in
+[`docs/VIDEO_SCRIPT_V5.md`](docs/VIDEO_SCRIPT_V5.md); the original v2 shot list is kept in
+[`docs/VIDEO_SCRIPT.md`](docs/VIDEO_SCRIPT.md) because it is what the submitted video was made from.
 
 ---
 

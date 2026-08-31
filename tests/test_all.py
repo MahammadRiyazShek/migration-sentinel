@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import subprocess
 import sys
 import unittest
 
@@ -339,6 +340,79 @@ class TestStructuralNarrator(unittest.TestCase):
                      learned_path=None, trace=False, guard_narrator=False)["report"]
         self.assertEqual(on["narrator"]["mode"], "pattern")
         self.assertEqual(off["narrator"]["mode"], "off")
+
+
+class TestSubmissionText(unittest.TestCase):
+    """The eighth session's finding: the first artefact a judge reads is the form's
+    Description field, which lives outside the repository and which no checker could reach.
+    `SUBMISSION_FORM_TEXT.txt` commits it and `tools/check_submission_text.py` audits it.
+    These tests exist to stop that checker becoming decorative: every required claim has to
+    be demonstrably load-bearing, or it is a regex nobody is defending."""
+
+    FORM = ROOT / "SUBMISSION_FORM_TEXT.txt"
+    CHECKER = ROOT / "tools/check_submission_text.py"
+
+    def _run(self, text=None):
+        """Run the checker over `text`, restoring the committed file afterwards."""
+        original = self.FORM.read_text(encoding="utf-8")
+        try:
+            if text is not None:
+                self.FORM.write_text(text, encoding="utf-8")
+            return subprocess.run([sys.executable, str(self.CHECKER)], cwd=ROOT,
+                                  capture_output=True, text=True)
+        finally:
+            self.FORM.write_text(original, encoding="utf-8")
+
+    def test_the_committed_form_text_fits_the_field_and_is_plain_ascii(self):
+        text = self.FORM.read_text(encoding="utf-8").strip()
+        self.assertLessEqual(len(text), 10000)
+        self.assertEqual([c for c in text if ord(c) > 127], [],
+                         "the form field is plain text; non-ASCII may be mangled")
+        for markup in ("|", "**", "`"):
+            self.assertNotIn(markup, text, f"markdown {markup!r} renders literally in the form")
+
+    def test_the_checker_passes_on_the_committed_form_text(self):
+        out = self._run()
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertIn("6/6 submission-text checks hold", out.stdout)
+
+    def test_a_wrong_figure_in_the_form_text_fails_the_audit(self):
+        text = self.FORM.read_text(encoding="utf-8")
+        broken = text.replace("Unsafe approvals (primary): 1/12, 1/12, 0/12",
+                              "Unsafe approvals (primary): 1/12, 1/12, 0/11")
+        self.assertNotEqual(broken, text, "the headline row this test edits has moved")
+        out = self._run(broken)
+        self.assertNotEqual(out.returncode, 0)
+        self.assertIn("results/evaluation.json says", out.stdout)
+
+    def test_every_required_claim_is_load_bearing(self):
+        """Delete each required sentence in turn: the audit must fail every time. A pattern
+        whose removal the audit tolerates is not protecting anything."""
+        from importlib import util
+        spec = util.spec_from_file_location("_cst", self.CHECKER)
+        mod = util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        text = self.FORM.read_text(encoding="utf-8")
+        self.assertGreaterEqual(len(mod.REQUIRED_CLAIMS), 7)
+        for label, pattern, _window, _why in mod.REQUIRED_CLAIMS:
+            m = pattern.search(text)
+            self.assertIsNotNone(m, f"required claim absent from the committed text: {label}")
+            out = self._run(text[: m.start()] + text[m.end():])
+            self.assertNotEqual(out.returncode, 0,
+                                f"the audit tolerates deleting {label!r}, so it is not "
+                                f"defending it")
+
+    def test_the_verification_lede_has_to_stay_near_the_top(self):
+        """The drift that started this session was a demotion, not a deletion: the one
+        command that proves every number was still present, five screens down."""
+        text = self.FORM.read_text(encoding="utf-8")
+        lede = "Every number below is re-asserted"
+        i = text.index(lede)
+        end = text.index("\n\n", i) + 2
+        moved = text[:i] + text[end:] + "\n\n" + text[i:end]
+        out = self._run(moved)
+        self.assertNotEqual(out.returncode, 0)
+        self.assertIn("past 1200", out.stdout)
 
 
 if __name__ == "__main__":

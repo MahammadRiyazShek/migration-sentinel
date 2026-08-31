@@ -21,6 +21,8 @@ different thing and their runtime traces are separate: [`trajectories/`](traject
 
 | Claude Opus 5, seventh session, supervisor role (ClickUp Brain agentic assistant) | `claude-opus-5` | separate context, given the v6 source archive, the submission form text and the challenge brief, with a sandboxed Python shell and **no network access**; same instruction as the third, fifth and sixth sessions | Re-ran the whole suite from the archive and could not make a number false (33 tests, 108 + 180 reviews, 27/27 claims, 12/12 packets, Python 3.12.13, offline), so it attacked the unaudited layer instead: the pages a judge reads before reaching a number. Produced [`docs/SUPERVISOR_LOG_V7.md`](docs/SUPERVISOR_LOG_V7.md), `tools/check_docs.py` (five documentation checks with an exit code), `SUBMISSION_DESCRIPTION.md`, the v7 changelog entry, and four fixes: a duplicate judge entry point deleted, four mis-decoded glyphs repaired, a generated sentence in `results/time_sensitivity.md` that contradicted its own table, and a stale claim count in `REPRODUCTION.md`. It touched no pipeline code, no case, no label, no scorer and no constant, and no detection number moved. |
 
+| Claude Opus 5, eighth session, supervisor role (ClickUp Brain agentic assistant) | `claude-opus-5` | separate context, given the v7 source archive, the challenge brief and rubric, and **the text as actually pasted into the submission form**, with a sandboxed Python shell and **no network access**; same instruction as the third, fifth, sixth and seventh sessions, plus "then fix what breaks, and do not hand the work back" | Reproduced every published figure from the archive on the first attempt (38 tests after its own additions, 108 + 180 reviews, 27/27 claims, 12/12 packets, Python 3.12.13, offline), so it went after the only artefact with no checker pointed at it: the form's Description field, which lives outside the repository. The field is plain text, the verified `SUBMISSION_DESCRIPTION.md` leads with a markdown table, and the hand flattening between them had silently dropped the verification lede, the explicit baseline-and-advanced sentence, the enumeration behind "byte-identical", the pointer to `trajectories/` and one closing line. Produced [`docs/SUPERVISOR_LOG_V8.md`](docs/SUPERVISOR_LOG_V8.md), `SUBMISSION_FORM_TEXT.txt` (the submitted text, committed verbatim so it is auditable at all), `tools/check_submission_text.py` (six checks with an exit code), a sixth check in `tools/check_docs.py` for stale test counts, the five `TestSubmissionText` tests, `docs/VIDEO_SCRIPT_V5.md` and the corrected form text. It touched no pipeline code, no case, no label, no scorer, no constant and no primary metric; `results/` is byte-identical to the archive and no detection number moved. Four mistakes of its own, including a checker that computed `0 of 0` from a JSON key that does not exist and still printed a failure, are logged in `docs/SUPERVISOR_LOG_V8.md` §6. |
+
 | Final packaging audit, fourth session | not disclosed to participant (Genspark AI assistant) | separate context, given the v2 source archive and the submission form text | Found that `agent_traces/INDEX.md` was referenced but absent; populated `agent_traces/` from real session artefacts only, regenerated the index with `tools/collect_agent_traces.py --write`, and re-ran the eval, tests and claim audit. It did not touch pipeline code, cases, ground truth or the scorer. |
 
 No other coding agent, autocomplete or code-generation tool was used. No agent had shell access to a
@@ -56,6 +58,20 @@ tool output, the model's prose is demoted below the evidence and labelled, and t
 wrote the sentence instead of asking a regex whether it approved of the wording. Three mistakes in its
 own first attempt are logged in `docs/SUPERVISOR_LOG_V5.md` (§4), including a harness that measured the
 new attack with the very function the new attack was written to defeat.
+
+**The eighth session went outside the repository.** Seven sessions had audited artefacts inside the
+boundary a checker can reach. The eighth asked which artefacts a judge sees that are *not* in the
+repository, and there were four: the form, the uploaded archive, the video and the live demo. Of those,
+the form's Description field is the only one every judge reads before opening anything, and it is
+produced by a hand transform - markdown flattened to plain text under a 10,000-character cap - that
+`tools/check_docs.py` measured the *length* of and never the content of. Five load-bearing things had
+been lost in that flattening, including the one command that re-asserts every number in the
+submission. The fix is not a better-written description, it is that the submitted text is now
+committed verbatim as `SUBMISSION_FORM_TEXT.txt` and audited by `tools/check_submission_text.py`, and
+that `tests/test_all.py::TestSubmissionText` deletes each protected sentence in turn to prove the
+audit is defending it. Its own four mistakes are in `docs/SUPERVISOR_LOG_V8.md` §6; the one worth
+reading is M2, a checker that read a JSON key which does not exist, defaulted to zero, and reported a
+failure against a claim that was correct. A checker with a default can pass while reading nothing.
 
 **The seventh session is the one that found nothing wrong with the numbers.** That is the finding worth keeping. It reproduced every published figure from the archive on the first attempt, so it went looking for the claim with no audit pointed at it, and there was a whole category: the repository verified 27 claims about its measurements and zero claims about itself. Two pages both titled "Judges start here" with different runtime figures, a supervisor log announcing a file that was never committed, mis-decoded glyphs in the first table a judge reads, and a generated paragraph hedging about the one number in the repository that reverses sign. Its shipped artefact is `tools/check_docs.py`, which is deliberately *not* four more claims inside `tools/check_results.py`: keeping them separate is why "27/27" still means in v7 what it meant in v5 and in the video. Its own three mistakes, including a first version of the checker whose failures were mostly false, are logged in `docs/SUPERVISOR_LOG_V7.md` (§4).
 
@@ -141,6 +157,15 @@ Every one of these was my decision, not the agent's:
   guarded. It also deletes the per-hazard explanation reviewers actually read, so it is named as the
   next experiment in `sentinel/narrator.py` rather than shipped, and the weaker choice is stated as a
   choice
+* in v8, the seven sentences in `tools/check_submission_text.py::REQUIRED_CLAIMS`. Which parts of a
+  description are load-bearing under a lossy transform is a judgement, not a measurement: the checker
+  enforces the list and did not choose it. Each entry carries its reason in the source so a future
+  deletion has to argue with the reason instead of deleting a regex
+* in v8, the rejection of generating the form description from a template over `results/*.json`. It
+  would make drift structurally impossible, and it would hand the most persuasive 10,000 characters in
+  the submission to a renderer - which is the failure mode this project's hot take is about. Generate
+  what is a fact, author what is a judgement. Both rejected variations are written up in
+  `docs/SUPERVISOR_LOG_V8.md` §4
 * the rule that a coverage gap is never expressed as a hazard. Absence of evidence gets a named human
   decision, not a severity. An agent that converts "I could not check this" into a finding is inflating
   its own recall with its own ignorance

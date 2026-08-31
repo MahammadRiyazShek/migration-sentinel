@@ -1,5 +1,13 @@
 # Paste-ready submission text
 
+> **The form field is plain text, and this file is markdown.** The flattening between the two is a
+> lossy transform, and in v7 it lost five load-bearing things on the way to the form without failing a
+> single check in this repository. The text **actually submitted** is committed verbatim as
+> [`SUBMISSION_FORM_TEXT.txt`](SUBMISSION_FORM_TEXT.txt) and audited by
+> `python tools/check_submission_text.py`. **Paste that file, not this one.** This file is the
+> markdown source and the record of what the plain-text version has to preserve. Reasoning:
+> [`docs/SUPERVISOR_LOG_V8.md`](docs/SUPERVISOR_LOG_V8.md).
+
 The micro1 form caps the Description field at 10,000 characters. Everything below the marker is
 that field, verified line by line against the committed evidence on a clean container
 (Python 3.12.13, no network, no pip install) by the seventh supervisor session:
@@ -56,7 +64,7 @@ The coverage ledger names, per affected object, what the review could not observ
 
 Review never touches a database. Execution runs in an in-memory SQLite sandbox and refuses three ways, each with its own exit code: without a named approving reviewer, on a BLOCK without an explicit override, and on an uncleared coverage gap.
 
-**Reproducibility.** Python 3.11+ standard library (3.11 and 3.12 verified), zero pip dependencies, no API key, no network, synthetic data. Start at `JUDGE_START_HERE.md`. `python -m sentinel review --case eval/cases/case_12_release_train.json` for one packet; `python eval/run_eval.py --ablations` for 108 reviews in under a second at $0.00; `python eval/model_invariance.py` for the 180 hostile-model reviews; 33 tests under `unittest`; `python tools/check_results.py` for 27/27 claims and `python tools/check_docs.py` for the documentation's own claims about the repository.
+**Reproducibility.** Python 3.11+ standard library (3.11 and 3.12 verified), zero pip dependencies, no API key, no network, synthetic data. Start at `JUDGE_START_HERE.md`. `python -m sentinel review --case eval/cases/case_12_release_train.json` for one packet; `python eval/run_eval.py --ablations` for 108 reviews in under a second at $0.00; `python eval/model_invariance.py` for the 180 hostile-model reviews; 38 tests under `unittest`; `python tools/check_results.py` for 27/27 claims and `python tools/check_docs.py` for the documentation's own claims about the repository, and `python tools/check_submission_text.py` for this description against both.
 
 Reviewer minutes is the one modelled number, so `eval/time_sensitivity.py` recomputes every arm under six constant sets, three written to break the claim: the saving holds at 69% under uniform rescaling, and **two adversarial sets reverse its sign** and are published flagged in the table. The load-bearing assumption is not that reviewers are slow, it is that writing a staged migration plan from scratch costs several times more than approving one that has already been replayed. That reversal is the coverage gate's bill.
 

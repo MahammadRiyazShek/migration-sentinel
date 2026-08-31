@@ -227,7 +227,7 @@ a hit or on an empty directory rather than writing an index that lists nothing. 
 python -m unittest discover -s tests -v
 ```
 
-Expected: `Ran 33 tests ... OK`, about 0.3 s. They cover the parser traps, the shadow replay,
+Expected: `Ran 38 tests ... OK`, about 0.3 s. They cover the parser traps, the shadow replay,
 memory escalation, determinism (same case twice, identical hazards and plan), the escalation path
 (`max_attempts=1` on case_01 must escalate instead of shipping an unverified plan) and the approval
 gate (refuses without `--i-approve`, refuses a `BLOCK` verdict without an explicit override, and
@@ -259,7 +259,23 @@ python tools/check_docs.py
 #    PASS  exactly one judge entry point at the root
 #    PASS  paste-ready description exists and fits the form
 #    PASS  no stale claim count in a current-state document
-#    5/5 documentation checks hold across 191 authored files
+#    6/6 documentation checks hold across 193 authored files
+
+### Step 7b: audit the description in the submission form
+
+```bash
+python3 tools/check_submission_text.py
+# ...
+#    6/6 submission-text checks hold: the description in the form is the description
+#    this repository can back
+```
+
+The micro1 form's Description field is plain text and lives outside this repository, so the
+markdown in `SUBMISSION_DESCRIPTION.md` has to be flattened by hand to paste it. The flattened
+text is committed verbatim as `SUBMISSION_FORM_TEXT.txt` and this command audits it: length,
+plain-text and ASCII cleanliness, every headline / ablation / hostile-model figure read back out
+of `results/*.json`, and seven named load-bearing sentences still present and in position.
+Exit code 1 on any failure. Runtime about 1 s (it shells out to `tools/check_results.py`).
 ```
 
 Exits 1 on any failure. It exists because the seventh supervisor session found five defects that

@@ -1,4 +1,4 @@
-.PHONY: help cases review baseline eval invariance test site artifact serve verify docs clean
+.PHONY: help cases review baseline eval invariance test site artifact serve verify docs form clean
 
 help:
 	@echo "make cases     regenerate the 12 evaluation cases"
@@ -8,7 +8,8 @@ help:
 	@echo "make invariance 12 cases x 4 models x guard on/off, hostile narrators"
 	@echo "make test      stdlib tests"
 	@echo "make verify    eval + assert every claim the README and the docs make"
-	@echo "make docs      audit the documentation only (references, glyphs, claim counts)"
+	@echo "make docs      audit the documentation only (references, glyphs, stale counts)"
+	@echo "make form      audit the submission form description against results/*.json"
 	@echo "make site      regenerate site/data + site/py from the results"
 	@echo "make serve     build the site and serve it at http://localhost:8000"
 
@@ -35,9 +36,13 @@ test:
 verify: eval invariance
 	python3 tools/check_results.py
 	python3 tools/check_docs.py
+	python3 tools/check_submission_text.py
 
 docs:
 	python3 tools/check_docs.py
+
+form:
+	python3 tools/check_submission_text.py
 
 site:
 	python3 tools/build_site.py

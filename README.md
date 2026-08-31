@@ -348,7 +348,10 @@ python -m sentinel cases                                      # list them
 python -m sentinel review --case eval/cases/case_12_release_train.json --print-report
 python eval/run_eval.py --ablations                           # everything, ~1 second
 python eval/model_invariance.py                               # 180 reviews: 5 models x 3 narrator modes
-python -m unittest discover -s tests -v                       # 33 tests
+python -m unittest discover -s tests -v                       # 38 tests
+python tools/check_results.py                                 # 27/27 claims, from raw JSON
+python tools/check_docs.py                                    # 6 checks on the docs themselves
+python tools/check_submission_text.py                         # 6 checks on the submission form text
 make serve                                                    # the review desk, locally
 ```
 
@@ -544,15 +547,22 @@ results/             review packets, comparison.md, ablation.md, evaluation.json
 trajectories/        one markdown + jsonl trajectory per case
 site/                the review desk: index.html, generated data/ and py/ (Pyodide runtime)
 tools/               build_site.py, build_artifact.py, check_results.py (27 claims about the numbers)
-  check_docs.py          5 claims the docs make about the repo: references, glyphs, entry point
+  check_docs.py          6 claims the docs make about the repo: references, glyphs, entry
+                         point, stale claim counts, stale test counts
+  check_submission_text.py  6 claims about the description in the submission form, which is
+                         the one artefact that lives outside this repository (v8)
   collect_agent_traces.py  generates agent_traces/INDEX.md, refuses on secret shapes
 agent_traces/        development-agent sessions (see AGENT_USE.md)
 AGENT_USE.md         coding-agent disclosure required by the challenge
+SUBMISSION_FORM_TEXT.txt  the exact plain-text description submitted to the form, committed
+                     verbatim so tools/check_submission_text.py can audit it (v8)
 .github/workflows/   verify the claims, then publish the desk to GitHub Pages
-docs/                CRITIQUE_LOG.md (read first), SUPERVISOR_LOG_V3.md to _V7.md,
-                     DESIGN_LOG.md, AGENT_TRAJECTORIES.md, VIDEO_SCRIPT.md, SUBMISSION.md,
+docs/                CRITIQUE_LOG.md (read first), SUPERVISOR_LOG_V3.md to _V8.md,
+                     DESIGN_LOG.md, AGENT_TRAJECTORIES.md, SUBMISSION.md,
+                     VIDEO_SCRIPT.md (what the submitted video was made from),
+                     VIDEO_SCRIPT_V5.md (single-take script against the current repo),
                      VIDEO_ADDENDUM.md (every number the video predates)
-tests/               33 stdlib tests
+tests/               38 stdlib tests
 ```
 
 ## Limitations, stated plainly

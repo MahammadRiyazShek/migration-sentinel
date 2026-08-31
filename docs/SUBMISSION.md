@@ -88,7 +88,7 @@ Python 3.11+ standard library (3.11 and 3.12 verified), zero pip dependencies, n
 
 - `python eval/run_eval.py --ablations` : 108 reviews, under 1 s, $0.00
 - `python eval/model_invariance.py` : 180 reviews, four hostile models, three narrator modes
-- `python -m unittest discover -s tests` : 33 tests
+- `python -m unittest discover -s tests` : 38 tests
 - `python tools/check_results.py` : 27/27 claims re-asserted from raw JSON
 
 The video predates v3, so its on-screen numbers are pre-coverage-gate and pre-provenance. `docs/VIDEO_ADDENDUM.md` is the exhaustive diff; where video and repo disagree, `results/comparison.md` and `results/model_invariance.md` win.
@@ -122,7 +122,7 @@ carries a 90-second delta script if there is time to append one.
 Upload the archive built from the tree that passes:
 
 ```bash
-python -m unittest discover -s tests   # 33 tests
+python -m unittest discover -s tests   # 38 tests
 python eval/run_eval.py --ablations    # 108 reviews
 python eval/model_invariance.py        # 180 reviews
 python tools/check_results.py          # 27/27 claims hold

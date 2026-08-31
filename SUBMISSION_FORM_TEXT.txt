@@ -1,0 +1,48 @@
+A two-line ALTER TABLE is either free or an outage, and the diff does not tell you which.
+
+Every number below is re-asserted from raw JSON by one command on a clean clone, in under a second, with no API key and no network: python tools/check_results.py -> 27/27 claims hold. Three of those claims make this pipeline look worse.
+
+THE USER. The platform engineer on the schema-migration review rota at a 20-to-300 engineer company: one Postgres primary, a dozen services and a BI layer reading it, migration PRs from teams that own their feature but not the database. A real review answers questions the diff does not contain: which live statements touch this column, whether anything reads SELECT * off the affected view, whether this lock survives 48M rows. It needs twenty to forty minutes and they get five, so review degrades into pattern matching on diff text: it catches the obvious DROP COLUMN and misses the DROP VIEW a worker reads every minute. The evidence exists already, in DDL, a query corpus, row counts and an incident log. Nobody has time to assemble it.
+
+BASELINE AND ADVANCED SOLUTION. A, the simple baseline: one model call on the diff. B, the stronger baseline: the same prompt plus full DDL and row counts. Sentinel, the advanced solution: five agents over a shadow-replay engine, static rules on a parsed change set, incident memory, generated expand/contract SQL, a Verifier that replays the plan it just wrote, a coverage ledger that caps the verdict, and a headline rendered from tool output. Same 12 cases, same hazard vocabulary, same scorer, same temperature. Only the scaffolding changes.
+
+RESULTS, in the order A, B, Sentinel.
+- Unsafe approvals (primary): 1/12, 1/12, 0/12
+- Blind-spot cases cleared (primary): 0/2, 0/2, 0/2
+- Blind spots named, with the object: 0, 0, 3
+- Hazard recall / precision: 0.545/0.947, 0.606/0.690, 0.970/0.970
+- Severity agreement on matched hazards: 0.611, 0.550, 0.969
+- Findings backed by machine evidence: 0/19, 0/29, 35/35
+- Verified expand/contract plans: 0/12, 0/12, 12/12
+- False alarms on the one clean migration: 1, 1, 0
+- Modelled reviewer minutes per case: 29.7, 34.7, 9.2
+
+Read the second primary metric honestly: all three arms tie at 0/2, and the tie is the finding. The baselines get there by requesting changes almost everywhere, 10 of 12 for A and 11 of 12 for B, both including the one genuinely safe migration. They never clear a blind spot because they clear almost nothing, and they name zero. Sentinel holds 0/2 while approving the clean case and shipping a plan for the safe one. "Ship as planned" printed above a declared blind spot passes the unsafe-approval scorer and still misleads the reviewer.
+
+B's precision is lower than A's. More context made it guess more, string-matching table names inside view bodies. Context you cannot check buys volume, not accuracy.
+
+WHAT EACH COMPONENT BUYS. 3 headline arms plus 6 ablation arms, one component removed at a time, across 12 cases = 108 reviews, scored on unsafe approvals / recall / plans / gaps / minutes per case. All five components: 0/12, 0.970, 12/12, 0/2, 9.2. Rules only: 1/12, 0.576, 0/12, 0/2, 23.3. Replay only: 2/12, 0.333, 12/12, 0/2, 8.8. No coverage gate: 0/12, 0.970, 12/12, 1/2, 8.5. Replay alone is worse than rules alone, 2 unsafe approvals against 1: a lock hazard produces no failing query, so nothing breaks, so replay-only waves through the 48M-row index build. Execution is necessary, not sufficient, and merging the layers is the biggest changelog contribution. The coverage gate is the only component whose removal makes a published number better (+0.7 min/case, no detection metric moved), and the one I defend first.
+
+CAN THE MODEL MOVE ANY OF THIS. 12 cases x 5 models x 3 narrator modes = 180 reviews, seconds, $0, four models not trying to help: a sycophant, an injector, a dead endpoint, and hostile-fluent, written to walk through my own earlier fix. The decision surface changed in 0 of 168 completed reviews, byte-identical on verdict, hazards, severities, evidence, ledger, generated SQL and verification. The other 12 crashed, all narrator-unguarded, on a model returning an empty body; both guarded modes take that to 0, which turns an outage into a degraded review.
+
+The prose did not hold, and no decision-surface metric could see it. Unguarded, the sycophant printed "Approved: no hazards found, safe to ship" under a badge reading BLOCK on 11 of 12 cases without moving one number. I shipped a blocklist, measured 0/12, then noticed the audit shared its regexes with the guard: the number only reported what the blocklist already knew. So I wrote the attacker for that gap. hostile-fluent uses no banned phrase, verdict token or injection marker, and still tells the reviewer the change can ride the normal release train: the audit flagged it 0/12 while it printed above a BLOCK 12/12. The fix is provenance, not a longer list. The headline is now a pure function of tool output and model prose is demoted to a block labelled "unverified prose, not evidence". Misleading headlines reaching the reviewer, per 48 hostile reviews per mode: 36/48 unguarded, 13/48 blocklist, 0/48 shipped, with 0 of 60 headlines model-written and no detection metric moved.
+
+HOW IT WORKS. Five agents, fixed order, instructions in sentinel/agents/prompts/: Cartographer (parser), Blast Radius (shadow-DB executor), Risk Officer (rules, memory, ledger, verdict), Rollout Engineer (plan writer), Verifier (replay and retry, max 3 attempts). Tools decide facts, the model explains them. The agency is in the loop: the Verifier replays the plan the Rollout Engineer just wrote, policy tightens between attempts, and it escalates when the retry budget is spent.
+
+The coverage ledger names, per affected object, what the review could not observe: unmodelled statements, rows rewritten in place, a value class the rollback cannot restore. Replay proves a statement still runs, never that it returns the same answer. Any open gap caps the verdict at NEEDS_COVERAGE_SIGNOFF, which is not an approval, not executable, and invents no hazard, so it costs no precision or recall. Review never touches a database. Execution runs in an in-memory SQLite sandbox and refuses three ways, each with its own exit code: no named approving reviewer, a BLOCK without explicit override, an uncleared coverage gap.
+
+REPRODUCIBILITY. Python 3.11+ standard library (3.11 and 3.12 verified), zero pip dependencies, no API key, no network, synthetic data. Start at JUDGE_START_HERE.md. One packet: python -m sentinel review --case eval/cases/case_12_release_train.json. 108 reviews in under a second at $0.00: python eval/run_eval.py --ablations. The 180 hostile-model reviews: python eval/model_invariance.py. Plus 38 unittest tests, tools/check_results.py for 27/27 claims, tools/check_docs.py for the documentation's claims about the repo, and tools/check_submission_text.py for this description against both.
+
+Reviewer minutes is the one modelled number, so eval/time_sensitivity.py recomputes every arm under six constant sets, three written to break the claim: the saving holds at 69% under uniform rescaling, and two adversarial sets reverse its sign and are published flagged. The load-bearing assumption is not that reviewers are slow, it is that writing a staged migration plan from scratch costs several times more than approving one already replayed. That reversal is the coverage gate's bill.
+
+ON THE VIDEO. Recorded against v2, the repo is v5, so some on-screen numbers are stale and two components did not exist yet. Where the video and the repo disagree, results/comparison.md and results/model_invariance.md are authoritative; docs/VIDEO_ADDENDUM.md lists every stale number line by line.
+
+AGENTS USED. Claude Opus 5, conversationally rather than as an autonomous shell harness, for everything under sentinel/, eval/, tools/, tests/ and site/, inside the challenge window. Disclosure in AGENT_USE.md, development traces in agent_traces/, per-case runtime trajectories for all five in-product agents in trajectories/. Fresh-context sessions were later pointed at the finished work to falsify it, producing the ablation, sensitivity, hostile-model, documentation and submission-text harnesses. Never delegated: ground truth, hazard vocabulary, scorer, metrics. An agent that grades its own work has graded itself.
+
+FAILURE MODE AND HOT TAKE. The corpus is the world: everything is proved from the SQL it was given. case_09 hides the risky consumer in a dbt model outside the corpus, so it is still missed, but no longer cleared, because the ledger sees the shape of the hole without seeing what is in it. Twelve cases, one schema, ground truth I wrote by hand. Do not quote the F1 without its denominator.
+
+Verification is a sensor with a specific blind spot, not a synonym for correctness. A system can be invariant in every number it publishes and still lie to the person reading it: every metric read the decision surface, the reviewer reads the sentence at the top. And the one I only found by attacking my own fix: a defence audited in its own vocabulary reports on the attacker's imagination, not on itself. Audit the output your user actually reads, and when removing components cannot find the gap, write the component that lies to you on purpose.
+
+LINKS
+GitHub: https://github.com/MahammadRiyazShek/migration-sentinel
+Live demo: https://migration-sentinel-frvo.vercel.app/

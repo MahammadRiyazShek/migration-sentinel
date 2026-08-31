@@ -14,7 +14,11 @@ three defects no results audit could ever see:
     UTF-8 read as Latin-1 - invisible to all 33 tests, because no test reads prose.
 
 None of that moves a metric. All of it is the first thing a judge sees. So it gets an audit
-with an exit code, like everything else here. Five checks, standard library, no network.
+with an exit code, like everything else here. Six checks, standard library, no network.
+
+The sixth check is the eighth session's: the claim-count audit below existed because a stale
+"18/18 claims" survived two releases, and the test count sat in the same six documents with
+no audit at all. Same defect class, same fix.
 
 Standard library only, no network. Run from the repository root:
 
@@ -128,7 +132,13 @@ def check_paste_ready_description(_files):
 # Documents that describe the repository as it is now, as opposed to the changelogs, supervisor
 # logs and session traces, where an older claim count is the honest record of an older run.
 LIVE_DOCS = ("JUDGE_START_HERE.md", "REPRODUCTION.md", "SUBMISSION_DESCRIPTION.md",
-             "docs/SUBMISSION.md")
+             "docs/SUBMISSION.md", "SUBMISSION_FORM_TEXT.txt")
+
+# The README carries the Improvement Changelog, where an older claim count is the honest
+# record of an older run, so it is not a current-state document for CLAIM_COUNT. Its
+# Quickstart does state a live test count, and no changelog row phrases one as "N tests",
+# so it is a current-state document for TEST_COUNT.
+TEST_COUNT_DOCS = LIVE_DOCS + ("README.md",)
 CLAIM_COUNT = re.compile(r"\b(\d+)/(\d+) claims\b")
 
 
@@ -163,12 +173,47 @@ def check_claim_counts_current(_files):
     return bad
 
 
+TEST_COUNT = re.compile(r"\b(\d+) (?:unittest |stdlib )?tests\b")
+
+
+def _current_test_count():
+    """Ask unittest how many tests there actually are."""
+    import subprocess
+    out = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests"],
+                         capture_output=True, text=True, cwd=ROOT)
+    m = re.search(r"^Ran (\d+) tests?", out.stdout + out.stderr, re.M)
+    return int(m.group(1)) if m else None
+
+
+def check_test_counts_current(_files):
+    """A stale claim count survived two releases before v7 caught it. The test count sits in
+    the same documents and had no audit at all."""
+    truth = _current_test_count()
+    if truth is None:
+        return ["could not read a test count out of `unittest discover`"]
+    bad = []
+    for rel in TEST_COUNT_DOCS:
+        path = ROOT / rel
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        for line_no, line in enumerate(text.splitlines(), 1):
+            for m in TEST_COUNT.finditer(line):
+                if int(m.group(1)) != truth:
+                    bad.append(f"{rel}:{line_no} says {m.group(0)}, "
+                               f"unittest discover runs {truth}")
+    if not bad:
+        print(f"        unittest discover runs {truth} tests; the live docs all say so")
+    return bad
+
+
 CHECKS = [
     ("no mis-decoded characters in authored text", check_no_mojibake),
     ("every path-shaped file reference resolves", check_references_resolve),
     ("exactly one judge entry point at the root", check_single_entry_point),
     ("paste-ready description exists and fits the form", check_paste_ready_description),
     ("no stale claim count in a current-state document", check_claim_counts_current),
+    ("no stale test count in a current-state document", check_test_counts_current),
 ]
 
 
