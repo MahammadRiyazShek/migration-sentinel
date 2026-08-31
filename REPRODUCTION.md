@@ -92,7 +92,7 @@ Expected: `REQUEST_CHANGES` with 3 findings, no evidence, no plan. Variant `prom
 python3 eval/run_eval.py --ablations
 ```
 
-This runs 12 cases x (2 baseline variants + 1 pipeline) plus 6 ablation configurations = 108 reviews.
+This runs 12 cases x (2 baseline variants + 1 pipeline) plus 6 ablation configurations = 120 reviews.
 
 * measured runtime on the reference machine: **under 1 s total**, about 8 ms per pipeline review
 * cost: **$0.00** (the default model is the offline scripted stand-in)
@@ -235,7 +235,7 @@ a hit or on an empty directory rather than writing an index that lists nothing. 
 python3 -m unittest discover -s tests -v
 ```
 
-Expected: `Ran 82 tests ... OK`, about 0.3 s. They cover the parser traps, the shadow replay,
+Expected: `Ran 104 tests ... OK`, about 0.3 s. They cover the parser traps, the shadow replay,
 memory escalation, determinism (same case twice, identical hazards and plan), the escalation path
 (`max_attempts=1` on case_01 must escalate instead of shipping an unverified plan) and the approval
 gate (refuses without `--i-approve`, refuses a `BLOCK` verdict without an explicit override, and
@@ -432,7 +432,7 @@ them after the evaluation, never before.
 
 ```bash
 python3 eval/run_eval.py --ablations      # writes results/ and trajectories/
-python3 tools/check_results.py           # 46/46 claims hold  (exits 1 if one does not)
+python3 tools/check_results.py           # 57/57 claims hold  (exits 1 if one does not)
 python3 tools/build_site.py               # -> site/data/bundle.json  (~467 KB), site/py/ (38 files)
 python3 tools/build_artifact.py           # -> site/standalone.html   (one file, no live engine)
 python3 tools/test_browser_driver.py      # 12/12 parity with the recorded packets

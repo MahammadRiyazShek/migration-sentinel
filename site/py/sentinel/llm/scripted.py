@@ -73,6 +73,16 @@ def baseline_hazards(migration_sql: str, schema_sql: str | None,
         if not _find(migration_sql, r"limit|ctid|batch|in\s*\(\s*select"):
             add("UNBATCHED_BACKFILL", "high",
                 "The backfill is one unbounded UPDATE; it will hold locks for its whole duration.")
+    # v13. Both patterns are visible in the text of the migration, so a generous
+    # single-pass reviewer gets them. The second one is a famous string, and the
+    # baseline catching it while the v12 pipeline did not is published rather than
+    # quietly excluded: results/redteam.md.
+    if _find(migration_sql, r"drop\s+index"):
+        add("ACCESS_PATH_REMOVED", "medium",
+            "An index is dropped; queries that relied on it may get much slower - check usage first.")
+    if _find(migration_sql, r"\bbegin\b") and _find(migration_sql, r"\bconcurrently\b"):
+        add("CONCURRENT_DDL_IN_TRANSACTION", "blocker",
+            "CONCURRENTLY cannot run inside a transaction block; Postgres will refuse the statement.")
     if not rollback_sql and not _find(migration_sql, r"--\s*rollback|down\s+migration"):
         add("MISSING_ROLLBACK", "medium", "No rollback statements are included in the file.")
     if schema_sql:

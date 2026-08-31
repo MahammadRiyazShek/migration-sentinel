@@ -461,7 +461,8 @@
   "static": true,
   "memory": true,
   "verify": true,
-  "coverage": true
+  "coverage": true,
+  "rule_coverage": true
  },
  "tool_calls": [
   {
@@ -477,7 +478,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 1.13,
+   "ms": 0.71,
    "result_summary": "Schema"
   },
   {
@@ -486,7 +487,7 @@
    "args": {
     "sql": "ALTER TABLE customers RENAME COLUMN full_name TO name;\nCREATE OR REPLACE VIEW customer_billing_summary AS\n  SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;\n"
    },
-   "ms": 0.17,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "rename_column",
@@ -637,7 +638,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.29,
+   "ms": 0.21,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -772,7 +773,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.03,
    "result_summary": 17
   },
   {
@@ -1008,7 +1009,7 @@
      "...+6 more"
     ]
    },
-   "ms": 4.18,
+   "ms": 3.38,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1417,9 +1418,10 @@
        "occurred_at": "2026-01-30"
       }
      ]
-    }
+    },
+    "rule_coverage": true
    },
-   "ms": 0.17,
+   "ms": 0.19,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1434,7 +1436,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);\nCREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;"
    },
-   "ms": 0.12,
+   "ms": 0.16,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1771,7 +1773,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.03,
+   "ms": 3.13,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1856,7 +1858,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);"
    },
-   "ms": 0.09,
+   "ms": 0.1,
    "result_summary": [
     {
      "kind": "add_column",
@@ -2157,7 +2159,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.77,
+   "ms": 2.83,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2243,7 +2245,7 @@
   "tokens_out": 622,
   "cost_usd": 0.0
  },
- "wall_ms": 14.8,
+ "wall_ms": 13.5,
  "severity_order": [
   "low",
   "medium",

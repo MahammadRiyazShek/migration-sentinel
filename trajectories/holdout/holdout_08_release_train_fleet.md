@@ -259,7 +259,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.16 ms)
+**tool** `corpus.dependents` (0.2 ms)
 
 ```json
 {
@@ -395,7 +395,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.07 ms)
 
 ```json
 {
@@ -463,7 +463,7 @@ _tool responded_
 42
 ```
 
-**tool** `shadow.replay` (4.08 ms)
+**tool** `shadow.replay` (3.77 ms)
 
 ```json
 {
@@ -942,7 +942,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.23 ms)
+**tool** `coverage.ledger` (0.25 ms)
 
 ```json
 {
@@ -1397,7 +1397,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.54 ms)
+**tool** `shadow.replay` (3.63 ms)
 
 ```json
 {

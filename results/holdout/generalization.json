@@ -3,10 +3,17 @@
   "state": "POST-FREEZE",
   "changed": [
    "sentinel/agents/risk_officer.py",
+   "sentinel/agents/rollout_engineer.py",
    "sentinel/coverage.py",
+   "sentinel/hazards.py",
+   "sentinel/llm/scripted.py",
+   "sentinel/orchestrator.py",
+   "sentinel/tools/query_corpus.py",
    "sentinel/tools/shadow_db.py"
   ],
-  "added": [],
+  "added": [
+   "sentinel/rulebook.py"
+  ],
   "removed": [],
   "note": "v5 decision code, hashed before the held-out schema, cases or labels existed",
   "frozen_files": 34
@@ -252,6 +259,13 @@
    "clean_on_blocking": 3,
    "gap_cases_cleared_without_signoff": 3,
    "minutes": 8.7
+  },
+  "no_rule_coverage": {
+   "unsafe_approvals": 0,
+   "recall": 0.96,
+   "clean_on_blocking": 0,
+   "gap_cases_cleared_without_signoff": 0,
+   "minutes": 10.7
   }
  }
 }

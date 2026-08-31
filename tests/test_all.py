@@ -11,7 +11,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from sentinel import cli, narrator, coverage  # noqa: E402
+from sentinel import cli, narrator, coverage, rulebook  # noqa: E402
 from sentinel.llm import get_llm  # noqa: E402
 from sentinel.orchestrator import review  # noqa: E402
 from sentinel.tools import shadow_db, sql_parse  # noqa: E402
@@ -19,14 +19,16 @@ from sentinel.tools.incident_memory import IncidentMemory  # noqa: E402
 
 CASES = ROOT / "eval" / "cases"
 HOLDOUT = ROOT / "eval" / "holdout"
+REDTEAM = ROOT / "eval" / "redteam"
 INCIDENTS = ROOT / "memory" / "incidents.jsonl"
 
 
 def case(name: str) -> dict:
-    path = CASES / f"{name}.json"
-    if not path.exists():
-        path = HOLDOUT / f"{name}.json"
-    return json.loads(path.read_text())
+    for directory in (CASES, HOLDOUT, REDTEAM):
+        path = directory / f"{name}.json"
+        if path.exists():
+            return json.loads(path.read_text())
+    raise FileNotFoundError(name)
 
 
 def run(name: str, **kwargs):
@@ -835,3 +837,184 @@ class TestSelfDescription(unittest.TestCase):
         newest = self.cd.newest_release()
         self.assertTrue((ROOT / f"docs/SUPERVISOR_LOG_V{newest}.md").exists())
         self.assertEqual(self.cd.check_declared_version_current([]), [])
+
+
+class TestRulebook(unittest.TestCase):
+    """The invariant that makes the v13 layer more than two more rules.
+
+    The two holes the red-team pass found were absent rules, not wrong ones, and nothing
+    in the repository was counting the absence. These tests are that counter.
+    """
+
+    def test_every_kind_the_parser_emits_is_classified(self):
+        emitted = rulebook.parser_kinds()
+        self.assertGreaterEqual(len(emitted), 20, "the parser-kind scrape found almost nothing, "
+                                                  "which would make this whole audit vacuous")
+        unclassified = emitted - rulebook.known_kinds()
+        self.assertEqual(unclassified, set(),
+                         f"sql_parse.parse_migration can emit {sorted(unclassified)} and "
+                         f"sentinel/rulebook.py has not decided how they are covered. Classify "
+                         f"them there; an unclassified kind is treated as residual at runtime, "
+                         f"which is safe but silent about why.")
+
+    def test_the_inventory_names_no_kind_the_parser_cannot_emit(self):
+        stale = rulebook.known_kinds() - rulebook.parser_kinds()
+        self.assertEqual(stale, set(), f"rulebook classifies {sorted(stale)}, which the parser "
+                                       f"no longer emits: dead coverage reads as coverage")
+
+    def test_every_ruled_kind_is_actually_named_in_the_risk_officer(self):
+        src = (ROOT / "sentinel" / "agents" / "risk_officer.py").read_text()
+        for kind in rulebook.RULED:
+            self.assertIn(kind, src, f"{kind} is listed as RULED but the string does not appear "
+                                     f"in agents/risk_officer.py at all")
+
+    def test_residual_kinds_are_the_ones_no_rule_names(self):
+        # The distinction the first draft of this layer got wrong: `create_index` is RULED
+        # because a rule looks at it, even on the runs where it clears it.
+        self.assertEqual(rulebook.bucket("create_index"), "RULED")
+        self.assertEqual(rulebook.bucket("drop_index"), "RULED")
+        self.assertEqual(rulebook.bucket("set_default"), "RESIDUAL")
+        self.assertEqual(rulebook.bucket("unsupported"), "LEDGERED")
+
+    def test_an_unknown_kind_is_treated_as_residual_rather_than_ignored(self):
+        op = sql_parse.Op("some_future_kind", "DO SOMETHING NEW;", 0)
+        self.assertEqual(rulebook.bucket("some_future_kind"), "UNCLASSIFIED")
+        self.assertEqual([o.kind for o in rulebook.residual_ops([op])], ["some_future_kind"])
+
+
+class TestAccessPathRule(unittest.TestCase):
+    """DROP INDEX: the op kind whose whole risk lives in the plan rather than the result."""
+
+    def test_a_dropped_index_under_live_lookups_blocks(self):
+        out = run("rt_01_drop_index_still_used")
+        report = out["report"]
+        self.assertEqual(report["verdict"], "BLOCK")
+        haz = [h for h in report["hazards"] if h["code"] == "ACCESS_PATH_REMOVED"]
+        self.assertEqual(len(haz), 1)
+        self.assertEqual(haz[0]["severity"], "blocker")
+        # the evidence has to be the statements, not an adjective
+        self.assertTrue(any("q_billing_customer_invoices" in e for e in haz[0]["evidence"]),
+                        haz[0]["evidence"])
+
+    def test_a_dropped_index_nobody_looks_up_by_is_a_gap_not_a_hazard(self):
+        report = run("rt_03_drop_index_no_corpus_user")["report"]
+        self.assertEqual(report["verdict"], "NEEDS_COVERAGE_SIGNOFF")
+        self.assertEqual([h["code"] for h in report["hazards"]], [])
+        kinds = [g["kind"] for g in report["coverage_ledger"]["gaps"]]
+        self.assertIn("unused_access_path", kinds)
+
+    def test_a_covering_replacement_index_is_not_a_removed_access_path(self):
+        # The canary. A B-tree on (customer_id, status) serves a lookup on customer_id, so
+        # the commonest correct index migration there is must come back clean.
+        report = run("rt_07_index_swap_done_right")["report"]
+        self.assertEqual(report["verdict"], "SAFE")
+        self.assertEqual(report["hazards"], [])
+        self.assertEqual(report["coverage_ledger"]["gaps"], [])
+
+    def test_a_projection_only_column_is_not_an_access_path(self):
+        from sentinel.tools import query_corpus
+        queries = [{"id": "q", "sql": "SELECT company_name FROM customers WHERE id = 1"}]
+        self.assertEqual(query_corpus.access_path_users(queries, "customers", ["company_name"]), [])
+        self.assertEqual(len(query_corpus.access_path_users(queries, "customers", ["id"])), 1)
+
+
+class TestConcurrentDDLInTransaction(unittest.TestCase):
+    """A hazard that is a property of two statements, which is why no rule had it."""
+
+    def test_concurrently_inside_a_transaction_blocks(self):
+        report = run("rt_02_concurrently_inside_transaction")["report"]
+        self.assertEqual(report["verdict"], "BLOCK")
+        codes = {h["code"] for h in report["hazards"]}
+        self.assertIn("CONCURRENT_DDL_IN_TRANSACTION", codes)
+
+    def test_the_plan_does_not_reproduce_the_transaction_wrapper(self):
+        plan = run("rt_02_concurrently_inside_transaction")["report"]["plan"]
+        joined = " ".join(plan["phase1_sql"] + plan["phase2_sql"]).lower()
+        self.assertNotIn("begin;", joined)
+        self.assertTrue(any("transaction" in s.lower() for s in plan["code_steps"]),
+                        plan["code_steps"])
+
+    def test_a_committed_transaction_does_not_taint_a_later_statement(self):
+        ops = sql_parse.parse_migration(
+            "BEGIN;\nALTER TABLE t ADD COLUMN a text;\nCOMMIT;\n"
+            "CREATE INDEX CONCURRENTLY i ON t (a);")
+        from sentinel.agents.risk_officer import open_transaction_at
+        target = next(o for o in ops if o.kind == "create_index")
+        self.assertIsNone(open_transaction_at(ops, target.index))
+
+    def test_concurrently_outside_any_transaction_is_clean(self):
+        report = run("rt_07_index_swap_done_right")["report"]
+        self.assertNotIn("CONCURRENT_DDL_IN_TRANSACTION",
+                         {h["code"] for h in report["hazards"]})
+
+
+class TestResidualGapClass(unittest.TestCase):
+    """The ledger's own shape, caught from outside: an allow-list of known unknowns."""
+
+    def test_a_kind_no_rule_inspects_opens_a_gap(self):
+        report = run("rt_04_change_signup_default")["report"]
+        self.assertEqual(report["verdict"], "NEEDS_COVERAGE_SIGNOFF")
+        gaps = [g for g in report["coverage_ledger"]["gaps"] if g["kind"] == "unruled_statement"]
+        self.assertEqual(len(gaps), 1)
+        self.assertIn("set_default", gaps[0]["object"])
+        # a gap is an absence of evidence, so it must not have become a finding
+        self.assertEqual(report["hazards"], [])
+
+    def test_the_gap_becomes_a_named_human_gate_in_the_plan(self):
+        report = run("rt_05_relax_country_not_null")["report"]
+        gates = " ".join(report["plan"]["human_gates"])
+        self.assertIn("unruled_statement", gates)
+
+    def test_the_canary_case_for_crying_wolf_still_passes(self):
+        # The first draft of this class opened a gap on case_06, which exists to catch
+        # reviewers who cry wolf, because it could not tell "a rule cleared this" from
+        # "nothing looked at this".
+        report = run("case_06_safe_unique_index")["report"]
+        self.assertEqual(report["verdict"], "SAFE")
+        self.assertEqual(report["coverage_ledger"]["gaps"], [])
+
+    def test_the_layer_can_be_switched_off_to_reproduce_v12(self):
+        before = run("rt_01_drop_index_still_used", features="no_rule_coverage")["report"]
+        after = run("rt_01_drop_index_still_used")["report"]
+        self.assertEqual(before["verdict"], "SAFE")
+        self.assertEqual(after["verdict"], "BLOCK")
+
+
+class TestRedTeamSet(unittest.TestCase):
+    """The published red-team numbers, re-derived here rather than read out of the report."""
+
+    def test_seven_cases_with_ground_truth_and_a_scenario(self):
+        files = sorted(REDTEAM.glob("*.json"))
+        self.assertEqual(len(files), 7)
+        for path in files:
+            doc = json.loads(path.read_text())
+            self.assertIn("ground_truth", doc)
+            self.assertTrue(doc["ground_truth"]["notes"].strip())
+            self.assertTrue(doc["scenario"].strip())
+
+    def test_the_two_correct_migrations_are_labelled_non_blocking(self):
+        self.assertFalse(case("rt_07_index_swap_done_right")["ground_truth"]["blocking"])
+        self.assertEqual(case("rt_07_index_swap_done_right")["ground_truth"]["hazards"], [])
+
+    def test_the_wrapped_index_swap_ground_truth_excludes_the_access_path_hazard(self):
+        gt = case("rt_06_index_swap_inside_transaction")["ground_truth"]
+        codes = {h["code"] for h in gt["hazards"]}
+        self.assertEqual(codes, {"CONCURRENT_DDL_IN_TRANSACTION"})
+        self.assertNotIn("ACCESS_PATH_REMOVED", codes)
+
+    def test_the_published_report_agrees_with_a_fresh_run(self):
+        path = ROOT / "results" / "redteam" / "redteam.json"
+        if not path.exists():
+            self.skipTest("run eval/run_redteam.py first")
+        published = json.loads(path.read_text())
+        for cid, row in published["per_case"].items():
+            fresh = run(cid)["report"]
+            self.assertEqual(fresh["verdict"], row["verdict"], cid)
+
+    def test_the_v13_layer_moves_no_labelled_case(self):
+        path = ROOT / "results" / "redteam" / "redteam.json"
+        if not path.exists():
+            self.skipTest("run eval/run_redteam.py first")
+        par = json.loads(path.read_text())["in_sample_parity"]
+        self.assertEqual(par["cases_moved"], 0, par["moved_ids"])
+        self.assertEqual(par["labelled_cases_compared"], 21)

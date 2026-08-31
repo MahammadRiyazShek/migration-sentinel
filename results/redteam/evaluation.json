@@ -1,0 +1,952 @@
+{
+ "time_model_assumptions": {
+  "read_review_minutes": 5,
+  "verify_unevidenced_claim_minutes": 4,
+  "write_expand_contract_plan_minutes": 20,
+  "decide_human_gate_minutes": 3
+ },
+ "arms": {
+  "baseline_prompt_only": {
+   "per_case": [
+    {
+     "case_id": "rt_01_drop_index_still_used",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "pred_codes": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "tp": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "plan_regression"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": true,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": true,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.8,
+     "tokens": 499,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_02_concurrently_inside_transaction",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "pred_codes": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "tp": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "deploy_mechanics"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.1,
+     "tokens": 514,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_03_drop_index_no_corpus_user",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": true,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "tp": [],
+     "fp": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [
+      "plan_regression"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": true,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.1,
+     "tokens": 500,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_04_change_signup_default",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": true,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 0.1,
+     "tokens": 490,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_05_relax_country_not_null",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": true,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 0.1,
+     "tokens": 491,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_06_index_swap_inside_transaction",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "pred_codes": [
+      "ACCESS_PATH_REMOVED",
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "tp": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "fp": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "fn": [],
+     "fam_tp": [
+      "deploy_mechanics"
+     ],
+     "fam_fp": [
+      "plan_regression"
+     ],
+     "fam_fn": [],
+     "severity_matches": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.1,
+     "tokens": 577,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_07_index_swap_done_right",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "tp": [],
+     "fp": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [
+      "plan_regression"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": true,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.1,
+     "tokens": 538,
+     "cost_usd": 0.0
+    }
+   ],
+   "aggregate": {
+    "cases": 7,
+    "unsafe_approvals": 1,
+    "blocking_cases": 3,
+    "clean_verdicts_on_blocking_cases": 1,
+    "false_alarms_on_clean_cases": 2,
+    "strict": {
+     "precision": 0.5,
+     "recall": 1.0,
+     "f1": 0.667,
+     "tp": 3,
+     "fp": 3,
+     "fn": 0
+    },
+    "lenient_family": {
+     "precision": 0.5,
+     "recall": 1.0,
+     "f1": 0.667,
+     "tp": 3,
+     "fp": 3,
+     "fn": 0
+    },
+    "severity_agreement": 0.667,
+    "findings_total": 6,
+    "findings_with_evidence": 0,
+    "verified_plans": 0,
+    "cases_with_coverage_gaps": 3,
+    "declared_coverage_gaps": 0,
+    "gap_cases_cleared_without_signoff": 3,
+    "modelled_reviewer_minutes_total": 159,
+    "modelled_reviewer_minutes_per_case": 22.7,
+    "wall_ms_per_case": 0.2,
+    "tokens_total": 3609,
+    "cost_usd_total": 0.0
+   }
+  },
+  "baseline_prompt_with_schema": {
+   "per_case": [
+    {
+     "case_id": "rt_01_drop_index_still_used",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "pred_codes": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "tp": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "plan_regression"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": true,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": true,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.4,
+     "tokens": 989,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_02_concurrently_inside_transaction",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "pred_codes": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "tp": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "deploy_mechanics"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.1,
+     "tokens": 1004,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_03_drop_index_no_corpus_user",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": true,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "tp": [],
+     "fp": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [
+      "plan_regression"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": true,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.1,
+     "tokens": 989,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_04_change_signup_default",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [],
+     "fp": [
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [
+      "consumer_breakage"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": true,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.2,
+     "tokens": 992,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_05_relax_country_not_null",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [],
+     "fp": [
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [
+      "consumer_breakage"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": true,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.1,
+     "tokens": 993,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_06_index_swap_inside_transaction",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "pred_codes": [
+      "ACCESS_PATH_REMOVED",
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "tp": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "fp": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "fn": [],
+     "fam_tp": [
+      "deploy_mechanics"
+     ],
+     "fam_fp": [
+      "plan_regression"
+     ],
+     "fam_fn": [],
+     "severity_matches": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.1,
+     "tokens": 1067,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_07_index_swap_done_right",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "tp": [],
+     "fp": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [
+      "plan_regression"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": true,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.1,
+     "tokens": 1028,
+     "cost_usd": 0.0
+    }
+   ],
+   "aggregate": {
+    "cases": 7,
+    "unsafe_approvals": 1,
+    "blocking_cases": 3,
+    "clean_verdicts_on_blocking_cases": 1,
+    "false_alarms_on_clean_cases": 4,
+    "strict": {
+     "precision": 0.375,
+     "recall": 1.0,
+     "f1": 0.545,
+     "tp": 3,
+     "fp": 5,
+     "fn": 0
+    },
+    "lenient_family": {
+     "precision": 0.375,
+     "recall": 1.0,
+     "f1": 0.545,
+     "tp": 3,
+     "fp": 5,
+     "fn": 0
+    },
+    "severity_agreement": 0.667,
+    "findings_total": 8,
+    "findings_with_evidence": 0,
+    "verified_plans": 0,
+    "cases_with_coverage_gaps": 3,
+    "declared_coverage_gaps": 0,
+    "gap_cases_cleared_without_signoff": 1,
+    "modelled_reviewer_minutes_total": 207,
+    "modelled_reviewer_minutes_per_case": 29.6,
+    "wall_ms_per_case": 0.2,
+    "tokens_total": 7062,
+    "cost_usd_total": 0.0
+   }
+  },
+  "agent_pipeline": {
+   "per_case": [
+    {
+     "case_id": "rt_01_drop_index_still_used",
+     "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "pred_codes": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "tp": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "plan_regression"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "ACCESS_PATH_REMOVED"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 1,
+     "plan_verified": true,
+     "human_gates": 1,
+     "modelled_reviewer_minutes": 8,
+     "wall_ms": 9.9,
+     "tokens": 1222,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_02_concurrently_inside_transaction",
+     "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "pred_codes": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "tp": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "deploy_mechanics"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 1,
+     "evidenced_findings": 1,
+     "plan_verified": true,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 9.2,
+     "tokens": 1167,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_03_drop_index_no_corpus_user",
+     "verdict": "NEEDS_COVERAGE_SIGNOFF",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 1,
+     "coverage_signoff_required": true,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": true,
+     "human_gates": 1,
+     "modelled_reviewer_minutes": 8,
+     "wall_ms": 8.3,
+     "tokens": 593,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_04_change_signup_default",
+     "verdict": "NEEDS_COVERAGE_SIGNOFF",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 1,
+     "coverage_signoff_required": true,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": true,
+     "human_gates": 2,
+     "modelled_reviewer_minutes": 11,
+     "wall_ms": 8.1,
+     "tokens": 593,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_05_relax_country_not_null",
+     "verdict": "NEEDS_COVERAGE_SIGNOFF",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 1,
+     "coverage_signoff_required": true,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": true,
+     "human_gates": 2,
+     "modelled_reviewer_minutes": 11,
+     "wall_ms": 8.4,
+     "tokens": 593,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_06_index_swap_inside_transaction",
+     "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "pred_codes": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "tp": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "deploy_mechanics"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "CONCURRENT_DDL_IN_TRANSACTION"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 2,
+     "evidenced_findings": 2,
+     "plan_verified": true,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 9.0,
+     "tokens": 1758,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "rt_07_index_swap_done_right",
+     "verdict": "SAFE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "clean_verdict_on_blocking_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": true,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 8.9,
+     "tokens": 545,
+     "cost_usd": 0.0
+    }
+   ],
+   "aggregate": {
+    "cases": 7,
+    "unsafe_approvals": 0,
+    "blocking_cases": 3,
+    "clean_verdicts_on_blocking_cases": 0,
+    "false_alarms_on_clean_cases": 0,
+    "strict": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "tp": 3,
+     "fp": 0,
+     "fn": 0
+    },
+    "lenient_family": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "tp": 3,
+     "fp": 0,
+     "fn": 0
+    },
+    "severity_agreement": 1.0,
+    "findings_total": 4,
+    "findings_with_evidence": 4,
+    "verified_plans": 7,
+    "cases_with_coverage_gaps": 3,
+    "declared_coverage_gaps": 3,
+    "gap_cases_cleared_without_signoff": 0,
+    "modelled_reviewer_minutes_total": 53,
+    "modelled_reviewer_minutes_per_case": 7.6,
+    "wall_ms_per_case": 8.8,
+    "tokens_total": 6471,
+    "cost_usd_total": 0.0
+   }
+  }
+ },
+ "agent_notes": {
+  "rt_01_drop_index_still_used": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  },
+  "rt_02_concurrently_inside_transaction": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  },
+  "rt_03_drop_index_no_corpus_user": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [
+    {
+     "kind": "unused_access_path",
+     "object": "customers(company_name)",
+     "object_inferred": false,
+     "statement_index": 0,
+     "statement": "DROP INDEX idx_customers_company",
+     "why": "no statement in the 17-statement corpus filters, joins or sorts by customers(company_name), so this review has no evidence the index is unused - only no evidence that it is used, and shadow replay has no query planner to ask",
+     "closes_with": "a reviewer reads pg_stat_user_indexes.idx_scan for idx_customers_company over a full business cycle before phase 2",
+     "irreversible": false
+    }
+   ],
+   "verdict_capped_by_coverage": true
+  },
+  "rt_04_change_signup_default": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [
+    {
+     "kind": "unruled_statement",
+     "object": "customers:set_default",
+     "object_inferred": false,
+     "statement_index": 0,
+     "statement": "ALTER TABLE customers ALTER COLUMN plan SET DEFAULT 'team'",
+     "why": "no static rule inspects `set_default` and shadow replay cannot see its consequence: the default only affects writes that have not happened yet, so no existing statement in the corpus can fail and no rule prices the behaviour change",
+     "closes_with": "a reviewer decides by hand what statement 0 changes for future writes and who depends on the current behaviour",
+     "irreversible": false
+    }
+   ],
+   "verdict_capped_by_coverage": true
+  },
+  "rt_05_relax_country_not_null": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [
+    {
+     "kind": "unruled_statement",
+     "object": "customers:drop_not_null",
+     "object_inferred": false,
+     "statement_index": 0,
+     "statement": "ALTER TABLE customers ALTER COLUMN country_code DROP NOT NULL",
+     "why": "no static rule inspects `drop_not_null` and shadow replay cannot see its consequence: relaxing nullability breaks readers that assume non-null, and every one of those readers is in application code rather than in the SQL corpus",
+     "closes_with": "a reviewer decides by hand what statement 0 changes for future writes and who depends on the current behaviour",
+     "irreversible": false
+    }
+   ],
+   "verdict_capped_by_coverage": true
+  },
+  "rt_06_index_swap_inside_transaction": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  },
+  "rt_07_index_swap_done_right": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  }
+ }
+}

@@ -343,7 +343,8 @@
   "static": true,
   "memory": true,
   "verify": true,
-  "coverage": true
+  "coverage": true,
+  "rule_coverage": true
  },
  "tool_calls": [
   {
@@ -359,7 +360,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.74,
+   "ms": 0.71,
    "result_summary": "Schema"
   },
   {
@@ -832,7 +833,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.81,
+   "ms": 2.9,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1200,9 +1201,10 @@
        "occurred_at": "2026-01-30"
       }
      ]
-    }
+    },
+    "rule_coverage": true
    },
-   "ms": 0.16,
+   "ms": 0.19,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1227,7 +1229,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.13,
+   "ms": 0.18,
    "result_summary": [
     "Schema",
     []
@@ -1443,7 +1445,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.85,
+   "ms": 2.79,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1466,7 +1468,7 @@
   "tokens_out": 471,
   "cost_usd": 0.0
  },
- "wall_ms": 8.3,
+ "wall_ms": 8.5,
  "severity_order": [
   "low",
   "medium",

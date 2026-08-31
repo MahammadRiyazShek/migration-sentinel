@@ -328,7 +328,8 @@
   "static": true,
   "memory": true,
   "verify": true,
-  "coverage": true
+  "coverage": true,
+  "rule_coverage": true
  },
  "tool_calls": [
   {
@@ -346,7 +347,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.94,
+   "ms": 0.88,
    "result_summary": "Schema"
   },
   {
@@ -524,7 +525,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.23,
+   "ms": 0.21,
    "result_summary": [
     {
      "query_id": "q_dispatch_create",
@@ -1031,7 +1032,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.41,
+   "ms": 3.48,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1455,9 +1456,10 @@
        "recorded_at": "2026-03-01"
       }
      ]
-    }
+    },
+    "rule_coverage": true
    },
-   "ms": 0.17,
+   "ms": 0.2,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1899,7 +1901,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.41,
+   "ms": 3.47,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1981,7 +1983,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 9.2,
+ "wall_ms": 9.4,
  "severity_order": [
   "low",
   "medium",

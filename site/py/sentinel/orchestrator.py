@@ -32,14 +32,28 @@ MAX_ATTEMPTS = 3
 # Ablation switches. `full` is the shipped configuration; the others exist so the
 # changelog can point at a number instead of a feeling.
 FEATURE_SETS = {
-    "full": {"replay": True, "static": True, "memory": True, "verify": True, "coverage": True},
-    "no_replay": {"replay": False, "static": True, "memory": True, "verify": False, "coverage": True},
-    "no_static": {"replay": True, "static": False, "memory": True, "verify": True, "coverage": True},
-    "no_memory": {"replay": True, "static": True, "memory": False, "verify": True, "coverage": True},
-    "no_verify": {"replay": True, "static": True, "memory": True, "verify": False, "coverage": True},
+    "full": {"replay": True, "static": True, "memory": True, "verify": True, "coverage": True,
+             "rule_coverage": True},
+    "no_replay": {"replay": False, "static": True, "memory": True, "verify": False,
+                  "coverage": True, "rule_coverage": True},
+    "no_static": {"replay": True, "static": False, "memory": True, "verify": True,
+                  "coverage": True, "rule_coverage": True},
+    "no_memory": {"replay": True, "static": True, "memory": False, "verify": True,
+                  "coverage": True, "rule_coverage": True},
+    "no_verify": {"replay": True, "static": True, "memory": True, "verify": False,
+                  "coverage": True, "rule_coverage": True},
     # v2 component. `no_coverage` reproduces the v1 behaviour exactly: gaps are
     # still reported, they just do not constrain the verdict.
-    "no_coverage": {"replay": True, "static": True, "memory": True, "verify": True, "coverage": False},
+    "no_coverage": {"replay": True, "static": True, "memory": True, "verify": True,
+                    "coverage": False, "rule_coverage": True},
+    # v13 component. `no_rule_coverage` reproduces v12 exactly: the two rules the
+    # red-team pass found missing are off, and the ledger goes back to declaring blind
+    # spots only about objects some rule had already looked at. It is identical to
+    # `full` on all 21 labelled cases in this repository, which is the evidence that
+    # this layer was absent rather than retuned - and it is 2/6 unsafe approvals on
+    # eval/redteam, where `full` is 0/6.
+    "no_rule_coverage": {"replay": True, "static": True, "memory": True, "verify": True,
+                         "coverage": True, "rule_coverage": False},
 }
 
 
@@ -60,6 +74,8 @@ def build_registry(memory: IncidentMemory, tracer: Tracer) -> ToolRegistry:
     reg.register("memory.escalation", memory.escalation,
                  "Look up prior incidents for a hazard code and table; returns severity bump + ids.")
     reg.register("memory.recall", memory.recall, "Full prior-incident records for a hazard code.")
+    reg.register("corpus.access_path_users", query_corpus.access_path_users,
+                 "Statements that use given columns as a lookup, sort or grouping key.")
     reg.register("coverage.ledger", coverage_tools.ledger,
                  "Enumerate what this review structurally could not see, per affected object.")
     return reg
@@ -101,7 +117,8 @@ def review(case: dict[str, Any], llm, incidents_path: str, learned_path: str | N
     blast = BlastRadius(tools, llm, tracer).run(case, parsed, use_replay=feat["replay"])
     risk = RiskOfficer(tools, llm, tracer).run(case, parsed, blast,
                                                use_static=feat["static"], use_memory=feat["memory"],
-                                               use_coverage=feat.get("coverage", True))
+                                               use_coverage=feat.get("coverage", True),
+                                               use_rule_coverage=feat.get("rule_coverage", True))
 
     engineer = RolloutEngineer(tools, llm, tracer)
     engineer.guard_narrator = guarded

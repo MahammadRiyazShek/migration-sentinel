@@ -283,7 +283,8 @@
   "static": true,
   "memory": true,
   "verify": true,
-  "coverage": true
+  "coverage": true,
+  "rule_coverage": true
  },
  "tool_calls": [
   {
@@ -301,7 +302,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.91,
+   "ms": 0.95,
    "result_summary": "Schema"
   },
   {
@@ -310,7 +311,7 @@
    "args": {
     "sql": "ALTER TABLE drivers DROP COLUMN employment_type;\n"
    },
-   "ms": 0.03,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "drop_column",
@@ -806,7 +807,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.52,
+   "ms": 3.82,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1262,9 +1263,10 @@
        "recorded_at": "2026-03-01"
       }
      ]
-    }
+    },
+    "rule_coverage": true
    },
-   "ms": 0.17,
+   "ms": 0.18,
    "result_summary": {
     "gaps": [
      {
@@ -1302,7 +1304,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.06,
+   "ms": 0.1,
    "result_summary": [
     "Schema",
     []
@@ -1632,7 +1634,7 @@
      "...+7 more"
     ]
    },
-   "ms": 4.77,
+   "ms": 3.55,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1655,7 +1657,7 @@
   "tokens_out": 386,
   "cost_usd": 0.0
  },
- "wall_ms": 11.0,
+ "wall_ms": 10.2,
  "severity_order": [
   "low",
   "medium",

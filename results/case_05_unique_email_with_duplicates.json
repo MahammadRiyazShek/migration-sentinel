@@ -261,7 +261,8 @@
   "static": true,
   "memory": true,
   "verify": true,
-  "coverage": true
+  "coverage": true,
+  "rule_coverage": true
  },
  "tool_calls": [
   {
@@ -277,7 +278,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.69,
+   "ms": 0.7,
    "result_summary": "Schema"
   },
   {
@@ -328,7 +329,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -416,7 +417,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -782,7 +783,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.0,
+   "ms": 2.98,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1081,7 +1082,8 @@
        "occurred_at": "2026-01-30"
       }
      ]
-    }
+    },
+    "rule_coverage": true
    },
    "ms": 0.17,
    "result_summary": {
@@ -1098,7 +1100,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_customers_email_tmp_nonunique\" ON \"customers\" (\"email\");"
    },
-   "ms": 0.04,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "create_index",
@@ -1140,7 +1142,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1372,7 +1374,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.69,
+   "ms": 2.87,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1395,7 +1397,7 @@
   "tokens_out": 221,
   "cost_usd": 0.0
  },
- "wall_ms": 7.8,
+ "wall_ms": 8.1,
  "severity_order": [
   "low",
   "medium",

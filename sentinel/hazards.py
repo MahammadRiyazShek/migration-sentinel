@@ -90,6 +90,20 @@ HAZARDS: dict[str, dict[str, str]] = {
         "detect": "corpus ownership lookup",
         "why": "The fix needs a deploy the migration author does not control, so ordering must be agreed first.",
     },
+    "ACCESS_PATH_REMOVED": {
+        "title": "Index dropped while live statements still filter on it",
+        "default_severity": "high",
+        "detect": "static rule + corpus access-path lookup",
+        "why": "Every statement still succeeds, so replay and tests are silent; the plan flips to a "
+               "sequential scan and the table's size decides whether that is a slow page or an outage.",
+    },
+    "CONCURRENT_DDL_IN_TRANSACTION": {
+        "title": "CONCURRENTLY used inside a transaction block",
+        "default_severity": "blocker",
+        "detect": "static rule (statement correlation)",
+        "why": "Postgres refuses CREATE/DROP INDEX CONCURRENTLY inside a transaction block, and most "
+               "migration frameworks open one by default, so the deploy fails on the statement itself.",
+    },
     "MISSING_ROLLBACK": {
         "title": "No rollback path supplied",
         "default_severity": "medium",

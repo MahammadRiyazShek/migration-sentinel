@@ -55,6 +55,27 @@ the evaluation set:
     gap, and an irreversible one, because the rollback restores the type and not
     the values.
 
+`unruled_statement`
+    v13, and the ledger's own shape caught from outside.  Every gap class above is
+    keyed to a statement kind that some rule or some replay already handles, so the
+    ledger could only ever declare blind spots about objects something had already
+    looked at.  A statement kind **no rule inspects at all** produced no hazard, no
+    gap and a clean verdict.  An allow-list of known unknowns is still an allow-list.
+    `sentinel/rulebook.py` partitions every kind the parser can emit into RULED,
+    REPLAY_COVERED, LEDGERED and RESIDUAL, and every residual op files this gap.  The
+    distinction that makes it usable rather than noisy: a rule *considering* a kind
+    and clearing it is coverage; no rule *existing* for that kind is a hole.  Without
+    that distinction the first version of this flagged `case_06`, the case that exists
+    to catch reviewers who cry wolf.
+
+`unused_access_path`
+    v13, the other half of the `DROP INDEX` fix.  When an index is dropped and no
+    statement in the corpus filters, joins or sorts by its columns, the honest answer
+    is not "safe": it is that a sample of the consumers proves nothing about a plan.
+    Exactly the `uncovered_object` argument, one level down in the storage engine, and
+    it closes with a different action - real scan counts out of
+    `pg_stat_user_indexes`, not a grep.
+
 What the ledger deliberately does NOT do
 ----------------------------------------
 It does not invent a hazard.  A gap is an absence of evidence, and the honest
@@ -76,6 +97,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from . import rulebook
+from .tools.query_corpus import access_path_users
 from .tools.shadow_db import is_narrowing, offending_values
 from .tools.sql_parse import referenced_identifiers
 
@@ -133,11 +156,17 @@ def _nulls_erased(sql: str, columns: list[str]) -> list[str]:
 
 def ledger(ops: list[Any], schema: Any, queries: list[dict[str, Any]],
            unmodelled_notes: list[str] | None = None,
-           seed: dict[str, list[dict[str, Any]]] | None = None) -> dict[str, Any]:
+           seed: dict[str, list[dict[str, Any]]] | None = None,
+           rule_coverage: bool = True) -> dict[str, Any]:
     """Deterministic coverage facts for one migration. Pure function, no model involved.
 
     `seed` is the fixture the shadow replay runs on. It is passed in so the ledger can
     say what the fixture could not have shown, which is the v6 gap class.
+
+    `rule_coverage` is the v13 layer: the two gap classes that come from the rule
+    inventory rather than from the data. It is a switch only so `no_rule_coverage` can
+    reproduce v12 behaviour exactly and the ablation can price this layer like every
+    other one.
     """
     queries = queries or []
     seed = seed or {}
@@ -224,6 +253,38 @@ def ledger(ops: list[Any], schema: Any, queries: list[dict[str, Any]],
                     f"no statement in the {len(queries)}-statement corpus references {op.column}, so "
                     f"replay had nothing to run against it; that is silence, not a clean bill of health",
                     f"a reviewer greps the real consumers for {op.column} before phase 2")
+
+        # v13: an index drop whose access path nobody in the corpus uses. Zero users is a
+        # fact about a sample of the consumers, and the storage engine is not consulted.
+        if op.kind == "drop_index" and rule_coverage:
+            idx = getattr(schema, "indexes", {}).get(op.detail.get("name", ""))
+            replaced = idx is not None and any(
+                o.kind == "create_index"
+                and (o.table or "").lower() == (idx.table or "").lower()
+                and [c.lower() for c in o.detail.get("columns", [])][:len(idx.columns)]
+                == [c.lower() for c in idx.columns]
+                for o in ops)
+            if idx is not None and not replaced \
+                    and not access_path_users(queries, idx.table, idx.columns):
+                add("unused_access_path", f"{idx.table}({', '.join(idx.columns)})", op,
+                    f"no statement in the {len(queries)}-statement corpus filters, joins or sorts "
+                    f"by {idx.table}({', '.join(idx.columns)}), so this review has no evidence the "
+                    f"index is unused - only no evidence that it is used, and shadow replay has no "
+                    f"query planner to ask",
+                    f"a reviewer reads pg_stat_user_indexes.idx_scan for "
+                    f"{op.detail.get('name', 'the index')} over a full business cycle before phase 2")
+
+    # v13: statement kinds nothing in this pipeline inspects. The gap class that exists
+    # because the ledger could previously only declare blind spots about objects some
+    # rule had already looked at. See sentinel/rulebook.py.
+    if rule_coverage:
+        for op in rulebook.residual_ops(ops):
+            obj = op.table or relation_hint(getattr(op, "sql", "")) or "statement"
+            add("unruled_statement", f"{obj}:{op.kind}", op,
+                f"no static rule inspects `{op.kind}` and shadow replay cannot see its consequence: "
+                f"{rulebook.reason(op.kind)}",
+                f"a reviewer decides by hand what statement {op.index} changes for future writes "
+                f"and who depends on the current behaviour")
 
     seen: set[tuple[str, str]] = set()
     unique: list[dict[str, Any]] = []

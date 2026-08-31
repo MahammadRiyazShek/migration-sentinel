@@ -279,6 +279,51 @@ between attempts, the retry budget, and the escalation to a human when it runs o
 exactly two attempts and the retry is triggered by a real regression the first plan introduced. The
 narrator is a narrator, is labelled as one, and is now audited like one.
 
+## Red team: the half that labels cannot test
+
+`eval/cases` asks whether the pipeline finds the hazards I thought of. `eval/holdout` asks whether it
+finds them on a schema the rules were never written against. Neither can ask whether there is a class
+of hazard **nobody enumerated**, because both were labelled from the same hazard vocabulary. So the
+last pass ran the opposite brief: find a migration a Postgres primary calls an outage and this
+pipeline calls SAFE. Six probes, two hits, and neither hit was a wrong rule - both were absent rules
+nothing in this repository was counting.
+
+| metric | Baseline B | Sentinel v12 | Sentinel v13 |
+|---|---|---|---|
+| **Unsafe approvals** (primary) | 1/7 | 3/7 | **0/7** |
+| **Blocking cases given a clean verdict** | 1/3 | 3/3 | **0/3** |
+| False alarms on the two correct migrations | 4 | 0 | **0** |
+| Findings backed by machine evidence | 0/8 | 0/0 | **4/4** |
+
+* **`DROP INDEX` on a 48M-row table three live statements filter by.** Every statement still
+  executes, so shadow replay is silent - the hazard is in the plan, not the result - and no static
+  rule mentioned `drop_index`. v12 verdict: SAFE, zero hazards, zero declared gaps.
+* **`CONCURRENTLY` inside `BEGIN`/`COMMIT`.** Postgres refuses it and every migration framework
+  opens that transaction by default. The parser saw both statements and no rule correlated them,
+  because no rule here had ever looked at two statements at once. v12 verdict: SAFE - and on this one
+  the **text-only baseline wins**, because `BEGIN` plus `CONCURRENTLY` in one file is a famous
+  string. It is published rather than left out.
+* **The ledger was an allow-list of known unknowns.** Every gap class was keyed to a statement kind
+  some rule already handled, so it could only declare blind spots about objects something had already
+  looked at. [`sentinel/rulebook.py`](sentinel/rulebook.py) now partitions all 26 statement kinds the
+  parser can emit into RULED, REPLAY_COVERED, LEDGERED and RESIDUAL; a test fails if the parser
+  learns a kind nobody classified, and a residual kind opens a gap rather than inventing a hazard.
+
+**Read the generalisation number first.** These seven cases are in sample - the rules were written
+from these probes. The evidence that the layer was *missing* rather than *retuned* runs the other way
+and is computed per case by `eval/run_redteam.py`: `no_rule_coverage` reproduces v12 exactly and is
+identical to `full` on **21 of 21** labelled cases in `eval/cases` and `eval/holdout` - same
+verdicts, same hazards, same severities, same gap counts.
+
+Two experiments this pass removed, both recorded in `sentinel/rulebook.py` rather than deleted:
+default-deny (it flagged `case_06`, the cry-wolf canary, because "no hazard was produced" is
+indistinguishable from "nothing looked" if you only count hazards) and a bare `drop_index` blocker
+(it blocked the commonest correct index migration there is, since a B-tree on `(customer_id, status)`
+still serves a lookup on `customer_id`).
+
+Full report: [`results/redteam.md`](results/redteam.md). Reasoning:
+[`docs/SUPERVISOR_LOG_V13.md`](docs/SUPERVISOR_LOG_V13.md).
+
 ## Architecture
 
 Five agents, fixed order, one feedback loop. Instructions for each are in
@@ -348,8 +393,8 @@ python3 -m sentinel cases                                     # list them
 python3 -m sentinel review --case eval/cases/case_12_release_train.json --print-report
 python3 eval/run_eval.py --ablations                          # everything, ~1 second
 python3 eval/model_invariance.py                              # 180 reviews: 5 models x 3 narrator modes
-python3 -m unittest discover -s tests -v                      # 82 tests
-python3 tools/check_results.py                                # 46/46 claims, from raw JSON
+python3 -m unittest discover -s tests -v                      # 104 tests
+python3 tools/check_results.py                                # 57/57 claims, from raw JSON
 python3 tools/check_docs.py                                   # 9 checks on the docs themselves
 python3 tools/check_submission_text.py                        # 7 checks on the submission form text
 python3 tools/check_cross_version.py                          # the same diff on a second interpreter
@@ -554,7 +599,7 @@ memory/              incidents.jsonl (curated, fictional)
 results/             review packets, comparison.md, ablation.md, evaluation.json
 trajectories/        one markdown + jsonl trajectory per case
 site/                the review desk: index.html, generated data/ and py/ (Pyodide runtime)
-tools/               build_site.py, build_artifact.py, check_results.py (46 claims about the numbers)
+tools/               build_site.py, build_artifact.py, check_results.py (57 claims about the numbers)
   check_docs.py          9 claims the docs make about the repo: references, glyphs, entry
                          point, stale counts for any claim ledger or audit, stale test counts,
                          no heading trapped in a code fence (v11), no counting tool that
@@ -579,7 +624,7 @@ docs/                CRITIQUE_LOG.md (read first), SUPERVISOR_LOG_V3.md to _V12.
                      VIDEO_SCRIPT.md (what the submitted video was made from),
                      VIDEO_SCRIPT_V12.md (single-take script against the current numbers),
                      VIDEO_ADDENDUM.md (every number the video predates)
-tests/               82 stdlib tests
+tests/               104 stdlib tests
 ```
 
 ## Limitations, stated plainly

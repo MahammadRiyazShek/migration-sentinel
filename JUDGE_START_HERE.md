@@ -19,14 +19,14 @@ python3 tools/check_results.py          # <- if you run one command, run this on
 ```
 
 It reads `results/*.json` and re-asserts every number in this repository, including the five that
-make the pipeline look worse. Expect `46/46 claims hold`, in under a second, with no key and no
+make the pipeline look worse. Expect `57/57 claims hold`, in under a second, with no key and no
 network.
 
 The rest, in the order they build on each other:
 
 ```bash
-python3 -m unittest discover -s tests   # 82 tests, ~0.3 s
-python3 eval/run_eval.py --ablations    # 108 reviews (12 cases x 9 arms), < 1 s
+python3 -m unittest discover -s tests   # 104 tests, ~0.3 s
+python3 eval/run_eval.py --ablations    # 120 reviews (12 cases x 9 arms), < 1 s
 python3 eval/run_holdout.py --ablations # the second schema: 9 held-out cases, rules frozen
 python3 eval/model_invariance.py        # 180 reviews, 5 models x 3 narrator modes, < 1 s
 python3 tools/check_determinism.py      # reruns everything in a temp copy and diffs it back
@@ -143,7 +143,7 @@ read it: [`docs/SUPERVISOR_LOG_V10.md`](docs/SUPERVISOR_LOG_V10.md).
 
 ## The video is older than the repo
 
-The submitted video was recorded against v2. The repository is v12. The problem, architecture,
+The submitted video was recorded against v2. The repository is v13. The problem, architecture,
 baseline comparison and walkthrough all still match; some on-screen numbers are stale and three
 components (the coverage gate, the structural narrator and the held-out world) did not exist yet.
 

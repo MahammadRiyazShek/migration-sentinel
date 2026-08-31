@@ -189,11 +189,25 @@ CLAIM_TOTAL = re.compile(r"\b(\d+)(?:\s+[A-Za-z][A-Za-z-]*){0,3}\s+claims\b")
 # A line may cite an out-of-date count when it dates itself: a changelog row, a "was N, now M"
 # sentence, an "as of v5". Allow-lists of line numbers rot; a rule that reads the line's own
 # tense does not.
-DATED = re.compile(r"->|-->|\bas of\b|\bwas\b|\bused to\b|\bv(?:[1-9]|10|11)\b|\bthen\b")
+DATED = re.compile(r"->|-->|\bas of\b|\bwas\b|\bused to\b|\bthen\b")
+OLD_VERSION = re.compile(r"\bv(\d+)\b")
 
 
 def _is_dated(line):
-    return bool(DATED.search(line))
+    """A line dates itself, so an older count on it is a record rather than a drift.
+
+    v13: the version range used to be spelled out - `v(?:[1-9]|10|11)` - which is the same
+    hand-maintained list this file exists to catch elsewhere, and it went stale the moment v12
+    shipped: every honest changelog row citing a v12 count started failing this audit for
+    reasons that had nothing to do with the row. The range is read off docs/ now, so "v12"
+    counts as dated once v13 exists and never before.
+    """
+    if DATED.search(line):
+        return True
+    truth = newest_release()
+    if truth is None:
+        return False
+    return any(int(m.group(1)) < truth for m in OLD_VERSION.finditer(line))
 
 
 def _stale_counts(text, pattern, truth, group=None):

@@ -31,6 +31,12 @@ FAMILIES = {
     "DESTRUCTIVE_NO_EXPAND_CONTRACT": "process",
     "MISSING_ROLLBACK": "process",
     "CROSS_SERVICE_UNCOORDINATED": "process",
+    # v13. Two families rather than one: an index drop is a plan regression that no
+    # statement reports, and CONCURRENTLY inside a transaction is the deploy step itself
+    # failing. Folding either into an existing family would have let a lenient-family
+    # match paper over a miss.
+    "ACCESS_PATH_REMOVED": "plan_regression",
+    "CONCURRENT_DDL_IN_TRANSACTION": "deploy_mechanics",
 }
 
 # Reviewer-minute model. These are assumptions, not measurements. They are stated

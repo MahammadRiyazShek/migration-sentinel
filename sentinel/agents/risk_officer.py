@@ -4,9 +4,17 @@ Shadow replay is blind to three things: locks (SQLite has no MVCC), volume (the
 fixtures are tiny) and intent (dropping a CHECK constraint breaks nothing today).
 This agent covers exactly those, with explicit, auditable rules - and then lets
 memory of past incidents raise, never lower, a severity.
+
+v13 adds a fourth thing replay is blind to, found by an external red-team pass rather
+than by an ablation: the query *plan*.  Replay proves a statement still executes; it
+says nothing about how the planner will find the rows, so `DROP INDEX` on a hot table
+was a clean SAFE.  And it adds one thing both halves saw and neither correlated:
+`CONCURRENTLY` inside a transaction block, which Postgres refuses outright.  See
+`sentinel/rulebook.py` for why those two were absent rather than wrong.
 """
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from .. import coverage as coverage_tools
@@ -16,6 +24,57 @@ from .base import Agent
 LOCK_ROWS_WARN = 100_000
 LOCK_ROWS_BLOCK = 5_000_000
 DESTRUCTIVE = {"drop_column", "drop_table", "rename_column", "rename_table"}
+CONCURRENT_KINDS = {"create_index", "drop_index"}
+
+
+def is_concurrent(op: Any) -> bool:
+    """CONCURRENTLY on an index statement, from the parse where available and the text otherwise.
+
+    `create_index` carries it in `detail`; `drop_index` does not parse it out, and reading
+    the text is honest here because the keyword is unambiguous in that position.
+    """
+    if op.detail.get("concurrently"):
+        return True
+    return bool(re.search(r"\bconcurrently\b", op.sql or "", flags=re.I))
+
+
+def replacement_index(ops: list[Any], table: str, columns: list[str]) -> Any | None:
+    """A CREATE INDEX in the same migration that still serves `columns` on `table`.
+
+    Prefix match, because a B-tree on (a, b) serves a lookup on (a) and a plain index on
+    (a) does not serve one on (b).  Without this the commonest correct index migration in
+    the world - drop the narrow index, create the composite - would earn a blocker, and a
+    safety tool that blocks the correct version of a change gets switched off.
+    """
+    want = [c.lower() for c in columns]
+    for op in ops:
+        if op.kind != "create_index" or (op.table or "").lower() != (table or "").lower():
+            continue
+        have = [c.lower() for c in op.detail.get("columns", [])]
+        if have[:len(want)] == want:
+            return op
+    return None
+
+
+def open_transaction_at(ops: list[Any], index: int) -> Any | None:
+    """The BEGIN that is still open at statement `index`, if any.
+
+    Postgres refuses CREATE/DROP INDEX CONCURRENTLY inside a transaction block. Migration
+    frameworks open one by default, so this is a correlation between two statements rather
+    than a property of either, which is exactly why no single-statement rule caught it.
+    """
+    current = None
+    for op in ops:
+        if op.index >= index:
+            break
+        if op.kind != "transaction_control":
+            continue
+        head = (op.sql or "").strip().lower()
+        if head.startswith("begin") or head.startswith("start transaction"):
+            current = op
+        elif head.startswith(("commit", "rollback", "end")):
+            current = None
+    return current
 
 
 def size_class(rows: int) -> str:
@@ -35,7 +94,7 @@ class RiskOfficer(Agent):
 
     def run(self, case: dict[str, Any], parsed: dict[str, Any], blast: dict[str, Any],
             use_static: bool = True, use_memory: bool = True,
-            use_coverage: bool = True) -> dict[str, Any]:
+            use_coverage: bool = True, use_rule_coverage: bool = True) -> dict[str, Any]:
         schema = parsed["schema"]
         rows_of = {t.name: t.row_estimate for t in schema.tables.values()}
         self.start({"case": case["id"], "row_estimates": rows_of,
@@ -109,6 +168,77 @@ class RiskOfficer(Agent):
                     summary=f"new column {op.table}.{op.column} is NOT NULL with no default",
                     evidence=[f"statement {op.index}: `{op.sql[:110]}`"],
                     objects=[f"{op.table}.{op.column}"]))
+            # v13, rule 1: the access path. Replay proves the statement executes; nothing in
+            # this pipeline priced how the planner would find the rows.
+            if op.kind == "drop_index" and use_rule_coverage:
+                name = op.detail.get("name", "")
+                idx = schema.indexes.get(name)
+                if idx is None:
+                    hazards.append(Hazard(
+                        "ACCESS_PATH_REMOVED", "medium", source="static",
+                        summary=(f"index {name} is dropped but is not in the current DDL, so this "
+                                 f"review cannot tell what it served"),
+                        evidence=[f"statement {op.index}: `{op.sql[:110]}`",
+                                  f"no index named {name} in the supplied schema"],
+                        objects=[name],
+                        remediation="confirm the index name against the live catalogue before shipping"))
+                else:
+                    idx_rows = rows_of.get(idx.table, 0)
+                    users = self.tool("corpus.access_path_users", queries=case.get("queries", []),
+                                      table=idx.table, columns=idx.columns)
+                    replacement = replacement_index(parsed["ops"], idx.table, idx.columns)
+                    if replacement is not None:
+                        users = []
+                        if self.tracer:
+                            self.tracer.note(
+                                self.NAME,
+                                f"{name} is dropped but statement {replacement.index} creates "
+                                f"{replacement.detail['name']} on {idx.table}"
+                                f"({', '.join(replacement.detail['columns'])}), whose leading "
+                                f"columns still serve {idx.table}({', '.join(idx.columns)}). The "
+                                f"access path survives, so no ACCESS_PATH_REMOVED is raised.")
+                    crit = {u["criticality"] for u in users}
+                    if users:
+                        sev = "medium"
+                        if idx_rows >= LOCK_ROWS_WARN:
+                            sev = "high"
+                        if idx_rows >= LOCK_ROWS_BLOCK and crit & {"critical", "high"}:
+                            sev = "blocker"
+                        cols = ", ".join(idx.columns)
+                        hazards.append(Hazard(
+                            "ACCESS_PATH_REMOVED", sev, source="static+replay",
+                            summary=(f"dropping {name} removes the only declared index on "
+                                     f"{idx.table} ({cols}) while {len(users)} live statement(s) "
+                                     f"still filter, join or sort by it on a "
+                                     f"{size_class(idx_rows)} table ({idx_rows:,} rows)"),
+                            evidence=[f"statement {op.index}: `{op.sql[:110]}`",
+                                      f"declared row estimate for {idx.table}: {idx_rows:,}"]
+                                     + [f"{u['query_id']} ({u['service']}, {u['criticality']}): "
+                                        f"`{u['clause_excerpt']}`" for u in users[:4]],
+                            objects=[f"{idx.table}.{c}" for c in idx.columns],
+                            services=sorted({u["service"] for u in users}),
+                            remediation=(f"prove the index is unused first: check "
+                                         f"pg_stat_user_indexes.idx_scan for {name} over a full "
+                                         f"business cycle, then drop it CONCURRENTLY in phase 2")))
+
+            # v13, rule 2: a correlation between two statements, not a property of either.
+            if op.kind in CONCURRENT_KINDS and use_rule_coverage and is_concurrent(op):
+                opener = open_transaction_at(parsed["ops"], op.index)
+                if opener is not None:
+                    hazards.append(Hazard(
+                        "CONCURRENT_DDL_IN_TRANSACTION", "blocker", source="static",
+                        summary=(f"statement {op.index} uses CONCURRENTLY inside the transaction "
+                                 f"opened at statement {opener.index}; Postgres refuses this and "
+                                 f"the deploy fails on the statement itself"),
+                        evidence=[f"statement {opener.index}: `{opener.sql[:60]}`",
+                                  f"statement {op.index}: `{op.sql[:110]}`",
+                                  "ERROR: CREATE INDEX CONCURRENTLY cannot run inside a "
+                                  "transaction block (Postgres, all supported versions)"],
+                        objects=[op.detail.get("name", op.table or "index")],
+                        remediation=("take this statement out of the transaction: most frameworks "
+                                     "need an explicit opt-out (Rails disable_ddl_transaction!, "
+                                     "Django atomic = False, Alembic autocommit block)")))
+
             if op.kind == "drop_constraint":
                 table = schema.tables.get(op.table)
                 con = next((c for c in (table.constraints if table else [])
@@ -153,7 +283,8 @@ class RiskOfficer(Agent):
         cov = self.tool("coverage.ledger", ops=parsed["ops"], schema=schema,
                         queries=case.get("queries", []),
                         unmodelled_notes=parsed["change_set"]["unmodelled"],
-                        seed=case.get("seed", {})) \
+                        seed=case.get("seed", {}),
+                        rule_coverage=use_rule_coverage) \
             if use_coverage else {"gaps": [], "gap_kinds": [], "irreversible": [],
                                   "corpus_statements": len(case.get("queries", [])),
                                   "parser_notes": parsed["change_set"]["unmodelled"]}

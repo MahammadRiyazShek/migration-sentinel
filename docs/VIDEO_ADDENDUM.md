@@ -1,6 +1,6 @@
 # Video addendum: what changed after the recording
 
-The submitted video was recorded against v2. The repo is v12. Nothing in the video is wrong about the
+The submitted video was recorded against v2. The repo is v13. Nothing in the video is wrong about the
 problem, the architecture, the baseline comparison or the walkthrough; some on-screen numbers are stale
 and three components did not exist yet: the coverage gate, the structural narrator and the held-out
 world on the second schema. **When video and repo disagree, `results/comparison.md` and
@@ -10,12 +10,12 @@ world on the second schema. **When video and repo disagree, `results/comparison.
 
 | on screen (v2) | in the repo now (v12) | why it moved |
 |---|---|---|
-| ablation table with 8 arms | 9 arms, 108 reviews | the coverage gate became its own ablation arm |
+| ablation table with 8 arms | 9 arms, 120 reviews | the coverage gate became its own ablation arm |
 | reviewer minutes/case **8.5** | **9.2** | the coverage gate turns every declared blind spot into a human gate, and that costs time. The number went up on purpose and is published as it fell out |
 | "coverage-gap cases cleared without sign-off" absent | second primary metric, **0/2** | v2 could say "ship as plan" above its own declared blind spot without the scorer calling it an unsafe approval |
 | no hostile-model section | `results/model_invariance.md`: **180 reviews**, 4 hostile models, 3 narrator modes | v2 argued invariance from the shape of the code. v3 measured it, found the decision surface unmoved and the *prose* fully compromised. v5 attacked v3's own guard and broke it |
 | the headline is written by the model | the headline is a pure function of tool output | a model that lies in words v3's blocklist never learned printed above a `BLOCK` badge on 12/12 cases while v3's metric for it read 0. Model prose is now demoted below the evidence and labelled |
-| 22 tests, 18 claims | **82 tests, 46 claims** | two hostile-model iterations, a held-out schema and a submission-text audit, each pinned by tests and by `tools/check_results.py` |
+| 22 tests, 18 claims | **104 tests, 57 claims** | two hostile-model iterations, a held-out schema and a submission-text audit, each pinned by tests and by `tools/check_results.py` |
 | no cross-interpreter or rerun proof | `tools/check_determinism.py` and `tools/check_cross_version.py`: **146 files, 0 decision differences** on a rerun and across CPython 3.11.2 and 3.12.13 | "deterministic" and "3.11 and 3.12 verified" were sentences in a document until v11 and v12 gave each of them an exit code |
 | no held-out evaluation | `results/holdout/`: **9 cases on a second schema**, rules hashed before the labels existed | in-sample numbers on rules and labels written by the same person are worth what the freeze is worth |
 

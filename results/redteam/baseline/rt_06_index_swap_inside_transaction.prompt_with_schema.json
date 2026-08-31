@@ -1,0 +1,33 @@
+{
+ "case_id": "rt_06_index_swap_inside_transaction",
+ "variant": "prompt_with_schema",
+ "verdict": "REQUEST_CHANGES",
+ "hazards": [
+  {
+   "code": "ACCESS_PATH_REMOVED",
+   "severity": "medium",
+   "note": "An index is dropped; queries that relied on it may get much slower - check usage first.",
+   "evidence": [],
+   "source": "model"
+  },
+  {
+   "code": "CONCURRENT_DDL_IN_TRANSACTION",
+   "severity": "blocker",
+   "note": "CONCURRENTLY cannot run inside a transaction block; Postgres will refuse the statement.",
+   "evidence": [],
+   "source": "model"
+  }
+ ],
+ "review_text": "Verdict: REQUEST_CHANGES\n\n- [MEDIUM] ACCESS_PATH_REMOVED: An index is dropped; queries that relied on it may get much slower - check usage first.\n- [BLOCKER] CONCURRENT_DDL_IN_TRANSACTION: CONCURRENTLY cannot run inside a transaction block; Postgres will refuse the statement.",
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 1,
+  "tokens_in": 998,
+  "tokens_out": 69,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 0.1,
+ "plan": null,
+ "plan_verified": false
+}

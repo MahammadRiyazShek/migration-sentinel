@@ -149,7 +149,8 @@ def render_ablation(ablation: dict) -> str:
          "| configuration | unsafe approvals | recall (strict) | precision (strict) | "
          "severity agreement | verified plans | gaps cleared without sign-off |",
          "|---|---|---|---|---|---|---|"]
-    order = ["full", "no_replay", "no_static", "no_memory", "no_verify", "no_coverage"]
+    order = ["full", "no_replay", "no_static", "no_memory", "no_verify", "no_coverage",
+             "no_rule_coverage"]
     for key in order:
         if key not in ablation:
             continue

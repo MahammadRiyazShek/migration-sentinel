@@ -211,7 +211,8 @@
   "static": true,
   "memory": true,
   "verify": true,
-  "coverage": true
+  "coverage": true,
+  "rule_coverage": true
  },
  "tool_calls": [
   {
@@ -227,7 +228,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.7,
+   "ms": 0.67,
    "result_summary": "Schema"
   },
   {
@@ -387,7 +388,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_dunning_open",
@@ -654,7 +655,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.97,
+   "ms": 3.13,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -955,9 +956,10 @@
        "occurred_at": "2026-01-30"
       }
      ]
-    }
+    },
+    "rule_coverage": true
    },
-   "ms": 0.27,
+   "ms": 0.17,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -972,7 +974,7 @@
    "args": {
     "sql": "CREATE VIEW open_invoices_v2 AS SELECT id, customer_id, invoice_number, amount_cents, status, issued_at FROM invoices WHERE status IN ('draft','open');"
    },
-   "ms": 0.06,
+   "ms": 0.08,
    "result_summary": [
     {
      "kind": "create_view",
@@ -1237,7 +1239,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.86,
+   "ms": 2.71,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],

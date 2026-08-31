@@ -1,7 +1,8 @@
 """Fail the build if the numbers the README claims are no longer true.
 
-    python3 tools/check_results.py      # after eval/run_eval.py --ablations
-                                       # and eval/run_holdout.py --ablations
+    python3 tools/check_results.py      # after eval/run_eval.py --ablations,
+                                       # eval/run_holdout.py --ablations
+                                       # and eval/run_redteam.py
 
 Every assertion below is a sentence somewhere in README.md or on the site. If an
 edit to the pipeline moves one of them, CI stops instead of quietly publishing a
@@ -148,12 +149,18 @@ def main() -> int:
 
         claim("9 held-out cases on a second schema, same three arms",
               H["cases"] == HB["cases"] == HA["cases"] == 9, H["cases"])
+        # v13 moved five more decision files and added one, so the expected list moved with
+        # it. The claim is unchanged in kind: every file that changed since the freeze is
+        # named here, in the submission text, and in the report the held-out run prints.
+        post_freeze = sorted(gen["freeze"]["changed"]) + sorted(gen["freeze"].get("added", []))
         claim("the decision code was hashed before the held-out labels existed, and every "
-              "file changed since is named",
-              man["files"] == 34 and sorted(gen["freeze"]["changed"]) == [
-                  "sentinel/agents/risk_officer.py", "sentinel/coverage.py",
-                  "sentinel/tools/shadow_db.py"],
-              f"{man['files']} hashed, changed since: {gen['freeze']['changed']}")
+              "file changed or added since is named",
+              man["files"] == 34 and post_freeze == [
+                  "sentinel/agents/risk_officer.py", "sentinel/agents/rollout_engineer.py",
+                  "sentinel/coverage.py", "sentinel/hazards.py", "sentinel/llm/scripted.py",
+                  "sentinel/orchestrator.py", "sentinel/tools/query_corpus.py",
+                  "sentinel/tools/shadow_db.py", "sentinel/rulebook.py"],
+              f"{man['files']} hashed, {len(post_freeze)} moved since: {post_freeze}")
         claim("no unsafe approval out of sample either", H["unsafe_approvals"] == 0,
               H["unsafe_approvals"])
         claim("out-of-sample recall at least 0.90, and 1.0 once the label no arm can name is "
@@ -214,6 +221,69 @@ def main() -> int:
                   f"fluent liar printed {hinv['inv_fluent']}/{hinv['inv_cases']}")
         claim("out-of-sample reviewer minutes still under half of baseline B",
               H["minutes"] <= HB["minutes"] / 2, f"{H['minutes']} vs {HB['minutes']}")
+
+    # ---------------------------------------------------------------- red team
+    # v13. Everything above is measured on cases whose labels came out of the shared
+    # hazard vocabulary, so everything above can only test hazards someone had already
+    # named. These are measured on 7 cases written the other way round: find a migration
+    # a Postgres primary calls an outage and this pipeline calls SAFE. Four of these
+    # claims make the pipeline look worse, and one of them puts the text-only baseline
+    # ahead of the v12 pipeline.
+    rt_path = ROOT / "results" / "redteam" / "redteam.json"
+    if rt_path.exists():
+        rt = json.loads(rt_path.read_text())
+        R = rt["arms"]["agent_pipeline"]
+        R12 = rt["arms"]["sentinel_v12"]
+        RB = rt["arms"]["baseline_prompt_with_schema"]
+        par = rt["in_sample_parity"]
+        per = rt["per_case"]
+
+        claim("7 red-team cases, written to break the pipeline rather than to score it",
+              rt["cases"] == 7 and R["cases"] == R12["cases"] == 7, rt["cases"])
+        claim("the v12 pipeline approved every single red-team migration",
+              R12["unsafe_approvals"] == 3
+              and R12["clean_on_blocking"] == R12["blocking_cases"] == 3,
+              f"{R12['unsafe_approvals']} unsafe, {R12['clean_on_blocking']}"
+              f"/{R12['blocking_cases']} blocking cases cleared")
+        claim("v13 makes no unsafe approval on the set built to produce them",
+              R["unsafe_approvals"] == 0 and R["clean_on_blocking"] == 0,
+              f"{R['unsafe_approvals']} unsafe, {R['clean_on_blocking']}"
+              f"/{R['blocking_cases']} cleared")
+        claim("the text-only baseline beat the v12 pipeline on this set (the unflattering one)",
+              RB["clean_on_blocking"] < R12["clean_on_blocking"],
+              f"baseline B cleared {RB['clean_on_blocking']}/{RB['blocking_cases']}, v12 cleared "
+              f"{R12['clean_on_blocking']}/{R12['blocking_cases']}")
+        claim("the v13 layer moves nothing that was already being measured",
+              par["cases_moved"] == 0 and par["labelled_cases_compared"] == 21,
+              f"{par['labelled_cases_compared'] - par['cases_moved']} of "
+              f"{par['labelled_cases_compared']} labelled cases identical")
+        claim("the correct index migration still comes back clean, so the new rule is not a "
+              "wolf-crier",
+              per["rt_07_index_swap_done_right"]["verdict"] == "SAFE"
+              and R["false_alarms"] == 0,
+              f"rt_07 {per['rt_07_index_swap_done_right']['verdict']}, "
+              f"{R['false_alarms']} false alarms")
+        claim("the correct-but-wrapped index swap raises the transaction hazard and NOT the "
+              "access-path one",
+              per["rt_06_index_swap_inside_transaction"]["fp"] == []
+              and per["rt_06_index_swap_inside_transaction"]["tp"]
+              == ["CONCURRENT_DDL_IN_TRANSACTION"],
+              f"tp {per['rt_06_index_swap_inside_transaction']['tp']}, "
+              f"fp {per['rt_06_index_swap_inside_transaction']['fp']}")
+        claim("on three cases the honest answer is a declared gap rather than a finding, and "
+              "none of them is cleared",
+              R["declared_gaps"] == 3 and R["gaps_cleared"] == 0 and R["gap_cases"] == 3,
+              f"{R['declared_gaps']} gaps, {R['gaps_cleared']}/{R['gap_cases']} cleared")
+        claim("baseline B pays for its reach in false alarms the pipeline does not make",
+              RB["false_alarms"] > R["false_alarms"],
+              f"baseline B {RB['false_alarms']}, pipeline {R['false_alarms']}")
+        claim("every red-team finding cites machine evidence and no baseline finding does",
+              R["evidenced"].split("/")[0] == R["evidenced"].split("/")[1]
+              and RB["evidenced"].startswith("0/"),
+              f"pipeline {R['evidenced']}, baseline B {RB['evidenced']}")
+        claim("closing these two holes costs reviewer minutes rather than saving them",
+              R["minutes"] > R12["minutes"],
+              f"{R12['minutes']} -> {R['minutes']} modelled minutes per case")
 
     # -------------------------------------------------------- cross-interpreter
     # v12. Everything above is measured under one interpreter. "3.11 and 3.12 verified" used to

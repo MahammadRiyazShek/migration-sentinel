@@ -210,7 +210,8 @@
   "static": true,
   "memory": true,
   "verify": true,
-  "coverage": true
+  "coverage": true,
+  "rule_coverage": true
  },
  "tool_calls": [
   {
@@ -228,7 +229,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.89,
+   "ms": 0.87,
    "result_summary": "Schema"
   },
   {
@@ -269,7 +270,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -352,7 +353,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_finance_totals",
@@ -745,7 +746,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.45,
+   "ms": 3.56,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1128,9 +1129,10 @@
        "recorded_at": "2026-03-01"
       }
      ]
-    }
+    },
+    "rule_coverage": true
    },
-   "ms": 0.19,
+   "ms": 0.25,
    "result_summary": {
     "gaps": [
      {
@@ -1160,7 +1162,7 @@
    "args": {
     "sql": "ALTER TABLE \"carrier_invoices\" ADD COLUMN \"amount_new\" numeric(8,2);\nUPDATE \"carrier_invoices\" SET \"amount_new\" = \"amount\" WHERE \"amount_new\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"carrier_invoices\" WHERE \"amount_new\" IS NULL LIMIT 5000);"
    },
-   "ms": 0.1,
+   "ms": 0.11,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1575,7 +1577,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.53,
+   "ms": 3.45,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1598,7 +1600,7 @@
   "tokens_out": 197,
   "cost_usd": 0.0
  },
- "wall_ms": 9.4,
+ "wall_ms": 9.7,
  "severity_order": [
   "low",
   "medium",

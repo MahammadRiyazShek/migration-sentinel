@@ -20,6 +20,14 @@ from ..tools.sql_parse import Schema, sqlite_type
 BATCH = 5000
 
 
+def _concurrent_drop(sql: str) -> str:
+    """DROP INDEX, but CONCURRENTLY, because the plan should not add a lock of its own."""
+    out = sql if sql.endswith(";") else sql + ";"
+    if re.search(r"\bconcurrently\b", out, flags=re.I):
+        return out
+    return re.sub(r"^\s*drop\s+index\s+", "DROP INDEX CONCURRENTLY ", out, flags=re.I)
+
+
 @dataclass
 class Policy:
     """Knobs the Verifier is allowed to turn between attempts."""
@@ -196,8 +204,27 @@ class RolloutEngineer(Agent):
                 phase2.append(op.sql if op.sql.endswith(";") else op.sql + ";")
                 code_steps.append(f"switch all readers from {table} to {op.detail['new_name']}")
                 gates.append(f"renaming {table} is not backwards compatible; confirm the cutover window")
-            elif op.kind in ("create_table", "transaction_control", "validate_constraint",
-                             "dml_insert", "dml_delete", "drop_index"):
+            elif op.kind == "drop_index":
+                # v13: an index drop that a live statement still needs is not a phase-1
+                # statement. Phase 2, after the scan counts have been read.
+                if "ACCESS_PATH_REMOVED" in codes:
+                    phase2.append(_concurrent_drop(op.sql))
+                    gates.append(f"read pg_stat_user_indexes.idx_scan for "
+                                 f"{op.detail.get('name', 'the index')} over a full business cycle "
+                                 f"and confirm it is unused before phase 2 drops it")
+                else:
+                    phase1.append(_concurrent_drop(op.sql))
+            elif op.kind == "transaction_control":
+                # v13: if the plan contains a CONCURRENTLY statement, the transaction
+                # wrapper is the hazard, so the plan must not reproduce it.
+                if "CONCURRENT_DDL_IN_TRANSACTION" in codes:
+                    code_steps.append("run phase 1 with the framework's DDL transaction disabled "
+                                      "(Rails disable_ddl_transaction!, Django atomic = False, "
+                                      "Alembic autocommit block): CONCURRENTLY cannot run inside "
+                                      "a transaction block")
+                else:
+                    phase1.append(op.sql if op.sql.endswith(";") else op.sql + ";")
+            elif op.kind in ("create_table", "validate_constraint", "dml_insert", "dml_delete"):
                 phase1.append(op.sql if op.sql.endswith(";") else op.sql + ";")
             else:
                 gates.append(f"statement {op.index} ({op.kind}) is outside the tool's model and needs "

@@ -696,7 +696,8 @@
   "static": true,
   "memory": true,
   "verify": true,
-  "coverage": true
+  "coverage": true,
+  "rule_coverage": true
  },
  "tool_calls": [
   {
@@ -1014,7 +1015,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.16,
+   "ms": 0.2,
    "result_summary": [
     {
      "query_id": "q_dispatch_create",
@@ -1193,7 +1194,7 @@
      "...+5 more"
     ]
    },
-   "ms": 0.03,
+   "ms": 0.07,
    "result_summary": 42
   },
   {
@@ -1589,7 +1590,7 @@
      "...+7 more"
     ]
    },
-   "ms": 4.08,
+   "ms": 3.77,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2206,9 +2207,10 @@
        "recorded_at": "2026-03-01"
       }
      ]
-    }
+    },
+    "rule_coverage": true
    },
-   "ms": 0.23,
+   "ms": 0.25,
    "result_summary": {
     "gaps": [
      {
@@ -2795,7 +2797,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.54,
+   "ms": 3.63,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2877,7 +2879,7 @@
   "tokens_out": 792,
   "cost_usd": 0.0
  },
- "wall_ms": 11.7,
+ "wall_ms": 11.5,
  "severity_order": [
   "low",
   "medium",

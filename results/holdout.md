@@ -4,8 +4,14 @@
 decision-code freeze: POST-FREEZE (34 files hashed under sentinel/)
   frozen at: v5 decision code, hashed before the held-out schema, cases or labels existed
   changed: sentinel/agents/risk_officer.py
+  changed: sentinel/agents/rollout_engineer.py
   changed: sentinel/coverage.py
+  changed: sentinel/hazards.py
+  changed: sentinel/llm/scripted.py
+  changed: sentinel/orchestrator.py
+  changed: sentinel/tools/query_corpus.py
   changed: sentinel/tools/shadow_db.py
+  added: sentinel/rulebook.py
   -> the held-out numbers below are an AFTER-THE-FIX run. The frozen first-contact run is kept in results/holdout/frozen_run.json.
 ```
 
@@ -60,6 +66,7 @@ Neither fix moves an in-sample number: `tools/check_results.py` still asserts th
 | `no_memory` | 0/9 | 0/7 | 0.96 | 9/9 | 0/4 | 10.7 |
 | `no_verify` | 0/9 | 0/7 | 0.96 | 0/9 | 0/4 | 22.8 |
 | `no_coverage` | 1/9 | 3/7 | 0.96 | 9/9 | 3/4 | 8.7 |
+| `no_rule_coverage` | 0/9 | 0/7 | 0.96 | 9/9 | 0/4 | 10.7 |
 
 **The one component that looked like a tax in sample pays for itself out of sample.** Removing the coverage gate costs nothing in sample - 0 unsafe approvals either way - and saves 0.7 modelled minutes a case, which is why it is the only component whose removal makes a published in-sample number look better. Out of sample, removing it costs 1 unsafe approval and lets 3 of 7 blocking migrations reach a clean verdict: on `holdout_06` the hazard is a statement class the parser cannot model and the vocabulary cannot name, so refusing to certify it is the *only* correct behaviour available, and the gate is the only thing that does it.
 

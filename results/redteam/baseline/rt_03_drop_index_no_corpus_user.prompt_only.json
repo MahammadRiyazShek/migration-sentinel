@@ -1,0 +1,26 @@
+{
+ "case_id": "rt_03_drop_index_no_corpus_user",
+ "variant": "prompt_only",
+ "verdict": "APPROVE",
+ "hazards": [
+  {
+   "code": "ACCESS_PATH_REMOVED",
+   "severity": "medium",
+   "note": "An index is dropped; queries that relied on it may get much slower - check usage first.",
+   "evidence": [],
+   "source": "model"
+  }
+ ],
+ "review_text": "Verdict: APPROVE\n\n- [MEDIUM] ACCESS_PATH_REMOVED: An index is dropped; queries that relied on it may get much slower - check usage first.",
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 1,
+  "tokens_in": 466,
+  "tokens_out": 34,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 0.1,
+ "plan": null,
+ "plan_verified": false
+}

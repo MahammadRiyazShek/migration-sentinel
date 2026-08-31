@@ -224,7 +224,8 @@ def render(insample: dict, holdout: dict, frozen: dict, freeze_state: dict,
           "## Ablation, out of sample", "",
           "| configuration | unsafe approvals | blocking cases given a clean verdict | recall | "
           "verified plans | gaps cleared | minutes/case |", "|---|---|---|---|---|---|---|"]
-    for key in ("full", "no_replay", "no_static", "no_memory", "no_verify", "no_coverage"):
+    for key in ("full", "no_replay", "no_static", "no_memory", "no_verify", "no_coverage",
+                "no_rule_coverage"):
         if key not in ab_out:
             continue
         a = ab_out[key]["aggregate"]
