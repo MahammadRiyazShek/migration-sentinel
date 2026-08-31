@@ -265,7 +265,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.83,
+   "ms": 0.8,
    "result_summary": "Schema"
   },
   {
@@ -804,7 +804,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.6,
+   "ms": 2.67,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1073,7 +1073,7 @@
      "clean": true
     }
    },
-   "ms": 0.17,
+   "ms": 0.16,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1130,7 +1130,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1362,7 +1362,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.66,
+   "ms": 2.7,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1608,7 +1608,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 2.97,
+   "ms": 2.88,
    "result_summary": {
     "statements_audited": 2,
     "scripts": {

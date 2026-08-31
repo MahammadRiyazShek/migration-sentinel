@@ -1,6 +1,6 @@
 # Trajectory - case_12_release_train
 
-- run id: `run-cd8ced97`
+- run id: `eval-case_12_release_train`
 - case: `case_12_release_train`
 - events: 46
 
@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (2.05 ms)
+**tool** `schema.parse` (0.81 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (3.09 ms)
+**tool** `migration.parse` (0.26 ms)
 
 ```json
 {
@@ -148,7 +148,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.24 ms)
+**tool** `migration.audit` (0.22 ms)
 
 ```json
 {
@@ -206,7 +206,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.11 ms)
+**tool** `schema.apply_ops` (0.19 ms)
 
 ```json
 {
@@ -323,7 +323,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.28 ms)
+**tool** `corpus.dependents` (0.15 ms)
 
 ```json
 {
@@ -523,7 +523,7 @@ _tool responded_
 21
 ```
 
-**tool** `shadow.replay` (3.26 ms)
+**tool** `shadow.replay` (2.65 ms)
 
 ```json
 {
@@ -875,7 +875,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.44 ms)
+**tool** `coverage.ledger` (0.19 ms)
 
 ```json
 {
@@ -1156,7 +1156,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.28 ms)
+**tool** `migration.parse` (0.23 ms)
 
 ```json
 {
@@ -1227,7 +1227,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `schema.apply_ops` (0.11 ms)
 
 ```json
 {
@@ -1292,7 +1292,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.72 ms)
+**tool** `shadow.replay` (2.96 ms)
 
 ```json
 {
@@ -1386,7 +1386,7 @@ _tool responded_
 }
 ```
 
-**tool** `plan.audit` (7.0 ms)
+**tool** `plan.audit` (6.63 ms)
 
 ```json
 {

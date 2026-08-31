@@ -292,7 +292,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.83,
+   "ms": 0.85,
    "result_summary": "Schema"
   },
   {
@@ -533,7 +533,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.24,
+   "ms": 0.23,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -684,7 +684,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.02,
    "result_summary": 22
   },
   {
@@ -929,7 +929,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.98,
+   "ms": 2.99,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1212,7 +1212,7 @@
      "clean": true
     }
    },
-   "ms": 0.16,
+   "ms": 0.19,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1501,7 +1501,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.12,
+   "ms": 3.03,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],

@@ -349,7 +349,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.08,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -388,7 +388,7 @@
      }
     ]
    },
-   "ms": 0.28,
+   "ms": 0.14,
    "result_summary": [
     "Schema",
     []
@@ -477,7 +477,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.25,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_dispatch_create",
@@ -938,7 +938,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.38,
+   "ms": 3.3,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1398,7 +1398,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -1745,7 +1745,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.4,
+   "ms": 3.35,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2110,7 +2110,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 7.33,
+   "ms": 7.05,
    "result_summary": {
     "statements_audited": 3,
     "scripts": {
@@ -2171,7 +2171,7 @@
   "tokens_out": 230,
   "cost_usd": 0.0
  },
- "wall_ms": 17.2,
+ "wall_ms": 16.5,
  "severity_order": [
   "low",
   "medium",

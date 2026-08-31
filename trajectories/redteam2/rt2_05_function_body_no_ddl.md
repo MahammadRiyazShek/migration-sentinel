@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.85 ms)
+**tool** `schema.parse` (0.83 ms)
 
 ```json
 {
@@ -92,7 +92,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.2 ms)
+**tool** `migration.audit` (0.17 ms)
 
 ```json
 {
@@ -278,7 +278,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.14 ms)
+**tool** `corpus.dependents` (0.17 ms)
 
 ```json
 {
@@ -482,7 +482,7 @@ _tool responded_
 25
 ```
 
-**tool** `shadow.replay` (3.11 ms)
+**tool** `shadow.replay` (3.02 ms)
 
 ```json
 {
@@ -599,7 +599,7 @@ _tool responded_
 
 </details>
 
-**tool** `coverage.ledger` (0.18 ms)
+**tool** `coverage.ledger` (0.19 ms)
 
 ```json
 {
@@ -814,7 +814,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.89 ms)
+**tool** `shadow.replay` (2.9 ms)
 
 ```json
 {
@@ -913,7 +913,7 @@ _tool responded_
 }
 ```
 
-**tool** `plan.audit` (3.77 ms)
+**tool** `plan.audit` (3.31 ms)
 
 ```json
 {

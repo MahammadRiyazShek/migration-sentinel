@@ -209,7 +209,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.83,
+   "ms": 0.8,
    "result_summary": "Schema"
   },
   {
@@ -366,7 +366,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.22,
+   "ms": 0.17,
    "result_summary": []
   },
   {
@@ -599,7 +599,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.41,
+   "ms": 3.54,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -681,7 +681,7 @@
      "customer_id"
     ]
    },
-   "ms": 0.18,
+   "ms": 0.21,
    "result_summary": [
     {
      "query_id": "q_billing_customer_invoices",
@@ -988,7 +988,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.05,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -1450,7 +1450,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.33,
+   "ms": 3.32,
    "result_summary": {
     "statements_audited": 1,
     "scripts": {

@@ -1,5 +1,5 @@
 {
- "run_id": "run-cd8ced97",
+ "run_id": "eval-case_12_release_train",
  "case_id": "case_12_release_train",
  "title": "Release train: six changes in one migration",
  "owner_service": "billing-api",
@@ -699,7 +699,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 2.05,
+   "ms": 0.81,
    "result_summary": "Schema"
   },
   {
@@ -708,7 +708,7 @@
    "args": {
     "sql": "ALTER TABLE subscriptions ADD COLUMN billing_interval TEXT NOT NULL DEFAULT 'monthly';\nCREATE UNIQUE INDEX idx_subscriptions_customer ON subscriptions (customer_id);\nALTER TABLE invoices DROP COLUMN tax_rate;\nCREATE INDEX idx_usage_events_name ON usage_events (event_name);\nALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk;\nUPDATE invoices SET status = 'open' WHERE status = 'draft';..."
    },
-   "ms": 3.09,
+   "ms": 0.26,
    "result_summary": [
     {
      "kind": "add_column",
@@ -884,7 +884,7 @@
      }
     ]
    },
-   "ms": 0.24,
+   "ms": 0.22,
    "result_summary": {
     "lexed_statements": 7,
     "ops": 7,
@@ -989,7 +989,7 @@
      }
     ]
    },
-   "ms": 0.11,
+   "ms": 0.19,
    "result_summary": [
     "Schema",
     [
@@ -1146,7 +1146,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.28,
+   "ms": 0.15,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -1601,7 +1601,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.26,
+   "ms": 2.65,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2068,7 +2068,7 @@
      "clean": true
     }
    },
-   "ms": 0.44,
+   "ms": 0.19,
    "result_summary": {
     "gaps": [
      {
@@ -2109,7 +2109,7 @@
    "args": {
     "sql": "ALTER TABLE \"subscriptions\" ADD COLUMN \"billing_interval\" TEXT DEFAULT 'monthly';\nCREATE INDEX CONCURRENTLY \"idx_subscriptions_customer_tmp_nonunique\" ON \"subscriptions\" (\"customer_id\");\nCREATE INDEX CONCURRENTLY \"idx_usage_events_name\" ON \"usage_events\" (\"event_name\");\nUPDATE invoices SET status = 'open' WHERE status = 'draft' AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE status = 'draft' LIMIT ..."
    },
-   "ms": 0.28,
+   "ms": 0.23,
    "result_summary": [
     {
      "kind": "add_column",
@@ -2229,7 +2229,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.11,
    "result_summary": [
     "Schema",
     []
@@ -2500,7 +2500,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.72,
+   "ms": 2.96,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2772,7 +2772,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 7.0,
+   "ms": 6.63,
    "result_summary": {
     "statements_audited": 11,
     "scripts": {
@@ -2935,7 +2935,7 @@
   "tokens_out": 705,
   "cost_usd": 0.0
  },
- "wall_ms": 21.8,
+ "wall_ms": 16.2,
  "severity_order": [
   "low",
   "medium",

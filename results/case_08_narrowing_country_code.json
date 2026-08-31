@@ -269,7 +269,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.82,
+   "ms": 0.83,
    "result_summary": "Schema"
   },
   {
@@ -783,7 +783,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.88,
+   "ms": 2.77,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1070,7 +1070,7 @@
      "clean": true
     }
    },
-   "ms": 0.21,
+   "ms": 0.18,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1095,7 +1095,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.05,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -1311,7 +1311,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.5,
+   "ms": 2.78,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1558,7 +1558,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 0.2,
+   "ms": 0.17,
    "result_summary": {
     "statements_audited": 0,
     "scripts": {
@@ -1589,7 +1589,7 @@
   "tokens_out": 155,
   "cost_usd": 0.0
  },
- "wall_ms": 7.7,
+ "wall_ms": 8.0,
  "severity_order": [
   "low",
   "medium",

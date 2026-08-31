@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.8 ms)
+**tool** `schema.parse` (0.89 ms)
 
 ```json
 {
@@ -134,7 +134,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -212,7 +212,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.15 ms)
 
 ```json
 {
@@ -319,7 +319,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.03 ms)
 
 ```json
 {
@@ -387,7 +387,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (2.7 ms)
+**tool** `shadow.replay` (2.75 ms)
 
 ```json
 {
@@ -549,7 +549,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.19 ms)
+**tool** `coverage.ledger` (0.24 ms)
 
 ```json
 {
@@ -756,7 +756,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -788,7 +788,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.57 ms)
+**tool** `shadow.replay` (2.73 ms)
 
 ```json
 {
@@ -885,7 +885,7 @@ _tool responded_
 }
 ```
 
-**tool** `plan.audit` (0.31 ms)
+**tool** `plan.audit` (0.32 ms)
 
 ```json
 {

@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.89 ms)
+**tool** `schema.parse` (0.87 ms)
 
 ```json
 {
@@ -197,7 +197,7 @@ _note (cartographer)_: parse conservation: the scanner finds 1 statement(s) in t
 
 </details>
 
-**tool** `corpus.dependents` (0.16 ms)
+**tool** `corpus.dependents` (0.13 ms)
 
 ```json
 {
@@ -333,7 +333,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.05 ms)
 
 ```json
 {
@@ -401,7 +401,7 @@ _tool responded_
 25
 ```
 
-**tool** `shadow.replay` (3.38 ms)
+**tool** `shadow.replay` (3.44 ms)
 
 ```json
 {
@@ -791,7 +791,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (5.15 ms)
+**tool** `shadow.replay` (2.91 ms)
 
 ```json
 {
@@ -955,7 +955,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.13 ms)
+**tool** `migration.parse` (0.12 ms)
 
 ```json
 {
@@ -983,7 +983,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.12 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -1015,7 +1015,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.46 ms)
+**tool** `shadow.replay` (2.89 ms)
 
 ```json
 {
@@ -1120,7 +1120,7 @@ _tool responded_
 
 **feedback into next step (attempt 2)** phase 1 is not safe yet: phase-1 data step failed: migration DML failed (stmt 0): unrecognized token: "'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND "id" IN (SELECT "id" FROM "invoices" WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate LIMIT 5000);" :: UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate. Tightening the policy and regenerating.
 
-**tool** `plan.audit` (0.37 ms)
+**tool** `plan.audit` (0.36 ms)
 
 ```json
 {

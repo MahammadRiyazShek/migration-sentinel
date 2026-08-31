@@ -4,7 +4,7 @@
 
 Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches, or a defect in the plan it generated. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
 
-`run eval-rt_04_change_signup_default` · case `rt_04_change_signup_default` · owning service `billing-api` · 8.1 ms · model scripted-v1 (2 calls, $0.0000)
+`run eval-rt_04_change_signup_default` · case `rt_04_change_signup_default` · owning service `billing-api` · 8.0 ms · model scripted-v1 (2 calls, $0.0000)
 
 > **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
 

@@ -595,7 +595,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.85,
+   "ms": 0.87,
    "result_summary": "Schema"
   },
   {
@@ -800,7 +800,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.19,
+   "ms": 0.21,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -935,7 +935,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": 17
   },
   {
@@ -1171,7 +1171,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.38,
+   "ms": 3.22,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1611,7 +1611,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);\nCREATE OR REPLACE VIEW customer_billing_summary AS SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;"
    },
-   "ms": 0.16,
+   "ms": 0.15,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1948,7 +1948,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.72,
+   "ms": 2.83,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2033,7 +2033,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);"
    },
-   "ms": 0.1,
+   "ms": 0.13,
    "result_summary": [
     {
      "kind": "add_column",
@@ -2334,7 +2334,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.76,
+   "ms": 2.66,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2658,7 +2658,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 6.0,
+   "ms": 6.15,
    "result_summary": {
     "statements_audited": 5,
     "scripts": {
@@ -2781,7 +2781,7 @@
   "tokens_out": 622,
   "cost_usd": 0.0
  },
- "wall_ms": 18.7,
+ "wall_ms": 18.9,
  "severity_order": [
   "low",
   "medium",
