@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.67 ms)
+**tool** `schema.parse` (0.77 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.03 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -79,7 +79,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.03 ms)
+**tool** `migration.audit` (0.04 ms)
 
 ```json
 {
@@ -122,7 +122,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.04 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -193,7 +193,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.1 ms)
+**tool** `corpus.dependents` (0.11 ms)
 
 ```json
 {
@@ -381,7 +381,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.05 ms)
+**tool** `shadow.replay` (2.72 ms)
 
 ```json
 {
@@ -614,7 +614,7 @@ _note (blast_radius)_: q_bi_summary gains column(s) ['billing_email']; recorded 
 
 </details>
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -674,7 +674,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.1 ms)
+**tool** `coverage.ledger` (0.13 ms)
 
 ```json
 {
@@ -874,7 +874,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.04 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -908,7 +908,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.0 ms)
+**tool** `shadow.replay` (2.62 ms)
 
 ```json
 {

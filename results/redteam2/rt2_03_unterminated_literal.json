@@ -271,7 +271,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.53,
+   "ms": 0.83,
    "result_summary": "Schema"
   },
   {
@@ -280,7 +280,7 @@
    "args": {
     "sql": "UPDATE invoices SET status = 'open WHERE id = 1;\nALTER TABLE invoices DROP COLUMN tax_rate;\n"
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "dml_update",
@@ -314,7 +314,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.05,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -356,7 +356,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -440,7 +440,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.19,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -611,7 +611,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": 25
   },
   {
@@ -836,7 +836,7 @@
      "...+9 more"
     ]
    },
-   "ms": 1.94,
+   "ms": 2.93,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -859,7 +859,7 @@
     "hazard_code": "MIGRATION_TEXT_UNPARSED",
     "table": "migration script"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -1109,7 +1109,7 @@
      "clean": false
     }
    },
-   "ms": 0.14,
+   "ms": 0.19,
    "result_summary": {
     "gaps": [
      {
@@ -1148,7 +1148,7 @@
    "args": {
     "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate LIMIT 5000);"
    },
-   "ms": 0.05,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "dml_update",
@@ -1182,7 +1182,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1410,7 +1410,7 @@
      "...+9 more"
     ]
    },
-   "ms": 1.97,
+   "ms": 2.93,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1432,7 +1432,7 @@
    "args": {
     "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate LIMIT 5000);"
    },
-   "ms": 0.06,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "dml_update",
@@ -1466,7 +1466,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1694,7 +1694,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.4,
+   "ms": 3.37,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1719,7 +1719,7 @@
   "tokens_out": 172,
   "cost_usd": 0.0
  },
- "wall_ms": 8.3,
+ "wall_ms": 12.0,
  "severity_order": [
   "low",
   "medium",

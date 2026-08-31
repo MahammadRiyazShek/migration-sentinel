@@ -294,7 +294,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.73,
+   "ms": 1.09,
    "result_summary": "Schema"
   },
   {
@@ -303,7 +303,7 @@
    "args": {
     "sql": "ALTER TABLE shipment_stops RENAME TO stops;\nCREATE VIEW shipment_stops AS\n  SELECT id, shipment_id, sequence_no, kind, status, address_json, arrived_at FROM stops;\n"
    },
-   "ms": 0.05,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "rename_table",
@@ -359,7 +359,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.08,
    "result_summary": {
     "lexed_statements": 2,
     "ops": 2,
@@ -404,7 +404,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -499,7 +499,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.08,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_dispatch_stop_progress",
@@ -920,7 +920,7 @@
      "...+7 more"
     ]
    },
-   "ms": 2.71,
+   "ms": 3.71,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -958,7 +958,7 @@
     "hazard_code": "BREAKING_QUERY",
     "table": "q_dispatch_stop_progress"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -1379,7 +1379,7 @@
      "clean": true
     }
    },
-   "ms": 0.12,
+   "ms": 0.2,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1394,7 +1394,7 @@
    "args": {
     "sql": "CREATE VIEW shipment_stops AS SELECT id, shipment_id, sequence_no, kind, status, address_json, arrived_at FROM stops;"
    },
-   "ms": 0.1,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "create_view",
@@ -1773,7 +1773,7 @@
      "...+7 more"
     ]
    },
-   "ms": 2.18,
+   "ms": 3.31,
    "result_summary": {
     "materialised": false,
     "schema_errors": [
@@ -1798,7 +1798,7 @@
   "tokens_out": 432,
   "cost_usd": 0.0
  },
- "wall_ms": 7.0,
+ "wall_ms": 9.9,
  "severity_order": [
   "low",
   "medium",

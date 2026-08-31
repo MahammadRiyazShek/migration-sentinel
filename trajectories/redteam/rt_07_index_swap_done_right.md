@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.55 ms)
+**tool** `schema.parse` (0.79 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -92,7 +92,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.05 ms)
+**tool** `migration.audit` (0.15 ms)
 
 ```json
 {
@@ -148,7 +148,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.04 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -233,7 +233,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.09 ms)
+**tool** `corpus.dependents` (0.14 ms)
 
 ```json
 {
@@ -377,7 +377,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.03 ms)
 
 ```json
 {
@@ -446,7 +446,7 @@ _tool responded_
 28
 ```
 
-**tool** `shadow.replay` (2.05 ms)
+**tool** `shadow.replay` (2.98 ms)
 
 ```json
 {
@@ -569,7 +569,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.access_path_users` (0.13 ms)
+**tool** `corpus.access_path_users` (0.18 ms)
 
 ```json
 {
@@ -657,7 +657,7 @@ _tool responded_
 
 _note (risk_officer)_: idx_invoices_customer is dropped but statement 1 creates idx_invoices_customer_status on invoices(customer_id, status), whose leading columns still serve invoices(customer_id). The access path survives, so no ACCESS_PATH_REMOVED is raised.
 
-**tool** `coverage.ledger` (0.1 ms)
+**tool** `coverage.ledger` (0.15 ms)
 
 ```json
 {
@@ -795,7 +795,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.13 ms)
 
 ```json
 {
@@ -838,7 +838,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.08 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -885,7 +885,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (1.87 ms)
+**tool** `shadow.replay` (2.79 ms)
 
 ```json
 {

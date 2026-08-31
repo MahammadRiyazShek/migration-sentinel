@@ -213,7 +213,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.58,
+   "ms": 0.79,
    "result_summary": "Schema"
   },
   {
@@ -222,7 +222,7 @@
    "args": {
     "sql": "ALTER TABLE invoices ADD CONSTRAINT invoices_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id);\n"
    },
-   "ms": 0.08,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "add_constraint",
@@ -262,7 +262,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -299,7 +299,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -386,7 +386,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.08,
+   "ms": 0.11,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -497,7 +497,7 @@
      }
     ]
    },
-   "ms": 0.01,
+   "ms": 0.02,
    "result_summary": 16
   },
   {
@@ -725,7 +725,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.05,
+   "ms": 2.74,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -993,7 +993,7 @@
      "clean": true
     }
    },
-   "ms": 0.13,
+   "ms": 0.17,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1008,7 +1008,7 @@
    "args": {
     "sql": "ALTER TABLE \"invoices\" ADD CONSTRAINT \"invoices_customer_fk\" FOREIGN KEY (customer_id) REFERENCES customers (id) NOT VALID;"
    },
-   "ms": 0.07,
+   "ms": 0.09,
    "result_summary": [
     {
      "kind": "add_constraint",
@@ -1048,7 +1048,7 @@
      }
     ]
    },
-   "ms": 0.11,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1279,7 +1279,7 @@
      "...+6 more"
     ]
    },
-   "ms": 1.89,
+   "ms": 2.7,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1302,7 +1302,7 @@
   "tokens_out": 120,
   "cost_usd": 0.0
  },
- "wall_ms": 5.8,
+ "wall_ms": 7.6,
  "severity_order": [
   "low",
   "medium",

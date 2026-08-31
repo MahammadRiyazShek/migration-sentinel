@@ -309,7 +309,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.51,
+   "ms": 0.81,
    "result_summary": "Schema"
   },
   {
@@ -318,7 +318,7 @@
    "args": {
     "sql": "BEGIN;\nDROP INDEX CONCURRENTLY idx_invoices_customer;\nCREATE INDEX CONCURRENTLY idx_invoices_customer_status ON invoices (customer_id, status);\nCOMMIT;\n"
    },
-   "ms": 0.04,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "transaction_control",
@@ -414,7 +414,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.09,
    "result_summary": {
     "lexed_statements": 4,
     "ops": 4,
@@ -479,7 +479,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -594,7 +594,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.1,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -781,7 +781,7 @@
      "...+1 more"
     ]
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": 28
   },
   {
@@ -1037,7 +1037,7 @@
      "...+9 more"
     ]
    },
-   "ms": 1.97,
+   "ms": 3.06,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1119,7 +1119,7 @@
      "customer_id"
     ]
    },
-   "ms": 0.14,
+   "ms": 0.17,
    "result_summary": [
     {
      "query_id": "q_billing_customer_invoices",
@@ -1446,7 +1446,7 @@
      "clean": true
     }
    },
-   "ms": 0.1,
+   "ms": 0.15,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1525,7 +1525,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1768,7 +1768,7 @@
      "...+9 more"
     ]
    },
-   "ms": 1.96,
+   "ms": 2.89,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1791,7 +1791,7 @@
   "tokens_out": 174,
   "cost_usd": 0.0
  },
- "wall_ms": 5.8,
+ "wall_ms": 8.5,
  "severity_order": [
   "low",
   "medium",

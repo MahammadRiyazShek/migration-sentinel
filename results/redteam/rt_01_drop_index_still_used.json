@@ -159,7 +159,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.51,
+   "ms": 0.89,
    "result_summary": "Schema"
   },
   {
@@ -168,7 +168,7 @@
    "args": {
     "sql": "DROP INDEX idx_invoices_customer;\n"
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": [
     {
      "kind": "drop_index",
@@ -200,7 +200,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.04,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -233,7 +233,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -316,7 +316,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.12,
+   "ms": 0.17,
    "result_summary": []
   },
   {
@@ -549,7 +549,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.27,
+   "ms": 3.42,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -631,7 +631,7 @@
      "customer_id"
     ]
    },
-   "ms": 0.14,
+   "ms": 0.18,
    "result_summary": [
     {
      "query_id": "q_billing_customer_invoices",
@@ -672,7 +672,7 @@
     "hazard_code": "ACCESS_PATH_REMOVED",
     "table": "invoices"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -913,7 +913,7 @@
      "clean": true
     }
    },
-   "ms": 0.23,
+   "ms": 0.32,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -938,7 +938,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1154,7 +1154,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.08,
+   "ms": 3.02,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1177,7 +1177,7 @@
   "tokens_out": 131,
   "cost_usd": 0.0
  },
- "wall_ms": 6.5,
+ "wall_ms": 9.3,
  "severity_order": [
   "low",
   "medium",

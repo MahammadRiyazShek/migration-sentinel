@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.64 ms)
+**tool** `schema.parse` (1.05 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.03 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -86,7 +86,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.04 ms)
+**tool** `migration.audit` (0.06 ms)
 
 ```json
 {
@@ -132,7 +132,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.06 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -207,7 +207,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.08 ms)
+**tool** `corpus.dependents` (0.12 ms)
 
 ```json
 {
@@ -312,7 +312,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.01 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -382,7 +382,7 @@ _tool responded_
 14
 ```
 
-**tool** `shadow.replay` (2.23 ms)
+**tool** `shadow.replay` (3.27 ms)
 
 ```json
 {
@@ -540,7 +540,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -562,7 +562,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.11 ms)
+**tool** `coverage.ledger` (0.17 ms)
 
 ```json
 {
@@ -723,7 +723,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.05 ms)
 
 ```json
 {
@@ -756,7 +756,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.07 ms)
 
 ```json
 {
@@ -793,7 +793,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.18 ms)
+**tool** `shadow.replay` (3.34 ms)
 
 ```json
 {

@@ -147,7 +147,7 @@ read it: [`docs/SUPERVISOR_LOG_V10.md`](docs/SUPERVISOR_LOG_V10.md).
 
 ## The video is older than the repo
 
-The submitted video was recorded against v2. The repository is v14. The problem, architecture,
+The submitted video was recorded against v2. The repository is v15. The problem, architecture,
 baseline comparison and walkthrough all still match; some on-screen numbers are stale and three
 components (the coverage gate, the structural narrator and the held-out world) did not exist yet.
 

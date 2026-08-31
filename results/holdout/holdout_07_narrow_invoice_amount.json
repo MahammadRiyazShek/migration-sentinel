@@ -230,7 +230,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.8,
+   "ms": 1.01,
    "result_summary": "Schema"
   },
   {
@@ -239,7 +239,7 @@
    "args": {
     "sql": "ALTER TABLE carrier_invoices ALTER COLUMN amount TYPE numeric(8,2);\n"
    },
-   "ms": 0.04,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "alter_type",
@@ -271,7 +271,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.05,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -304,7 +304,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -387,7 +387,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.07,
+   "ms": 0.11,
    "result_summary": [
     {
      "query_id": "q_finance_totals",
@@ -780,7 +780,7 @@
      "...+7 more"
     ]
    },
-   "ms": 2.23,
+   "ms": 3.29,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -811,7 +811,7 @@
     "hazard_code": "TABLE_REWRITE_LOCK",
     "table": "carrier_invoices"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -1179,7 +1179,7 @@
      "clean": true
     }
    },
-   "ms": 0.15,
+   "ms": 0.28,
    "result_summary": {
     "gaps": [
      {
@@ -1209,7 +1209,7 @@
    "args": {
     "sql": "ALTER TABLE \"carrier_invoices\" ADD COLUMN \"amount_new\" numeric(8,2);\nUPDATE \"carrier_invoices\" SET \"amount_new\" = \"amount\" WHERE \"amount_new\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"carrier_invoices\" WHERE \"amount_new\" IS NULL LIMIT 5000);"
    },
-   "ms": 0.09,
+   "ms": 0.11,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1269,7 +1269,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -1624,7 +1624,7 @@
      "...+7 more"
     ]
    },
-   "ms": 2.2,
+   "ms": 3.45,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1647,7 +1647,7 @@
   "tokens_out": 197,
   "cost_usd": 0.0
  },
- "wall_ms": 6.4,
+ "wall_ms": 9.4,
  "severity_order": [
   "low",
   "medium",

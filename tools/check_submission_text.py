@@ -30,10 +30,14 @@ committed verbatim as `SUBMISSION_FORM_TEXT.txt` and audited here, with an exit 
 everything else in this repository.
 
 v9 found a seventh defect of exactly the same class, and this one could have truncated the
-submission: this file asserted a 10,000-character cap, and the form's own field label says
-9,000. The pasted text was 9,422 characters. Everything from the failure mode down - the
+submission: this file asserted a 10,000-character cap, and the form's field label at the time
+read 9,000. The pasted text was 9,422 characters. Everything from the failure mode down - the
 5% hot-take row - was over the edge of a limit no checker in this repository had ever read
-off the form. So the cap is 9,000 here now, and the audited text fits it.
+off the form. So the cap is 9,000 here, and the audited text fits it on both counts.
+
+v15: the field's label now reads "under 10000". The enforced number is unchanged and is no
+longer described as a quotation of it - see the comment on FORM_LIMIT. An audit that calls its
+own policy a measurement is the v9 defect wearing the other shoe.
 
 The claim count is no longer hardcoded either. It used to read `27/27` in a regex; the count
 is produced by `tools/check_results.py`, so it is asked rather than restated.
@@ -53,8 +57,13 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 FORM_TEXT = ROOT / "SUBMISSION_FORM_TEXT.txt"
-# The form field's own label: "9000 characters only. only plain text." Not 10,000, which is
-# what this file asserted until v9 read the form again instead of the previous audit.
+# v15: this number has changed meaning and the comment above it had not. v9 read "9000
+# characters only. only plain text." off the field and replaced a hardcoded 10,000 with it, and
+# the comment said so for six releases. The field now reads "under 10000 characters only. only
+# plain text. no tables or other characters allowed." Both readings cannot be evidence, so this
+# is the stricter of the two, held deliberately as a budget rather than quoted as a label: a
+# field label that moved once can move again between the last green run and the paste, and the
+# count that decides the outcome is the CRLF one below, which no counter in the page reports.
 FORM_LIMIT = 9000
 
 ARMS = ("baseline_prompt_only", "baseline_prompt_with_schema", "agent_pipeline")

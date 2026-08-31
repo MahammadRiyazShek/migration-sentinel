@@ -348,7 +348,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.64,
+   "ms": 1.9,
    "result_summary": "Schema"
   },
   {
@@ -357,7 +357,7 @@
    "args": {
     "sql": "ALTER TABLE drivers ADD COLUMN preferred_language TEXT;\nCREATE INDEX CONCURRENTLY idx_drivers_carrier ON drivers (carrier_id);\n"
    },
-   "ms": 0.05,
+   "ms": 0.1,
    "result_summary": [
     {
      "kind": "add_column",
@@ -425,7 +425,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.16,
    "result_summary": {
     "lexed_statements": 2,
     "ops": 2,
@@ -476,7 +476,7 @@
      }
     ]
    },
-   "ms": 0.12,
+   "ms": 0.23,
    "result_summary": [
     "Schema",
     []
@@ -577,7 +577,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.08,
+   "ms": 0.21,
    "result_summary": [
     {
      "query_id": "q_dispatch_create",
@@ -728,7 +728,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.05,
    "result_summary": 20
   },
   {
@@ -1084,7 +1084,7 @@
      "...+7 more"
     ]
    },
-   "ms": 2.2,
+   "ms": 4.16,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1524,7 +1524,7 @@
      "clean": true
     }
    },
-   "ms": 0.11,
+   "ms": 0.21,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1539,7 +1539,7 @@
    "args": {
     "sql": "ALTER TABLE \"drivers\" ADD COLUMN \"preferred_language\" TEXT;\nCREATE INDEX CONCURRENTLY \"idx_drivers_carrier\" ON \"drivers\" (\"carrier_id\");"
    },
-   "ms": 0.07,
+   "ms": 0.08,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1607,7 +1607,7 @@
      }
     ]
    },
-   "ms": 0.09,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -1966,7 +1966,7 @@
      "...+7 more"
     ]
    },
-   "ms": 2.24,
+   "ms": 3.41,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2048,7 +2048,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 6.3,
+ "wall_ms": 11.3,
  "severity_order": [
   "low",
   "medium",

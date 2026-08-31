@@ -251,7 +251,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.55,
+   "ms": 0.79,
    "result_summary": "Schema"
   },
   {
@@ -260,7 +260,7 @@
    "args": {
     "sql": "DROP INDEX CONCURRENTLY idx_invoices_customer;\nCREATE INDEX CONCURRENTLY idx_invoices_customer_status ON invoices (customer_id, status);\n"
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     {
      "kind": "drop_index",
@@ -324,7 +324,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.15,
    "result_summary": {
     "lexed_statements": 2,
     "ops": 2,
@@ -373,7 +373,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -472,7 +472,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.09,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -659,7 +659,7 @@
      "...+1 more"
     ]
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": 28
   },
   {
@@ -899,7 +899,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.05,
+   "ms": 2.98,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -981,7 +981,7 @@
      "customer_id"
     ]
    },
-   "ms": 0.13,
+   "ms": 0.18,
    "result_summary": [
     {
      "query_id": "q_billing_customer_invoices",
@@ -1266,7 +1266,7 @@
      "clean": true
     }
    },
-   "ms": 0.1,
+   "ms": 0.15,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1281,7 +1281,7 @@
    "args": {
     "sql": "DROP INDEX CONCURRENTLY idx_invoices_customer;\nCREATE INDEX CONCURRENTLY \"idx_invoices_customer_status\" ON \"invoices\" (\"customer_id\", \"status\");"
    },
-   "ms": 0.05,
+   "ms": 0.13,
    "result_summary": [
     {
      "kind": "drop_index",
@@ -1345,7 +1345,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1588,7 +1588,7 @@
      "...+9 more"
     ]
    },
-   "ms": 1.87,
+   "ms": 2.79,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1611,7 +1611,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 5.6,
+ "wall_ms": 8.2,
  "severity_order": [
   "low",
   "medium",

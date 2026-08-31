@@ -208,7 +208,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.55,
+   "ms": 0.84,
    "result_summary": "Schema"
   },
   {
@@ -217,7 +217,7 @@
    "args": {
     "sql": "ALTER TABLE customers ALTER COLUMN country_code DROP NOT NULL;\n"
    },
-   "ms": 0.03,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "drop_not_null",
@@ -245,7 +245,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.04,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -276,7 +276,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -357,7 +357,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.08,
+   "ms": 0.15,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -490,7 +490,7 @@
      }
     ]
    },
-   "ms": 0.01,
+   "ms": 0.02,
    "result_summary": 17
   },
   {
@@ -712,7 +712,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.0,
+   "ms": 2.97,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -959,7 +959,7 @@
      "clean": true
     }
    },
-   "ms": 0.1,
+   "ms": 0.15,
    "result_summary": {
     "gaps": [
      {
@@ -997,7 +997,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1213,7 +1213,7 @@
      "...+9 more"
     ]
    },
-   "ms": 1.89,
+   "ms": 2.87,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1236,7 +1236,7 @@
   "tokens_out": 78,
   "cost_usd": 0.0
  },
- "wall_ms": 5.4,
+ "wall_ms": 7.8,
  "severity_order": [
   "low",
   "medium",

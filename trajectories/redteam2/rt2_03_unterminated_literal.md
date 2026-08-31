@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.53 ms)
+**tool** `schema.parse` (0.83 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.05 ms)
 
 ```json
 {
@@ -77,7 +77,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.03 ms)
+**tool** `migration.audit` (0.05 ms)
 
 ```json
 {
@@ -126,7 +126,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.03 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -197,7 +197,7 @@ _note (cartographer)_: parse conservation: the scanner finds 1 statement(s) in t
 
 </details>
 
-**tool** `corpus.dependents` (0.11 ms)
+**tool** `corpus.dependents` (0.19 ms)
 
 ```json
 {
@@ -333,7 +333,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.03 ms)
 
 ```json
 {
@@ -401,7 +401,7 @@ _tool responded_
 25
 ```
 
-**tool** `shadow.replay` (1.94 ms)
+**tool** `shadow.replay` (2.93 ms)
 
 ```json
 {
@@ -534,7 +534,7 @@ _tool responded_
 
 Postgres will refuse this script, so no statement in it executes and any finding read off the mangled remainder would be a claim about text that never runs. Suppressed for that reason: BREAKING_QUERY, UNBATCHED_BACKFILL. The only honest output is the parse failure and the region nobody could read. Fix the script and resubmit for review.
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -554,7 +554,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.14 ms)
+**tool** `coverage.ledger` (0.19 ms)
 
 ```json
 {
@@ -731,7 +731,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.07 ms)
 
 ```json
 {
@@ -759,7 +759,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.04 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -791,7 +791,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (1.97 ms)
+**tool** `shadow.replay` (2.93 ms)
 
 ```json
 {
@@ -955,7 +955,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.06 ms)
+**tool** `migration.parse` (0.07 ms)
 
 ```json
 {
@@ -983,7 +983,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.04 ms)
+**tool** `schema.apply_ops` (0.05 ms)
 
 ```json
 {
@@ -1015,7 +1015,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.4 ms)
+**tool** `shadow.replay` (3.37 ms)
 
 ```json
 {

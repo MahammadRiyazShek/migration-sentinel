@@ -127,7 +127,11 @@ def check_single_entry_point(_files):
 
 
 def check_paste_ready_description(_files):
-    """The submission form caps the description at 9,000 characters, and says so on the field.
+    """The paste-ready copy fits the 9,000-character budget and is the text in the form.
+
+    The budget, not the label: the field's label now reads "under 10000". 9,000 is the stricter
+    of the two readings this repository has taken off the form, and tools/check_submission_text.py
+    owns the reasoning.
 
     v9: this check asserted 10,000 for two releases, and the markdown copy below the marker was
     9,744 - so a green check sat over a description the form would have truncated. The cap is

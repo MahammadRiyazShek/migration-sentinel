@@ -373,7 +373,7 @@ class TestSubmissionText(unittest.TestCase):
 
     def test_the_committed_form_text_fits_the_field_and_is_plain_ascii(self):
         text = self.FORM.read_text(encoding="utf-8").strip()
-        # The field's own label says 9,000. v10: this test asserted 10,000 for three releases,
+        # 9,000 is the enforced budget, stricter than the field's current "under 10000" label. v10: this test asserted 10,000 for three releases,
         # so it stood green over a description the form would have truncated. Both counts are
         # asserted, because a form POST normalises every line break to CRLF and the counter in
         # the page does not.

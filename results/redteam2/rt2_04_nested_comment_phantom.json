@@ -233,7 +233,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.53,
+   "ms": 0.85,
    "result_summary": "Schema"
   },
   {
@@ -242,7 +242,7 @@
    "args": {
     "sql": "/* superseded by 2026_02_02_tax_rate_v2:\n   /* original attempt */ ALTER TABLE invoices DROP COLUMN tax_rate;\n*/\nCREATE INDEX CONCURRENTLY idx_invoices_status ON invoices (status);\n"
    },
-   "ms": 0.04,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "create_index",
@@ -284,7 +284,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.1,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -410,7 +410,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.1,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -589,7 +589,7 @@
      "...+1 more"
     ]
    },
-   "ms": 0.02,
+   "ms": 0.03,
    "result_summary": 28
   },
   {
@@ -818,7 +818,7 @@
      "...+9 more"
     ]
    },
-   "ms": 1.95,
+   "ms": 3.02,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1072,7 +1072,7 @@
      "clean": true
     }
    },
-   "ms": 0.1,
+   "ms": 0.14,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1087,7 +1087,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_invoices_status\" ON \"invoices\" (\"status\");"
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "create_index",
@@ -1129,7 +1129,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1361,7 +1361,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.0,
+   "ms": 2.98,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1384,7 +1384,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 5.5,
+ "wall_ms": 8.2,
  "severity_order": [
   "low",
   "medium",

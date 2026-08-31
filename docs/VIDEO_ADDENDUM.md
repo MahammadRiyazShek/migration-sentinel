@@ -1,6 +1,6 @@
 # Video addendum: what changed after the recording
 
-The submitted video was recorded against v2. The repo is v14. Nothing in the video is wrong about the
+The submitted video was recorded against v2. The repo is v15. Nothing in the video is wrong about the
 problem, the architecture, the baseline comparison or the walkthrough; some on-screen numbers are stale
 and three components did not exist yet: the coverage gate, the structural narrator and the held-out
 world on the second schema. **When video and repo disagree, `results/comparison.md` and

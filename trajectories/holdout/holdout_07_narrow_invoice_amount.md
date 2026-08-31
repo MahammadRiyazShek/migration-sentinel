@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.8 ms)
+**tool** `schema.parse` (1.01 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -80,7 +80,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.03 ms)
+**tool** `migration.audit` (0.05 ms)
 
 ```json
 {
@@ -120,7 +120,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.04 ms)
+**tool** `schema.apply_ops` (0.07 ms)
 
 ```json
 {
@@ -189,7 +189,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.07 ms)
+**tool** `corpus.dependents` (0.11 ms)
 
 ```json
 {
@@ -302,7 +302,7 @@ _tool responded_
 5
 ```
 
-**tool** `shadow.replay` (2.23 ms)
+**tool** `shadow.replay` (3.29 ms)
 
 ```json
 {
@@ -456,7 +456,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -496,7 +496,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.15 ms)
+**tool** `coverage.ledger` (0.28 ms)
 
 ```json
 {
@@ -670,7 +670,7 @@ _note (risk_officer)_: verdict capped to NEEDS_COVERAGE_SIGNOFF: 1 coverage gap(
 
 </details>
 
-**tool** `migration.parse` (0.09 ms)
+**tool** `migration.parse` (0.11 ms)
 
 ```json
 {
@@ -711,7 +711,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.07 ms)
 
 ```json
 {
@@ -756,7 +756,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.2 ms)
+**tool** `shadow.replay` (3.45 ms)
 
 ```json
 {

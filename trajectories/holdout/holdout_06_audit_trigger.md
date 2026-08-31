@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.67 ms)
+**tool** `schema.parse` (1.05 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.1 ms)
+**tool** `migration.parse` (0.17 ms)
 
 ```json
 {
@@ -88,7 +88,7 @@ _tool responded_
 ]
 ```
 
-**tool** `migration.audit` (0.08 ms)
+**tool** `migration.audit` (0.12 ms)
 
 ```json
 {
@@ -136,7 +136,7 @@ _tool responded_
 }
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.07 ms)
 
 ```json
 {
@@ -220,7 +220,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.07 ms)
+**tool** `corpus.dependents` (0.11 ms)
 
 ```json
 {
@@ -287,7 +287,7 @@ _tool responded_
 0
 ```
 
-**tool** `shadow.replay` (2.32 ms)
+**tool** `shadow.replay` (3.35 ms)
 
 ```json
 {
@@ -410,7 +410,7 @@ _tool responded_
 
 </details>
 
-**tool** `coverage.ledger` (0.14 ms)
+**tool** `coverage.ledger` (0.19 ms)
 
 ```json
 {
@@ -558,7 +558,7 @@ _note (risk_officer)_: verdict capped to NEEDS_COVERAGE_SIGNOFF: 1 coverage gap(
 
 </details>
 
-**tool** `migration.parse` (0.1 ms)
+**tool** `migration.parse` (0.12 ms)
 
 ```json
 {
@@ -585,7 +585,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.05 ms)
+**tool** `schema.apply_ops` (0.07 ms)
 
 ```json
 {
@@ -616,7 +616,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.18 ms)
+**tool** `shadow.replay` (3.2 ms)
 
 ```json
 {

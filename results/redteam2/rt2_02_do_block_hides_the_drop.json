@@ -175,7 +175,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.71,
+   "ms": 1.05,
    "result_summary": "Schema"
   },
   {
@@ -184,7 +184,7 @@
    "args": {
     "sql": "DO $$\nBEGIN\n  IF EXISTS (SELECT 1 FROM information_schema.columns\n             WHERE table_name = 'invoices' AND column_name = 'tax_rate')\n  THEN\n    ALTER TABLE invoices DROP COLUMN tax_rate;\n  END IF;\nEND\n$$;\n"
    },
-   "ms": 0.06,
+   "ms": 0.09,
    "result_summary": [
     {
      "kind": "procedural_block",
@@ -222,7 +222,7 @@
      }
     ]
    },
-   "ms": 0.14,
+   "ms": 0.26,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -299,7 +299,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     [
@@ -387,7 +387,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.07,
+   "ms": 0.12,
    "result_summary": []
   },
   {
@@ -623,7 +623,7 @@
      "...+9 more"
     ]
    },
-   "ms": 1.94,
+   "ms": 3.21,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -644,7 +644,7 @@
     "hazard_code": "PROCEDURAL_DDL_UNREVIEWED",
     "table": "migration script"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -931,7 +931,7 @@
      "clean": false
     }
    },
-   "ms": 0.13,
+   "ms": 0.18,
    "result_summary": {
     "gaps": [
      {
@@ -973,7 +973,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1189,7 +1189,7 @@
      "...+9 more"
     ]
    },
-   "ms": 1.97,
+   "ms": 3.14,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1212,7 +1212,7 @@
   "tokens_out": 159,
   "cost_usd": 0.0
  },
- "wall_ms": 5.8,
+ "wall_ms": 9.0,
  "severity_order": [
   "low",
   "medium",
