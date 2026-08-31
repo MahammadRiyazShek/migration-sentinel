@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.62 ms)
+**tool** `schema.parse` (0.69 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.03 ms)
+**tool** `migration.parse` (0.04 ms)
 
 ```json
 {
@@ -144,7 +144,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.14 ms)
+**tool** `corpus.dependents` (0.11 ms)
 
 ```json
 {
@@ -332,7 +332,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.59 ms)
+**tool** `shadow.replay` (2.68 ms)
 
 ```json
 {
@@ -473,7 +473,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.14 ms)
+**tool** `coverage.ledger` (0.16 ms)
 
 ```json
 {
@@ -656,7 +656,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.61 ms)
+**tool** `shadow.replay` (2.65 ms)
 
 ```json
 {

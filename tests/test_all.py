@@ -706,3 +706,132 @@ class TestDeterminism(unittest.TestCase):
         a, _ = self.det.normalise('{"minutes_per_case": 9.2}')
         b, _ = self.det.normalise('{"minutes_per_case": 8.5}')
         self.assertNotEqual(a, b)
+
+
+class TestCrossVersion(unittest.TestCase):
+    """v12. `tools/check_determinism.py` reruns everything under the interpreter it was invoked
+    with, so "3.11 and 3.12 verified" meant the tests do not raise on either - a claim about
+    exceptions, not about numbers. `tools/check_cross_version.py` diffs the two `results/` trees.
+    These tests are what stop it from calling a moved verdict a timing difference, and what stop
+    its timing disclosure from turning back into an unanchored percentage."""
+
+    @classmethod
+    def setUpClass(cls):
+        from tools import check_cross_version
+        cls.xv = check_cross_version
+
+    def _tree(self, payload, name="results/case_x.json"):
+        import json
+        import pathlib
+        import tempfile
+        root = pathlib.Path(tempfile.mkdtemp())
+        path = root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, indent=1))
+        return root
+
+    def test_only_distinct_minor_versions_are_ever_compared(self):
+        """`python3` and `python3.12` are usually the same binary, and diffing a tree against
+        itself would print PASS while proving nothing."""
+        found = self.xv.interpreters()
+        minors = [tuple(int(x) for x in v.split(".")[:2]) for v, _ in found]
+        self.assertEqual(len(minors), len(set(minors)), found)
+        self.assertTrue(all(m >= (3, 11) for m in minors), found)
+        self.assertLessEqual(len(found), 2)
+
+    def test_a_wall_clock_difference_is_not_a_decision_difference(self):
+        a = self._tree({"verdict": "BLOCK", "ms": 3.49})
+        b = self._tree({"verdict": "BLOCK", "ms": 2.85})
+        identical, wall_only, real, only_one = self.xv.compare(a, b)
+        self.assertEqual((len(identical), len(wall_only), len(real), only_one), (0, 1, 0, []))
+
+    def test_a_verdict_difference_is_a_decision_difference(self):
+        a = self._tree({"verdict": "BLOCK", "ms": 3.49})
+        b = self._tree({"verdict": "APPROVE", "ms": 3.49})
+        _, _, real, _ = self.xv.compare(a, b)
+        self.assertEqual(len(real), 1, "an interpreter that changes a verdict must fail the check")
+
+    def test_a_file_only_one_interpreter_produced_is_a_failure_rather_than_a_pass(self):
+        a = self._tree({"verdict": "BLOCK"}, "results/case_x.json")
+        b = self._tree({"verdict": "BLOCK"}, "results/case_y.json")
+        _, _, _, only_one = self.xv.compare(a, b)
+        self.assertEqual(sorted(only_one), ["results/case_x.json", "results/case_y.json"])
+
+    def test_the_timing_delta_is_published_relative_and_absolute(self):
+        """The first draft published "worst wall-clock delta: 100%", which was 0.0 ms against
+        0.1 ms wearing a percentage sign: the exact unanchored percentage this repository refuses
+        everywhere else."""
+        a = self._tree({"wall_ms": 0.0, "tool_calls": [{"ms": 8.0}]})
+        b = self._tree({"wall_ms": 0.1, "tool_calls": [{"ms": 8.2}]})
+        relative, absolute, seen = self.xv.clock_deltas(a, b)
+        self.assertEqual((relative, seen), (1.0, 2))
+        self.assertAlmostEqual(absolute, 0.2, places=3)
+
+    def test_the_committed_comparison_is_two_interpreters_with_no_decision_difference(self):
+        record = json.loads((ROOT / "results" / "cross_version.json").read_text())
+        self.assertEqual(record["decision_differences"], 0)
+        self.assertEqual(len(record["interpreters"]), 2)
+        self.assertNotEqual(record["interpreters"][0]["version"],
+                            record["interpreters"][1]["version"])
+        self.assertGreater(record["files_compared"], 140)
+        self.assertGreater(record["max_relative_clock_delta"], 0,
+                           "the timings do move; the claim that they do not would be false")
+
+
+class TestProvenancePreflight(unittest.TestCase):
+    """v12. `python3 -m sentinel review` writes into `results/` with its own run id, so a judge who
+    follows `JUDGE_START_HERE.md` in the order it is written makes the determinism check report a
+    decision difference over a random hex string."""
+
+    @classmethod
+    def setUpClass(cls):
+        from tools import check_determinism
+        cls.det = check_determinism
+
+    def test_an_interactive_run_id_is_told_apart_from_a_harness_one(self):
+        self.assertTrue(self.det.INTERACTIVE_RUN_ID.match("run-5dd02ef1"))
+        for harness in ("eval-case_12_release_train", "holdout-holdout_07_narrow_invoice_amount",
+                        "ablation-full-case_01"):
+            self.assertIsNone(self.det.INTERACTIVE_RUN_ID.match(harness), harness)
+
+    def test_the_committed_evidence_carries_only_harness_run_ids(self):
+        self.assertEqual(self.det.interactive_packets(), [],
+                         "a committed packet was written by an ad-hoc run: `make eval` restores it")
+
+
+class TestSelfDescription(unittest.TestCase):
+    """v12. Two blind spots in `tools/check_docs.py`, found by pointing it at itself: it audits
+    markdown, so the three counting tools' own docstrings were never read, and the release the
+    documentation declares was retyped in four places."""
+
+    @classmethod
+    def setUpClass(cls):
+        from tools import check_docs
+        cls.cd = check_docs
+
+    def test_a_stale_size_in_a_tools_own_docstring_is_caught(self):
+        doc = "So it gets an audit with an exit code. Six checks, standard library, no network."
+        found = self.cd.tool_docstring_counts("tools/check_docs.py", doc, "checks", 9)
+        self.assertEqual([(f[1], f[2]) for f in found], [("Six checks", 6)])
+
+    def test_a_quoted_count_in_a_docstring_is_a_citation_not_a_claim(self):
+        doc = 'the claim-count audit existed because a stale "18/18 claims" survived two releases'
+        self.assertEqual(self.cd.tool_docstring_counts("tools/check_docs.py", doc, "claims", 46), [])
+
+    def test_the_version_sentence_that_dated_itself_with_the_video_is_still_caught(self):
+        """The first draft of this check reused `_is_dated` and was therefore exempt on all four
+        instances of the defect: the sentence dates itself with the version of the *video*."""
+        line = "The submitted video was recorded against v2. The repository is v10."
+        stale, seen = self.cd.stale_version_statements(line, 12)
+        self.assertEqual([(s[1], s[2]) for s in stale], [("repository is v10", 10)])
+        self.assertEqual(seen, 1)
+
+    def test_a_quoted_version_is_a_citation_and_a_current_one_raises_nothing(self):
+        cited = '`JUDGE_START_HERE.md` said "the repository is v5" for two releases'
+        self.assertEqual(self.cd.stale_version_statements(cited, 12)[0], [])
+        self.assertEqual(self.cd.stale_version_statements("The repo is v12 as of today.", 12)[0], [])
+
+    def test_the_declared_version_is_the_newest_supervisor_log(self):
+        newest = self.cd.newest_release()
+        self.assertTrue((ROOT / f"docs/SUPERVISOR_LOG_V{newest}.md").exists())
+        self.assertEqual(self.cd.check_declared_version_current([]), [])

@@ -241,7 +241,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 0.9,
+   "ms": 0.94,
    "result_summary": "Schema"
   },
   {
@@ -294,7 +294,7 @@
      }
     ]
    },
-   "ms": 0.11,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -383,7 +383,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.13,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_dispatch_create",
@@ -844,7 +844,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.41,
+   "ms": 3.55,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1231,7 +1231,7 @@
      ]
     }
    },
-   "ms": 0.2,
+   "ms": 0.17,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1246,7 +1246,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_carrier_invoices_number_tmp_nonunique\" ON \"carrier_invoices\" (\"carrier_id\", \"invoice_number\");"
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "create_index",
@@ -1290,7 +1290,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -1637,7 +1637,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.34,
+   "ms": 3.48,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1660,7 +1660,7 @@
   "tokens_out": 230,
   "cost_usd": 0.0
  },
- "wall_ms": 9.2,
+ "wall_ms": 9.5,
  "severity_order": [
   "low",
   "medium",

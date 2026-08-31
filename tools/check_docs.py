@@ -14,7 +14,20 @@ three defects no results audit could ever see:
     UTF-8 read as Latin-1 - invisible to all 33 tests, because no test reads prose.
 
 None of that moves a metric. All of it is the first thing a judge sees. So it gets an audit
-with an exit code, like everything else here. Six checks, standard library, no network.
+with an exit code, like everything else here. Nine checks, standard library, no network.
+
+The eighth and ninth checks are the twelfth session's, and both close a hole in this file
+rather than in the documentation it reads:
+
+  * this audit reads markdown. The three tools that count things state their own size in
+    their own module docstring, in prose, where nothing had ever looked - so
+    `check_docs.py` said "Six checks" while running seven, and
+    `check_submission_text.py` said "Eight checks" while running seven. The audit that
+    exists because a count was typed twice had its own count typed twice.
+  * three live documents said "the repository is v10" while `docs/SUPERVISOR_LOG_V11.md`
+    sat in the tree, including the first paragraph of the video notice, whose entire job is
+    to tell a judge which artefact is newer. The version of the repository is now read from
+    the newest supervisor log rather than retyped.
 
 The sixth check is the eighth session's: the claim-count audit below existed because a stale
 "18/18 claims" survived two releases, and the test count sat in the same six documents with
@@ -201,13 +214,10 @@ def _stale_counts(text, pattern, truth, group=None):
     return out
 
 
-def _current_claim_count():
-    """Ask tools/check_results.py how many claims it actually asserts."""
-    import subprocess
-    out = subprocess.run([sys.executable, str(ROOT / "tools/check_results.py")],
-                         capture_output=True, text=True, cwd=ROOT).stdout
-    m = CLAIM_COUNT.search(out.strip().splitlines()[-1] if out.strip() else "")
-    return (int(m.group(1)), int(m.group(2))) if m else None
+# v12: a first definition of `_current_claim_count` used to sit here, shadowed by the one below
+# it and dead for two releases - the audit that reads other files for stale duplication carrying a
+# stale duplicate of its own. It parsed the same output with a stricter regex, so it would have
+# disagreed with the live one the moment a count moved.
 
 
 def _tool_total(script, noun):
@@ -298,6 +308,16 @@ def stale_counts_in_line(line, totals):
         if found != truth:
             out.append((span, found, truth, owner))
     return out
+
+
+def _tool_totals():
+    """What each counting tool says its own size is, right now. `None` if one cannot be read."""
+    results = _current_claim_count()
+    submission = _tool_total("tools/check_submission_text.py", "checks")
+    if results is None or submission is None:
+        return None
+    return {"results": results[1], "docs": len(CHECKS), "submission_text": submission[1],
+            "_results_held": results[0]}
 
 
 def check_counts_current(_files):
@@ -419,6 +439,148 @@ def check_no_trapped_headings(files):
     return bad
 
 
+# v12. Two blind spots in this file, found by an external supervisor pass over this file.
+
+# The tools that count things, and the noun each one counts. A module docstring is prose about
+# the tool it sits in, so ownership is by file here rather than by what the line happens to name.
+TOOL_COUNTS = {
+    "tools/check_results.py": ("claims", "results"),
+    "tools/check_docs.py": ("checks", "docs"),
+    "tools/check_submission_text.py": ("checks", "submission_text"),
+}
+
+QUOTED = ('"', "'", "`")
+
+
+def _is_citation(line, start, end):
+    """A count in quotation marks or backticks is a citation of an older run, not a claim about
+    this one: `a stale "18/18 claims" survived two releases` is the honest record of a defect.
+    A bare count in a docstring is the tool describing itself."""
+    before, after = line[:start], line[end:]
+    return any(before.rstrip().endswith(q) or after.lstrip().startswith(q) for q in QUOTED)
+
+
+def tool_docstring_counts(rel, docstring, noun, truth):
+    """(line_no, span, found) for every self-description in `docstring` that `truth` contradicts."""
+    out = []
+    for line_no, line in enumerate(docstring.splitlines(), 1):
+        if _is_dated(line):
+            continue
+        for pattern in COUNT_PATTERNS:
+            for m in pattern.finditer(line):
+                span = m.group(0).strip()
+                if noun not in span.lower():
+                    continue
+                if _is_citation(line, m.start(), m.end()):
+                    continue
+                raw = m.group(m.lastindex)
+                found = WORD_NUMBERS.get(raw.lower(), None)
+                found = int(raw) if found is None else found
+                if found != truth:
+                    out.append((line_no, span, found))
+    return out
+
+
+def check_tool_docstring_counts(_files):
+    """No audit tool's own docstring states a size the tool contradicts.
+
+    `check_counts_current` reads markdown, because that is where a judge reads a number. It is
+    also why `check_docs.py` announced "Six checks" while running seven for a release, and
+    `check_submission_text.py` announced "Eight checks" while running seven: the docstring is
+    the first thing anyone reads about a tool and the only text about it that nothing checked.
+    """
+    import ast
+    totals = _tool_totals()
+    if totals is None:
+        return ["could not read a size out of the counting tools"]
+    bad = []
+    for rel, (noun, owner) in TOOL_COUNTS.items():
+        path = ROOT / rel
+        if not path.exists():
+            continue
+        doc = ast.get_docstring(ast.parse(path.read_text(encoding="utf-8")))
+        if not doc:
+            bad.append(f"{rel} has no module docstring, so it describes itself nowhere")
+            continue
+        for line_no, span, found in tool_docstring_counts(rel, doc, noun, totals[owner]):
+            bad.append(f"{rel} docstring line {line_no} says {span!r}, but it runs "
+                       f"{totals[owner]}")
+    if not bad:
+        print(f"        the three counting tools describe their own size correctly: "
+              f"{totals['results']} claims, {totals['docs']} documentation checks, "
+              f"{totals['submission_text']} submission-text checks")
+    return bad
+
+
+# The repository names its own version in prose, and the convention is one supervisor log per
+# release, so the newest log is the version. Retyping it is what put "the repository is v10" in
+# three live documents while `docs/SUPERVISOR_LOG_V11.md` was sitting in the tree.
+VERSION_PHRASE = re.compile(r"\b(?:repository|repo) is v(\d+)\b")
+VERSION_DOCS = LIVE_DOCS + ("README.md", "docs/VIDEO_ADDENDUM.md")
+
+
+def newest_release():
+    """The highest N in docs/SUPERVISOR_LOG_V<N>.md, which is this repository's version."""
+    found = []
+    for path in (ROOT / "docs").glob("SUPERVISOR_LOG_V*.md"):
+        m = re.search(r"SUPERVISOR_LOG_V(\d+)\.md$", path.name)
+        if m:
+            found.append(int(m.group(1)))
+    return max(found) if found else None
+
+
+def stale_version_statements(text, truth):
+    """((line_no, span, found) list, statements seen) for one document.
+
+    Exposed as a function so `tests/test_all.py::TestDocAudit` can feed it the exact sentence
+    that defeated the first draft - "the video was recorded against v2. The repository is v10" -
+    rather than trusting that the file walk below would have caught it.
+    """
+    stale, seen = [], 0
+    for line_no, line in enumerate(text.splitlines(), 1):
+        for m in VERSION_PHRASE.finditer(line):
+            # Not `_is_dated`. The first draft of this check used it, and every instance of the
+            # defect was exempt on the first run: the sentence dates itself with the version of
+            # something else, the video. Third generation of this repository's own hot take, a
+            # guard tested only against the example that motivated it. The phrase is present
+            # tense by construction ("is v10"); a record writes "was v10" and never matches.
+            # Only a quoted citation is exempt.
+            if _is_citation(line, m.start(), m.end()):
+                continue
+            seen += 1
+            if int(m.group(1)) != truth:
+                stale.append((line_no, m.group(0), int(m.group(1))))
+    return stale, seen
+
+
+def check_declared_version_current(_files):
+    """No live document tells a judge the repository is an older release than it is.
+
+    The worst instance was the video notice - the paragraph whose only job is to say which
+    artefact is newer than which - which said v10 in three documents at v11. A judge reading
+    it has been told, in writing, that the correction table they are about to trust is one
+    release behind, by the only sentence that could have told them otherwise.
+    """
+    truth = newest_release()
+    if truth is None:
+        return ["no docs/SUPERVISOR_LOG_V<N>.md, so the repository states its version nowhere"]
+    bad, seen = [], 0
+    for rel in VERSION_DOCS:
+        path = ROOT / rel
+        if not path.exists():
+            continue
+        stale, counted = stale_version_statements(
+            path.read_text(encoding="utf-8", errors="replace"), truth)
+        seen += counted
+        for line_no, span, _found in stale:
+            bad.append(f"{rel}:{line_no} says {span!r}, but the newest release in "
+                       f"docs/ is v{truth}")
+    if not bad:
+        print(f"        every live document that names a version says v{truth}, "
+              f"matching docs/SUPERVISOR_LOG_V{truth}.md ({seen} statements)")
+    return bad
+
+
 CHECKS = [
     ("no mis-decoded characters in authored text", check_no_mojibake),
     ("every path-shaped file reference resolves", check_references_resolve),
@@ -427,6 +589,8 @@ CHECKS = [
     ("no stale count for a claim ledger or an audit", check_counts_current),
     ("no stale test count in a current-state document", check_test_counts_current),
     ("no heading trapped in a language-tagged code fence", check_no_trapped_headings),
+    ("no counting tool misstates its own size in its docstring", check_tool_docstring_counts),
+    ("no live document declares an older release than the newest one", check_declared_version_current),
 ]
 
 

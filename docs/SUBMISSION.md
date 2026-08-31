@@ -38,7 +38,7 @@ Paste [`SUBMISSION_FORM_TEXT.txt`](../SUBMISSION_FORM_TEXT.txt) as-is. Do not re
 - seven checks assert all of that plus every figure and nine load-bearing sentences:
 
 ```bash
-python tools/check_submission_text.py
+python3 tools/check_submission_text.py
 ```
 
 If that command does not print `7/7 submission-text checks hold`, the text in the form is not the text
@@ -62,13 +62,13 @@ the description says so.
 Upload the archive built from the tree that passes:
 
 ```bash
-python -m unittest discover -s tests    # 69 tests
-python eval/run_eval.py --ablations     # 108 reviews
-python eval/run_holdout.py --ablations  # 9 held-out cases, three arms
-python eval/model_invariance.py         # 180 reviews
-python tools/check_results.py           # 44/44 claims hold
-python tools/check_docs.py              # 7 documentation checks
-python tools/check_submission_text.py   # 7 submission-text checks
+python3 -m unittest discover -s tests    # 82 tests
+python3 eval/run_eval.py --ablations     # 108 reviews
+python3 eval/run_holdout.py --ablations  # 9 held-out cases, three arms
+python3 eval/model_invariance.py         # 180 reviews
+python3 tools/check_results.py           # 46/46 claims hold
+python3 tools/check_docs.py              # 9 documentation checks
+python3 tools/check_submission_text.py   # 7 submission-text checks
 ```
 
 Check the uploaded filename before saving. An older archive beside a current description fails the
@@ -78,7 +78,8 @@ completeness and reproducibility gate before rubric scoring begins.
 
 - [ ] description pasted from `SUBMISSION_FORM_TEXT.txt`, unedited, `7/7` green
 - [ ] title and video URL fields match the two blocks above
-- [ ] source archive is the tree that prints `44/44 claims hold`
-- [ ] `agent_traces/INDEX.md` regenerated (`python tools/collect_agent_traces.py --write`) and secret
+- [ ] source archive is the tree that prints `46/46 claims hold`, `9/9 documentation checks` and
+      `0 decision differences` on both `check_determinism.py` and `check_cross_version.py`
+- [ ] `agent_traces/INDEX.md` regenerated (`python3 tools/collect_agent_traces.py --write`) and secret
       scan clean
 - [ ] live desk loads and its recorded packets match `results/`

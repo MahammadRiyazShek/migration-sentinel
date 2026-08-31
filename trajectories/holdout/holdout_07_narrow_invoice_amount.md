@@ -28,7 +28,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.88 ms)
+**tool** `schema.parse` (0.89 ms)
 
 ```json
 {
@@ -53,7 +53,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.04 ms)
+**tool** `migration.parse` (0.05 ms)
 
 ```json
 {
@@ -80,7 +80,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.06 ms)
 
 ```json
 {
@@ -262,7 +262,7 @@ _tool responded_
 5
 ```
 
-**tool** `shadow.replay` (3.55 ms)
+**tool** `shadow.replay` (3.45 ms)
 
 ```json
 {
@@ -671,7 +671,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -716,7 +716,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.37 ms)
+**tool** `shadow.replay` (3.53 ms)
 
 ```json
 {

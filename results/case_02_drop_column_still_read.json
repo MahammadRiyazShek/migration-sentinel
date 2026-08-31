@@ -359,7 +359,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.64,
+   "ms": 0.74,
    "result_summary": "Schema"
   },
   {
@@ -832,7 +832,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.63,
+   "ms": 2.81,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1202,7 +1202,7 @@
      ]
     }
    },
-   "ms": 0.15,
+   "ms": 0.16,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1227,7 +1227,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.12,
+   "ms": 0.13,
    "result_summary": [
     "Schema",
     []
@@ -1443,7 +1443,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.65,
+   "ms": 2.85,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1466,7 +1466,7 @@
   "tokens_out": 471,
   "cost_usd": 0.0
  },
- "wall_ms": 7.6,
+ "wall_ms": 8.3,
  "severity_order": [
   "low",
   "medium",

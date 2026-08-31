@@ -8,8 +8,8 @@ Offline, deterministic, zero dependencies, sub-second for all 12 evaluation case
 
 **Judging this? Start at [`JUDGE_START_HERE.md`](JUDGE_START_HERE.md)**: four commands, a
 rubric-row map, and the two things in here to read carefully rather than generously. Two audits
-with exit codes back everything below: `python3 tools/check_results.py` re-asserts all 44
-published claims from raw JSON, and `python3 tools/check_docs.py` re-asserts the seven claims this
+with exit codes back everything below: `python3 tools/check_results.py` re-asserts all 46
+published claims from raw JSON, and `python3 tools/check_docs.py` re-asserts the nine claims this
 documentation makes about the repository itself.
 
 **Live review desk:** <https://migration-sentinel-frvo.vercel.app/> (every recorded packet, plus a
@@ -62,7 +62,7 @@ assemble it by hand for every PR.
 One command per PR:
 
 ```bash
-python -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json
+python3 -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json
 ```
 
 It produces a review packet ([example](results/case_01_rename_with_compat_view.md)) containing:
@@ -139,7 +139,7 @@ Reviewer minutes are **modelled** from four stated constants in `eval/scoring.py
 Because `tools/check_results.py` re-asserts that claim from the same constants that produce it, the
 audit cannot fail, so the claim is also reported as a band:
 [`results/time_sensitivity.md`](results/time_sensitivity.md), regenerated with
-`python eval/time_sensitivity.py`. The reduction holds at 71-72% under any uniform rescaling of the
+`python3 eval/time_sensitivity.py`. The reduction holds at 71-72% under any uniform rescaling of the
 constants and at 63% when checking an unevidenced claim is priced at one minute. It **reverses**,
 to -12% and -5%, under one specific ratio: pricing a hand-written expand/contract plan at 6 minutes
 against 6 minutes to approve a generated one. So the load-bearing assumption is not that reviewers
@@ -172,7 +172,7 @@ From [`results/ablation.md`](results/ablation.md), same cases, one component rem
 | no coverage gate (= v1) | 0/12 | 0.970 | 0.970 | 0.969 | 12/12 | **1/2** | 8.5 |
 
 Oriented as the cost of removing each component, with the same table generated from raw scores by
-`python eval/report_components.py --write`: [`results/components.md`](results/components.md).
+`python3 eval/report_components.py --write`: [`results/components.md`](results/components.md).
 
 Four readings, including the three that do not flatter the design.
 
@@ -343,17 +343,23 @@ Design choices that mattered, and why:
 Python 3.11+ and nothing else. No pip install, no API key, no network.
 
 ```bash
-python eval/build_cases.py                                    # regenerate the 12 cases
-python -m sentinel cases                                      # list them
-python -m sentinel review --case eval/cases/case_12_release_train.json --print-report
-python eval/run_eval.py --ablations                           # everything, ~1 second
-python eval/model_invariance.py                               # 180 reviews: 5 models x 3 narrator modes
-python -m unittest discover -s tests -v                       # 69 tests
-python tools/check_results.py                                 # 44/44 claims, from raw JSON
-python tools/check_docs.py                                    # 7 checks on the docs themselves
-python tools/check_submission_text.py                         # 7 checks on the submission form text
+python3 eval/build_cases.py                                   # regenerate the 12 cases
+python3 -m sentinel cases                                     # list them
+python3 -m sentinel review --case eval/cases/case_12_release_train.json --print-report
+python3 eval/run_eval.py --ablations                          # everything, ~1 second
+python3 eval/model_invariance.py                              # 180 reviews: 5 models x 3 narrator modes
+python3 -m unittest discover -s tests -v                      # 82 tests
+python3 tools/check_results.py                                # 46/46 claims, from raw JSON
+python3 tools/check_docs.py                                   # 9 checks on the docs themselves
+python3 tools/check_submission_text.py                        # 7 checks on the submission form text
+python3 tools/check_cross_version.py                          # the same diff on a second interpreter
 make serve                                                    # the review desk, locally
 ```
+
+`python3`, spelled out, because a stock macOS has no `python` on the path and the first command a
+judge runs should not be the one that fails. A review writes its packet into `results/` by default:
+pass `--out /tmp/desk` for an ad-hoc run, or `make eval` afterwards, so the committed evidence stays
+the harness's. `tools/check_determinism.py` explains that in its own output if you forget.
 
 Full walkthrough from a clean machine, including the hosted-model path:
 [`REPRODUCTION.md`](REPRODUCTION.md).
@@ -395,7 +401,7 @@ both the solution and its own grading criteria has graded itself, and every numb
 would be worth nothing.
 
 Development traces are indexed in [`agent_traces/INDEX.md`](agent_traces/INDEX.md), generated by
-`python tools/collect_agent_traces.py` from the files actually present rather than listed by hand.
+`python3 tools/collect_agent_traces.py` from the files actually present rather than listed by hand.
 These are separate from the runtime traces of the five agents that run *inside* the tool, which are
 in [`trajectories/`](trajectories/) and [`docs/AGENT_TRAJECTORIES.md`](docs/AGENT_TRAJECTORIES.md).
 
@@ -430,6 +436,7 @@ v2 number in this file is comparable.
 | **Iteration 9: the narrator is untrusted input** | The sharpest finding of the second hostile re-read (`docs/SUPERVISOR_LOG_V3.md`, A1). v2 proved no model can move a verdict and never asked what a model *can* move: the headline sentence and the reviewer questions, which is everything a human reads before the hazard table. So I wrote three models that are not trying to help (`sentinel/llm/adversarial.py`) and an invariance harness that diffs the decision surface field by field (`eval/model_invariance.py`), then put a guard on the two places model text enters the packet (`sentinel/narrator.py`). | decision surface **0/84** changed across 12 cases x 4 models x guard on/off at the time (0/168 over 180 reviews today) - the v2 invariance claim became a measurement instead of an argument from code shape; misleading headlines **23 of the 24 unguarded hostile reviews that ran -> 0/36 guarded**, a number iteration 10 shows was measured against the attacker's vocabulary; `hostile-null` crashed **12/12** unguarded runs and **0/12** guarded; every detection metric byte-identical (recall 0.970, precision 0.970, severity 0.969, unsafe 0/12, plans 12/12, 9.2 min/case) | Kept. Two things came out of it that no removal-style ablation could have. First, the guard only ever *removes* model text, so it cannot buy a detection point - and the harness publishes that it does not. Second, `.payload.get("questions")` on a raw model response meant a degraded endpoint was an outage, not a degraded review: v2 had no metric that could even express availability. Ablations subtract components that behave correctly; they never test one behaving badly. |
 | **Iteration 10: take the headline away from the model** | Iteration 9 shipped a blocklist and wrote its own limit into `sentinel/narrator.py`: the audit uses the same regexes as the guard, so `0/36` measured what the blocklist already knew. So I wrote the attacker that exploits precisely that gap. `hostile-fluent` writes prose with no banned phrase, no verdict token and no injection marker in it, and still tells the reviewer the change can ride the normal release train. Then I replaced the defence rather than extending the list: the headline is now a pure function of tool output (`narrator.render_headline`) on every run, the model's prose is demoted to a labelled *Model commentary* section at the end of the packet, and the harness counts **provenance** - who wrote the sentence above the badge - instead of asking a regex whether it liked the wording. Three modes (`off`, `pattern`, `structural`) all still run, so each defence has a price. | the v3 guard printed the fluent liar above a `BLOCK` on **12/12** cases while the v3 audit column read **0/12** - the metric said the guard held and the reviewer read a lie; misleading headlines reaching the reviewer over 48 hostile reviews per mode: **36/48 (v2) -> 13/48 (v3 blocklist) -> 0/48 (v5)**; model-written headlines **0 of 60** across all five models; decision surface **0/168** completed reviews of 180; every detection metric byte-identical again (recall 0.970, precision 0.970, severity 0.969, unsafe 0/12, plans 12/12, 9.2 min/case); tests 27 -> 33, claims 23/23 -> 27/27 | Kept. The lesson is not "regexes are weak", it is that **a defence audited in its own vocabulary reports on the attacker's imagination, not on itself**. Provenance is checkable without a language model in the loop: either the bytes came from a tool or they did not. What it does *not* fix is published in the same table - the reviewer questions and the demoted note are still pattern-guarded, so the fluent liar's two plausible questions still print, below the evidence and attributed to the model. The exposure is bounded by placement now, not by vocabulary, and the next experiment is named in the module rather than in a slide. |
 | **Iteration 11: audit the auditor, and prove the rerun** | An external supervisor pass over the submitted archive, on the assumption that everything the suite can see is already green - it was: 52 tests, `44/44 claims`, `6/6` docs, `7/7` form text, 12/12 packets, first attempt, offline. So the session went looking for what no audit could see, and found the repository's own hot take pointed back at it. `tools/check_docs.py` asserted "no stale claim count" against the literal phrase `N/N claims`, so `JUDGE_START_HERE.md` line 20 advertised **`27/27 published claims`** for a command that prints 44 - one adjective, in the first file a judge opens, for three releases. The size of an *audit* had no audit at all, so `6 checks` and `Seven checks` sat 70 lines apart in one document about one tool that prints 7. And `REPRODUCTION.md` was missing one closing fence at line 263, so from section 5a to the end - approval gate, hosted-model path, review desk - headings rendered as code and commands rendered as prose, invisible to a suite in which nothing reads markdown structure. Fix: every count is read out of the tool that owns it at run time, the pattern is loose (up to three words between the number and its noun, word-numbers included), and a stale figure is exempt only where the line **dates itself** - so changelog rows like this one stay honest records instead of whitelisted lies. Plus `tools/check_determinism.py`, because rerunning the evaluation rewrites 80 files under `results/` and "trust me, it is only the timings" is the exact sentence this project exists to refuse. | the widened audit found **6 stale counts** in live documents, 4 of them in the two files a judge reads first, and 1 trapped heading; determinism, measured rather than asserted: **144 files compared, 0 decision differences**, 85 byte-identical, 59 differing in three named wall-clock fields; every decision metric unmoved and re-asserted after the edits, not before - unsafe approvals 0/12 and 0/9, recall 0.970 and 0.96, plans 12/12 and 9/9, 9.2 and 10.7 min/case, decision surface 0/180 and 0/126; tests 52 -> 69, docs checks 6 -> 7 (two added, two merged into one owner-resolving check), claims 44/44 unchanged | Kept. The lesson is the v5 lesson arriving as a bug report against the tool that was supposed to have learned it: **a guard audited in its own vocabulary reports on the author's imagination**, and an honesty layer inherits the perimeter of the examples its author had. So the counter was not a longer list of phrasings, it was to stop typing the number twice. Two perimeters are published rather than discovered: `Seven checks:` names no tool, so nothing can own it and it was fixed by hand; and README line 11 said "27 published *numbers*", which I rewrote to say *claims* so the audit could reach it - moving the prose into the audited vocabulary rather than widening the audit into false positives. The first draft of the fence check fired 18 times to catch 1 defect, and a check that cries wolf gets switched off by whoever owns it. |
+| **Iteration 12: change the interpreter, and read the documentation in the order a stranger would** | A second external supervisor pass over the submitted archive, same standing instruction, and everything the suite can see was green on the first attempt on *two* interpreters - so the session attacked the sentence rather than the suite. "3.11 and 3.12 verified" meant *the tests do not raise on either*, and nothing in eleven releases had ever compared the two `results/` trees; dict ordering, float repr, `round`, `re` and the bundled `sqlite3` are all routes from an interpreter upgrade to a moved verdict, and none of them raises. So `tools/check_cross_version.py` reruns all four generators under both interpreters in private copies and diffs the trees, raw then wall-clock-normalised. Then it followed `JUDGE_START_HERE.md` in the order it is written and broke the flagship reproducibility command: `python3 -m sentinel review` writes its packet into `results/` with the run id it mints for an interactive run, so `check_determinism.py` reports a decision difference over a random hex string on a packet that is otherwise byte-identical. Then it read the audit tools themselves: `check_docs.py` announced "Six checks" while running seven, `check_submission_text.py` announced "Eight checks" while running seven, a dead shadowed `_current_claim_count` sat inside the file that audits stale duplication, and three live documents said "the repository is v10" at v11 - including the first line of the video notice, whose only job is to tell a judge which artefact is newer. | **146 files compared, 0 decision differences** across CPython 3.11.2 and 3.12.13 (`results/cross_version.md`), with the unflattering half published as a claim rather than a footnote: 64 files moved on timing alone, up to 7.1 ms absolute in the recorded run, so the decisions are portable and the milliseconds never were. The provenance preflight reproduces the failure and then diagnoses it, with both fixes printed. Claims 44 -> 46, documentation checks 7 -> 9, tests 69 -> 82; no file under `sentinel/` touched, so the freeze still names the same three post-freeze files, and every decision number was re-asserted after the edits rather than before - unsafe approvals 0/12 and 0/9, recall 0.970 and 0.96, plans 12/12 and 9/9, 9.2 and 10.7 min/case, decision surface 0/180 and 0/126 - none moved. | Kept, and two decisions in it are worth more than the checks. The run-id trap was fixed with **documentation and a diagnosis instead of code**, because `sentinel/cli.py` sits inside the frozen decision tree and spending a held-out attestation on a documentation defect is a bad trade. And the first draft of the version check **exempted all four instances of the bug it was written for**, because the defective sentence dates itself with the version of the video: the third generation of this repository's own hot take, which is why the regression test feeds it that exact sentence. Full log: [`docs/SUPERVISOR_LOG_V12.md`](docs/SUPERVISOR_LOG_V12.md). |
 | **Rejected: two models with opposing incentives** | Put the model back on the detection path, honestly: one instance must argue the migration is safe, one must argue it breaks something, each must cite a tool result, and a deterministic judge accepts only claims whose citation resolves to a real replay row or row count. Disagreement between them is itself a signal for where a human should look. | not run - it moves recall back onto a nondeterministic component, so the primary metric stops being reproducible from a clean clone with no API key, and there is no fair way to compare a two-model debate against a single prompt | Rejected for this submission and it is the design most likely to raise the recall ceiling, because the ceiling is currently set by what my rules and my corpus know. The reason it is not here is the same reason the verdict is deterministic: a review that gates a deploy should return the same answer twice. |
 | **Rejected in v3, half-adopted in v5: delete the narrator entirely** | Render every word of the packet from tool output and demote the model to a read-only Q&A layer over the evidence, whose answers never enter the record. It makes the whole class of problem in Iteration 9 structurally impossible instead of guarded. | v3: not run, because it removes the per-hazard explanation reviewers actually read and answers a challenge about agentic workflows with a linter plus a chatbot. v5: run for the *headline* only - 0/60 model-written headlines, 0/48 misleading headlines reaching the reviewer, and the per-hazard explanations kept | The half that shipped is the half where model prose sits **above** the evidence and can be mistaken for the verdict. The half that did not is the per-hazard explanation, which sits beside the engine error text that contradicts it. Splitting the rejection by *placement in the packet* is the thing I would not have found without writing the attacker: it is not "is model prose allowed", it is "can model prose be mistaken for a finding". |
 | **Rejected: counterexample search instead of review** | Attack the migration rather than review it: generate a row set plus a statement that is valid before and fails after, then shrink it to a minimal reproduction. It never needs a declared consumer, so it attacks *the corpus is the world* at the root instead of reporting around it. | not run - it changes the primary metric from "unsafe approvals" to "counterexamples found", for which there is no fair baseline, and it needs a real PostgreSQL, which breaks reproduction from a clean clone with no API key | Rejected for this submission, kept as the design I would build next. Written up in full in `docs/CRITIQUE_LOG.md` (V1) rather than left as a hallway opinion. A witness that *could* exist is also a weaker artifact for a reviewer than a failure in a statement their own service issues today. |
@@ -547,12 +554,18 @@ memory/              incidents.jsonl (curated, fictional)
 results/             review packets, comparison.md, ablation.md, evaluation.json
 trajectories/        one markdown + jsonl trajectory per case
 site/                the review desk: index.html, generated data/ and py/ (Pyodide runtime)
-tools/               build_site.py, build_artifact.py, check_results.py (44 claims about the numbers)
-  check_docs.py          7 claims the docs make about the repo: references, glyphs, entry
+tools/               build_site.py, build_artifact.py, check_results.py (46 claims about the numbers)
+  check_docs.py          9 claims the docs make about the repo: references, glyphs, entry
                          point, stale counts for any claim ledger or audit, stale test counts,
-                         and no heading trapped in a code fence (v11)
-  check_determinism.py   reruns every generator in a temp copy and diffs 144 files back: the
-                         wall-clock fields are named, the decision bytes must not move (v11)
+                         no heading trapped in a code fence (v11), no counting tool that
+                         misstates its own size in its docstring, and no live document
+                         declaring an older release than the newest one (v12)
+  check_determinism.py   reruns every generator in a temp copy and diffs 146 files back: the
+                         wall-clock fields are named, the decision bytes must not move (v11).
+                         Detects an interactive packet in results/ and names the fix (v12)
+  check_cross_version.py reruns them again on a second interpreter and diffs the two trees:
+                         0 decision differences on CPython 3.11 and 3.12, and the wall-clock
+                         figures published as the one thing that is not portable (v12)
   check_submission_text.py  7 claims about the description in the submission form, which is
                          the one artefact that lives outside this repository (v8)
   collect_agent_traces.py  generates agent_traces/INDEX.md, refuses on secret shapes
@@ -561,12 +574,12 @@ AGENT_USE.md         coding-agent disclosure required by the challenge
 SUBMISSION_FORM_TEXT.txt  the exact plain-text description submitted to the form, committed
                      verbatim so tools/check_submission_text.py can audit it (v8)
 .github/workflows/   verify the claims, then publish the desk to GitHub Pages
-docs/                CRITIQUE_LOG.md (read first), SUPERVISOR_LOG_V3.md to _V8.md,
+docs/                CRITIQUE_LOG.md (read first), SUPERVISOR_LOG_V3.md to _V12.md,
                      DESIGN_LOG.md, AGENT_TRAJECTORIES.md, SUBMISSION.md,
                      VIDEO_SCRIPT.md (what the submitted video was made from),
-                     VIDEO_SCRIPT_V5.md (single-take script against the current repo),
+                     VIDEO_SCRIPT_V12.md (single-take script against the current numbers),
                      VIDEO_ADDENDUM.md (every number the video predates)
-tests/               69 stdlib tests
+tests/               82 stdlib tests
 ```
 
 ## Limitations, stated plainly

@@ -477,7 +477,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.64,
+   "ms": 1.13,
    "result_summary": "Schema"
   },
   {
@@ -486,7 +486,7 @@
    "args": {
     "sql": "ALTER TABLE customers RENAME COLUMN full_name TO name;\nCREATE OR REPLACE VIEW customer_billing_summary AS\n  SELECT id, email, name, company_name, country_code, plan, mrr_cents, signed_up_at FROM customers;\n"
    },
-   "ms": 0.06,
+   "ms": 0.17,
    "result_summary": [
     {
      "kind": "rename_column",
@@ -542,7 +542,7 @@
      }
     ]
    },
-   "ms": 0.1,
+   "ms": 0.09,
    "result_summary": [
     "Schema",
     []
@@ -637,7 +637,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.19,
+   "ms": 0.29,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -772,7 +772,7 @@
      }
     ]
    },
-   "ms": 0.02,
+   "ms": 0.04,
    "result_summary": 17
   },
   {
@@ -1008,7 +1008,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.32,
+   "ms": 4.18,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1419,7 +1419,7 @@
      ]
     }
    },
-   "ms": 0.2,
+   "ms": 0.17,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1771,7 +1771,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.83,
+   "ms": 3.03,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1856,7 +1856,7 @@
    "args": {
     "sql": "ALTER TABLE \"customers\" ADD COLUMN \"name\" TEXT;\nUPDATE \"customers\" SET \"name\" = \"full_name\" WHERE \"name\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"customers\" WHERE \"name\" IS NULL LIMIT 5000);"
    },
-   "ms": 0.08,
+   "ms": 0.09,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1916,7 +1916,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -2157,7 +2157,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.84,
+   "ms": 2.77,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2243,7 +2243,7 @@
   "tokens_out": 622,
   "cost_usd": 0.0
  },
- "wall_ms": 12.5,
+ "wall_ms": 14.8,
  "severity_order": [
   "low",
   "medium",

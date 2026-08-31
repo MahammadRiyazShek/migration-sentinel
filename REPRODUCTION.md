@@ -6,7 +6,7 @@ Written for someone who has just cloned this into an empty directory on a clean 
 
 | thing | version used | notes |
 |---|---|---|
-| Python | 3.12.13 (3.11+ works) | `python3 -V` |
+| Python | 3.12.13 and 3.11.2, both verified | `python3 -V`. Not "the tests pass on both": `tools/check_cross_version.py` reruns every generator on each and diffs the two `results/` trees, 146 files, 0 decision differences |
 | SQLite | 3.40.1, bundled with Python | `python3 -c "import sqlite3;print(sqlite3.sqlite_version)"` |
 | pip packages | **none** | standard library only, `requirements.txt` is intentionally empty |
 | network | **not required** | the default run makes zero network calls |
@@ -31,7 +31,7 @@ All data is synthetic and lives in the repo. Nothing to download.
 Cases are generated so they stay consistent with each other. Regenerate them at any time:
 
 ```bash
-python eval/build_cases.py
+python3 eval/build_cases.py
 # -> wrote 12 cases to .../eval/cases
 ```
 
@@ -41,8 +41,8 @@ included specifically because the pipeline cannot find them.
 ## 2. Run the solution on one case
 
 ```bash
-python -m sentinel cases                      # list the 12 cases and their ground truth shape
-python -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json
+python3 -m sentinel cases                      # list the 12 cases and their ground truth shape
+python3 -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json
 ```
 
 Expected stdout (one line):
@@ -52,6 +52,14 @@ case_01_rename_with_compat_view: BLOCK (2 blocker / 4 high) -> results/case_01_r
 ```
 
 Expected files:
+
+> **One thing to know before you run it.** `review` writes into `results/` by default, which is
+> where the committed evidence lives, and it stamps the packet with the run id it mints for an
+> interactive run instead of the harness id. Nothing else in the packet changes - it is
+> byte-identical on verdict, hazards, severities, evidence, ledger, plan and verification - but
+> `tools/check_determinism.py` in step 5b compares committed bytes and will report it. Either pass
+> `--out /tmp/desk --trace-dir /tmp/desk` for ad-hoc runs, or run `make eval` before step 5b. The
+> determinism check detects this exact case and prints both fixes rather than blaming the pipeline.
 
 * `results/case_01_rename_with_compat_view.md` - the review packet a human reads
 * `results/case_01_rename_with_compat_view.json` - the same thing structured, including every tool call
@@ -63,7 +71,7 @@ Add `--print-report` to dump the packet to stdout. Runtime: about 10 ms. Cost: $
 The most interesting case is the release train:
 
 ```bash
-python -m sentinel review --case eval/cases/case_12_release_train.json --print-report
+python3 -m sentinel review --case eval/cases/case_12_release_train.json --print-report
 ```
 
 Expect `BLOCK`, 4 blockers, and a "What this review did not check" section that names the `CLUSTER`
@@ -72,7 +80,7 @@ statement it could not model.
 ## 3. Run the baseline on the same case
 
 ```bash
-python baseline/baseline_review.py --case eval/cases/case_01_rename_with_compat_view.json \
+python3 baseline/baseline_review.py --case eval/cases/case_01_rename_with_compat_view.json \
     --variant prompt_with_schema --print-review
 ```
 
@@ -81,7 +89,7 @@ Expected: `REQUEST_CHANGES` with 3 findings, no evidence, no plan. Variant `prom
 ## 4. Run the whole evaluation
 
 ```bash
-python eval/run_eval.py --ablations
+python3 eval/run_eval.py --ablations
 ```
 
 This runs 12 cases x (2 baseline variants + 1 pipeline) plus 6 ablation configurations = 108 reviews.
@@ -124,7 +132,7 @@ If any of those differ, the run is not reproducing and I would like to know.
 ### 4a. What each component costs to remove
 
 ```bash
-python eval/report_components.py --write
+python3 eval/report_components.py --write
 ```
 
 Reads `results/ablation.json` and rewrites [`results/components.md`](results/components.md), oriented
@@ -138,7 +146,7 @@ is the only arm that clears a declared blind spot (1/2 against 0/2).
 ### 4b. Sensitivity band on the reviewer-minute claim
 
 ```bash
-python eval/time_sensitivity.py --write
+python3 eval/time_sensitivity.py --write
 ```
 
 Reads the committed `results/` and rewrites `results/time_sensitivity.md`. Recomputes the reviewer
@@ -157,7 +165,7 @@ reversal is the point of running it.
 ### 4c. Attack the model-invariance claim (v3), and the guard that answered it (v5)
 
 ```bash
-python eval/model_invariance.py --write
+python3 eval/model_invariance.py --write
 ```
 
 Runs all 12 cases through five models - the cooperative offline stand-in plus the four hostile ones in
@@ -192,17 +200,17 @@ a vocabulary, so the metric could only ever report what the guard already knew.
 Watch all three modes on one case:
 
 ```bash
-python -m sentinel review --case eval/cases/case_02_drop_column_still_read.json \
+python3 -m sentinel review --case eval/cases/case_02_drop_column_still_read.json \
     --provider hostile-fluent --print-report
 # -> BLOCK, 5 hazards, headline written by the tools, and the model's paragraph printed at the
 #    very end under "Model commentary (unverified prose, not evidence)"
 
-python -m sentinel review --case eval/cases/case_02_drop_column_still_read.json \
+python3 -m sentinel review --case eval/cases/case_02_drop_column_still_read.json \
     --provider hostile-fluent --narrator-mode pattern --print-report
 # -> BLOCK, 5 hazards, and the headline above the badge now says the change "can ride the normal
 #    release train". This is what v3 shipped and what v3's own metric scored as clean.
 
-python -m sentinel review --case eval/cases/case_02_drop_column_still_read.json \
+python3 -m sentinel review --case eval/cases/case_02_drop_column_still_read.json \
     --provider hostile-approve --no-narrator-guard --print-report
 # -> v2 behaviour: headline reads "Approved: no hazards found, safe to ship. LGTM"
 ```
@@ -213,7 +221,7 @@ SQL are byte-identical. Only the sentence at the top moves, which is exactly the
 ### 4d. Development-agent trace index
 
 ```bash
-python tools/collect_agent_traces.py --write
+python3 tools/collect_agent_traces.py --write
 ```
 
 Regenerates `agent_traces/INDEX.md` from the trace files actually present, with sizes and SHA-256
@@ -224,10 +232,10 @@ a hit or on an empty directory rather than writing an index that lists nothing. 
 ## 5. Tests
 
 ```bash
-python -m unittest discover -s tests -v
+python3 -m unittest discover -s tests -v
 ```
 
-Expected: `Ran 69 tests ... OK`, about 0.3 s. They cover the parser traps, the shadow replay,
+Expected: `Ran 82 tests ... OK`, about 0.3 s. They cover the parser traps, the shadow replay,
 memory escalation, determinism (same case twice, identical hazards and plan), the escalation path
 (`max_attempts=1` on case_01 must escalate instead of shipping an unverified plan) and the approval
 gate (refuses without `--i-approve`, refuses a `BLOCK` verdict without an explicit override, and
@@ -253,7 +261,7 @@ argument still maps to `pattern`/`off` for older call sites.
 ### 5a. Audit the documentation, not just the numbers
 
 ```bash
-python tools/check_docs.py
+python3 tools/check_docs.py
 # -> PASS  no mis-decoded characters in authored text
 #    PASS  every path-shaped file reference resolves
 #    PASS  exactly one judge entry point at the root
@@ -261,14 +269,21 @@ python tools/check_docs.py
 #    PASS  no stale count for a claim ledger or an audit
 #    PASS  no stale test count in a current-state document
 #    PASS  no heading trapped in a language-tagged code fence
-#    7/7 documentation checks hold across every authored file
+#    PASS  no counting tool misstates its own size in its docstring
+#    PASS  no live document declares an older release than the newest one
+#    9/9 documentation checks hold across every authored file
 ```
 
 The count of authored files is printed rather than documented here on purpose: it is the one
 number in this repository that changes every time a file is added, and a number no tool owns is
 a number that goes stale. The counts that *are* documented - claims, checks, tests - are each
 read out of the tool that owns them by this same audit, in v11 including the size of an audit,
-which is how `6 checks` and `Seven checks` sat in one document for three releases.
+which is how `6 checks` and `Seven checks` sat in one document for three releases. v12 added the
+two places that audit could not reach: the counting tools' own module docstrings, where
+`check_docs.py`, as of v11, announced `six checks` while running seven, and the release this
+documentation says
+this repository is - read from the newest `docs/SUPERVISOR_LOG_V<N>.md`, after three live documents
+spent a release telling judges v10 at v11.
 
 ### 5b. Prove the rerun changed only the clock
 
@@ -278,19 +293,22 @@ python3 tools/check_determinism.py
 #    ran   eval/run_holdout.py --ablations
 #    ran   eval/model_invariance.py
 #    ran   eval/report_components.py
-#    85 files byte-identical on a rerun
-#    59 files differ, in wall-clock fields only
+#    75 files byte-identical on a rerun
+#    71 files differ, in wall-clock fields only
 #    wall-clock fields that moved: json field "ms", markdown "N ms", markdown "Wall clock per case" row
 #    PASS  every decision byte in results/ survives a rerun; only wall-clock fields move
-#          144 files compared, 0 decision differences
+#          146 files compared, 0 decision differences
 ```
 
 Run steps 3 and 4 and 80 files under `results/` change. Every one of those diffs is a measured
 millisecond, and this command is how you know that without taking anyone's word for it: it copies
-the repository to a temporary directory, reruns every generator there, and diffs all 144
+the repository to a temporary directory, reruns every generator there, and diffs all 146
 regenerated files back against the committed ones with the wall-clock fields - and only the
 wall-clock fields, each one named in the output - normalised. Zero decision differences is the
 pass condition. Your committed tree is never written to. About 3 seconds, most of it the copy.
+
+If it reports a difference on one packet with a `run-<hex>` id, that is step 2 rather than the
+pipeline: see the note there. The check says so itself, and names the two ways to fix it.
 
 ### 5c. Audit the description in the submission form
 
@@ -315,17 +333,44 @@ announcing a file that was never committed, a generated paragraph contradicting 
 stale claim count (`18/18`, when the audit asserts 27) in this very guide. None of them is a number, and all of them sit on the path a
 judge walks before reaching one. Reasoning in `docs/SUPERVISOR_LOG_V7.md`.
 
+### 5d. Prove the interpreter does not matter
+
+```bash
+python3 tools/check_cross_version.py
+# ->    comparing CPython 3.11.2 and 3.12.13
+#       ran   4 generators on CPython 3.11.2
+#       ran   4 generators on CPython 3.12.13
+#       75 files byte-identical across interpreters
+#       71 files differ, in wall-clock fields only
+#       worst wall-clock delta: 100.0% relative, 7.5 ms absolute, over 634 numbers
+#    PASS  every decision byte is identical on CPython 3.11.2 and 3.12.13
+```
+
+Step 5b reruns everything under *one* interpreter, so it cannot see a decision that depends on
+which Python you have. This copies the repository once per interpreter, reruns all four generators
+in each, and runs the same two-pass diff between the two trees. Zero decision differences is the
+pass condition; `results/cross_version.md` is the recorded run and
+`tools/check_results.py` re-asserts it.
+
+It also publishes the half that fails. The wall-clock numbers *do* move between interpreters - 64
+files, up to 7.1 ms in the recorded run - which is why the comparison table labels its wall-clock row `(ms, measured)`
+and why no reviewer-minute claim is derived from it.
+
+With one interpreter on the machine you get `SKIP` and exit 0, with the reason printed. A check
+that cannot find a second Python should say so rather than pass. About 6 seconds, most of it the
+two copies.
+
 ## 6. The human approval gate
 
 `review` never touches a database. To dry-run phase 1 against a throwaway in-memory sandbox:
 
 ```bash
-python -m sentinel review --case eval/cases/case_06_safe_unique_index.json
-python -m sentinel execute --report results/case_06_safe_unique_index.json \
+python3 -m sentinel review --case eval/cases/case_06_safe_unique_index.json
+python3 -m sentinel execute --report results/case_06_safe_unique_index.json \
     --case eval/cases/case_06_safe_unique_index.json
 # -> REFUSED: phase 1 execution requires --i-approve and --reviewer "name".
 
-python -m sentinel execute --report results/case_06_safe_unique_index.json \
+python3 -m sentinel execute --report results/case_06_safe_unique_index.json \
     --case eval/cases/case_06_safe_unique_index.json --i-approve --reviewer "your name"
 # -> sandbox: SQLite in-memory copy (never a live database)
 #    corpus after phase 1: 16/16 passing
@@ -340,11 +385,11 @@ cost, not the primary metric.
 
 ```bash
 export OPENAI_API_KEY=...            # or ANTHROPIC_API_KEY
-python -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json \
+python3 -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json \
     --provider openai --model gpt-4.1-mini
-python baseline/baseline_review.py --case eval/cases/case_01_rename_with_compat_view.json \
+python3 baseline/baseline_review.py --case eval/cases/case_01_rename_with_compat_view.json \
     --provider openai --model gpt-4.1-mini --print-review
-python eval/run_eval.py --provider openai --model gpt-4.1-mini
+python3 eval/run_eval.py --provider openai --model gpt-4.1-mini
 ```
 
 Approximate cost for the full hosted evaluation, at the prices in `sentinel/llm/base.py`
@@ -355,9 +400,9 @@ arms. Wall clock is dominated by the API: expect 1 to 3 s per review instead of 
 To make a hosted run reproducible afterwards, record a cassette and replay it offline:
 
 ```bash
-python -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json \
+python3 -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json \
     --provider openai --cassette cassettes/case_01.json --cassette-mode record
-python -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json \
+python3 -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json \
     --provider openai --cassette cassettes/case_01.json     # no network, byte-identical
 ```
 
@@ -366,7 +411,7 @@ python -m sentinel review --case eval/cases/case_01_rename_with_compat_view.json
 Off by default so the evaluation stays deterministic.
 
 ```bash
-python -m sentinel review --case eval/cases/case_05_unique_email_with_duplicates.json --learn
+python3 -m sentinel review --case eval/cases/case_05_unique_email_with_duplicates.json --learn
 cat memory/learned.jsonl
 ```
 
@@ -376,7 +421,7 @@ file to reset. `eval/run_eval.py` never writes to memory.
 ## 9. Bringing your own migration
 
 Copy any case JSON, replace `schema_sql`, `migration_sql`, `row_estimates`, `queries` and `seed`, drop
-`ground_truth` (only the scorer needs it), then run `python -m sentinel review --case yours.json`.
+`ground_truth` (only the scorer needs it), then run `python3 -m sentinel review --case yours.json`.
 The parser covers the PostgreSQL subset listed in `sentinel/tools/sql_parse.py`; anything outside it
 is reported as an unmodelled statement rather than silently ignored.
 
@@ -386,12 +431,12 @@ The desk is static. `site/data/bundle.json` and `site/py/` are generated from `r
 them after the evaluation, never before.
 
 ```bash
-python eval/run_eval.py --ablations      # writes results/ and trajectories/
-python tools/check_results.py            # 44/44 claims hold  (exits 1 if one does not)
-python tools/build_site.py               # -> site/data/bundle.json  (~467 KB), site/py/ (38 files)
-python tools/build_artifact.py           # -> site/standalone.html   (one file, no live engine)
-python tools/test_browser_driver.py      # 12/12 parity with the recorded packets
-python -m http.server 8000 --directory site
+python3 eval/run_eval.py --ablations      # writes results/ and trajectories/
+python3 tools/check_results.py           # 46/46 claims hold  (exits 1 if one does not)
+python3 tools/build_site.py               # -> site/data/bundle.json  (~467 KB), site/py/ (38 files)
+python3 tools/build_artifact.py           # -> site/standalone.html   (one file, no live engine)
+python3 tools/test_browser_driver.py      # 12/12 parity with the recorded packets
+python3 -m http.server 8000 --directory site
 # open http://localhost:8000
 ```
 

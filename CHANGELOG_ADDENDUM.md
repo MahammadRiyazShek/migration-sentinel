@@ -440,3 +440,20 @@ python tools/check_docs.py              # 7 documentation checks
 python tools/check_submission_text.py   # 7 checks on the description in the form
 python tools/check_determinism.py       # 144 files rerun and diffed, 0 decision differences
 ```
+
+## v12 - the interpreter, the run id, and the audit's own docstring
+
+An external supervisor pass over the v11 archive, in a separate context with no network, on the
+standing instruction to critique first, propose radically different alternatives, write the findings
+down, then execute. Everything the suite could see was green on the first attempt on **two**
+interpreters, so the session went after the sentences instead.
+
+| stage | what and why | evidence | decision |
+|---|---|---|---|
+| **F1: "3.11 and 3.12 verified" was never a claim about the numbers** | it meant the tests do not raise on either; nothing had compared the two `results/` trees, and dict ordering, float repr, `round`, `re` and the bundled `sqlite3` are all silent routes from an interpreter upgrade to a moved verdict | `tools/check_cross_version.py`: **146 files, 0 decision differences** on CPython 3.11.2 and 3.12.13; and the unflattering half as a claim - 64 files moved on timing alone, up to 7.1 ms | Kept. Two new claims, 44 -> 46 |
+| **F2: the documented first command breaks the flagship reproducibility command** | `python3 -m sentinel review` writes into `results/` with an interactive run id, so a judge following the entry point in order gets a decision difference over a random hex string | reproduced, then diagnosed: the packet is byte-identical apart from its own run id | Fixed in `tools/` and the docs, not in `sentinel/cli.py`: the decision tree is frozen and a held-out attestation is worth more than a tidy fix |
+| **F3: the counting tools misstated their own size** | `check_docs.py` said "Six checks" while running seven, `check_submission_text.py` said "Eight checks" while running seven, and a dead shadowed `_current_claim_count` sat in the file that audits stale duplication | 8th documentation check reads the three tools' own docstrings, with a quoted count treated as a citation | Kept, 7 -> 9 checks |
+| **F4: four live statements declared v10 at v11** | including the first line of the video notice, whose only job is to say which artefact is newer | 9th check reads the version from the newest `docs/SUPERVISOR_LOG_V<N>.md` | Kept. The first draft exempted all four, because the sentence dates itself with the version of the video |
+
+Tests 69 -> 82. No file under `sentinel/` touched; every decision number re-asserted after the
+edits and none moved. Full log: [`docs/SUPERVISOR_LOG_V12.md`](docs/SUPERVISOR_LOG_V12.md).

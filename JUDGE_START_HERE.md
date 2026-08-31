@@ -5,8 +5,9 @@ shadow copy of the schema and a real query corpus, write an expand/contract roll
 plan they just wrote, declare what they structurally could not observe, and render the verdict from
 tool output so no model can write it.
 
-**Zero pip dependencies. No API key. No network. Python 3.11+ (3.11 and 3.12 verified).
-Whole evaluation is under a second and costs $0.00.**
+**Zero pip dependencies. No API key. No network. Python 3.11+ - and "verified" means the
+decision bytes are identical on 3.11.2 and 3.12.13, not merely that the tests pass on both
+(`results/cross_version.md`). Whole evaluation is under a second and costs $0.00.**
 
 ---
 
@@ -18,20 +19,32 @@ python3 tools/check_results.py          # <- if you run one command, run this on
 ```
 
 It reads `results/*.json` and re-asserts every number in this repository, including the five that
-make the pipeline look worse. Expect `44/44 claims hold`, in under a second, with no key and no
+make the pipeline look worse. Expect `46/46 claims hold`, in under a second, with no key and no
 network.
 
 The rest, in the order they build on each other:
 
 ```bash
-python3 -m unittest discover -s tests   # 69 tests, ~0.3 s
+python3 -m unittest discover -s tests   # 82 tests, ~0.3 s
 python3 eval/run_eval.py --ablations    # 108 reviews (12 cases x 9 arms), < 1 s
 python3 eval/run_holdout.py --ablations # the second schema: 9 held-out cases, rules frozen
 python3 eval/model_invariance.py        # 180 reviews, 5 models x 3 narrator modes, < 1 s
 python3 tools/check_determinism.py      # reruns everything in a temp copy and diffs it back
-python3 tools/check_docs.py             # 7 checks on what the docs claim about the repo
+python3 tools/check_cross_version.py    # reruns it again on a second interpreter and diffs that
+python3 tools/check_docs.py             # 9 checks on what the docs claim about the repo
 python3 tools/check_submission_text.py  # 7 checks on the description in the submission form
 ```
+
+Or `make verify`, which is all of the above in one target.
+
+**One ordering note, because it is the only way to make this repository look non-reproducible.**
+`python3 -m sentinel review` writes its packet into `results/` by default, with the run id it
+mints for an interactive run instead of the harness id. Run a review before
+`check_determinism.py` and you are diffing the committed evidence against something the harness
+did not write. The check now detects exactly that and prints the two fixes rather than reporting
+a decision difference for a random hex string: `make eval` restores the harness packets, and
+`--out /tmp/desk` keeps an ad-hoc run out of the evidence in the first place. Every other byte of
+that packet is identical, which is the point.
 
 ---
 
@@ -43,7 +56,7 @@ python3 tools/check_submission_text.py  # 7 checks on the description in the sub
 | Agent solution & engineering (30%) | `sentinel/agents/`, prompts in `sentinel/agents/prompts/`, `sentinel/orchestrator.py` | `results/ablation.md`: 9 arms, one component removed at a time. Replay alone is **worse** than rules alone (2 unsafe vs 1) |
 | End to end quality (20%) | `results/case_12_release_train.md`, live desk below | `python3 -m sentinel review --case eval/cases/case_12_release_train.json --print-report` produces the packet a reviewer actually reads |
 | Measured improvement (15%) | `results/comparison.md`, `README.md` §Improvement Changelog | 10 kept iterations, 3 removed experiments, 4 rejected designs, each row tied to an arm in `results/*.json` |
-| Reproducibility (15%) | `REPRODUCTION.md` | clean clone to main result in one command, no key, no network. `tools/check_determinism.py` reruns every generator in a temporary copy and diffs 144 files back against the committed ones: **0 decision differences**, and it names the wall-clock fields that do move rather than asking you to assume them. `tools/check_docs.py` audits the documentation itself: no dangling reference, no stale count, no heading trapped in a code fence. `tools/check_submission_text.py` audits the description in the submission form, the one artefact that lives outside this repository |
+| Reproducibility (15%) | `REPRODUCTION.md` | clean clone to main result in one command, no key, no network. `tools/check_determinism.py` reruns every generator in a temporary copy and diffs 146 files back against the committed ones: **0 decision differences**, and it names the wall-clock fields that do move rather than asking you to assume them. `tools/check_cross_version.py` does the same diff across **two interpreters** - CPython 3.11.2 and 3.12.13, 146 files, **0 decision differences** - and publishes the half that fails: in the recorded run the wall-clock figures moved by up to 7.1 ms on the same machine, so the decisions are portable and the timings never were. `tools/check_docs.py` audits the documentation itself: no dangling reference, no stale count (including the size of an audit, in its own docstring), no heading trapped in a code fence, no document declaring an older release than the newest one. `tools/check_submission_text.py` audits the description in the submission form, the one artefact that lives outside this repository |
 | Hot take / insights (5%) | `README.md` §Hot take, `results/model_invariance.md` | the failure mode was found by writing an attacker against my own fix, not by removing a component |
 
 ---
@@ -130,16 +143,18 @@ read it: [`docs/SUPERVISOR_LOG_V10.md`](docs/SUPERVISOR_LOG_V10.md).
 
 ## The video is older than the repo
 
-The submitted video was recorded against v2. The repository is v10. The problem, architecture,
+The submitted video was recorded against v2. The repository is v12. The problem, architecture,
 baseline comparison and walkthrough all still match; some on-screen numbers are stale and three
 components (the coverage gate, the structural narrator and the held-out world) did not exist yet.
 
 **Where the video and the repository disagree, `results/comparison.md` and
 `results/model_invariance.md` are authoritative.** An exhaustive, line-by-line correction table is in
 [`docs/VIDEO_ADDENDUM.md`](docs/VIDEO_ADDENDUM.md) - every stale number, what it moved to, and why.
-A single-take script written against v5, for the re-record, is in
-[`docs/VIDEO_SCRIPT_V5.md`](docs/VIDEO_SCRIPT_V5.md); the original v2 shot list is kept in
-[`docs/VIDEO_SCRIPT.md`](docs/VIDEO_SCRIPT.md) because it is what the submitted video was made from.
+A single-take script written against the **current** numbers, timed to 4:40 and ready to record,
+is in [`docs/VIDEO_SCRIPT_V12.md`](docs/VIDEO_SCRIPT_V12.md); the v5-era script is kept in
+[`docs/VIDEO_SCRIPT_V5.md`](docs/VIDEO_SCRIPT_V5.md) and the original v2 shot list in
+[`docs/VIDEO_SCRIPT.md`](docs/VIDEO_SCRIPT.md), because that is what the submitted video was made
+from.
 
 ---
 

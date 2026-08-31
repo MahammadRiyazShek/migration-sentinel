@@ -244,7 +244,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.78,
+   "ms": 0.68,
    "result_summary": "Schema"
   },
   {
@@ -253,7 +253,7 @@
    "args": {
     "sql": "ALTER TABLE customers ALTER COLUMN country_code TYPE varchar(2);\n"
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": [
     {
      "kind": "alter_type",
@@ -285,7 +285,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -368,7 +368,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.12,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -725,7 +725,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.68,
+   "ms": 2.92,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1023,7 +1023,7 @@
     "schema": "Schema",
     "ops": []
    },
-   "ms": 0.09,
+   "ms": 0.05,
    "result_summary": [
     "Schema",
     []
@@ -1239,7 +1239,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.76,
+   "ms": 2.55,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],

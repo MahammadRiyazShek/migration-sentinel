@@ -29,6 +29,23 @@ Standard library only, no network, no model. A few seconds, almost all of it the
 
     python3 tools/check_determinism.py
     python3 tools/check_determinism.py --verbose   # name every file that moved, and how
+
+v12 adds a preflight, because the twelfth supervisor session broke this check by following the
+documentation in the order it is written. `JUDGE_START_HERE.md` invites a judge to run one packet
+first:
+
+    python3 -m sentinel review --case eval/cases/case_12_release_train.json --print-report
+
+That command writes its packet to `results/` by default, with the run id it mints for an
+interactive run (`run-5dd02ef1`) instead of the harness id (`eval-case_12_release_train`). The
+packet is otherwise identical - every hazard, severity, verdict, gap, plan statement and
+verification byte matches, which is the point of the whole repository - but this check reports a
+decision difference, on the flagship reproducibility command, for a random hex string. A judge
+would read that as "the numbers do not reproduce".
+
+So the preflight names the cause instead of leaving a judge to infer it, and names the two fixes:
+`make eval` restores the harness packets, and `--out` keeps an ad-hoc run out of the committed
+evidence in the first place.
 """
 
 from __future__ import annotations
@@ -109,11 +126,48 @@ def compare(committed, regenerated):
     return identical, wall_clock_only, real, missing
 
 
+# The evaluation harnesses mint a run id from the case name (`eval-case_12_release_train`,
+# `holdout-holdout_07_narrow_invoice_amount`). An interactive `sentinel review` mints
+# `run-<8 hex>`. Committed evidence should carry the harness id, and a judge who runs one review
+# before this check will have overwritten one packet with the other.
+INTERACTIVE_RUN_ID = re.compile(r"^run-[0-9a-f]{6,}$")
+
+
+def interactive_packets():
+    """Committed packets under results/ that were written by an ad-hoc run, not the harness."""
+    import json
+    out = []
+    for path in sorted((ROOT / "results").rglob("*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (ValueError, OSError):
+            continue
+        if isinstance(data, dict) and INTERACTIVE_RUN_ID.match(str(data.get("run_id", ""))):
+            out.append((path.relative_to(ROOT).as_posix(), data["run_id"]))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser("check_determinism")
     ap.add_argument("--verbose", action="store_true",
                     help="name every file that moved and which wall-clock fields it carried")
     args = ap.parse_args()
+
+    dirty = interactive_packets()
+    if dirty:
+        print("FAIL  the committed results/ tree carries a packet from an interactive run, so a "
+              "rerun\n      would be compared against something the harness did not write:")
+        for rel, run_id in dirty:
+            print(f"        {rel}  run_id {run_id}")
+        print("      This is not a determinism failure. `python3 -m sentinel review` writes to "
+              "results/ by\n      default and mints its own run id; every other byte of that "
+              "packet still matches.")
+        print("      Restore the harness packets, then rerun this check:")
+        print("        make eval && make holdout")
+        print("      Or keep ad-hoc runs out of the evidence in the first place:")
+        print("        python3 -m sentinel review --case <case> --out /tmp/sentinel-desk "
+              "--trace-dir /tmp/sentinel-desk")
+        return 1
 
     with tempfile.TemporaryDirectory() as tmp:
         work = pathlib.Path(tmp) / "rerun"

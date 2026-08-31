@@ -98,7 +98,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.08 ms)
 
 ```json
 {
@@ -186,7 +186,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.2 ms)
+**tool** `corpus.dependents` (0.23 ms)
 
 ```json
 {
@@ -377,7 +377,7 @@ _tool responded_
 20
 ```
 
-**tool** `shadow.replay` (3.37 ms)
+**tool** `shadow.replay` (3.41 ms)
 
 ```json
 {
@@ -624,7 +624,7 @@ _note (blast_radius)_: q_etl_driver_roster gains column(s) ['preferred_language'
 
 </details>
 
-**tool** `coverage.ledger` (0.16 ms)
+**tool** `coverage.ledger` (0.17 ms)
 
 ```json
 {
@@ -854,7 +854,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.35 ms)
+**tool** `shadow.replay` (3.41 ms)
 
 ```json
 {

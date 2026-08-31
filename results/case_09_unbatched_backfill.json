@@ -249,7 +249,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.65,
+   "ms": 0.68,
    "result_summary": "Schema"
   },
   {
@@ -258,7 +258,7 @@
    "args": {
     "sql": "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL;\nALTER TABLE invoices ALTER COLUMN currency SET NOT NULL;\n"
    },
-   "ms": 0.09,
+   "ms": 0.07,
    "result_summary": [
     {
      "kind": "dml_update",
@@ -746,7 +746,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.72,
+   "ms": 2.99,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1080,7 +1080,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1308,7 +1308,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.66,
+   "ms": 2.74,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1331,7 +1331,7 @@
   "tokens_out": 204,
   "cost_usd": 0.0
  },
- "wall_ms": 7.6,
+ "wall_ms": 8.0,
  "severity_order": [
   "low",
   "medium",

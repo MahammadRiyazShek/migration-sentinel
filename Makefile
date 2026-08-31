@@ -1,4 +1,4 @@
-.PHONY: help cases review baseline eval invariance holdout test site artifact serve verify docs form determinism clean
+.PHONY: help cases review baseline eval invariance holdout test site artifact serve verify docs form determinism crossversion clean
 
 help:
 	@echo "make cases     regenerate the 12 evaluation cases"
@@ -12,6 +12,7 @@ help:
 	@echo "make docs      audit the documentation only (references, glyphs, stale counts)"
 	@echo "make form      audit the submission form description against results/*.json"
 	@echo "make determinism  rerun every generator in a temp copy and diff it back"
+	@echo "make crossversion rerun it again on a second interpreter and diff the two trees"
 	@echo "make site      regenerate site/data + site/py from the results"
 	@echo "make serve     build the site and serve it at http://localhost:8000"
 
@@ -42,12 +43,16 @@ holdout:
 # submission-text audit could both sit outside the one command the docs tell you to run.
 # v11: and it skipped the determinism proof, so "a rerun changes only the clock" was a sentence
 # in a document rather than an exit code in the one command the docs tell you to run.
+# v12: and the determinism proof reruns everything under one interpreter, so "3.11 and 3.12
+# verified" was a claim about exceptions rather than about numbers until check_cross_version ran
+# here too. It SKIPs with a printed reason on a machine with a single Python, rather than passing.
 verify: eval invariance holdout
 	python3 -m unittest discover -s tests
 	python3 tools/check_results.py
 	python3 tools/check_docs.py
 	python3 tools/check_submission_text.py
 	python3 tools/check_determinism.py
+	python3 tools/check_cross_version.py
 
 docs:
 	python3 tools/check_docs.py
@@ -57,6 +62,9 @@ form:
 
 determinism:
 	python3 tools/check_determinism.py
+
+crossversion:
+	python3 tools/check_cross_version.py
 
 site:
 	python3 tools/build_site.py

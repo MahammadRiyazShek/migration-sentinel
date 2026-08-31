@@ -221,7 +221,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.64,
+   "ms": 0.68,
    "result_summary": "Schema"
   },
   {
@@ -272,7 +272,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -722,7 +722,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.85,
+   "ms": 2.92,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -977,7 +977,7 @@
      ]
     }
    },
-   "ms": 0.15,
+   "ms": 0.16,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -992,7 +992,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_invoices_status\" ON \"invoices\" (\"status\");"
    },
-   "ms": 0.03,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "create_index",
@@ -1034,7 +1034,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1266,7 +1266,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.72,
+   "ms": 2.7,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1289,7 +1289,7 @@
   "tokens_out": 109,
   "cost_usd": 0.0
  },
- "wall_ms": 7.4,
+ "wall_ms": 7.6,
  "severity_order": [
   "low",
   "medium",

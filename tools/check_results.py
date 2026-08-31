@@ -215,6 +215,29 @@ def main() -> int:
         claim("out-of-sample reviewer minutes still under half of baseline B",
               H["minutes"] <= HB["minutes"] / 2, f"{H['minutes']} vs {HB['minutes']}")
 
+    # -------------------------------------------------------- cross-interpreter
+    # v12. Everything above is measured under one interpreter. "3.11 and 3.12 verified" used to
+    # mean a green test suite on both, which is a claim about exceptions rather than about
+    # numbers: dict ordering, float repr, `round`, `re` and the bundled sqlite3 can all move a
+    # published verdict without raising. tools/check_cross_version.py reruns every generator
+    # under both and diffs the two results/ trees. The second claim is the unflattering half.
+    xv_path = ROOT / "results" / "cross_version.json"
+    if xv_path.exists():
+        xv = json.loads(xv_path.read_text())
+        versions = " and ".join(i["version"] for i in xv["interpreters"])
+        claim(f"no decision depends on the interpreter: CPython {versions} agree byte for byte",
+              (xv["decision_differences"] == 0 and len(xv["interpreters"]) >= 2
+               and not xv["files_present_in_one_tree_only"] and xv["files_compared"] >= 140),
+              f"{xv['files_compared']} files compared, {xv['decision_differences']} decision "
+              f"differences")
+        claim("the published wall-clock figures are the one thing that is not portable",
+              (xv["max_relative_clock_delta"] > 0 and xv["wall_clock_only"] > 0
+               and xv["clock_numbers_compared"] > 100),
+              f"{xv['wall_clock_only']} files moved on timing alone, worst delta "
+              f"{xv['max_relative_clock_delta'] * 100:.0f}% "
+              f"({xv['max_absolute_clock_delta_ms']} ms) over "
+              f"{xv['clock_numbers_compared']} numbers")
+
     width = max(len(c[0]) for c in CLAIMS)
     bad = 0
     for text, ok, got in CLAIMS:

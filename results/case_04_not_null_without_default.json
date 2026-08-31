@@ -444,7 +444,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.66,
+   "ms": 0.64,
    "result_summary": "Schema"
   },
   {
@@ -453,7 +453,7 @@
    "args": {
     "sql": "ALTER TABLE customers ADD COLUMN billing_email TEXT NOT NULL;\n"
    },
-   "ms": 0.03,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "add_column",
@@ -577,7 +577,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -935,7 +935,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.03,
+   "ms": 2.86,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1332,7 +1332,7 @@
      ]
     }
    },
-   "ms": 0.12,
+   "ms": 0.13,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1385,7 +1385,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.06,
    "result_summary": [
     "Schema",
     []
@@ -1615,7 +1615,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.68,
+   "ms": 2.65,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1701,7 +1701,7 @@
   "tokens_out": 328,
   "cost_usd": 0.0
  },
- "wall_ms": 7.8,
+ "wall_ms": 7.7,
  "severity_order": [
   "low",
   "medium",

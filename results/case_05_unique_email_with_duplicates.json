@@ -277,7 +277,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.68,
+   "ms": 0.69,
    "result_summary": "Schema"
   },
   {
@@ -782,7 +782,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.81,
+   "ms": 3.0,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1083,7 +1083,7 @@
      ]
     }
    },
-   "ms": 0.12,
+   "ms": 0.17,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1098,7 +1098,7 @@
    "args": {
     "sql": "CREATE INDEX CONCURRENTLY \"idx_customers_email_tmp_nonunique\" ON \"customers\" (\"email\");"
    },
-   "ms": 0.03,
+   "ms": 0.04,
    "result_summary": [
     {
      "kind": "create_index",
@@ -1140,7 +1140,7 @@
      }
     ]
    },
-   "ms": 0.08,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -1372,7 +1372,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.64,
+   "ms": 2.69,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1395,7 +1395,7 @@
   "tokens_out": 221,
   "cost_usd": 0.0
  },
- "wall_ms": 7.4,
+ "wall_ms": 7.8,
  "severity_order": [
   "low",
   "medium",

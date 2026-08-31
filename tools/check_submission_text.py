@@ -38,7 +38,7 @@ off the form. So the cap is 9,000 here now, and the audited text fits it.
 The claim count is no longer hardcoded either. It used to read `27/27` in a regex; the count
 is produced by `tools/check_results.py`, so it is asked rather than restated.
 
-Eight checks. Standard library only, no network. Run from the repository root:
+Seven checks. Standard library only, no network. Run from the repository root:
 
     python3 tools/check_submission_text.py
 """
@@ -346,7 +346,7 @@ def check_held_out_figures(text):
 
 REQUIRED_CLAIMS = [
     ("the verification lede, in the first 1200 characters",
-     re.compile(r"python tools/check_results\.py\s*->\s*" + re.escape(claim_count())), 1200,
+     re.compile(r"python3 tools/check_results\.py\s*->\s*" + re.escape(claim_count())), 1200,
      "reproducibility is 15% and the second tie-break; the one command that proves every "
      "number has to be read before the numbers, not after them"),
     ("the explicit baseline-and-advanced framing",

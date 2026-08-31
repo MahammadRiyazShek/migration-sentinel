@@ -1,0 +1,30 @@
+{
+  "generated_by": "tools/check_cross_version.py",
+  "interpreters": [
+    {
+      "version": "3.11.2"
+    },
+    {
+      "version": "3.12.13"
+    }
+  ],
+  "generators": [
+    "eval/run_eval.py --ablations",
+    "eval/run_holdout.py --ablations",
+    "eval/model_invariance.py",
+    "eval/report_components.py"
+  ],
+  "files_compared": 146,
+  "identical": 82,
+  "wall_clock_only": 64,
+  "decision_differences": 0,
+  "files_present_in_one_tree_only": [],
+  "wall_clock_fields": [
+    "json field \"ms\"",
+    "markdown \"N ms\"",
+    "markdown \"Wall clock per case\" row"
+  ],
+  "max_relative_clock_delta": 1.0,
+  "max_absolute_clock_delta_ms": 7.1,
+  "clock_numbers_compared": 634
+}

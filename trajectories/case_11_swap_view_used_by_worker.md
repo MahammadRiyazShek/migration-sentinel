@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.64 ms)
+**tool** `schema.parse` (0.7 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -260,7 +260,7 @@ _tool responded_
 4
 ```
 
-**tool** `shadow.replay` (2.77 ms)
+**tool** `shadow.replay` (2.97 ms)
 
 ```json
 {
@@ -416,7 +416,7 @@ _note (blast_radius)_: view open_invoices breakage folded into the corpus statem
 
 </details>
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -476,7 +476,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.15 ms)
+**tool** `coverage.ledger` (0.27 ms)
 
 ```json
 {
@@ -645,7 +645,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.05 ms)
+**tool** `migration.parse` (0.06 ms)
 
 ```json
 {
@@ -707,7 +707,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.87 ms)
+**tool** `shadow.replay` (2.86 ms)
 
 ```json
 {
