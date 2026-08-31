@@ -29,7 +29,16 @@ None of that moves a metric. All of it is read before any metric is. So the past
 committed verbatim as `SUBMISSION_FORM_TEXT.txt` and audited here, with an exit code, like
 everything else in this repository.
 
-Six checks. Standard library only, no network. Run from the repository root:
+v9 found a seventh defect of exactly the same class, and this one could have truncated the
+submission: this file asserted a 10,000-character cap, and the form's own field label says
+9,000. The pasted text was 9,422 characters. Everything from the failure mode down - the
+5% hot-take row - was over the edge of a limit no checker in this repository had ever read
+off the form. So the cap is 9,000 here now, and the audited text fits it.
+
+The claim count is no longer hardcoded either. It used to read `27/27` in a regex; the count
+is produced by `tools/check_results.py`, so it is asked rather than restated.
+
+Eight checks. Standard library only, no network. Run from the repository root:
 
     python3 tools/check_submission_text.py
 """
@@ -44,9 +53,19 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 FORM_TEXT = ROOT / "SUBMISSION_FORM_TEXT.txt"
-FORM_LIMIT = 10000
+# The form field's own label: "9000 characters only. only plain text." Not 10,000, which is
+# what this file asserted until v9 read the form again instead of the previous audit.
+FORM_LIMIT = 9000
 
 ARMS = ("baseline_prompt_only", "baseline_prompt_with_schema", "agent_pipeline")
+
+
+def claim_count():
+    """Ask tools/check_results.py how many claims it asserts, rather than restating it."""
+    out = subprocess.run([sys.executable, str(ROOT / "tools/check_results.py")],
+                         capture_output=True, text=True, cwd=ROOT).stdout
+    m = re.search(r"(\d+)/(\d+) claims hold", out)
+    return m.group(0) if m else "0/0 claims hold"
 
 
 def _load(rel):
@@ -244,11 +263,65 @@ def check_invariance_figures(text):
     return bad
 
 
-# ------------------------------- 6. the claims the flattening is most likely to drop
+# ---------------------------------------- 6. the held-out figures still match
+
+def _row(g, fmt):
+    """One held-out row, in the order A, B, Sentinel, exactly as the description states it."""
+    return ", ".join(fmt(g["held_out"][arm]) for arm in ARMS)
+
+
+HELD_OUT = {
+    "Unsafe approvals, held out":
+        lambda g: _row(g, lambda h: f"{h['unsafe_approvals']}/{h['cases']}"),
+    "Blocking cases given a clean verdict, held out":
+        lambda g: _row(g, lambda h: f"{h['clean_on_blocking']}/{h['blocking_cases']}"),
+    "Hazard recall, held out": lambda g: _row(g, lambda h: f"{h['recall']:g}"),
+    "Modelled reviewer minutes per case, held out":
+        lambda g: _row(g, lambda h: f"{h['minutes']:g}"),
+}
+
+
+def check_held_out_figures(text):
+    """v9. The held-out table is the newest claim in the description, so it gets the same
+    treatment as the oldest: read back out of raw JSON, arm for arm."""
+    path = ROOT / "results" / "holdout" / "generalization.json"
+    if not path.exists():
+        return ["results/holdout/generalization.json is absent, so the held-out figures in "
+                "the description are not auditable"]
+    g = json.loads(path.read_text(encoding="utf-8"))
+    bad = []
+    for label, reader in HELD_OUT.items():
+        m = re.search(re.escape(label) + r"\s*:\s*(.+)", text)
+        if not m:
+            bad.append(f"the pasted text no longer states {label!r}")
+            continue
+        got, want = _norm(m.group(1)), _norm(reader(g))
+        if got != want:
+            bad.append(f"{label}: form says {', '.join(got)}; generalization.json says "
+                       f"{', '.join(want)}")
+    frozen = g["frozen_first_contact"]["agent_pipeline"]
+    now = g["held_out"]["agent_pipeline"]
+    want = (f"first contact {frozen['clean_on_blocking']}/{frozen['blocking_cases']}, "
+            f"after the fix {now['clean_on_blocking']}/{now['blocking_cases']}")
+    if want not in text:
+        bad.append(f"the first-contact regression line no longer reads '{want}' - the number "
+                   f"before the fix is the evidence that the fix was needed")
+    changed = ", ".join(g["freeze"]["changed"])
+    if changed and changed not in text:
+        bad.append(f"the description does not name the decision files changed after the "
+                   f"freeze: {changed}")
+    if not bad:
+        print(f"        {len(HELD_OUT)} held-out rows, the first-contact regression and the "
+              f"{len(g['freeze']['changed'])} post-freeze files match "
+              f"results/holdout/generalization.json")
+    return bad
+
+
+# ------------------------------- 7. the claims the flattening is most likely to drop
 
 REQUIRED_CLAIMS = [
     ("the verification lede, in the first 1200 characters",
-     re.compile(r"python tools/check_results\.py\s*->\s*27/27 claims hold"), 1200,
+     re.compile(r"python tools/check_results\.py\s*->\s*" + re.escape(claim_count())), 1200,
      "reproducibility is 15% and the second tie-break; the one command that proves every "
      "number has to be read before the numbers, not after them"),
     ("the explicit baseline-and-advanced framing",
@@ -277,6 +350,15 @@ REQUIRED_CLAIMS = [
      re.compile(r"Do not quote the F1 without its denominator"), None,
      "twelve hand-labelled cases on one schema; the honest reading of 0.970 is part of "
      "the claim"),
+    ("the held-out disclosure, with the freeze and the after-the-fix labelling",
+     re.compile(r"held out.*hashed.*before.*(labels|cases) existed", re.S | re.I), None,
+     "an out-of-sample number is worth what the evidence that the rules did not move is "
+     "worth; the description has to carry the freeze, not just the result"),
+    ("the two held-out cases that are no longer held out",
+     re.compile(r"holdout_0[67].*no longer held out|no longer held out.*holdout_0[67]",
+                re.S | re.I), None,
+     "once a fix is derived from a case, that case is in-sample for the fix; saying so is "
+     "the difference between a held-out claim and a marketing one"),
 ]
 
 
@@ -301,6 +383,8 @@ CHECKS = [
     ("every ablation figure matches results/ablation.json", check_ablation_figures),
     ("every hostile-model figure matches results/model_invariance.json",
      check_invariance_figures),
+    ("every held-out figure matches results/holdout/generalization.json",
+     check_held_out_figures),
     ("no load-bearing claim was lost in flattening", check_load_bearing_claims),
 ]
 

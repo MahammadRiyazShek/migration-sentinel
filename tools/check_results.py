@@ -1,6 +1,7 @@
 """Fail the build if the numbers the README claims are no longer true.
 
     python3 tools/check_results.py      # after eval/run_eval.py --ablations
+                                       # and eval/run_holdout.py --ablations
 
 Every assertion below is a sentence somewhere in README.md or on the site. If an
 edit to the pipeline moves one of them, CI stops instead of quietly publishing a
@@ -129,6 +130,90 @@ def main() -> int:
         claim("every recorded packet in results/ matches a fresh reference run",
               inv["recorded_packets_matching_reference"] == inv["recorded_packets_checked"] == 12,
               f"{inv['recorded_packets_matching_reference']}/{inv['recorded_packets_checked']}")
+
+    # ------------------------------------------------------------------ held out
+    # v6. Everything above is measured on the 12 cases whose labels were written by the
+    # same hand as the rules. These are measured on a second schema, hashed-code-frozen
+    # before the labels existed. Three of them make the pipeline look worse.
+    gen_path = ROOT / "results" / "holdout" / "generalization.json"
+    if gen_path.exists():
+        gen = json.loads(gen_path.read_text())
+        H = gen["held_out"]["agent_pipeline"]
+        HB = gen["held_out"]["baseline_prompt_with_schema"]
+        HA = gen["held_out"]["baseline_prompt_only"]
+        F = gen["frozen_first_contact"]["agent_pipeline"]
+        hab = gen["ablation_held_out"]
+        man = json.loads((ROOT / "results" / "holdout"
+                          / "decision_code_manifest.json").read_text())
+
+        claim("9 held-out cases on a second schema, same three arms",
+              H["cases"] == HB["cases"] == HA["cases"] == 9, H["cases"])
+        claim("the decision code was hashed before the held-out labels existed, and every "
+              "file changed since is named",
+              man["files"] == 34 and sorted(gen["freeze"]["changed"]) == [
+                  "sentinel/agents/risk_officer.py", "sentinel/coverage.py",
+                  "sentinel/tools/shadow_db.py"],
+              f"{man['files']} hashed, changed since: {gen['freeze']['changed']}")
+        claim("no unsafe approval out of sample either", H["unsafe_approvals"] == 0,
+              H["unsafe_approvals"])
+        claim("out-of-sample recall at least 0.90, and 1.0 once the label no arm can name is "
+              "excluded",
+              H["recall"] >= 0.90 and H["recall_excluding_unnameable"] == 1.0,
+              f"{H['recall']} strict, {H['recall_excluding_unnameable']} excluding "
+              f"{gen['unnameable_labels']}")
+        claim("the one out-of-vocabulary hazard is still missed, out of sample, on purpose",
+              H["recall_excluding_unnameable"] > H["recall"],
+              f"{H['recall']} vs {H['recall_excluding_unnameable']}")
+        claim("both baselines miss more than a third of the held-out hazards",
+              HA["recall"] < 0.65 and HB["recall"] < 0.65,
+              f"A {HA['recall']}, B {HB['recall']}")
+        claim("out-of-sample precision is no worse than in sample",
+              H["precision"] >= S["strict"]["precision"],
+              f"{H['precision']} vs {S['strict']['precision']}")
+        claim("still no false alarm on the deliberately clean held-out case, where baseline B "
+              "raises one", H["false_alarms"] == 0 and HB["false_alarms"] == 1,
+              f"{H['false_alarms']} vs {HB['false_alarms']}")
+        claim("every out-of-sample finding cites machine evidence, and 9/9 plans are verified",
+              H["evidenced"].split("/")[0] == H["evidenced"].split("/")[1]
+              and H["verified_plans"] == "9/9",
+              f"{H['evidenced']} evidenced, {H['verified_plans']} plans")
+        claim("first contact gave one blocking migration a clean verdict; the fix took it to zero",
+              F["clean_on_blocking"] == 1 and H["clean_on_blocking"] == 0,
+              f"frozen {F['clean_on_blocking']}/{F['blocking_cases']} -> "
+              f"now {H['clean_on_blocking']}/{H['blocking_cases']}")
+        claim("no gap is filed against `unknown` any more, and one was on first contact",
+              gen["gap_objects_named_unknown"]["frozen"] == 1
+              and gen["gap_objects_named_unknown"]["current"] == 0,
+              f"frozen {gen['gap_objects_named_unknown']['frozen']}, "
+              f"now {gen['gap_objects_named_unknown']['current']}")
+        claim("the v6 gap class opens no new in-sample gap: same 3 blind spots on the same 2 cases",
+              S["declared_coverage_gaps"] == 3 and S["cases_with_coverage_gaps"] == 2,
+              f"{S['declared_coverage_gaps']} gaps across {S['cases_with_coverage_gaps']} cases")
+        if hab:
+            claim("the coverage gate costs no unsafe approval in sample and prevents one out of "
+                  "sample",
+                  ab["no_coverage"]["aggregate"]["unsafe_approvals"] == 0
+                  and hab["no_coverage"]["unsafe_approvals"] == 1,
+                  f"in-sample {ab['no_coverage']['aggregate']['unsafe_approvals']}, held-out "
+                  f"{hab['no_coverage']['unsafe_approvals']}")
+            claim("the memory layer is worth exactly nothing on a schema with no incident log",
+                  (hab["no_memory"]["recall"] == hab["full"]["recall"]
+                   and hab["no_memory"]["unsafe_approvals"] == hab["full"]["unsafe_approvals"]
+                   and hab["no_memory"]["minutes"] == hab["full"]["minutes"]),
+                  f"no_memory {hab['no_memory']['recall']}/{hab['no_memory']['minutes']}min vs "
+                  f"full {hab['full']['recall']}/{hab['full']['minutes']}min")
+        hinv = gen.get("invariance_held_out") or {}
+        if hinv:
+            claim("no model, hostile or not, moves the decision surface out of sample either",
+                  hinv["inv_changed"] == 0 and hinv["inv_done"] >= 120,
+                  f"{hinv['inv_changed']} changed of {hinv['inv_done']} completed held-out "
+                  f"reviews")
+            claim("no model writes a held-out headline in the shipped narrator mode",
+                  hinv["inv_headlines"] == 0 and hinv["inv_fluent"] == 0,
+                  f"{hinv['inv_headlines']} of {hinv['inv_struct']} headlines model-written, "
+                  f"fluent liar printed {hinv['inv_fluent']}/{hinv['inv_cases']}")
+        claim("out-of-sample reviewer minutes still under half of baseline B",
+              H["minutes"] <= HB["minutes"] / 2, f"{H['minutes']} vs {HB['minutes']}")
 
     width = max(len(c[0]) for c in CLAIMS)
     bad = 0

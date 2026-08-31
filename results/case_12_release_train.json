@@ -367,6 +367,7 @@
    {
     "kind": "in_place_data_mutation",
     "object": "invoices.status",
+    "object_inferred": false,
     "statement_index": 5,
     "statement": "UPDATE invoices SET status = 'open' WHERE status = 'draft'",
     "why": "rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns the same answer",
@@ -376,6 +377,7 @@
    {
     "kind": "unmodelled_statement",
     "object": "invoices",
+    "object_inferred": false,
     "statement_index": 6,
     "statement": "CLUSTER invoices USING idx_invoices_customer",
     "why": "the parser produced no structural model for this statement, so no post-migration schema and no replay covers it",
@@ -522,7 +524,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.7,
+   "ms": 1.15,
    "result_summary": "Schema"
   },
   {
@@ -531,7 +533,7 @@
    "args": {
     "sql": "ALTER TABLE subscriptions ADD COLUMN billing_interval TEXT NOT NULL DEFAULT 'monthly';\nCREATE UNIQUE INDEX idx_subscriptions_customer ON subscriptions (customer_id);\nALTER TABLE invoices DROP COLUMN tax_rate;\nCREATE INDEX idx_usage_events_name ON usage_events (event_name);\nALTER TABLE subscriptions DROP CONSTRAINT subscriptions_seats_chk;\nUPDATE invoices SET status = 'open' WHERE status = 'draft';..."
    },
-   "ms": 0.21,
+   "ms": 0.32,
    "result_summary": [
     {
      "kind": "add_column",
@@ -707,7 +709,7 @@
      }
     ]
    },
-   "ms": 0.09,
+   "ms": 0.15,
    "result_summary": [
     "Schema",
     [
@@ -864,7 +866,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.14,
+   "ms": 0.25,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -1023,7 +1025,7 @@
      }
     ]
    },
-   "ms": 0.03,
+   "ms": 0.05,
    "result_summary": 21
   },
   {
@@ -1319,7 +1321,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.05,
+   "ms": 4.71,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1387,7 +1389,7 @@
     "hazard_code": "UNIQUE_VIOLATION_EXISTING_DATA",
     "table": "subscriptions"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     [
@@ -1402,7 +1404,7 @@
     "hazard_code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
     "table": "invoices"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     [
@@ -1417,7 +1419,7 @@
     "hazard_code": "INDEX_LOCK_NO_CONCURRENT",
     "table": "subscriptions"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     [
@@ -1445,7 +1447,7 @@
     "hazard_code": "TABLE_REWRITE_LOCK",
     "table": "invoices"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -1627,14 +1629,158 @@
     ],
     "unmodelled_notes": [
      "op 6 (maintenance_rewrite) not modelled structurally: CLUSTER invoices USING idx_invoices_customer"
-    ]
+    ],
+    "seed": {
+     "customers": [
+      {
+       "id": 1,
+       "email": "ada@corp.example",
+       "full_name": "Ada Lovelace",
+       "company_name": "Corp",
+       "country_code": "US",
+       "plan": "business",
+       "mrr_cents": 49900,
+       "signed_up_at": "2024-01-04"
+      },
+      {
+       "id": 2,
+       "email": "grace@corp.example",
+       "full_name": "Grace Hopper",
+       "company_name": "Corp",
+       "country_code": "USA",
+       "plan": "team",
+       "mrr_cents": 9900,
+       "signed_up_at": "2024-03-11"
+      },
+      {
+       "id": 3,
+       "email": "alan@lab.example",
+       "full_name": "Alan Turing",
+       "company_name": null,
+       "country_code": "GB",
+       "plan": "free",
+       "mrr_cents": 0,
+       "signed_up_at": "2025-06-02"
+      },
+      {
+       "id": 4,
+       "email": "katherine@nasa.example",
+       "full_name": "Katherine Johnson",
+       "company_name": "NASA",
+       "country_code": "US",
+       "plan": "enterprise",
+       "mrr_cents": 249900,
+       "signed_up_at": "2023-11-20"
+      }
+     ],
+     "subscriptions": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "status": "active",
+       "seats": 12,
+       "price_cents": 49900,
+       "started_on": "2024-01-04",
+       "canceled_on": null
+      },
+      {
+       "id": 2,
+       "customer_id": 1,
+       "status": "canceled",
+       "seats": 3,
+       "price_cents": 9900,
+       "started_on": "2023-02-01",
+       "canceled_on": "2024-01-03"
+      },
+      {
+       "id": 3,
+       "customer_id": 4,
+       "status": "active",
+       "seats": 400,
+       "price_cents": 249900,
+       "started_on": "2023-11-20",
+       "canceled_on": null
+      }
+     ],
+     "invoices": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1001",
+       "amount_cents": 49900,
+       "tax_rate": 0.2,
+       "currency": "usd",
+       "status": "open",
+       "issued_at": "2026-01-01",
+       "paid_at": null
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "subscription_id": 3,
+       "invoice_number": "INV-1002",
+       "amount_cents": 249900,
+       "tax_rate": 0.0,
+       "currency": "usd",
+       "status": "paid",
+       "issued_at": "2026-01-01",
+       "paid_at": "2026-01-05"
+      },
+      {
+       "id": 3,
+       "customer_id": 1,
+       "subscription_id": 1,
+       "invoice_number": "INV-1003",
+       "amount_cents": 1200,
+       "tax_rate": null,
+       "currency": "eur",
+       "status": "draft",
+       "issued_at": null,
+       "paid_at": null
+      }
+     ],
+     "invoice_lines": [
+      {
+       "id": 1,
+       "invoice_id": 1,
+       "description": "Business plan",
+       "quantity": 12,
+       "unit_price_cents": 4158
+      },
+      {
+       "id": 2,
+       "invoice_id": 2,
+       "description": "Enterprise plan",
+       "quantity": 400,
+       "unit_price_cents": 624
+      }
+     ],
+     "usage_events": [
+      {
+       "id": 1,
+       "customer_id": 1,
+       "event_name": "api_call",
+       "quantity": 900,
+       "occurred_at": "2026-01-30"
+      },
+      {
+       "id": 2,
+       "customer_id": 4,
+       "event_name": "seat_active",
+       "quantity": 400,
+       "occurred_at": "2026-01-30"
+      }
+     ]
+    }
    },
-   "ms": 0.16,
+   "ms": 0.34,
    "result_summary": {
     "gaps": [
      {
       "kind": "in_place_data_mutation",
       "object": "invoices.status",
+      "object_inferred": false,
       "statement_index": 5,
       "statement": "UPDATE invoices SET status = 'open' WHERE status = 'draft'",
       "why": "rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns ...",
@@ -1644,6 +1790,7 @@
      {
       "kind": "unmodelled_statement",
       "object": "invoices",
+      "object_inferred": false,
       "statement_index": 6,
       "statement": "CLUSTER invoices USING idx_invoices_customer",
       "why": "the parser produced no structural model for this statement, so no post-migration schema and no replay covers it",
@@ -1668,7 +1815,7 @@
    "args": {
     "sql": "ALTER TABLE \"subscriptions\" ADD COLUMN \"billing_interval\" TEXT DEFAULT 'monthly';\nCREATE INDEX CONCURRENTLY \"idx_subscriptions_customer_tmp_nonunique\" ON \"subscriptions\" (\"customer_id\");\nCREATE INDEX CONCURRENTLY \"idx_usage_events_name\" ON \"usage_events\" (\"event_name\");\nUPDATE invoices SET status = 'open' WHERE status = 'draft' AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE status = 'draft' LIMIT ..."
    },
-   "ms": 0.13,
+   "ms": 0.2,
    "result_summary": [
     {
      "kind": "add_column",
@@ -1788,7 +1935,7 @@
      }
     ]
    },
-   "ms": 0.07,
+   "ms": 0.12,
    "result_summary": [
     "Schema",
     []
@@ -2059,7 +2206,7 @@
      "...+6 more"
     ]
    },
-   "ms": 3.01,
+   "ms": 4.57,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2082,7 +2229,7 @@
   "tokens_out": 705,
   "cost_usd": 0.0
  },
- "wall_ms": 9.2,
+ "wall_ms": 14.1,
  "severity_order": [
   "low",
   "medium",

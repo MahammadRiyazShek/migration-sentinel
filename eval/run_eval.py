@@ -39,7 +39,8 @@ def case_gap_count(case: dict) -> int:
     """Blind spots that exist as a fact about the case, computed once and applied to every arm."""
     schema = sql_parse.parse_schema(case["schema_sql"], case.get("row_estimates", {}))
     ops = sql_parse.parse_migration(case["migration_sql"])
-    return len(coverage_ledger(ops, schema, case.get("queries", []))["gaps"])
+    return len(coverage_ledger(ops, schema, case.get("queries", []),
+                              seed=case.get("seed", {}))["gaps"])
 
 
 def agent_result(case: dict, args, features: str = "full", trace: bool = True) -> tuple[dict, dict]:
@@ -66,6 +67,9 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser("run_eval")
     ap.add_argument("--cases", default=str(ROOT / "eval" / "cases"))
     ap.add_argument("--out", default=str(ROOT / "results"))
+    ap.add_argument("--trajectories", default=str(ROOT / "trajectories"),
+                    help="where per-case runtime trajectories are written; the held-out run keeps "
+                         "its own directory so the in-sample trajectories stay a clean set")
     ap.add_argument("--provider", default="scripted",
                     choices=["scripted", "openai", "anthropic"] + sorted(HOSTILE))
     ap.add_argument("--model", default=None)
@@ -98,8 +102,8 @@ def main(argv: list[str] | None = None) -> int:
             res, out = agent_result(case, args)
             (outdir / f"{case['id']}.json").write_text(json.dumps(out["report"], indent=1, default=str))
             (outdir / f"{case['id']}.md").write_text(render(out["report"]))
-            tdir = ROOT / "trajectories"
-            tdir.mkdir(exist_ok=True)
+            tdir = pathlib.Path(args.trajectories)
+            tdir.mkdir(parents=True, exist_ok=True)
             out["tracer"].write_jsonl(tdir / f"{case['id']}.jsonl")
             (tdir / f"{case['id']}.md").write_text(
                 out["tracer"].render_markdown(f"Trajectory - {case['id']}"))
@@ -139,8 +143,9 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def render_ablation(ablation: dict) -> str:
+    cases = ablation.get("full", {}).get("aggregate", {}).get("cases", 12)
     L = ["# Ablation: which component actually does the work", "",
-         "Same 12 cases, same scripted model, one component removed at a time.", "",
+         f"Same {cases} cases, same scripted model, one component removed at a time.", "",
          "| configuration | unsafe approvals | recall (strict) | precision (strict) | "
          "severity agreement | verified plans | gaps cleared without sign-off |",
          "|---|---|---|---|---|---|---|"]
@@ -176,6 +181,8 @@ def render_comparison(report: dict, cases: list[dict]) -> str:
 
     row("**Unsafe approvals** (primary, lower is better)",
         lambda a: f"{a['unsafe_approvals']}/{a['cases']}")
+    row("**Blocking cases given a clean verdict** (primary, lower is better)",
+        lambda a: f"{a['clean_verdicts_on_blocking_cases']}/{a['blocking_cases']}")
     row("Hazard recall (strict code)", lambda a: a["strict"]["recall"])
     row("Hazard precision (strict code)", lambda a: a["strict"]["precision"])
     row("Hazard F1 (strict code)", lambda a: a["strict"]["f1"])

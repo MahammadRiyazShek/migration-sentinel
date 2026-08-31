@@ -1,0 +1,18 @@
+{
+ "case_id": "holdout_04_safe_additive_language",
+ "variant": "prompt_only",
+ "verdict": "APPROVE",
+ "hazards": [],
+ "review_text": "Verdict: APPROVE\n\n- No problems found in the migration as written. Looks safe to ship.",
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 1,
+  "tokens_in": 455,
+  "tokens_out": 21,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 0.1,
+ "plan": null,
+ "plan_verified": false
+}

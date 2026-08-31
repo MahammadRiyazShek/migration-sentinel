@@ -14,7 +14,7 @@ Whole evaluation is under a second and costs $0.00.**
 
 ```bash
 git clone https://github.com/MahammadRiyazShek/migration-sentinel && cd migration-sentinel
-python3 -m unittest discover -s tests   # 38 tests, ~0.3 s
+python3 -m unittest discover -s tests   # 52 tests, ~0.3 s
 python3 eval/run_eval.py --ablations    # 108 reviews (12 cases x 9 arms), < 1 s
 python3 eval/model_invariance.py        # 180 reviews, 5 models x 3 narrator modes, < 1 s
 python3 tools/check_results.py          # 27/27 published claims re-asserted from raw JSON

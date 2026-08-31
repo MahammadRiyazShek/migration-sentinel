@@ -152,7 +152,8 @@ class RiskOfficer(Agent):
         # in an appendix underneath a clean badge.  Facts from a tool, as always.
         cov = self.tool("coverage.ledger", ops=parsed["ops"], schema=schema,
                         queries=case.get("queries", []),
-                        unmodelled_notes=parsed["change_set"]["unmodelled"]) \
+                        unmodelled_notes=parsed["change_set"]["unmodelled"],
+                        seed=case.get("seed", {})) \
             if use_coverage else {"gaps": [], "gap_kinds": [], "irreversible": [],
                                   "corpus_statements": len(case.get("queries", [])),
                                   "parser_notes": parsed["change_set"]["unmodelled"]}

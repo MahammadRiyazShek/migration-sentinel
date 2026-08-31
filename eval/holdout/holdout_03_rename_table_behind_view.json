@@ -1,0 +1,408 @@
+{
+ "id": "holdout_03_rename_table_behind_view",
+ "title": "Rename shipment_stops to stops behind a compatibility view",
+ "owner_service": "dispatch-api",
+ "scenario": "A naming cleanup, shipped with a compatibility view so that nothing has to change on the read side.",
+ "schema_sql": "CREATE TABLE carriers (\n  id SERIAL PRIMARY KEY,\n  code TEXT NOT NULL,\n  legal_name TEXT NOT NULL,\n  region TEXT NOT NULL DEFAULT 'emea',\n  active INTEGER NOT NULL DEFAULT 1,\n  onboarded_at TIMESTAMPTZ NOT NULL\n);\n\nCREATE TABLE vehicles (\n  id SERIAL PRIMARY KEY,\n  carrier_id INTEGER NOT NULL,\n  plate TEXT NOT NULL,\n  capacity_kg INTEGER NOT NULL DEFAULT 0,\n  refrigerated INTEGER NOT NULL DEFAULT 0,\n  last_service_on TEXT,\n  CONSTRAINT vehicles_capacity_chk CHECK (capacity_kg >= 0)\n);\n\nCREATE TABLE drivers (\n  id SERIAL PRIMARY KEY,\n  carrier_id INTEGER NOT NULL,\n  full_name TEXT NOT NULL,\n  phone TEXT NOT NULL,\n  licence_class TEXT NOT NULL DEFAULT 'C',\n  employment_type TEXT NOT NULL DEFAULT 'contract',\n  hired_on TEXT NOT NULL\n);\n\nCREATE TABLE shipments (\n  id SERIAL PRIMARY KEY,\n  carrier_id INTEGER NOT NULL,\n  vehicle_id INTEGER,\n  parent_shipment_id INTEGER,\n  reference TEXT NOT NULL,\n  legacy_ref TEXT,\n  status TEXT NOT NULL DEFAULT 'planned',\n  weight_kg INTEGER NOT NULL DEFAULT 0,\n  promised_at TIMESTAMPTZ,\n  delivered_at TIMESTAMPTZ,\n  CONSTRAINT shipments_status_chk CHECK (status IN ('planned','in_transit','delivered','cancelled'))\n);\n\nCREATE TABLE shipment_stops (\n  id SERIAL PRIMARY KEY,\n  shipment_id INTEGER NOT NULL,\n  sequence_no INTEGER NOT NULL,\n  kind TEXT NOT NULL DEFAULT 'delivery',\n  status TEXT NOT NULL DEFAULT 'pending',\n  address_json JSONB,\n  arrived_at TIMESTAMPTZ\n);\n\nCREATE TABLE carrier_invoices (\n  id SERIAL PRIMARY KEY,\n  carrier_id INTEGER NOT NULL,\n  invoice_number TEXT NOT NULL,\n  shipment_id INTEGER,\n  amount NUMERIC(12,2) NOT NULL,\n  currency TEXT NOT NULL DEFAULT 'eur',\n  status TEXT NOT NULL DEFAULT 'received',\n  received_on TEXT NOT NULL\n);\n\nCREATE TABLE geofence_events (\n  id SERIAL PRIMARY KEY,\n  shipment_id INTEGER NOT NULL,\n  vehicle_id INTEGER,\n  event_kind TEXT NOT NULL,\n  recorded_at TIMESTAMPTZ NOT NULL\n);\n\nCREATE VIEW driver_roster AS SELECT * FROM drivers;\n\nCREATE VIEW active_shipments AS\n  SELECT id, carrier_id, reference, status, promised_at\n  FROM shipments WHERE status IN ('planned','in_transit');\n\nCREATE INDEX idx_shipments_carrier ON shipments (carrier_id);\n\nCREATE INDEX idx_stops_shipment ON shipment_stops (shipment_id);",
+ "row_estimates": {
+  "carriers": 4200,
+  "vehicles": 21000,
+  "drivers": 48000,
+  "shipments": 62000000,
+  "shipment_stops": 310000000,
+  "carrier_invoices": 9400000,
+  "geofence_events": 1200000000
+ },
+ "queries": [
+  {
+   "id": "q_dispatch_create",
+   "service": "dispatch-api",
+   "criticality": "critical",
+   "label": "shipment creation",
+   "sql": "INSERT INTO shipments (carrier_id, reference, status, weight_kg, promised_at) VALUES (7,'SHP-77001','planned',1200,'2026-03-02')"
+  },
+  {
+   "id": "q_dispatch_board",
+   "service": "dispatch-api",
+   "criticality": "critical",
+   "label": "dispatch board",
+   "sql": "SELECT id, reference, status, promised_at FROM shipments WHERE status = 'in_transit'"
+  },
+  {
+   "id": "q_dispatch_stop_progress",
+   "service": "dispatch-api",
+   "criticality": "high",
+   "label": "mark a stop arrived",
+   "sql": "UPDATE shipment_stops SET status = 'arrived' WHERE id = 1"
+  },
+  {
+   "id": "q_portal_track",
+   "service": "customer-portal",
+   "criticality": "critical",
+   "label": "public tracking page",
+   "sql": "SELECT reference, status, promised_at, delivered_at FROM shipments WHERE reference = 'SHP-10001'"
+  },
+  {
+   "id": "q_ops_active",
+   "service": "ops-console",
+   "criticality": "high",
+   "label": "active shipment list",
+   "sql": "SELECT * FROM active_shipments"
+  },
+  {
+   "id": "q_ops_vehicles",
+   "service": "ops-console",
+   "criticality": "medium",
+   "label": "fleet panel",
+   "sql": "SELECT id, plate, capacity_kg, refrigerated FROM vehicles WHERE carrier_id = 7"
+  },
+  {
+   "id": "q_ops_carriers",
+   "service": "ops-console",
+   "criticality": "low",
+   "label": "carrier directory",
+   "sql": "SELECT code, legal_name, region FROM carriers WHERE active = 1"
+  },
+  {
+   "id": "q_driver_stop_list",
+   "service": "driver-app",
+   "criticality": "critical",
+   "label": "today's stop list",
+   "sql": "SELECT id, sequence_no, kind, status FROM shipment_stops WHERE shipment_id = 1 ORDER BY sequence_no"
+  },
+  {
+   "id": "q_driver_stop_arrive",
+   "service": "driver-app",
+   "criticality": "critical",
+   "label": "driver marks arrival",
+   "sql": "INSERT INTO shipment_stops (shipment_id, sequence_no, kind, status, arrived_at) VALUES (1,4,'delivery','arrived','2026-03-02')"
+  },
+  {
+   "id": "q_driver_profile",
+   "service": "driver-app",
+   "criticality": "high",
+   "label": "driver profile in the app",
+   "sql": "SELECT id, full_name, phone, licence_class FROM drivers WHERE id = 1"
+  },
+  {
+   "id": "q_etl_driver_roster",
+   "service": "bi-etl",
+   "criticality": "high",
+   "label": "warehouse load of the driver roster",
+   "sql": "SELECT * FROM driver_roster"
+  },
+  {
+   "id": "q_etl_volume",
+   "service": "bi-etl",
+   "criticality": "medium",
+   "label": "shipment volume by status",
+   "sql": "SELECT status, COUNT(*) AS n FROM shipments GROUP BY status"
+  },
+  {
+   "id": "q_finance_totals",
+   "service": "finance-ops",
+   "criticality": "high",
+   "label": "carrier spend rollup",
+   "sql": "SELECT carrier_id, SUM(amount) AS total FROM carrier_invoices GROUP BY carrier_id"
+  },
+  {
+   "id": "q_finance_lookup",
+   "service": "finance-ops",
+   "criticality": "medium",
+   "label": "invoice lookup",
+   "sql": "SELECT invoice_number, amount, currency, status FROM carrier_invoices WHERE carrier_id = 7"
+  },
+  {
+   "id": "q_telemetry_write",
+   "service": "telemetry-worker",
+   "criticality": "high",
+   "label": "geofence event ingest",
+   "sql": "INSERT INTO geofence_events (shipment_id, vehicle_id, event_kind, recorded_at) VALUES (1,1,'depart','2026-03-02')"
+  }
+ ],
+ "seed": {
+  "carriers": [
+   {
+    "id": 7,
+    "code": "NRDX",
+    "legal_name": "Nordex Freight BV",
+    "region": "emea",
+    "active": 1,
+    "onboarded_at": "2022-04-11"
+   },
+   {
+    "id": 8,
+    "code": "MRLN",
+    "legal_name": "Merlin Road Ltd",
+    "region": "emea",
+    "active": 1,
+    "onboarded_at": "2023-08-02"
+   },
+   {
+    "id": 9,
+    "code": "ATLS",
+    "legal_name": "Atlas Logistica SA",
+    "region": "latam",
+    "active": 0,
+    "onboarded_at": "2021-01-19"
+   }
+  ],
+  "vehicles": [
+   {
+    "id": 1,
+    "carrier_id": 7,
+    "plate": "NL-14-BXR",
+    "capacity_kg": 18000,
+    "refrigerated": 1,
+    "last_service_on": "2026-01-08"
+   },
+   {
+    "id": 2,
+    "carrier_id": 7,
+    "plate": "NL-22-QQT",
+    "capacity_kg": 7500,
+    "refrigerated": 0,
+    "last_service_on": "2025-11-30"
+   },
+   {
+    "id": 3,
+    "carrier_id": 8,
+    "plate": "DE-91-KLM",
+    "capacity_kg": 24000,
+    "refrigerated": 0,
+    "last_service_on": null
+   }
+  ],
+  "drivers": [
+   {
+    "id": 1,
+    "carrier_id": 7,
+    "full_name": "Ines Duarte",
+    "phone": "+31201234567",
+    "licence_class": "CE",
+    "employment_type": "employee",
+    "hired_on": "2021-06-01"
+   },
+   {
+    "id": 2,
+    "carrier_id": 7,
+    "full_name": "Tomas Bauer",
+    "phone": "+4930123456",
+    "licence_class": "C",
+    "employment_type": "contract",
+    "hired_on": "2024-02-17"
+   },
+   {
+    "id": 3,
+    "carrier_id": 8,
+    "full_name": "Aiko Tanaka",
+    "phone": "+819012345678",
+    "licence_class": "CE",
+    "employment_type": "agency",
+    "hired_on": "2023-09-05"
+   },
+   {
+    "id": 4,
+    "carrier_id": 9,
+    "full_name": "Rafael Souza",
+    "phone": "+5511998877665",
+    "licence_class": "C",
+    "employment_type": "contract",
+    "hired_on": "2020-03-23"
+   }
+  ],
+  "shipments": [
+   {
+    "id": 1,
+    "carrier_id": 7,
+    "vehicle_id": 1,
+    "parent_shipment_id": null,
+    "reference": "SHP-10001",
+    "legacy_ref": "OLD-4471",
+    "status": "in_transit",
+    "weight_kg": 8200,
+    "promised_at": "2026-03-02",
+    "delivered_at": null
+   },
+   {
+    "id": 2,
+    "carrier_id": 7,
+    "vehicle_id": 2,
+    "parent_shipment_id": 1,
+    "reference": "SHP-10002",
+    "legacy_ref": null,
+    "status": "planned",
+    "weight_kg": 1400,
+    "promised_at": "2026-03-03",
+    "delivered_at": null
+   },
+   {
+    "id": 3,
+    "carrier_id": 8,
+    "vehicle_id": 3,
+    "parent_shipment_id": null,
+    "reference": "SHP-10003",
+    "legacy_ref": "OLD-4480",
+    "status": "delivered",
+    "weight_kg": 19750,
+    "promised_at": "2026-02-25",
+    "delivered_at": "2026-02-25"
+   },
+   {
+    "id": 4,
+    "carrier_id": 9,
+    "vehicle_id": null,
+    "parent_shipment_id": null,
+    "reference": "SHP-10004",
+    "legacy_ref": null,
+    "status": "cancelled",
+    "weight_kg": 0,
+    "promised_at": "2026-02-20",
+    "delivered_at": null
+   }
+  ],
+  "shipment_stops": [
+   {
+    "id": 1,
+    "shipment_id": 1,
+    "sequence_no": 1,
+    "kind": "pickup",
+    "status": "arrived",
+    "address_json": "{\"city\": \"Rotterdam\"}",
+    "arrived_at": "2026-03-01"
+   },
+   {
+    "id": 2,
+    "shipment_id": 1,
+    "sequence_no": 2,
+    "kind": "delivery",
+    "status": "pending",
+    "address_json": "{\"city\": \"Utrecht\"}",
+    "arrived_at": null
+   },
+   {
+    "id": 3,
+    "shipment_id": 1,
+    "sequence_no": 3,
+    "kind": "delivery",
+    "status": "missed",
+    "address_json": "{\"city\": \"Arnhem\"}",
+    "arrived_at": null
+   },
+   {
+    "id": 4,
+    "shipment_id": 2,
+    "sequence_no": 1,
+    "kind": "pickup",
+    "status": "pending",
+    "address_json": "{\"city\": \"Antwerp\"}",
+    "arrived_at": null
+   },
+   {
+    "id": 5,
+    "shipment_id": 3,
+    "sequence_no": 1,
+    "kind": "delivery",
+    "status": "arrived",
+    "address_json": null,
+    "arrived_at": "2026-02-25"
+   }
+  ],
+  "carrier_invoices": [
+   {
+    "id": 1,
+    "carrier_id": 7,
+    "invoice_number": "NRDX-2026-0041",
+    "shipment_id": 1,
+    "amount": 1250.0,
+    "currency": "eur",
+    "status": "received",
+    "received_on": "2026-03-01"
+   },
+   {
+    "id": 2,
+    "carrier_id": 7,
+    "invoice_number": "NRDX-2026-0042",
+    "shipment_id": 2,
+    "amount": 24500.0,
+    "currency": "eur",
+    "status": "approved",
+    "received_on": "2026-03-02"
+   },
+   {
+    "id": 3,
+    "carrier_id": 8,
+    "invoice_number": "MRLN-88",
+    "shipment_id": 3,
+    "amount": 9990.5,
+    "currency": "gbp",
+    "status": "paid",
+    "received_on": "2026-02-26"
+   },
+   {
+    "id": 4,
+    "carrier_id": 8,
+    "invoice_number": "MRLN-89",
+    "shipment_id": null,
+    "amount": 410.75,
+    "currency": "gbp",
+    "status": "received",
+    "received_on": "2026-02-27"
+   },
+   {
+    "id": 5,
+    "carrier_id": 9,
+    "invoice_number": "ATLS-0007",
+    "shipment_id": null,
+    "amount": 3300.0,
+    "currency": "usd",
+    "status": "disputed",
+    "received_on": "2026-01-14"
+   }
+  ],
+  "geofence_events": [
+   {
+    "id": 1,
+    "shipment_id": 1,
+    "vehicle_id": 1,
+    "event_kind": "depart",
+    "recorded_at": "2026-03-01"
+   },
+   {
+    "id": 2,
+    "shipment_id": 1,
+    "vehicle_id": 1,
+    "event_kind": "arrive",
+    "recorded_at": "2026-03-01"
+   }
+  ]
+ },
+ "migration_sql": "ALTER TABLE shipment_stops RENAME TO stops;\nCREATE VIEW shipment_stops AS\n  SELECT id, shipment_id, sequence_no, kind, status, address_json, arrived_at FROM stops;\n",
+ "rollback_sql": "",
+ "ground_truth": {
+  "blocking": true,
+  "hazards": [
+   {
+    "code": "BREAKING_QUERY",
+    "severity": "blocker",
+    "note": "the driver app INSERTs into shipment_stops, and a view is not writable"
+   },
+   {
+    "code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+    "severity": "high",
+    "note": "the rename lands in a single deploy"
+   },
+   {
+    "code": "CROSS_SERVICE_UNCOORDINATED",
+    "severity": "high",
+    "note": "the driver app is released through the app stores, not by this team"
+   },
+   {
+    "code": "MISSING_ROLLBACK",
+    "severity": "medium",
+    "note": "no rollback supplied"
+   }
+  ],
+  "notes": "The compatibility view is the trap and it is a new one: reads keep working, so every SELECT in review passes, and the write path is the thing that dies."
+ }
+}

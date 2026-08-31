@@ -1,0 +1,67 @@
+# Migration review: Add a stop-status audit trail with a row trigger
+
+**NOT CLEARED - coverage gap on an affected object**
+
+Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)
+
+`run eval-holdout_06_audit_trigger` · case `holdout_06_audit_trigger` · owning service `dispatch-api` · 11.8 ms · model scripted-v1 (2 calls, $0.0000)
+
+> **The headline above was written by the tools, not by the model.** In this build the narrator cannot write the sentence above the badge on any run (`sentinel/narrator.py`, mode `structural`), so a lie in wording no blocklist knows cannot become the verdict sentence. The model's prose, where it survives the guard, appears under *Model commentary* at the end, labelled unverified.
+
+> **Not cleared on coverage.** The hazards found here are not blocking, but 1 object(s) this migration touches sit inside a blind spot of the review. The verdict is capped rather than clean: no hazard has been invented, and nothing has been certified either. See *Coverage ledger* below.
+
+## Hazards
+
+No hazards found by execution or by the static rules.
+
+## Blast radius
+
+- statements in the corpus that touch the changed objects: 0 (weighted score 0)
+- shadow replay: 17/17 statements passed before, 17/17 after
+- reproduced failures: 0 · silent column changes: 0 · data-migration failures: 0
+
+## Recommended rollout
+
+Plan generated on attempt 1 of 1; phase 1 **verified**: every statement in the corpus still passes after phase 1.
+
+### Phase 1 - expand (safe to run now)
+
+```sql
+CREATE TABLE stop_status_audit ( id SERIAL PRIMARY KEY, stop_id INTEGER NOT NULL, old_status TEXT, new_status TEXT, changed_at TIMESTAMPTZ NOT NULL );
+```
+
+### Human decisions required (the tool will not decide these)
+
+- statement 1 (unsupported) is outside the tool's model and needs manual review: CREATE TRIGGER trg_stop_status_audit AFTER UPDATE OF status ON shipment_stops FOR EACH ROW
+- coverage gap on `shipment_stops` (unmodelled_statement): a reviewer confirms by hand what statement 1 does to shipment_stops and to anything reading it
+
+## Coverage ledger
+
+1 gap(s) between what this migration touches and what this review could actually observe. A gap is an absence of evidence, so it is recorded as a decision for a person rather than as a finding with a severity.
+
+| object | gap | why it is a gap | closes when |
+|---|---|---|---|
+| `shipment_stops` | statement not modelled by the parser | the parser produced no structural model for this statement, so no post-migration schema and no replay covers it; the relation name was read out of the statement text, not parsed | a reviewer confirms by hand what statement 1 does to shipment_stops and to anything reading it |
+
+## What this review did not check
+
+- Lock behaviour is inferred from declared row estimates and static rules; the shadow database is SQLite and cannot reproduce PostgreSQL lock queues.
+- Fixture data is a small synthetic sample, so data-dependent hazards are detected only where the fixtures expose them.
+- Application code is only visible through the query corpus; anything issuing dynamic SQL that is not in the corpus is invisible here.
+- unmodelled statement: op 1 (unsupported) not modelled structurally: CREATE TRIGGER trg_stop_status_audit AFTER UPDATE OF status 
+
+## Approval
+
+Nothing was executed against a real database. Phase 1 can be dry-run against a local sandbox copy with:
+
+```bash
+python -m sentinel execute --report results/holdout_06_audit_trigger.json --i-approve --reviewer "your name"
+```
+
+A qualified reviewer signs off here before any deploy: ______________________
+
+## Model commentary (unverified prose, not evidence)
+
+> Not cleared: the hazards found are not blocking, but this review has a declared blind spot on an object the migration touches. 1 coverage gap(s) need a named sign-off before this can be called safe. 0 blocker, 0 high, 0 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.
+
+The narrator wrote the paragraph above. It passed the prose guard, which is a statement about its wording and not about its truth. Nothing in it produced, removed or reordered a single finding in this packet: every hazard, severity, plan statement and verdict above comes from a tool call recorded in the trajectory.

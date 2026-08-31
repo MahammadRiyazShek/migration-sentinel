@@ -1,0 +1,2887 @@
+{
+ "run_id": "eval-holdout_08_release_train_fleet",
+ "case_id": "holdout_08_release_train_fleet",
+ "title": "Release train: six fleet changes in one migration",
+ "owner_service": "dispatch-api",
+ "verdict": "BLOCK",
+ "summary": "Do not ship this as written. 3 coverage gap(s) need a named sign-off before this can be called safe. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 7 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements. (Written from the tool output. In this build the model never writes this line, whatever it returns.)",
+ "narrator": {
+  "mode": "structural",
+  "guard": true,
+  "headline_source": "tool",
+  "summary_overridden": false,
+  "summary_reasons": [],
+  "model_summary": "Do not ship this as written. 3 coverage gap(s) need a named sign-off before this can be called safe. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 7 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero brok",
+  "model_note": "Do not ship this as written. 3 coverage gap(s) need a named sign-off before this can be called safe. 1 statement(s) the application issues today fail against the post-migration schema in shadow replay. 2 blocker, 7 high, 1 medium, 0 low. The rewritten phase-1 plan passes shadow replay with zero broken statements.",
+  "model_note_reasons": [],
+  "questions_source": "model",
+  "questions_dropped": []
+ },
+ "counts": {
+  "low": 0,
+  "medium": 1,
+  "high": 7,
+  "blocker": 2
+ },
+ "hazards": [
+  {
+   "code": "BREAKING_QUERY",
+   "severity": "blocker",
+   "summary": "q_driver_profile fails after the migration: OperationalError: no such column: phone",
+   "evidence": [
+    "shadow replay: `SELECT id, full_name, phone, licence_class FROM drivers WHERE id = 1` -> OperationalError: no such column: phone"
+   ],
+   "objects": [
+    "q_driver_profile"
+   ],
+   "services": [
+    "driver-app"
+   ],
+   "source": "replay",
+   "memory_refs": [],
+   "remediation": "",
+   "title": "Live query breaks after migration"
+  },
+  {
+   "code": "INDEX_LOCK_NO_CONCURRENT",
+   "severity": "blocker",
+   "summary": "index idx_geofence_events_shipment is built without CONCURRENTLY on geofence_events (1,200,000,000 rows, very large)",
+   "evidence": [
+    "statement 1: `CREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id)`",
+    "declared row estimate for geofence_events: 1,200,000,000"
+   ],
+   "objects": [
+    "geofence_events"
+   ],
+   "services": [],
+   "source": "static",
+   "memory_refs": [
+    "INC-2024-07"
+   ],
+   "remediation": "",
+   "title": "Index built without CONCURRENTLY on a large table"
+  },
+  {
+   "code": "CONSTRAINT_VALIDATION_LOCK",
+   "severity": "high",
+   "summary": "carrier_invoices_shipment_fk is added without NOT VALID, so validation scans all 9,400,000 rows under a lock",
+   "evidence": [
+    "statement 4: `ALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk FOREIGN KEY (shipment_id) REFERENCES `"
+   ],
+   "objects": [
+    "carrier_invoices"
+   ],
+   "services": [],
+   "source": "static",
+   "memory_refs": [
+    "INC-2024-11"
+   ],
+   "remediation": "",
+   "title": "Constraint added without NOT VALID / VALIDATE split"
+  },
+  {
+   "code": "CROSS_SERVICE_UNCOORDINATED",
+   "severity": "high",
+   "summary": "the migration is owned by `dispatch-api` but breakage lands in bi-etl, driver-app",
+   "evidence": [
+    "corpus ownership of failing statements: ['bi-etl', 'driver-app']"
+   ],
+   "objects": [],
+   "services": [
+    "bi-etl",
+    "driver-app"
+   ],
+   "source": "static",
+   "memory_refs": [],
+   "remediation": "",
+   "title": "Impact lands on a service owned by another team"
+  },
+  {
+   "code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+   "severity": "high",
+   "summary": "rename column on drivers.phone lands in a single deploy",
+   "evidence": [
+    "statement 0: `ALTER TABLE drivers RENAME COLUMN phone TO phone_e164`"
+   ],
+   "objects": [
+    "drivers.phone"
+   ],
+   "services": [],
+   "source": "static",
+   "memory_refs": [
+    "INC-2023-09"
+   ],
+   "remediation": "",
+   "title": "Destructive change shipped in a single step"
+  },
+  {
+   "code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+   "severity": "high",
+   "summary": "drop column on shipments.legacy_ref lands in a single deploy",
+   "evidence": [
+    "statement 2: `ALTER TABLE shipments DROP COLUMN legacy_ref`"
+   ],
+   "objects": [
+    "shipments.legacy_ref"
+   ],
+   "services": [],
+   "source": "static",
+   "memory_refs": [
+    "INC-2023-09"
+   ],
+   "remediation": "",
+   "title": "Destructive change shipped in a single step"
+  },
+  {
+   "code": "SELECT_STAR_DRIFT",
+   "severity": "high",
+   "summary": "q_etl_driver_roster still runs but its column set changes (removed ['phone'], added ['phone_e164'])",
+   "evidence": [
+    "shadow replay columns before=['id', 'carrier_id', 'full_name', 'phone', 'licence_class', 'employment_type', 'hired_on'] after=['id', 'carrier_id', 'full_name', 'licence_class', 'employment_type', 'hired_on', 'phone_e164']"
+   ],
+   "objects": [
+    "q_etl_driver_roster"
+   ],
+   "services": [
+    "bi-etl"
+   ],
+   "source": "replay",
+   "memory_refs": [
+    "INC-2025-02"
+   ],
+   "remediation": "",
+   "title": "SELECT * consumer receives a different column set"
+  },
+  {
+   "code": "TABLE_REWRITE_LOCK",
+   "severity": "high",
+   "summary": "VACUUM FULL rewrites shipments under an ACCESS EXCLUSIVE lock (62,000,000 rows, very large)",
+   "evidence": [
+    "statement 5: `VACUUM FULL shipments`",
+    "declared row estimate for shipments: 62,000,000",
+    "recognised as a whole-relation maintenance command; the statement itself is still not modelled structurally and stays in the coverage ledger"
+   ],
+   "objects": [
+    "shipments"
+   ],
+   "services": [],
+   "source": "static",
+   "memory_refs": [],
+   "remediation": "",
+   "title": "Type change forces a full table rewrite"
+  },
+  {
+   "code": "UNBATCHED_BACKFILL",
+   "severity": "high",
+   "summary": "backfill on shipment_stops runs as one statement over 310,000,000 rows",
+   "evidence": [
+    "statement 3: `UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed'`"
+   ],
+   "objects": [
+    "shipment_stops"
+   ],
+   "services": [],
+   "source": "static",
+   "memory_refs": [],
+   "remediation": "",
+   "title": "Backfill runs as one unbounded statement"
+  },
+  {
+   "code": "MISSING_ROLLBACK",
+   "severity": "medium",
+   "summary": "the change ships without a rollback script",
+   "evidence": [
+    "case field `rollback_sql` is empty"
+   ],
+   "objects": [],
+   "services": [],
+   "source": "static",
+   "memory_refs": [],
+   "remediation": "",
+   "title": "No rollback path supplied"
+  }
+ ],
+ "blast_radius": {
+  "dependent_queries": [
+   {
+    "query_id": "q_dispatch_create",
+    "service": "dispatch-api",
+    "criticality": "critical",
+    "matched": [
+     "shipments"
+    ],
+    "uses_select_star": false,
+    "label": "shipment creation"
+   },
+   {
+    "query_id": "q_dispatch_board",
+    "service": "dispatch-api",
+    "criticality": "critical",
+    "matched": [
+     "shipments"
+    ],
+    "uses_select_star": false,
+    "label": "dispatch board"
+   },
+   {
+    "query_id": "q_dispatch_stop_progress",
+    "service": "dispatch-api",
+    "criticality": "high",
+    "matched": [
+     "shipment_stops"
+    ],
+    "uses_select_star": false,
+    "label": "mark a stop arrived"
+   },
+   {
+    "query_id": "q_portal_track",
+    "service": "customer-portal",
+    "criticality": "critical",
+    "matched": [
+     "shipments"
+    ],
+    "uses_select_star": false,
+    "label": "public tracking page"
+   },
+   {
+    "query_id": "q_ops_active",
+    "service": "ops-console",
+    "criticality": "high",
+    "matched": [
+     "active_shipments"
+    ],
+    "uses_select_star": true,
+    "label": "active shipment list"
+   },
+   {
+    "query_id": "q_driver_stop_list",
+    "service": "driver-app",
+    "criticality": "critical",
+    "matched": [
+     "shipment_id",
+     "shipment_stops"
+    ],
+    "uses_select_star": false,
+    "label": "today's stop list"
+   },
+   {
+    "query_id": "q_driver_stop_arrive",
+    "service": "driver-app",
+    "criticality": "critical",
+    "matched": [
+     "shipment_id",
+     "shipment_stops"
+    ],
+    "uses_select_star": false,
+    "label": "driver marks arrival"
+   },
+   {
+    "query_id": "q_driver_profile",
+    "service": "driver-app",
+    "criticality": "high",
+    "matched": [
+     "drivers",
+     "phone"
+    ],
+    "uses_select_star": false,
+    "label": "driver profile in the app"
+   },
+   {
+    "query_id": "q_etl_driver_roster",
+    "service": "bi-etl",
+    "criticality": "high",
+    "matched": [
+     "driver_roster"
+    ],
+    "uses_select_star": true,
+    "label": "warehouse load of the driver roster"
+   },
+   {
+    "query_id": "q_etl_volume",
+    "service": "bi-etl",
+    "criticality": "medium",
+    "matched": [
+     "shipments"
+    ],
+    "uses_select_star": false,
+    "label": "shipment volume by status"
+   },
+   {
+    "query_id": "q_finance_totals",
+    "service": "finance-ops",
+    "criticality": "high",
+    "matched": [
+     "carrier_invoices"
+    ],
+    "uses_select_star": false,
+    "label": "carrier spend rollup"
+   },
+   {
+    "query_id": "q_finance_lookup",
+    "service": "finance-ops",
+    "criticality": "medium",
+    "matched": [
+     "carrier_invoices"
+    ],
+    "uses_select_star": false,
+    "label": "invoice lookup"
+   },
+   {
+    "query_id": "q_telemetry_write",
+    "service": "telemetry-worker",
+    "criticality": "high",
+    "matched": [
+     "geofence_events",
+     "shipment_id"
+    ],
+    "uses_select_star": false,
+    "label": "geofence event ingest"
+   }
+  ],
+  "blast_score": 42,
+  "replay": {
+   "materialised": true,
+   "schema_errors": [],
+   "data_errors": [],
+   "broken": [
+    {
+     "query_id": "q_driver_profile",
+     "service": "driver-app",
+     "criticality": "high",
+     "label": "driver profile in the app",
+     "error": "OperationalError: no such column: phone",
+     "sql": "SELECT id, full_name, phone, licence_class FROM drivers WHERE id = 1"
+    }
+   ],
+   "column_drift": [
+    {
+     "query_id": "q_etl_driver_roster",
+     "service": "bi-etl",
+     "criticality": "high",
+     "before": [
+      "id",
+      "carrier_id",
+      "full_name",
+      "phone",
+      "licence_class",
+      "employment_type",
+      "hired_on"
+     ],
+     "after": [
+      "id",
+      "carrier_id",
+      "full_name",
+      "licence_class",
+      "employment_type",
+      "hired_on",
+      "phone_e164"
+     ],
+     "removed": [
+      "phone"
+     ],
+     "added": [
+      "phone_e164"
+     ],
+     "sql": "SELECT * FROM driver_roster"
+    },
+    {
+     "query_id": "__view__driver_roster",
+     "service": "database",
+     "criticality": "high",
+     "before": [
+      "id",
+      "carrier_id",
+      "full_name",
+      "phone",
+      "licence_class",
+      "employment_type",
+      "hired_on"
+     ],
+     "after": [
+      "id",
+      "carrier_id",
+      "full_name",
+      "licence_class",
+      "employment_type",
+      "hired_on",
+      "phone_e164"
+     ],
+     "removed": [
+      "phone"
+     ],
+     "added": [
+      "phone_e164"
+     ],
+     "sql": "SELECT * FROM \"driver_roster\" LIMIT 1"
+    }
+   ],
+   "rowcount_drift": [],
+   "data_loss": [],
+   "queries_run": 17,
+   "queries_ok_before": 17,
+   "queries_ok_after": 16
+  }
+ },
+ "plan": {
+  "attempt": 1,
+  "phase1_sql": [
+   "ALTER TABLE \"drivers\" ADD COLUMN \"phone_e164\" TEXT;",
+   "UPDATE \"drivers\" SET \"phone_e164\" = \"phone\" WHERE \"phone_e164\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"drivers\" WHERE \"phone_e164\" IS NULL LIMIT 5000);",
+   "CREATE INDEX CONCURRENTLY \"idx_geofence_events_shipment\" ON \"geofence_events\" (\"shipment_id\");",
+   "-- repeat until zero rows are affected (batch size 5000):",
+   "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed' AND \"id\" IN (SELECT \"id\" FROM \"shipment_stops\" WHERE status = 'missed' LIMIT 5000);",
+   "ALTER TABLE \"carrier_invoices\" ADD CONSTRAINT \"carrier_invoices_shipment_fk\" FOREIGN KEY (shipment_id) REFERENCES shipments (id) NOT VALID;"
+  ],
+  "phase2_sql": [
+   "ALTER TABLE \"drivers\" DROP COLUMN \"phone\";",
+   "ALTER TABLE \"shipments\" DROP COLUMN \"legacy_ref\";",
+   "ALTER TABLE \"carrier_invoices\" VALIDATE CONSTRAINT \"carrier_invoices_shipment_fk\";"
+  ],
+  "rollback_sql": [
+   "ALTER TABLE \"drivers\" DROP COLUMN \"phone_e164\";",
+   "DROP INDEX CONCURRENTLY \"idx_geofence_events_shipment\";",
+   "ALTER TABLE \"carrier_invoices\" DROP CONSTRAINT \"carrier_invoices_shipment_fk\";"
+  ],
+  "code_steps": [
+   "deploy code that writes both drivers.phone and drivers.phone_e164, and reads drivers.phone_e164",
+   "remove every read and write of shipments.legacy_ref, then wait one full deploy cycle"
+  ],
+  "human_gates": [
+   "confirm no consumer still reads drivers.phone before phase 2 drops it",
+   "confirm shipments.legacy_ref has had zero reads for the agreed observation window before phase 2",
+   "statement 5 (maintenance_rewrite) is outside the tool's model and needs manual review: VACUUM FULL shipments",
+   "coverage gap on `shipments.legacy_ref` (uncovered_object): a reviewer greps the real consumers for legacy_ref before phase 2",
+   "coverage gap on `shipment_stops.status` (in_place_data_mutation): a reviewer confirms which consumers of shipment_stops.status depend on the current values",
+   "coverage gap on `shipments` (unmodelled_statement): a reviewer confirms by hand what statement 5 does to shipments and to anything reading it"
+  ],
+  "questions": [
+   "Which deploy lands first: the query change or the schema change?",
+   "What is the accepted risk for CONSTRAINT_VALIDATION_LOCK?",
+   "Has the owning team agreed to the deploy order?",
+   "What is the accepted risk for DESTRUCTIVE_NO_EXPAND_CONTRACT?",
+   "What is the acceptable write-stall window for this table?",
+   "What is the accepted risk for MISSING_ROLLBACK?"
+  ],
+  "questions_source": "model",
+  "questions_dropped": [],
+  "policy": {
+   "include_view_changes": true,
+   "expand_contract_type_change": true,
+   "minimal_phase1": false,
+   "notes": []
+  }
+ },
+ "plan_verification": {
+  "verified": true,
+  "problems": [],
+  "replay": {
+   "materialised": true,
+   "schema_errors": [],
+   "data_errors": [],
+   "broken": [],
+   "column_drift": [
+    {
+     "query_id": "q_etl_driver_roster",
+     "service": "bi-etl",
+     "criticality": "high",
+     "before": [
+      "id",
+      "carrier_id",
+      "full_name",
+      "phone",
+      "licence_class",
+      "employment_type",
+      "hired_on"
+     ],
+     "after": [
+      "id",
+      "carrier_id",
+      "full_name",
+      "phone",
+      "licence_class",
+      "employment_type",
+      "hired_on",
+      "phone_e164"
+     ],
+     "removed": [],
+     "added": [
+      "phone_e164"
+     ],
+     "sql": "SELECT * FROM driver_roster"
+    },
+    {
+     "query_id": "__view__driver_roster",
+     "service": "database",
+     "criticality": "high",
+     "before": [
+      "id",
+      "carrier_id",
+      "full_name",
+      "phone",
+      "licence_class",
+      "employment_type",
+      "hired_on"
+     ],
+     "after": [
+      "id",
+      "carrier_id",
+      "full_name",
+      "phone",
+      "licence_class",
+      "employment_type",
+      "hired_on",
+      "phone_e164"
+     ],
+     "removed": [],
+     "added": [
+      "phone_e164"
+     ],
+     "sql": "SELECT * FROM \"driver_roster\" LIMIT 1"
+    }
+   ],
+   "rowcount_drift": [],
+   "data_loss": [],
+   "queries_run": 17,
+   "queries_ok_before": 17,
+   "queries_ok_after": 17
+  },
+  "unmodelled": []
+ },
+ "escalated_to_human": false,
+ "coverage_gaps": [
+  "op 5 (maintenance_rewrite) not modelled structurally: VACUUM FULL shipments"
+ ],
+ "coverage_ledger": {
+  "gaps": [
+   {
+    "kind": "uncovered_object",
+    "object": "shipments.legacy_ref",
+    "object_inferred": false,
+    "statement_index": 2,
+    "statement": "ALTER TABLE shipments DROP COLUMN legacy_ref",
+    "why": "no statement in the 15-statement corpus references legacy_ref, so replay had nothing to run against it; that is silence, not a clean bill of health",
+    "closes_with": "a reviewer greps the real consumers for legacy_ref before phase 2",
+    "irreversible": false
+   },
+   {
+    "kind": "in_place_data_mutation",
+    "object": "shipment_stops.status",
+    "object_inferred": false,
+    "statement_index": 3,
+    "statement": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed'",
+    "why": "rows that already exist in shipment_stops are rewritten; replay proves the corpus still executes, never that it still returns the same answer",
+    "closes_with": "a reviewer confirms which consumers of shipment_stops.status depend on the current values",
+    "irreversible": false
+   },
+   {
+    "kind": "unmodelled_statement",
+    "object": "shipments",
+    "object_inferred": false,
+    "statement_index": 5,
+    "statement": "VACUUM FULL shipments",
+    "why": "the parser produced no structural model for this statement, so no post-migration schema and no replay covers it",
+    "closes_with": "a reviewer confirms by hand what statement 5 does to shipments and to anything reading it",
+    "irreversible": false
+   }
+  ],
+  "gap_kinds": [
+   "in_place_data_mutation",
+   "uncovered_object",
+   "unmodelled_statement"
+  ],
+  "irreversible": [],
+  "corpus_statements": 15,
+  "parser_notes": [
+   "op 5 (maintenance_rewrite) not modelled structurally: VACUUM FULL shipments"
+  ]
+ },
+ "verdict_capped_by_coverage": false,
+ "change_set": {
+  "ops": [
+   {
+    "kind": "rename_column",
+    "table": "drivers",
+    "column": "phone",
+    "detail": {
+     "new_name": "phone_e164"
+    },
+    "sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164",
+    "index": 0
+   },
+   {
+    "kind": "create_index",
+    "table": "geofence_events",
+    "column": null,
+    "detail": {
+     "name": "idx_geofence_events_shipment",
+     "unique": false,
+     "concurrently": false,
+     "columns": [
+      "shipment_id"
+     ]
+    },
+    "sql": "CREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id)",
+    "index": 1
+   },
+   {
+    "kind": "drop_column",
+    "table": "shipments",
+    "column": "legacy_ref",
+    "detail": {},
+    "sql": "ALTER TABLE shipments DROP COLUMN legacy_ref",
+    "index": 2
+   },
+   {
+    "kind": "dml_update",
+    "table": "shipment_stops",
+    "column": null,
+    "detail": {
+     "where": true,
+     "batched": false
+    },
+    "sql": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed'",
+    "index": 3
+   },
+   {
+    "kind": "add_constraint",
+    "table": "carrier_invoices",
+    "column": null,
+    "detail": {
+     "constraint": "carrier_invoices_shipment_fk",
+     "constraint_kind": "foreign_key",
+     "expr": "(shipment_id) REFERENCES shipments (id)",
+     "columns": [],
+     "not_valid": false
+    },
+    "sql": "ALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk FOREIGN KEY (shipment_id) REFERENCES shipments (id)",
+    "index": 4
+   },
+   {
+    "kind": "maintenance_rewrite",
+    "table": "shipments",
+    "column": null,
+    "detail": {
+     "command": "VACUUM FULL"
+    },
+    "sql": "VACUUM FULL shipments",
+    "index": 5
+   }
+  ],
+  "op_kinds": [
+   "add_constraint",
+   "create_index",
+   "dml_update",
+   "drop_column",
+   "maintenance_rewrite",
+   "rename_column"
+  ],
+  "tables_touched": [
+   "carrier_invoices",
+   "drivers",
+   "geofence_events",
+   "shipment_stops",
+   "shipments"
+  ],
+  "columns_touched": [
+   "drivers.phone",
+   "shipments.legacy_ref"
+  ],
+  "unmodelled": [
+   "op 5 (maintenance_rewrite) not modelled structurally: VACUUM FULL shipments"
+  ]
+ },
+ "attempts": 1,
+ "features": {
+  "replay": true,
+  "static": true,
+  "memory": true,
+  "verify": true,
+  "coverage": true
+ },
+ "tool_calls": [
+  {
+   "agent": "cartographer",
+   "tool": "schema.parse",
+   "args": {
+    "sql": "CREATE TABLE carriers (\n  id SERIAL PRIMARY KEY,\n  code TEXT NOT NULL,\n  legal_name TEXT NOT NULL,\n  region TEXT NOT NULL DEFAULT 'emea',\n  active INTEGER NOT NULL DEFAULT 1,\n  onboarded_at TIMESTAMPTZ NOT NULL\n);\n\nCREATE TABLE vehicles (\n  id SERIAL PRIMARY KEY,\n  carrier_id INTEGER NOT NULL,\n  plate TEXT NOT NULL,\n  capacity_kg INTEGER NOT NULL DEFAULT 0,\n  refrigerated INTEGER NOT NULL DEFAULT ...",
+    "row_estimates": {
+     "carriers": 4200,
+     "vehicles": 21000,
+     "drivers": 48000,
+     "shipments": 62000000,
+     "shipment_stops": 310000000,
+     "carrier_invoices": 9400000,
+     "geofence_events": 1200000000
+    }
+   },
+   "ms": 1.02,
+   "result_summary": "Schema"
+  },
+  {
+   "agent": "cartographer",
+   "tool": "migration.parse",
+   "args": {
+    "sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164;\nCREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id);\nALTER TABLE shipments DROP COLUMN legacy_ref;\nUPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed';\nALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk\n  FOREIGN KEY (shipment_id) REFERENCES shipments (id);\nVACUUM FULL shipments;\n"
+   },
+   "ms": 0.18,
+   "result_summary": [
+    {
+     "kind": "rename_column",
+     "table": "drivers",
+     "column": "phone",
+     "detail": {
+      "new_name": "phone_e164"
+     },
+     "sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164",
+     "index": 0
+    },
+    {
+     "kind": "create_index",
+     "table": "geofence_events",
+     "column": null,
+     "detail": {
+      "name": "idx_geofence_events_shipment",
+      "unique": false,
+      "concurrently": false,
+      "columns": [
+       "shipment_id"
+      ]
+     },
+     "sql": "CREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id)",
+     "index": 1
+    },
+    {
+     "kind": "drop_column",
+     "table": "shipments",
+     "column": "legacy_ref",
+     "detail": {},
+     "sql": "ALTER TABLE shipments DROP COLUMN legacy_ref",
+     "index": 2
+    },
+    {
+     "kind": "dml_update",
+     "table": "shipment_stops",
+     "column": null,
+     "detail": {
+      "where": true,
+      "batched": false
+     },
+     "sql": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed'",
+     "index": 3
+    },
+    {
+     "kind": "add_constraint",
+     "table": "carrier_invoices",
+     "column": null,
+     "detail": {
+      "constraint": "carrier_invoices_shipment_fk",
+      "constraint_kind": "foreign_key",
+      "expr": "(shipment_id) REFERENCES shipments (id)",
+      "columns": [],
+      "not_valid": false
+     },
+     "sql": "ALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk FOREIGN KEY (shipment_id) REFERENCES shipments ...",
+     "index": 4
+    },
+    {
+     "kind": "maintenance_rewrite",
+     "table": "shipments",
+     "column": null,
+     "detail": {
+      "command": "VACUUM FULL"
+     },
+     "sql": "VACUUM FULL shipments",
+     "index": 5
+    }
+   ]
+  },
+  {
+   "agent": "cartographer",
+   "tool": "schema.apply_ops",
+   "args": {
+    "schema": "Schema",
+    "ops": [
+     {
+      "kind": "rename_column",
+      "table": "drivers",
+      "column": "phone",
+      "detail": {
+       "new_name": "phone_e164"
+      },
+      "sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164",
+      "index": 0
+     },
+     {
+      "kind": "create_index",
+      "table": "geofence_events",
+      "column": null,
+      "detail": {
+       "name": "idx_geofence_events_shipment",
+       "unique": false,
+       "concurrently": false,
+       "columns": [
+        "shipment_id"
+       ]
+      },
+      "sql": "CREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id)",
+      "index": 1
+     },
+     {
+      "kind": "drop_column",
+      "table": "shipments",
+      "column": "legacy_ref",
+      "detail": {},
+      "sql": "ALTER TABLE shipments DROP COLUMN legacy_ref",
+      "index": 2
+     },
+     {
+      "kind": "dml_update",
+      "table": "shipment_stops",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": false
+      },
+      "sql": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed'",
+      "index": 3
+     },
+     {
+      "kind": "add_constraint",
+      "table": "carrier_invoices",
+      "column": null,
+      "detail": {
+       "constraint": "carrier_invoices_shipment_fk",
+       "constraint_kind": "foreign_key",
+       "expr": "(shipment_id) REFERENCES shipments (id)",
+       "columns": [],
+       "not_valid": false
+      },
+      "sql": "ALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk FOREIGN KEY (shipment_id) REFERENCES shipments ...",
+      "index": 4
+     },
+     {
+      "kind": "maintenance_rewrite",
+      "table": "shipments",
+      "column": null,
+      "detail": {
+       "command": "VACUUM FULL"
+      },
+      "sql": "VACUUM FULL shipments",
+      "index": 5
+     }
+    ]
+   },
+   "ms": 0.21,
+   "result_summary": [
+    "Schema",
+    [
+     "op 5 (maintenance_rewrite) not modelled structurally: VACUUM FULL shipments"
+    ]
+   ]
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "corpus.dependents",
+   "args": {
+    "queries": [
+     {
+      "id": "q_dispatch_create",
+      "service": "dispatch-api",
+      "criticality": "critical",
+      "label": "shipment creation",
+      "sql": "INSERT INTO shipments (carrier_id, reference, status, weight_kg, promised_at) VALUES (7,'SHP-77001','planned',1200,'2026..."
+     },
+     {
+      "id": "q_dispatch_board",
+      "service": "dispatch-api",
+      "criticality": "critical",
+      "label": "dispatch board",
+      "sql": "SELECT id, reference, status, promised_at FROM shipments WHERE status = 'in_transit'"
+     },
+     {
+      "id": "q_dispatch_stop_progress",
+      "service": "dispatch-api",
+      "criticality": "high",
+      "label": "mark a stop arrived",
+      "sql": "UPDATE shipment_stops SET status = 'arrived' WHERE id = 1"
+     },
+     {
+      "id": "q_portal_track",
+      "service": "customer-portal",
+      "criticality": "critical",
+      "label": "public tracking page",
+      "sql": "SELECT reference, status, promised_at, delivered_at FROM shipments WHERE reference = 'SHP-10001'"
+     },
+     {
+      "id": "q_ops_active",
+      "service": "ops-console",
+      "criticality": "high",
+      "label": "active shipment list",
+      "sql": "SELECT * FROM active_shipments"
+     },
+     {
+      "id": "q_ops_vehicles",
+      "service": "ops-console",
+      "criticality": "medium",
+      "label": "fleet panel",
+      "sql": "SELECT id, plate, capacity_kg, refrigerated FROM vehicles WHERE carrier_id = 7"
+     },
+     {
+      "id": "q_ops_carriers",
+      "service": "ops-console",
+      "criticality": "low",
+      "label": "carrier directory",
+      "sql": "SELECT code, legal_name, region FROM carriers WHERE active = 1"
+     },
+     {
+      "id": "q_driver_stop_list",
+      "service": "driver-app",
+      "criticality": "critical",
+      "label": "today's stop list",
+      "sql": "SELECT id, sequence_no, kind, status FROM shipment_stops WHERE shipment_id = 1 ORDER BY sequence_no"
+     },
+     "...+7 more"
+    ],
+    "ops": [
+     {
+      "kind": "rename_column",
+      "table": "drivers",
+      "column": "phone",
+      "detail": {
+       "new_name": "phone_e164"
+      },
+      "sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164",
+      "index": 0
+     },
+     {
+      "kind": "create_index",
+      "table": "geofence_events",
+      "column": null,
+      "detail": {
+       "name": "idx_geofence_events_shipment",
+       "unique": false,
+       "concurrently": false,
+       "columns": [
+        "shipment_id"
+       ]
+      },
+      "sql": "CREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id)",
+      "index": 1
+     },
+     {
+      "kind": "drop_column",
+      "table": "shipments",
+      "column": "legacy_ref",
+      "detail": {},
+      "sql": "ALTER TABLE shipments DROP COLUMN legacy_ref",
+      "index": 2
+     },
+     {
+      "kind": "dml_update",
+      "table": "shipment_stops",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": false
+      },
+      "sql": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed'",
+      "index": 3
+     },
+     {
+      "kind": "add_constraint",
+      "table": "carrier_invoices",
+      "column": null,
+      "detail": {
+       "constraint": "carrier_invoices_shipment_fk",
+       "constraint_kind": "foreign_key",
+       "expr": "(shipment_id) REFERENCES shipments (id)",
+       "columns": [],
+       "not_valid": false
+      },
+      "sql": "ALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk FOREIGN KEY (shipment_id) REFERENCES shipments ...",
+      "index": 4
+     },
+     {
+      "kind": "maintenance_rewrite",
+      "table": "shipments",
+      "column": null,
+      "detail": {
+       "command": "VACUUM FULL"
+      },
+      "sql": "VACUUM FULL shipments",
+      "index": 5
+     }
+    ],
+    "schema": "Schema"
+   },
+   "ms": 0.17,
+   "result_summary": [
+    {
+     "query_id": "q_dispatch_create",
+     "service": "dispatch-api",
+     "criticality": "critical",
+     "matched": [
+      "shipments"
+     ],
+     "uses_select_star": false,
+     "label": "shipment creation"
+    },
+    {
+     "query_id": "q_dispatch_board",
+     "service": "dispatch-api",
+     "criticality": "critical",
+     "matched": [
+      "shipments"
+     ],
+     "uses_select_star": false,
+     "label": "dispatch board"
+    },
+    {
+     "query_id": "q_dispatch_stop_progress",
+     "service": "dispatch-api",
+     "criticality": "high",
+     "matched": [
+      "shipment_stops"
+     ],
+     "uses_select_star": false,
+     "label": "mark a stop arrived"
+    },
+    {
+     "query_id": "q_portal_track",
+     "service": "customer-portal",
+     "criticality": "critical",
+     "matched": [
+      "shipments"
+     ],
+     "uses_select_star": false,
+     "label": "public tracking page"
+    },
+    {
+     "query_id": "q_ops_active",
+     "service": "ops-console",
+     "criticality": "high",
+     "matched": [
+      "active_shipments"
+     ],
+     "uses_select_star": true,
+     "label": "active shipment list"
+    },
+    {
+     "query_id": "q_driver_stop_list",
+     "service": "driver-app",
+     "criticality": "critical",
+     "matched": [
+      "shipment_id",
+      "shipment_stops"
+     ],
+     "uses_select_star": false,
+     "label": "today's stop list"
+    },
+    {
+     "query_id": "q_driver_stop_arrive",
+     "service": "driver-app",
+     "criticality": "critical",
+     "matched": [
+      "shipment_id",
+      "shipment_stops"
+     ],
+     "uses_select_star": false,
+     "label": "driver marks arrival"
+    },
+    {
+     "query_id": "q_driver_profile",
+     "service": "driver-app",
+     "criticality": "high",
+     "matched": [
+      "drivers",
+      "phone"
+     ],
+     "uses_select_star": false,
+     "label": "driver profile in the app"
+    },
+    "...+5 more"
+   ]
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "corpus.blast_score",
+   "args": {
+    "hits": [
+     {
+      "query_id": "q_dispatch_create",
+      "service": "dispatch-api",
+      "criticality": "critical",
+      "matched": [
+       "shipments"
+      ],
+      "uses_select_star": false,
+      "label": "shipment creation"
+     },
+     {
+      "query_id": "q_dispatch_board",
+      "service": "dispatch-api",
+      "criticality": "critical",
+      "matched": [
+       "shipments"
+      ],
+      "uses_select_star": false,
+      "label": "dispatch board"
+     },
+     {
+      "query_id": "q_dispatch_stop_progress",
+      "service": "dispatch-api",
+      "criticality": "high",
+      "matched": [
+       "shipment_stops"
+      ],
+      "uses_select_star": false,
+      "label": "mark a stop arrived"
+     },
+     {
+      "query_id": "q_portal_track",
+      "service": "customer-portal",
+      "criticality": "critical",
+      "matched": [
+       "shipments"
+      ],
+      "uses_select_star": false,
+      "label": "public tracking page"
+     },
+     {
+      "query_id": "q_ops_active",
+      "service": "ops-console",
+      "criticality": "high",
+      "matched": [
+       "active_shipments"
+      ],
+      "uses_select_star": true,
+      "label": "active shipment list"
+     },
+     {
+      "query_id": "q_driver_stop_list",
+      "service": "driver-app",
+      "criticality": "critical",
+      "matched": [
+       "shipment_id",
+       "shipment_stops"
+      ],
+      "uses_select_star": false,
+      "label": "today's stop list"
+     },
+     {
+      "query_id": "q_driver_stop_arrive",
+      "service": "driver-app",
+      "criticality": "critical",
+      "matched": [
+       "shipment_id",
+       "shipment_stops"
+      ],
+      "uses_select_star": false,
+      "label": "driver marks arrival"
+     },
+     {
+      "query_id": "q_driver_profile",
+      "service": "driver-app",
+      "criticality": "high",
+      "matched": [
+       "drivers",
+       "phone"
+      ],
+      "uses_select_star": false,
+      "label": "driver profile in the app"
+     },
+     "...+5 more"
+    ]
+   },
+   "ms": 0.04,
+   "result_summary": 42
+  },
+  {
+   "agent": "blast_radius",
+   "tool": "shadow.replay",
+   "args": {
+    "pre_schema": "Schema",
+    "post_schema": "Schema",
+    "ops": [
+     {
+      "kind": "rename_column",
+      "table": "drivers",
+      "column": "phone",
+      "detail": {
+       "new_name": "phone_e164"
+      },
+      "sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164",
+      "index": 0
+     },
+     {
+      "kind": "create_index",
+      "table": "geofence_events",
+      "column": null,
+      "detail": {
+       "name": "idx_geofence_events_shipment",
+       "unique": false,
+       "concurrently": false,
+       "columns": [
+        "shipment_id"
+       ]
+      },
+      "sql": "CREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id)",
+      "index": 1
+     },
+     {
+      "kind": "drop_column",
+      "table": "shipments",
+      "column": "legacy_ref",
+      "detail": {},
+      "sql": "ALTER TABLE shipments DROP COLUMN legacy_ref",
+      "index": 2
+     },
+     {
+      "kind": "dml_update",
+      "table": "shipment_stops",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": false
+      },
+      "sql": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed'",
+      "index": 3
+     },
+     {
+      "kind": "add_constraint",
+      "table": "carrier_invoices",
+      "column": null,
+      "detail": {
+       "constraint": "carrier_invoices_shipment_fk",
+       "constraint_kind": "foreign_key",
+       "expr": "(shipment_id) REFERENCES shipments (id)",
+       "columns": [],
+       "not_valid": false
+      },
+      "sql": "ALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk FOREIGN KEY (shipment_id) REFERENCES shipments ...",
+      "index": 4
+     },
+     {
+      "kind": "maintenance_rewrite",
+      "table": "shipments",
+      "column": null,
+      "detail": {
+       "command": "VACUUM FULL"
+      },
+      "sql": "VACUUM FULL shipments",
+      "index": 5
+     }
+    ],
+    "seed": {
+     "carriers": [
+      {
+       "id": 7,
+       "code": "NRDX",
+       "legal_name": "Nordex Freight BV",
+       "region": "emea",
+       "active": 1,
+       "onboarded_at": "2022-04-11"
+      },
+      {
+       "id": 8,
+       "code": "MRLN",
+       "legal_name": "Merlin Road Ltd",
+       "region": "emea",
+       "active": 1,
+       "onboarded_at": "2023-08-02"
+      },
+      {
+       "id": 9,
+       "code": "ATLS",
+       "legal_name": "Atlas Logistica SA",
+       "region": "latam",
+       "active": 0,
+       "onboarded_at": "2021-01-19"
+      }
+     ],
+     "vehicles": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "plate": "NL-14-BXR",
+       "capacity_kg": 18000,
+       "refrigerated": 1,
+       "last_service_on": "2026-01-08"
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "plate": "NL-22-QQT",
+       "capacity_kg": 7500,
+       "refrigerated": 0,
+       "last_service_on": "2025-11-30"
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "plate": "DE-91-KLM",
+       "capacity_kg": 24000,
+       "refrigerated": 0,
+       "last_service_on": null
+      }
+     ],
+     "drivers": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "full_name": "Ines Duarte",
+       "phone": "+31201234567",
+       "licence_class": "CE",
+       "employment_type": "employee",
+       "hired_on": "2021-06-01"
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "full_name": "Tomas Bauer",
+       "phone": "+4930123456",
+       "licence_class": "C",
+       "employment_type": "contract",
+       "hired_on": "2024-02-17"
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "full_name": "Aiko Tanaka",
+       "phone": "+819012345678",
+       "licence_class": "CE",
+       "employment_type": "agency",
+       "hired_on": "2023-09-05"
+      },
+      {
+       "id": 4,
+       "carrier_id": 9,
+       "full_name": "Rafael Souza",
+       "phone": "+5511998877665",
+       "licence_class": "C",
+       "employment_type": "contract",
+       "hired_on": "2020-03-23"
+      }
+     ],
+     "shipments": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "vehicle_id": 1,
+       "parent_shipment_id": null,
+       "reference": "SHP-10001",
+       "legacy_ref": "OLD-4471",
+       "status": "in_transit",
+       "weight_kg": 8200,
+       "promised_at": "2026-03-02",
+       "delivered_at": null
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "vehicle_id": 2,
+       "parent_shipment_id": 1,
+       "reference": "SHP-10002",
+       "legacy_ref": null,
+       "status": "planned",
+       "weight_kg": 1400,
+       "promised_at": "2026-03-03",
+       "delivered_at": null
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "vehicle_id": 3,
+       "parent_shipment_id": null,
+       "reference": "SHP-10003",
+       "legacy_ref": "OLD-4480",
+       "status": "delivered",
+       "weight_kg": 19750,
+       "promised_at": "2026-02-25",
+       "delivered_at": "2026-02-25"
+      },
+      {
+       "id": 4,
+       "carrier_id": 9,
+       "vehicle_id": null,
+       "parent_shipment_id": null,
+       "reference": "SHP-10004",
+       "legacy_ref": null,
+       "status": "cancelled",
+       "weight_kg": 0,
+       "promised_at": "2026-02-20",
+       "delivered_at": null
+      }
+     ],
+     "shipment_stops": [
+      {
+       "id": 1,
+       "shipment_id": 1,
+       "sequence_no": 1,
+       "kind": "pickup",
+       "status": "arrived",
+       "address_json": "{\"city\": \"Rotterdam\"}",
+       "arrived_at": "2026-03-01"
+      },
+      {
+       "id": 2,
+       "shipment_id": 1,
+       "sequence_no": 2,
+       "kind": "delivery",
+       "status": "pending",
+       "address_json": "{\"city\": \"Utrecht\"}",
+       "arrived_at": null
+      },
+      {
+       "id": 3,
+       "shipment_id": 1,
+       "sequence_no": 3,
+       "kind": "delivery",
+       "status": "missed",
+       "address_json": "{\"city\": \"Arnhem\"}",
+       "arrived_at": null
+      },
+      {
+       "id": 4,
+       "shipment_id": 2,
+       "sequence_no": 1,
+       "kind": "pickup",
+       "status": "pending",
+       "address_json": "{\"city\": \"Antwerp\"}",
+       "arrived_at": null
+      },
+      {
+       "id": 5,
+       "shipment_id": 3,
+       "sequence_no": 1,
+       "kind": "delivery",
+       "status": "arrived",
+       "address_json": null,
+       "arrived_at": "2026-02-25"
+      }
+     ],
+     "carrier_invoices": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "invoice_number": "NRDX-2026-0041",
+       "shipment_id": 1,
+       "amount": 1250.0,
+       "currency": "eur",
+       "status": "received",
+       "received_on": "2026-03-01"
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "invoice_number": "NRDX-2026-0042",
+       "shipment_id": 2,
+       "amount": 24500.0,
+       "currency": "eur",
+       "status": "approved",
+       "received_on": "2026-03-02"
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "invoice_number": "MRLN-88",
+       "shipment_id": 3,
+       "amount": 9990.5,
+       "currency": "gbp",
+       "status": "paid",
+       "received_on": "2026-02-26"
+      },
+      {
+       "id": 4,
+       "carrier_id": 8,
+       "invoice_number": "MRLN-89",
+       "shipment_id": null,
+       "amount": 410.75,
+       "currency": "gbp",
+       "status": "received",
+       "received_on": "2026-02-27"
+      },
+      {
+       "id": 5,
+       "carrier_id": 9,
+       "invoice_number": "ATLS-0007",
+       "shipment_id": null,
+       "amount": 3300.0,
+       "currency": "usd",
+       "status": "disputed",
+       "received_on": "2026-01-14"
+      }
+     ],
+     "geofence_events": [
+      {
+       "id": 1,
+       "shipment_id": 1,
+       "vehicle_id": 1,
+       "event_kind": "depart",
+       "recorded_at": "2026-03-01"
+      },
+      {
+       "id": 2,
+       "shipment_id": 1,
+       "vehicle_id": 1,
+       "event_kind": "arrive",
+       "recorded_at": "2026-03-01"
+      }
+     ]
+    },
+    "queries": [
+     {
+      "id": "q_dispatch_create",
+      "service": "dispatch-api",
+      "criticality": "critical",
+      "label": "shipment creation",
+      "sql": "INSERT INTO shipments (carrier_id, reference, status, weight_kg, promised_at) VALUES (7,'SHP-77001','planned',1200,'2026..."
+     },
+     {
+      "id": "q_dispatch_board",
+      "service": "dispatch-api",
+      "criticality": "critical",
+      "label": "dispatch board",
+      "sql": "SELECT id, reference, status, promised_at FROM shipments WHERE status = 'in_transit'"
+     },
+     {
+      "id": "q_dispatch_stop_progress",
+      "service": "dispatch-api",
+      "criticality": "high",
+      "label": "mark a stop arrived",
+      "sql": "UPDATE shipment_stops SET status = 'arrived' WHERE id = 1"
+     },
+     {
+      "id": "q_portal_track",
+      "service": "customer-portal",
+      "criticality": "critical",
+      "label": "public tracking page",
+      "sql": "SELECT reference, status, promised_at, delivered_at FROM shipments WHERE reference = 'SHP-10001'"
+     },
+     {
+      "id": "q_ops_active",
+      "service": "ops-console",
+      "criticality": "high",
+      "label": "active shipment list",
+      "sql": "SELECT * FROM active_shipments"
+     },
+     {
+      "id": "q_ops_vehicles",
+      "service": "ops-console",
+      "criticality": "medium",
+      "label": "fleet panel",
+      "sql": "SELECT id, plate, capacity_kg, refrigerated FROM vehicles WHERE carrier_id = 7"
+     },
+     {
+      "id": "q_ops_carriers",
+      "service": "ops-console",
+      "criticality": "low",
+      "label": "carrier directory",
+      "sql": "SELECT code, legal_name, region FROM carriers WHERE active = 1"
+     },
+     {
+      "id": "q_driver_stop_list",
+      "service": "driver-app",
+      "criticality": "critical",
+      "label": "today's stop list",
+      "sql": "SELECT id, sequence_no, kind, status FROM shipment_stops WHERE shipment_id = 1 ORDER BY sequence_no"
+     },
+     "...+7 more"
+    ]
+   },
+   "ms": 4.37,
+   "result_summary": {
+    "materialised": true,
+    "schema_errors": [],
+    "data_errors": [],
+    "broken": [
+     {
+      "query_id": "q_driver_profile",
+      "service": "driver-app",
+      "criticality": "high",
+      "label": "driver profile in the app",
+      "error": "OperationalError: no such column: phone",
+      "sql": "SELECT id, full_name, phone, licence_class FROM drivers WHERE id = 1"
+     }
+    ],
+    "column_drift": [
+     {
+      "query_id": "q_etl_driver_roster",
+      "service": "bi-etl",
+      "criticality": "high",
+      "before": [
+       "id",
+       "carrier_id",
+       "full_name",
+       "phone",
+       "licence_class",
+       "employment_type",
+       "hired_on"
+      ],
+      "after": [
+       "id",
+       "carrier_id",
+       "full_name",
+       "licence_class",
+       "employment_type",
+       "hired_on",
+       "phone_e164"
+      ],
+      "removed": [
+       "phone"
+      ],
+      "added": [
+       "phone_e164"
+      ],
+      "sql": "SELECT * FROM driver_roster"
+     },
+     {
+      "query_id": "__view__driver_roster",
+      "service": "database",
+      "criticality": "high",
+      "before": [
+       "id",
+       "carrier_id",
+       "full_name",
+       "phone",
+       "licence_class",
+       "employment_type",
+       "hired_on"
+      ],
+      "after": [
+       "id",
+       "carrier_id",
+       "full_name",
+       "licence_class",
+       "employment_type",
+       "hired_on",
+       "phone_e164"
+      ],
+      "removed": [
+       "phone"
+      ],
+      "added": [
+       "phone_e164"
+      ],
+      "sql": "SELECT * FROM \"driver_roster\" LIMIT 1"
+     }
+    ],
+    "rowcount_drift": [],
+    "data_loss": [],
+    "queries_run": 17,
+    "queries_ok_before": 17,
+    "queries_ok_after": 16
+   }
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "BREAKING_QUERY",
+    "table": "q_driver_profile"
+   },
+   "ms": 0.01,
+   "result_summary": [
+    0,
+    []
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "INDEX_LOCK_NO_CONCURRENT",
+    "table": "geofence_events"
+   },
+   "ms": 0.01,
+   "result_summary": [
+    0,
+    [
+     "INC-2024-07"
+    ]
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "CONSTRAINT_VALIDATION_LOCK",
+    "table": "carrier_invoices"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    [
+     "INC-2024-11"
+    ]
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "CROSS_SERVICE_UNCOORDINATED",
+    "table": null
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    []
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+    "table": "drivers"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    [
+     "INC-2023-09"
+    ]
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+    "table": "shipments"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    [
+     "INC-2023-09"
+    ]
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "SELECT_STAR_DRIFT",
+    "table": "q_etl_driver_roster"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    [
+     "INC-2025-02"
+    ]
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "TABLE_REWRITE_LOCK",
+    "table": "shipments"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    []
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "UNBATCHED_BACKFILL",
+    "table": "shipment_stops"
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    []
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "memory.escalation",
+   "args": {
+    "hazard_code": "MISSING_ROLLBACK",
+    "table": null
+   },
+   "ms": 0.0,
+   "result_summary": [
+    0,
+    []
+   ]
+  },
+  {
+   "agent": "risk_officer",
+   "tool": "coverage.ledger",
+   "args": {
+    "ops": [
+     {
+      "kind": "rename_column",
+      "table": "drivers",
+      "column": "phone",
+      "detail": {
+       "new_name": "phone_e164"
+      },
+      "sql": "ALTER TABLE drivers RENAME COLUMN phone TO phone_e164",
+      "index": 0
+     },
+     {
+      "kind": "create_index",
+      "table": "geofence_events",
+      "column": null,
+      "detail": {
+       "name": "idx_geofence_events_shipment",
+       "unique": false,
+       "concurrently": false,
+       "columns": [
+        "shipment_id"
+       ]
+      },
+      "sql": "CREATE INDEX idx_geofence_events_shipment ON geofence_events (shipment_id)",
+      "index": 1
+     },
+     {
+      "kind": "drop_column",
+      "table": "shipments",
+      "column": "legacy_ref",
+      "detail": {},
+      "sql": "ALTER TABLE shipments DROP COLUMN legacy_ref",
+      "index": 2
+     },
+     {
+      "kind": "dml_update",
+      "table": "shipment_stops",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": false
+      },
+      "sql": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed'",
+      "index": 3
+     },
+     {
+      "kind": "add_constraint",
+      "table": "carrier_invoices",
+      "column": null,
+      "detail": {
+       "constraint": "carrier_invoices_shipment_fk",
+       "constraint_kind": "foreign_key",
+       "expr": "(shipment_id) REFERENCES shipments (id)",
+       "columns": [],
+       "not_valid": false
+      },
+      "sql": "ALTER TABLE carrier_invoices ADD CONSTRAINT carrier_invoices_shipment_fk FOREIGN KEY (shipment_id) REFERENCES shipments ...",
+      "index": 4
+     },
+     {
+      "kind": "maintenance_rewrite",
+      "table": "shipments",
+      "column": null,
+      "detail": {
+       "command": "VACUUM FULL"
+      },
+      "sql": "VACUUM FULL shipments",
+      "index": 5
+     }
+    ],
+    "schema": "Schema",
+    "queries": [
+     {
+      "id": "q_dispatch_create",
+      "service": "dispatch-api",
+      "criticality": "critical",
+      "label": "shipment creation",
+      "sql": "INSERT INTO shipments (carrier_id, reference, status, weight_kg, promised_at) VALUES (7,'SHP-77001','planned',1200,'2026..."
+     },
+     {
+      "id": "q_dispatch_board",
+      "service": "dispatch-api",
+      "criticality": "critical",
+      "label": "dispatch board",
+      "sql": "SELECT id, reference, status, promised_at FROM shipments WHERE status = 'in_transit'"
+     },
+     {
+      "id": "q_dispatch_stop_progress",
+      "service": "dispatch-api",
+      "criticality": "high",
+      "label": "mark a stop arrived",
+      "sql": "UPDATE shipment_stops SET status = 'arrived' WHERE id = 1"
+     },
+     {
+      "id": "q_portal_track",
+      "service": "customer-portal",
+      "criticality": "critical",
+      "label": "public tracking page",
+      "sql": "SELECT reference, status, promised_at, delivered_at FROM shipments WHERE reference = 'SHP-10001'"
+     },
+     {
+      "id": "q_ops_active",
+      "service": "ops-console",
+      "criticality": "high",
+      "label": "active shipment list",
+      "sql": "SELECT * FROM active_shipments"
+     },
+     {
+      "id": "q_ops_vehicles",
+      "service": "ops-console",
+      "criticality": "medium",
+      "label": "fleet panel",
+      "sql": "SELECT id, plate, capacity_kg, refrigerated FROM vehicles WHERE carrier_id = 7"
+     },
+     {
+      "id": "q_ops_carriers",
+      "service": "ops-console",
+      "criticality": "low",
+      "label": "carrier directory",
+      "sql": "SELECT code, legal_name, region FROM carriers WHERE active = 1"
+     },
+     {
+      "id": "q_driver_stop_list",
+      "service": "driver-app",
+      "criticality": "critical",
+      "label": "today's stop list",
+      "sql": "SELECT id, sequence_no, kind, status FROM shipment_stops WHERE shipment_id = 1 ORDER BY sequence_no"
+     },
+     "...+7 more"
+    ],
+    "unmodelled_notes": [
+     "op 5 (maintenance_rewrite) not modelled structurally: VACUUM FULL shipments"
+    ],
+    "seed": {
+     "carriers": [
+      {
+       "id": 7,
+       "code": "NRDX",
+       "legal_name": "Nordex Freight BV",
+       "region": "emea",
+       "active": 1,
+       "onboarded_at": "2022-04-11"
+      },
+      {
+       "id": 8,
+       "code": "MRLN",
+       "legal_name": "Merlin Road Ltd",
+       "region": "emea",
+       "active": 1,
+       "onboarded_at": "2023-08-02"
+      },
+      {
+       "id": 9,
+       "code": "ATLS",
+       "legal_name": "Atlas Logistica SA",
+       "region": "latam",
+       "active": 0,
+       "onboarded_at": "2021-01-19"
+      }
+     ],
+     "vehicles": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "plate": "NL-14-BXR",
+       "capacity_kg": 18000,
+       "refrigerated": 1,
+       "last_service_on": "2026-01-08"
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "plate": "NL-22-QQT",
+       "capacity_kg": 7500,
+       "refrigerated": 0,
+       "last_service_on": "2025-11-30"
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "plate": "DE-91-KLM",
+       "capacity_kg": 24000,
+       "refrigerated": 0,
+       "last_service_on": null
+      }
+     ],
+     "drivers": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "full_name": "Ines Duarte",
+       "phone": "+31201234567",
+       "licence_class": "CE",
+       "employment_type": "employee",
+       "hired_on": "2021-06-01"
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "full_name": "Tomas Bauer",
+       "phone": "+4930123456",
+       "licence_class": "C",
+       "employment_type": "contract",
+       "hired_on": "2024-02-17"
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "full_name": "Aiko Tanaka",
+       "phone": "+819012345678",
+       "licence_class": "CE",
+       "employment_type": "agency",
+       "hired_on": "2023-09-05"
+      },
+      {
+       "id": 4,
+       "carrier_id": 9,
+       "full_name": "Rafael Souza",
+       "phone": "+5511998877665",
+       "licence_class": "C",
+       "employment_type": "contract",
+       "hired_on": "2020-03-23"
+      }
+     ],
+     "shipments": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "vehicle_id": 1,
+       "parent_shipment_id": null,
+       "reference": "SHP-10001",
+       "legacy_ref": "OLD-4471",
+       "status": "in_transit",
+       "weight_kg": 8200,
+       "promised_at": "2026-03-02",
+       "delivered_at": null
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "vehicle_id": 2,
+       "parent_shipment_id": 1,
+       "reference": "SHP-10002",
+       "legacy_ref": null,
+       "status": "planned",
+       "weight_kg": 1400,
+       "promised_at": "2026-03-03",
+       "delivered_at": null
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "vehicle_id": 3,
+       "parent_shipment_id": null,
+       "reference": "SHP-10003",
+       "legacy_ref": "OLD-4480",
+       "status": "delivered",
+       "weight_kg": 19750,
+       "promised_at": "2026-02-25",
+       "delivered_at": "2026-02-25"
+      },
+      {
+       "id": 4,
+       "carrier_id": 9,
+       "vehicle_id": null,
+       "parent_shipment_id": null,
+       "reference": "SHP-10004",
+       "legacy_ref": null,
+       "status": "cancelled",
+       "weight_kg": 0,
+       "promised_at": "2026-02-20",
+       "delivered_at": null
+      }
+     ],
+     "shipment_stops": [
+      {
+       "id": 1,
+       "shipment_id": 1,
+       "sequence_no": 1,
+       "kind": "pickup",
+       "status": "arrived",
+       "address_json": "{\"city\": \"Rotterdam\"}",
+       "arrived_at": "2026-03-01"
+      },
+      {
+       "id": 2,
+       "shipment_id": 1,
+       "sequence_no": 2,
+       "kind": "delivery",
+       "status": "pending",
+       "address_json": "{\"city\": \"Utrecht\"}",
+       "arrived_at": null
+      },
+      {
+       "id": 3,
+       "shipment_id": 1,
+       "sequence_no": 3,
+       "kind": "delivery",
+       "status": "missed",
+       "address_json": "{\"city\": \"Arnhem\"}",
+       "arrived_at": null
+      },
+      {
+       "id": 4,
+       "shipment_id": 2,
+       "sequence_no": 1,
+       "kind": "pickup",
+       "status": "pending",
+       "address_json": "{\"city\": \"Antwerp\"}",
+       "arrived_at": null
+      },
+      {
+       "id": 5,
+       "shipment_id": 3,
+       "sequence_no": 1,
+       "kind": "delivery",
+       "status": "arrived",
+       "address_json": null,
+       "arrived_at": "2026-02-25"
+      }
+     ],
+     "carrier_invoices": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "invoice_number": "NRDX-2026-0041",
+       "shipment_id": 1,
+       "amount": 1250.0,
+       "currency": "eur",
+       "status": "received",
+       "received_on": "2026-03-01"
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "invoice_number": "NRDX-2026-0042",
+       "shipment_id": 2,
+       "amount": 24500.0,
+       "currency": "eur",
+       "status": "approved",
+       "received_on": "2026-03-02"
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "invoice_number": "MRLN-88",
+       "shipment_id": 3,
+       "amount": 9990.5,
+       "currency": "gbp",
+       "status": "paid",
+       "received_on": "2026-02-26"
+      },
+      {
+       "id": 4,
+       "carrier_id": 8,
+       "invoice_number": "MRLN-89",
+       "shipment_id": null,
+       "amount": 410.75,
+       "currency": "gbp",
+       "status": "received",
+       "received_on": "2026-02-27"
+      },
+      {
+       "id": 5,
+       "carrier_id": 9,
+       "invoice_number": "ATLS-0007",
+       "shipment_id": null,
+       "amount": 3300.0,
+       "currency": "usd",
+       "status": "disputed",
+       "received_on": "2026-01-14"
+      }
+     ],
+     "geofence_events": [
+      {
+       "id": 1,
+       "shipment_id": 1,
+       "vehicle_id": 1,
+       "event_kind": "depart",
+       "recorded_at": "2026-03-01"
+      },
+      {
+       "id": 2,
+       "shipment_id": 1,
+       "vehicle_id": 1,
+       "event_kind": "arrive",
+       "recorded_at": "2026-03-01"
+      }
+     ]
+    }
+   },
+   "ms": 0.24,
+   "result_summary": {
+    "gaps": [
+     {
+      "kind": "uncovered_object",
+      "object": "shipments.legacy_ref",
+      "object_inferred": false,
+      "statement_index": 2,
+      "statement": "ALTER TABLE shipments DROP COLUMN legacy_ref",
+      "why": "no statement in the 15-statement corpus references legacy_ref, so replay had nothing to run against it; that is silence,...",
+      "closes_with": "a reviewer greps the real consumers for legacy_ref before phase 2",
+      "irreversible": false
+     },
+     {
+      "kind": "in_place_data_mutation",
+      "object": "shipment_stops.status",
+      "object_inferred": false,
+      "statement_index": 3,
+      "statement": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed'",
+      "why": "rows that already exist in shipment_stops are rewritten; replay proves the corpus still executes, never that it still re...",
+      "closes_with": "a reviewer confirms which consumers of shipment_stops.status depend on the current values",
+      "irreversible": false
+     },
+     {
+      "kind": "unmodelled_statement",
+      "object": "shipments",
+      "object_inferred": false,
+      "statement_index": 5,
+      "statement": "VACUUM FULL shipments",
+      "why": "the parser produced no structural model for this statement, so no post-migration schema and no replay covers it",
+      "closes_with": "a reviewer confirms by hand what statement 5 does to shipments and to anything reading it",
+      "irreversible": false
+     }
+    ],
+    "gap_kinds": [
+     "in_place_data_mutation",
+     "uncovered_object",
+     "unmodelled_statement"
+    ],
+    "irreversible": [],
+    "corpus_statements": 15,
+    "parser_notes": [
+     "op 5 (maintenance_rewrite) not modelled structurally: VACUUM FULL shipments"
+    ]
+   }
+  },
+  {
+   "agent": "verifier",
+   "tool": "migration.parse",
+   "args": {
+    "sql": "ALTER TABLE \"drivers\" ADD COLUMN \"phone_e164\" TEXT;\nUPDATE \"drivers\" SET \"phone_e164\" = \"phone\" WHERE \"phone_e164\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"drivers\" WHERE \"phone_e164\" IS NULL LIMIT 5000);\nCREATE INDEX CONCURRENTLY \"idx_geofence_events_shipment\" ON \"geofence_events\" (\"shipment_id\");\nUPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed' AND \"id\" IN (SELECT \"id\" FROM \"sh..."
+   },
+   "ms": 0.21,
+   "result_summary": [
+    {
+     "kind": "add_column",
+     "table": "drivers",
+     "column": "phone_e164",
+     "detail": {
+      "type": "TEXT",
+      "not_null": false,
+      "default": null,
+      "unique": false
+     },
+     "sql": "ALTER TABLE \"drivers\" ADD COLUMN \"phone_e164\" TEXT",
+     "index": 0
+    },
+    {
+     "kind": "dml_update",
+     "table": "drivers",
+     "column": null,
+     "detail": {
+      "where": true,
+      "batched": true
+     },
+     "sql": "UPDATE \"drivers\" SET \"phone_e164\" = \"phone\" WHERE \"phone_e164\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"drivers\" WHERE \"ph...",
+     "index": 1
+    },
+    {
+     "kind": "create_index",
+     "table": "geofence_events",
+     "column": null,
+     "detail": {
+      "name": "idx_geofence_events_shipment",
+      "unique": false,
+      "concurrently": true,
+      "columns": [
+       "shipment_id"
+      ]
+     },
+     "sql": "CREATE INDEX CONCURRENTLY \"idx_geofence_events_shipment\" ON \"geofence_events\" (\"shipment_id\")",
+     "index": 2
+    },
+    {
+     "kind": "dml_update",
+     "table": "shipment_stops",
+     "column": null,
+     "detail": {
+      "where": true,
+      "batched": true
+     },
+     "sql": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed' AND \"id\" IN (SELECT \"id\" FROM \"shipment_stops\" WHER...",
+     "index": 3
+    },
+    {
+     "kind": "add_constraint",
+     "table": "carrier_invoices",
+     "column": null,
+     "detail": {
+      "constraint": "carrier_invoices_shipment_fk",
+      "constraint_kind": "foreign_key",
+      "expr": "(shipment_id) REFERENCES shipments (id)",
+      "columns": [],
+      "not_valid": true
+     },
+     "sql": "ALTER TABLE \"carrier_invoices\" ADD CONSTRAINT \"carrier_invoices_shipment_fk\" FOREIGN KEY (shipment_id) REFERENCES shipme...",
+     "index": 4
+    }
+   ]
+  },
+  {
+   "agent": "verifier",
+   "tool": "schema.apply_ops",
+   "args": {
+    "schema": "Schema",
+    "ops": [
+     {
+      "kind": "add_column",
+      "table": "drivers",
+      "column": "phone_e164",
+      "detail": {
+       "type": "TEXT",
+       "not_null": false,
+       "default": null,
+       "unique": false
+      },
+      "sql": "ALTER TABLE \"drivers\" ADD COLUMN \"phone_e164\" TEXT",
+      "index": 0
+     },
+     {
+      "kind": "dml_update",
+      "table": "drivers",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": true
+      },
+      "sql": "UPDATE \"drivers\" SET \"phone_e164\" = \"phone\" WHERE \"phone_e164\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"drivers\" WHERE \"ph...",
+      "index": 1
+     },
+     {
+      "kind": "create_index",
+      "table": "geofence_events",
+      "column": null,
+      "detail": {
+       "name": "idx_geofence_events_shipment",
+       "unique": false,
+       "concurrently": true,
+       "columns": [
+        "shipment_id"
+       ]
+      },
+      "sql": "CREATE INDEX CONCURRENTLY \"idx_geofence_events_shipment\" ON \"geofence_events\" (\"shipment_id\")",
+      "index": 2
+     },
+     {
+      "kind": "dml_update",
+      "table": "shipment_stops",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": true
+      },
+      "sql": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed' AND \"id\" IN (SELECT \"id\" FROM \"shipment_stops\" WHER...",
+      "index": 3
+     },
+     {
+      "kind": "add_constraint",
+      "table": "carrier_invoices",
+      "column": null,
+      "detail": {
+       "constraint": "carrier_invoices_shipment_fk",
+       "constraint_kind": "foreign_key",
+       "expr": "(shipment_id) REFERENCES shipments (id)",
+       "columns": [],
+       "not_valid": true
+      },
+      "sql": "ALTER TABLE \"carrier_invoices\" ADD CONSTRAINT \"carrier_invoices_shipment_fk\" FOREIGN KEY (shipment_id) REFERENCES shipme...",
+      "index": 4
+     }
+    ]
+   },
+   "ms": 0.17,
+   "result_summary": [
+    "Schema",
+    []
+   ]
+  },
+  {
+   "agent": "verifier",
+   "tool": "shadow.replay",
+   "args": {
+    "pre_schema": "Schema",
+    "post_schema": "Schema",
+    "ops": [
+     {
+      "kind": "add_column",
+      "table": "drivers",
+      "column": "phone_e164",
+      "detail": {
+       "type": "TEXT",
+       "not_null": false,
+       "default": null,
+       "unique": false
+      },
+      "sql": "ALTER TABLE \"drivers\" ADD COLUMN \"phone_e164\" TEXT",
+      "index": 0
+     },
+     {
+      "kind": "dml_update",
+      "table": "drivers",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": true
+      },
+      "sql": "UPDATE \"drivers\" SET \"phone_e164\" = \"phone\" WHERE \"phone_e164\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"drivers\" WHERE \"ph...",
+      "index": 1
+     },
+     {
+      "kind": "create_index",
+      "table": "geofence_events",
+      "column": null,
+      "detail": {
+       "name": "idx_geofence_events_shipment",
+       "unique": false,
+       "concurrently": true,
+       "columns": [
+        "shipment_id"
+       ]
+      },
+      "sql": "CREATE INDEX CONCURRENTLY \"idx_geofence_events_shipment\" ON \"geofence_events\" (\"shipment_id\")",
+      "index": 2
+     },
+     {
+      "kind": "dml_update",
+      "table": "shipment_stops",
+      "column": null,
+      "detail": {
+       "where": true,
+       "batched": true
+      },
+      "sql": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed' AND \"id\" IN (SELECT \"id\" FROM \"shipment_stops\" WHER...",
+      "index": 3
+     },
+     {
+      "kind": "add_constraint",
+      "table": "carrier_invoices",
+      "column": null,
+      "detail": {
+       "constraint": "carrier_invoices_shipment_fk",
+       "constraint_kind": "foreign_key",
+       "expr": "(shipment_id) REFERENCES shipments (id)",
+       "columns": [],
+       "not_valid": true
+      },
+      "sql": "ALTER TABLE \"carrier_invoices\" ADD CONSTRAINT \"carrier_invoices_shipment_fk\" FOREIGN KEY (shipment_id) REFERENCES shipme...",
+      "index": 4
+     }
+    ],
+    "seed": {
+     "carriers": [
+      {
+       "id": 7,
+       "code": "NRDX",
+       "legal_name": "Nordex Freight BV",
+       "region": "emea",
+       "active": 1,
+       "onboarded_at": "2022-04-11"
+      },
+      {
+       "id": 8,
+       "code": "MRLN",
+       "legal_name": "Merlin Road Ltd",
+       "region": "emea",
+       "active": 1,
+       "onboarded_at": "2023-08-02"
+      },
+      {
+       "id": 9,
+       "code": "ATLS",
+       "legal_name": "Atlas Logistica SA",
+       "region": "latam",
+       "active": 0,
+       "onboarded_at": "2021-01-19"
+      }
+     ],
+     "vehicles": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "plate": "NL-14-BXR",
+       "capacity_kg": 18000,
+       "refrigerated": 1,
+       "last_service_on": "2026-01-08"
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "plate": "NL-22-QQT",
+       "capacity_kg": 7500,
+       "refrigerated": 0,
+       "last_service_on": "2025-11-30"
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "plate": "DE-91-KLM",
+       "capacity_kg": 24000,
+       "refrigerated": 0,
+       "last_service_on": null
+      }
+     ],
+     "drivers": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "full_name": "Ines Duarte",
+       "phone": "+31201234567",
+       "licence_class": "CE",
+       "employment_type": "employee",
+       "hired_on": "2021-06-01"
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "full_name": "Tomas Bauer",
+       "phone": "+4930123456",
+       "licence_class": "C",
+       "employment_type": "contract",
+       "hired_on": "2024-02-17"
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "full_name": "Aiko Tanaka",
+       "phone": "+819012345678",
+       "licence_class": "CE",
+       "employment_type": "agency",
+       "hired_on": "2023-09-05"
+      },
+      {
+       "id": 4,
+       "carrier_id": 9,
+       "full_name": "Rafael Souza",
+       "phone": "+5511998877665",
+       "licence_class": "C",
+       "employment_type": "contract",
+       "hired_on": "2020-03-23"
+      }
+     ],
+     "shipments": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "vehicle_id": 1,
+       "parent_shipment_id": null,
+       "reference": "SHP-10001",
+       "legacy_ref": "OLD-4471",
+       "status": "in_transit",
+       "weight_kg": 8200,
+       "promised_at": "2026-03-02",
+       "delivered_at": null
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "vehicle_id": 2,
+       "parent_shipment_id": 1,
+       "reference": "SHP-10002",
+       "legacy_ref": null,
+       "status": "planned",
+       "weight_kg": 1400,
+       "promised_at": "2026-03-03",
+       "delivered_at": null
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "vehicle_id": 3,
+       "parent_shipment_id": null,
+       "reference": "SHP-10003",
+       "legacy_ref": "OLD-4480",
+       "status": "delivered",
+       "weight_kg": 19750,
+       "promised_at": "2026-02-25",
+       "delivered_at": "2026-02-25"
+      },
+      {
+       "id": 4,
+       "carrier_id": 9,
+       "vehicle_id": null,
+       "parent_shipment_id": null,
+       "reference": "SHP-10004",
+       "legacy_ref": null,
+       "status": "cancelled",
+       "weight_kg": 0,
+       "promised_at": "2026-02-20",
+       "delivered_at": null
+      }
+     ],
+     "shipment_stops": [
+      {
+       "id": 1,
+       "shipment_id": 1,
+       "sequence_no": 1,
+       "kind": "pickup",
+       "status": "arrived",
+       "address_json": "{\"city\": \"Rotterdam\"}",
+       "arrived_at": "2026-03-01"
+      },
+      {
+       "id": 2,
+       "shipment_id": 1,
+       "sequence_no": 2,
+       "kind": "delivery",
+       "status": "pending",
+       "address_json": "{\"city\": \"Utrecht\"}",
+       "arrived_at": null
+      },
+      {
+       "id": 3,
+       "shipment_id": 1,
+       "sequence_no": 3,
+       "kind": "delivery",
+       "status": "missed",
+       "address_json": "{\"city\": \"Arnhem\"}",
+       "arrived_at": null
+      },
+      {
+       "id": 4,
+       "shipment_id": 2,
+       "sequence_no": 1,
+       "kind": "pickup",
+       "status": "pending",
+       "address_json": "{\"city\": \"Antwerp\"}",
+       "arrived_at": null
+      },
+      {
+       "id": 5,
+       "shipment_id": 3,
+       "sequence_no": 1,
+       "kind": "delivery",
+       "status": "arrived",
+       "address_json": null,
+       "arrived_at": "2026-02-25"
+      }
+     ],
+     "carrier_invoices": [
+      {
+       "id": 1,
+       "carrier_id": 7,
+       "invoice_number": "NRDX-2026-0041",
+       "shipment_id": 1,
+       "amount": 1250.0,
+       "currency": "eur",
+       "status": "received",
+       "received_on": "2026-03-01"
+      },
+      {
+       "id": 2,
+       "carrier_id": 7,
+       "invoice_number": "NRDX-2026-0042",
+       "shipment_id": 2,
+       "amount": 24500.0,
+       "currency": "eur",
+       "status": "approved",
+       "received_on": "2026-03-02"
+      },
+      {
+       "id": 3,
+       "carrier_id": 8,
+       "invoice_number": "MRLN-88",
+       "shipment_id": 3,
+       "amount": 9990.5,
+       "currency": "gbp",
+       "status": "paid",
+       "received_on": "2026-02-26"
+      },
+      {
+       "id": 4,
+       "carrier_id": 8,
+       "invoice_number": "MRLN-89",
+       "shipment_id": null,
+       "amount": 410.75,
+       "currency": "gbp",
+       "status": "received",
+       "received_on": "2026-02-27"
+      },
+      {
+       "id": 5,
+       "carrier_id": 9,
+       "invoice_number": "ATLS-0007",
+       "shipment_id": null,
+       "amount": 3300.0,
+       "currency": "usd",
+       "status": "disputed",
+       "received_on": "2026-01-14"
+      }
+     ],
+     "geofence_events": [
+      {
+       "id": 1,
+       "shipment_id": 1,
+       "vehicle_id": 1,
+       "event_kind": "depart",
+       "recorded_at": "2026-03-01"
+      },
+      {
+       "id": 2,
+       "shipment_id": 1,
+       "vehicle_id": 1,
+       "event_kind": "arrive",
+       "recorded_at": "2026-03-01"
+      }
+     ]
+    },
+    "queries": [
+     {
+      "id": "q_dispatch_create",
+      "service": "dispatch-api",
+      "criticality": "critical",
+      "label": "shipment creation",
+      "sql": "INSERT INTO shipments (carrier_id, reference, status, weight_kg, promised_at) VALUES (7,'SHP-77001','planned',1200,'2026..."
+     },
+     {
+      "id": "q_dispatch_board",
+      "service": "dispatch-api",
+      "criticality": "critical",
+      "label": "dispatch board",
+      "sql": "SELECT id, reference, status, promised_at FROM shipments WHERE status = 'in_transit'"
+     },
+     {
+      "id": "q_dispatch_stop_progress",
+      "service": "dispatch-api",
+      "criticality": "high",
+      "label": "mark a stop arrived",
+      "sql": "UPDATE shipment_stops SET status = 'arrived' WHERE id = 1"
+     },
+     {
+      "id": "q_portal_track",
+      "service": "customer-portal",
+      "criticality": "critical",
+      "label": "public tracking page",
+      "sql": "SELECT reference, status, promised_at, delivered_at FROM shipments WHERE reference = 'SHP-10001'"
+     },
+     {
+      "id": "q_ops_active",
+      "service": "ops-console",
+      "criticality": "high",
+      "label": "active shipment list",
+      "sql": "SELECT * FROM active_shipments"
+     },
+     {
+      "id": "q_ops_vehicles",
+      "service": "ops-console",
+      "criticality": "medium",
+      "label": "fleet panel",
+      "sql": "SELECT id, plate, capacity_kg, refrigerated FROM vehicles WHERE carrier_id = 7"
+     },
+     {
+      "id": "q_ops_carriers",
+      "service": "ops-console",
+      "criticality": "low",
+      "label": "carrier directory",
+      "sql": "SELECT code, legal_name, region FROM carriers WHERE active = 1"
+     },
+     {
+      "id": "q_driver_stop_list",
+      "service": "driver-app",
+      "criticality": "critical",
+      "label": "today's stop list",
+      "sql": "SELECT id, sequence_no, kind, status FROM shipment_stops WHERE shipment_id = 1 ORDER BY sequence_no"
+     },
+     "...+7 more"
+    ]
+   },
+   "ms": 4.21,
+   "result_summary": {
+    "materialised": true,
+    "schema_errors": [],
+    "data_errors": [],
+    "broken": [],
+    "column_drift": [
+     {
+      "query_id": "q_etl_driver_roster",
+      "service": "bi-etl",
+      "criticality": "high",
+      "before": [
+       "id",
+       "carrier_id",
+       "full_name",
+       "phone",
+       "licence_class",
+       "employment_type",
+       "hired_on"
+      ],
+      "after": [
+       "id",
+       "carrier_id",
+       "full_name",
+       "phone",
+       "licence_class",
+       "employment_type",
+       "hired_on",
+       "phone_e164"
+      ],
+      "removed": [],
+      "added": [
+       "phone_e164"
+      ],
+      "sql": "SELECT * FROM driver_roster"
+     },
+     {
+      "query_id": "__view__driver_roster",
+      "service": "database",
+      "criticality": "high",
+      "before": [
+       "id",
+       "carrier_id",
+       "full_name",
+       "phone",
+       "licence_class",
+       "employment_type",
+       "hired_on"
+      ],
+      "after": [
+       "id",
+       "carrier_id",
+       "full_name",
+       "phone",
+       "licence_class",
+       "employment_type",
+       "hired_on",
+       "phone_e164"
+      ],
+      "removed": [],
+      "added": [
+       "phone_e164"
+      ],
+      "sql": "SELECT * FROM \"driver_roster\" LIMIT 1"
+     }
+    ],
+    "rowcount_drift": [],
+    "data_loss": [],
+    "queries_run": 17,
+    "queries_ok_before": 17,
+    "queries_ok_after": 17
+   }
+  }
+ ],
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 12,
+  "tokens_in": 5046,
+  "tokens_out": 792,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 12.9,
+ "severity_order": [
+  "low",
+  "medium",
+  "high",
+  "blocker"
+ ]
+}

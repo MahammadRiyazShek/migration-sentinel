@@ -44,6 +44,16 @@ TIME_MODEL = {
 
 APPROVE_VERDICTS = {"APPROVE", "SAFE"}
 
+# v6, added AFTER the held-out first-contact run and applied to every arm and both
+# sets, because that run exposed a hole in the metric above rather than in the
+# pipeline. `unsafe_approvals` counts APPROVE and SAFE. On holdout_07 the packet
+# printed "Shippable, but only as the staged plan below" over a migration that
+# rejects production rows mid-flight, and scored zero unsafe approvals - which is
+# true, and useless to the reviewer who shipped it. A blocking migration under any
+# verdict that reads as "you may proceed on what is written here" is the thing worth
+# counting, so it is counted, and the number it produced on first contact (1/9) is
+# published next to the fix that took it to 0/9.
+
 # Verdicts that read as "you may proceed on what is written here". A packet that
 # declares a blind spot on an affected object and still lands in this set is the
 # v1 failure mode: the badge contradicts the appendix, and reviewers read badges.
@@ -88,6 +98,7 @@ def score_case(case: dict[str, Any], result: dict[str, Any],
 
     approved = result["verdict"] in APPROVE_VERDICTS
     unsafe_approval = bool(approved and gt["blocking"])
+    clean_on_blocking = bool(gt["blocking"] and result["verdict"] in CLEAN_VERDICTS)
     false_alarm = bool(not gt["blocking"] and not gt_codes and pred_codes)
 
     evidenced = sum(1 for h in result["hazards"] if h.get("evidence"))
@@ -117,6 +128,7 @@ def score_case(case: dict[str, Any], result: dict[str, Any],
         "fam_fn": sorted(gt_fam - pred_fam),
         "severity_matches": sev_matches,
         "unsafe_approval": unsafe_approval, "false_alarm_on_clean_case": false_alarm,
+        "clean_verdict_on_blocking_case": clean_on_blocking,
         "findings": len(result["hazards"]), "evidenced_findings": evidenced,
         "plan_verified": plan_verified, "human_gates": gates,
         "modelled_reviewer_minutes": minutes,
@@ -139,6 +151,9 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "cases": len(rows),
         "unsafe_approvals": sum(r["unsafe_approval"] for r in rows),
+        "blocking_cases": sum(bool(r["gt_blocking"]) for r in rows),
+        "clean_verdicts_on_blocking_cases": sum(
+            bool(r.get("clean_verdict_on_blocking_case")) for r in rows),
         "false_alarms_on_clean_cases": sum(r["false_alarm_on_clean_case"] for r in rows),
         "strict": {**prf(tp, fp, fn), "tp": tp, "fp": fp, "fn": fn},
         "lenient_family": {**prf(ftp, ffp, ffn), "tp": ftp, "fp": ffp, "fn": ffn},

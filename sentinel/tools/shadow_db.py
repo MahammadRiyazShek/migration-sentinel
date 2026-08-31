@@ -41,6 +41,57 @@ def _len_arg(t: str) -> int | None:
     return None
 
 
+def is_narrowing(old_type: str, new_type: str) -> bool:
+    """Whether `old_type -> new_type` can refuse or truncate a value that fits today.
+
+    Public because the coverage ledger needs the same answer this module uses: v6
+    found, on the held-out set, that a narrowing whose offenders happen to be absent
+    from the fixture was reported as a low-severity note with no blind spot declared.
+    Two callers, one definition.
+    """
+    if (_root(old_type), _root(new_type)) in NARROWING:
+        return True
+    new_len, old_len = _len_arg(new_type), _len_arg(old_type)
+    return new_len is not None and (old_len is None or new_len < old_len)
+
+
+def _numeric_limit(new_type: str) -> float | None:
+    """For numeric(p,s), the first magnitude the target type cannot hold.
+
+    v6, from the held-out set: `numeric(12,2) -> numeric(8,2)` was scanned as if the
+    only thing precision could do was truncate a string. It cannot hold 1,000,000.00,
+    and the migration errors on the row rather than rounding it.
+    """
+    if _root(new_type) not in ("numeric", "decimal"):
+        return None
+    args = new_type[new_type.index("(") + 1:new_type.rindex(")")].split(",") \
+        if "(" in new_type and ")" in new_type else []
+    digits = [a.strip() for a in args if a.strip().isdigit()]
+    if not digits:
+        return None
+    precision = int(digits[0])
+    scale = int(digits[1]) if len(digits) > 1 else 0
+    return float(10 ** max(0, precision - scale))
+
+
+def offending_values(values: list[Any], new_type: str) -> list[Any]:
+    """Values that would not survive a change to `new_type`, from the rows supplied."""
+    new_len = _len_arg(new_type)
+    limit = _numeric_limit(new_type)
+    out = []
+    for val in values:
+        if val is None:
+            continue
+        if limit is not None and isinstance(val, (int, float)) and abs(float(val)) >= limit:
+            out.append(val)
+        elif limit is None and new_len is not None and isinstance(val, str) and len(val) > new_len:
+            out.append(val)
+        elif _root(new_type) in ("integer", "int", "bigint", "smallint") \
+                and isinstance(val, (int, float)) and float(val) != int(float(val)):
+            out.append(val)
+    return out
+
+
 def ddl_for(schema: Schema) -> list[str]:
     stmts: list[str] = []
     for table in schema.tables.values():
@@ -226,23 +277,10 @@ def _data_loss(pre: sqlite3.Connection, pre_schema: Schema, ops: list[Op]) -> li
         if not table or op.column not in table.columns:
             continue
         old, new = table.columns[op.column].type, op.detail["new_type"]
-        pair = (_root(old), _root(new))
-        narrowing = pair in NARROWING
-        new_len, old_len = _len_arg(new), _len_arg(old)
-        if new_len is not None and (old_len is None or new_len < old_len):
-            narrowing = True
-        if not narrowing:
+        if not is_narrowing(old, new):
             continue
-        offenders = []
         rows = pre.execute(f'SELECT "{op.column}" FROM "{op.table}"').fetchall()
-        for (val,) in rows:
-            if val is None:
-                continue
-            if new_len is not None and isinstance(val, str) and len(val) > new_len:
-                offenders.append(val)
-            elif _root(new) in ("integer", "int", "bigint", "smallint") and isinstance(val, (int, float)):
-                if float(val) != int(float(val)):
-                    offenders.append(val)
+        offenders = offending_values([r[0] for r in rows], new)
         findings.append({
             "table": op.table, "column": op.column, "from": old, "to": new,
             "rows_checked": len(rows), "offending_samples": offenders[:5],

@@ -114,7 +114,14 @@ def check_single_entry_point(_files):
 
 
 def check_paste_ready_description(_files):
-    """The submission form caps the description at 10,000 characters."""
+    """The submission form caps the description at 9,000 characters, and says so on the field.
+
+    v9: this check asserted 10,000 for two releases, and the markdown copy below the marker was
+    9,744 - so a green check sat over a description the form would have truncated. The cap is
+    read off the form now, and the two copies of the text are asserted identical instead of
+    merely both existing: a markdown variant that cannot be pasted into a plain-text field is a
+    second source of truth with no reader.
+    """
     path = ROOT / "SUBMISSION_DESCRIPTION.md"
     if not path.exists():
         return ["SUBMISSION_DESCRIPTION.md is referenced by docs/SUPERVISOR_LOG_V6.md but absent"]
@@ -123,9 +130,21 @@ def check_paste_ready_description(_files):
     if marker not in body:
         return [f"SUBMISSION_DESCRIPTION.md has no {marker} marker, so its length is not auditable"]
     paste = body.split(marker, 1)[1].strip()
-    if len(paste) > 10000:
-        return [f"paste-ready description is {len(paste)} characters, over the form's 10,000 limit"]
-    print(f"        paste-ready description: {len(paste)} of 10,000 characters")
+    problems = []
+    if len(paste) > 9000:
+        problems.append(f"paste-ready description is {len(paste)} characters, over the form's "
+                        f"9,000 limit by {len(paste) - 9000}")
+    form = ROOT / "SUBMISSION_FORM_TEXT.txt"
+    if not form.exists():
+        problems.append("SUBMISSION_FORM_TEXT.txt is absent, so the text actually pasted into the "
+                        "form is not committed")
+    elif form.read_text(encoding="utf-8").strip() != paste:
+        problems.append("SUBMISSION_DESCRIPTION.md and SUBMISSION_FORM_TEXT.txt disagree below the "
+                        "marker: two copies of the one artefact that lives outside the repository")
+    if problems:
+        return problems
+    print(f"        paste-ready description: {len(paste)} of 9,000 characters, byte-identical to "
+          f"SUBMISSION_FORM_TEXT.txt")
     return []
 
 

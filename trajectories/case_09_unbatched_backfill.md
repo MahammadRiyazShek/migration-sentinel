@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.67 ms)
+**tool** `schema.parse` (0.62 ms)
 
 ```json
 {
@@ -270,7 +270,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.02 ms)
+**tool** `corpus.blast_score` (0.04 ms)
 
 ```json
 {
@@ -338,7 +338,7 @@ _tool responded_
 16
 ```
 
-**tool** `shadow.replay` (2.69 ms)
+**tool** `shadow.replay` (2.66 ms)
 
 ```json
 {
@@ -460,7 +460,7 @@ _tool responded_
 
 </details>
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -500,7 +500,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.16 ms)
+**tool** `coverage.ledger` (0.19 ms)
 
 ```json
 {
@@ -561,6 +561,7 @@ _tool responded_
   {
    "kind": "value_class_erased",
    "object": "invoices.currency",
+   "object_inferred": false,
    "statement_index": 0,
    "statement": "UPDATE invoices SET currency = 'usd' WHERE currency IS NULL",
    "why": "the backfill removes every NULL from invoices.currency and the following SET NOT NULL makes NULL unreachable; any consum...",
@@ -738,7 +739,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.69 ms)
+**tool** `shadow.replay` (2.62 ms)
 
 ```json
 {

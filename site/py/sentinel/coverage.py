@@ -42,17 +42,41 @@ the evaluation set:
     references it.  Zero failures is then a statement about the corpus, not
     about the column.
 
+`fixture_bounded_value_scan`
+    v6, and the ledger's own perimeter caught from outside.  A narrowing type
+    change is scanned against the seeded fixture rows: if none of them would be
+    refused by the new type, the packet reported the narrowing as a low-severity
+    note with no blind spot declared at all.  On `eval/holdout/holdout_07` that
+    printed "shippable" over a change that rejects every settlement invoice above
+    1,000,000.00, because the five fixture invoices were small.  The fixture is a
+    sample of the data in exactly the way the corpus is a sample of the consumers,
+    and the ledger already knew how to say that about consumers.  So: a clean value
+    scan over a fixture smaller than the declared row estimate is now a declared
+    gap, and an irreversible one, because the rollback restores the type and not
+    the values.
+
 What the ledger deliberately does NOT do
 ----------------------------------------
 It does not invent a hazard.  A gap is an absence of evidence, and the honest
 representation of an absence is a named human sign-off, not a finding with a
-severity.  Findings still come only from replay and the static rules.
+severity.  Findings still come only from replay and the static rules.  The v6
+addition holds that line: `fixture_bounded_value_scan` moves no severity and adds
+no code, it only stops the packet from calling the change shippable.
+
+It also does not pretend to know an object's name.  Where the parser produced no
+model at all, v5 filed the gap against the literal string `unknown`, which the
+held-out trigger case exposed: the statement says `ON shipment_stops` in plain text
+and the ledger, whose entire job is to name the affected object, printed `unknown`.
+v6 reads the relation out of the statement text and flags it `object_inferred`, so
+a reviewer is told which object to go and check *and* told that the name came from
+a regular expression rather than from a parse.
 """
 from __future__ import annotations
 
 import re
 from typing import Any
 
+from .tools.shadow_db import is_narrowing, offending_values
 from .tools.sql_parse import referenced_identifiers
 
 UNMODELLED_KINDS = {"unsupported", "unknown_alter", "unknown_alter_column",
@@ -63,6 +87,13 @@ MUTATING_KINDS = {"dml_update", "dml_delete"}
 PREEXISTING_TOUCH_KINDS = {"drop_column", "rename_column", "alter_type", "set_not_null",
                            "drop_not_null", "set_default", "drop_default", "drop_table",
                            "rename_table", "drop_view"}
+
+# Statements the parser cannot model at all still name their relation in the text.
+RELATION_HINT = re.compile(
+    r"\b(?:on|table|from|into|view|only)\s+(?:if\s+exists\s+)?\"?(?P<rel>[A-Za-z_][\w$]*)\"?",
+    re.I)
+HINT_STOPWORDS = {"select", "update", "delete", "insert", "each", "row", "statement", "concurrently",
+                  "materialized", "if", "exists", "only", "table", "view"}
 
 CAPPABLE_VERDICTS = ("SAFE", "SAFE_WITH_PLAN")
 CAPPED_VERDICT = "NEEDS_COVERAGE_SIGNOFF"
@@ -81,6 +112,19 @@ def _assigned_columns(sql: str) -> list[str]:
     return cols
 
 
+def relation_hint(sql: str) -> str | None:
+    """The relation an unmodelled statement mentions, read out of its text.
+
+    Deliberately a hint and not a parse: it is reported as `object_inferred` so the
+    packet never implies the parser understood the statement.
+    """
+    for m in RELATION_HINT.finditer(sql or ""):
+        rel = m.group("rel").lower()
+        if rel not in HINT_STOPWORDS:
+            return rel
+    return None
+
+
 def _nulls_erased(sql: str, columns: list[str]) -> list[str]:
     """Columns whose NULLs this statement overwrites (WHERE col IS NULL)."""
     return [c for c in columns
@@ -88,18 +132,25 @@ def _nulls_erased(sql: str, columns: list[str]) -> list[str]:
 
 
 def ledger(ops: list[Any], schema: Any, queries: list[dict[str, Any]],
-           unmodelled_notes: list[str] | None = None) -> dict[str, Any]:
-    """Deterministic coverage facts for one migration. Pure function, no model involved."""
+           unmodelled_notes: list[str] | None = None,
+           seed: dict[str, list[dict[str, Any]]] | None = None) -> dict[str, Any]:
+    """Deterministic coverage facts for one migration. Pure function, no model involved.
+
+    `seed` is the fixture the shadow replay runs on. It is passed in so the ledger can
+    say what the fixture could not have shown, which is the v6 gap class.
+    """
     queries = queries or []
+    seed = seed or {}
     corpus_idents: dict[str, set[str]] = {q["id"]: referenced_identifiers(q["sql"]) for q in queries}
     later_not_null = {(op.table, op.column) for op in ops if op.kind == "set_not_null"}
     gaps: list[dict[str, Any]] = []
 
     def add(kind: str, obj: str, op: Any, why: str, closes_with: str,
-            irreversible: bool = False) -> None:
+            irreversible: bool = False, object_inferred: bool = False) -> None:
         gaps.append({
             "kind": kind,
             "object": obj,
+            "object_inferred": object_inferred,
             "statement_index": getattr(op, "index", None),
             "statement": (getattr(op, "sql", "") or "")[:140],
             "why": why,
@@ -111,11 +162,19 @@ def ledger(ops: list[Any], schema: Any, queries: list[dict[str, Any]],
         table = op.table or "unknown"
 
         if op.kind in UNMODELLED_KINDS:
+            inferred = False
+            if op.table is None:
+                hint = relation_hint(getattr(op, "sql", ""))
+                if hint:
+                    table, inferred = hint, True
             add("unmodelled_statement", table, op,
                 "the parser produced no structural model for this statement, so no post-migration "
-                "schema and no replay covers it",
+                "schema and no replay covers it"
+                + (f"; the relation name was read out of the statement text, not parsed"
+                   if inferred else ""),
                 f"a reviewer confirms by hand what statement {op.index} does to {table} and to "
-                f"anything reading it")
+                f"anything reading it",
+                object_inferred=inferred)
 
         if op.kind in MUTATING_KINDS:
             cols = _assigned_columns(op.sql) if op.kind == "dml_update" else []
@@ -137,6 +196,25 @@ def ledger(ops: list[Any], schema: Any, queries: list[dict[str, Any]],
                         f"rows that already exist in {table} are rewritten; replay proves the corpus "
                         f"still executes, never that it still returns the same answer",
                         f"a reviewer confirms which consumers of {target} depend on the current values")
+
+        if op.kind == "alter_type" and op.column:
+            col_model = (schema.tables.get(op.table).columns.get(op.column)
+                         if schema.tables.get(op.table) else None)
+            new_type = op.detail.get("new_type", "")
+            if col_model is not None and is_narrowing(col_model.type, new_type):
+                fixture = seed.get(op.table, []) or []
+                values = [r.get(op.column) for r in fixture]
+                declared_rows = getattr(schema.tables.get(op.table), "row_estimate", 0) or 0
+                if not offending_values(values, new_type) and len(fixture) < declared_rows:
+                    add("fixture_bounded_value_scan", f"{op.table}.{op.column}", op,
+                        f"the value scan for {op.table}.{op.column} -> {new_type} ran over "
+                        f"{len(fixture)} fixture row(s) against a declared {declared_rows:,} in "
+                        f"production and found nothing that would be refused; that is a fact about "
+                        f"the fixture, not about the column, and the rollback restores the type "
+                        f"without the values",
+                        f"a reviewer counts the real offenders before phase 2: SELECT count(*) FROM "
+                        f"{op.table} WHERE {op.column} would not fit {new_type}",
+                        irreversible=True)
 
         if op.kind in PREEXISTING_TOUCH_KINDS and op.column:
             target = f"{op.table}.{op.column}"

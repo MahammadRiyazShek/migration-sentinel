@@ -1,0 +1,1429 @@
+{
+ "time_model_assumptions": {
+  "read_review_minutes": 5,
+  "verify_unevidenced_claim_minutes": 4,
+  "write_expand_contract_plan_minutes": 20,
+  "decide_human_gate_minutes": 3
+ },
+ "arms": {
+  "baseline_prompt_only": {
+   "per_case": [
+    {
+     "case_id": "holdout_01_service_level_not_null",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "NOT_NULL_NO_DEFAULT"
+     ],
+     "pred_codes": [
+      "NOT_NULL_NO_DEFAULT"
+     ],
+     "tp": [
+      "NOT_NULL_NO_DEFAULT"
+     ],
+     "fp": [],
+     "fn": [
+      "BREAKING_QUERY"
+     ],
+     "fam_tp": [
+      "data_integrity"
+     ],
+     "fam_fp": [],
+     "fam_fn": [
+      "consumer_breakage"
+     ],
+     "severity_matches": [
+      "NOT_NULL_NO_DEFAULT"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.8,
+     "tokens": 460,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_02_composite_unique_invoices",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "INDEX_LOCK_NO_CONCURRENT",
+      "UNIQUE_VIOLATION_EXISTING_DATA"
+     ],
+     "pred_codes": [
+      "INDEX_LOCK_NO_CONCURRENT",
+      "UNIQUE_VIOLATION_EXISTING_DATA"
+     ],
+     "tp": [
+      "INDEX_LOCK_NO_CONCURRENT",
+      "UNIQUE_VIOLATION_EXISTING_DATA"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "data_integrity",
+      "operational_lock"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.1,
+     "tokens": 498,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_03_rename_table_behind_view",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "tp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "fp": [],
+     "fn": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED"
+     ],
+     "fam_tp": [
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [
+      "consumer_breakage"
+     ],
+     "severity_matches": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.2,
+     "tokens": 490,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_04_safe_additive_language",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 0.0,
+     "tokens": 476,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_05_drop_status_check",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [
+      "INTEGRITY_CONSTRAINT_REMOVED"
+     ],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [
+      "INTEGRITY_CONSTRAINT_REMOVED"
+     ],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [
+      "data_integrity"
+     ],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 0.0,
+     "tokens": 467,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_06_audit_trigger",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": true,
+     "gt_blocking": true,
+     "gt_codes": [
+      "TRIGGER_WRITE_AMPLIFICATION"
+     ],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [
+      "TRIGGER_WRITE_AMPLIFICATION"
+     ],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [
+      "TRIGGER_WRITE_AMPLIFICATION"
+     ],
+     "severity_matches": [],
+     "unsafe_approval": true,
+     "false_alarm_on_clean_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 25,
+     "wall_ms": 0.1,
+     "tokens": 516,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_07_narrow_invoice_amount",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "TABLE_REWRITE_LOCK",
+      "TYPE_NARROWING_DATA_LOSS"
+     ],
+     "pred_codes": [
+      "TABLE_REWRITE_LOCK"
+     ],
+     "tp": [
+      "TABLE_REWRITE_LOCK"
+     ],
+     "fp": [],
+     "fn": [
+      "TYPE_NARROWING_DATA_LOSS"
+     ],
+     "fam_tp": [
+      "operational_lock"
+     ],
+     "fam_fp": [],
+     "fam_fn": [
+      "data_integrity"
+     ],
+     "severity_matches": [
+      "TABLE_REWRITE_LOCK"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.0,
+     "tokens": 462,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_08_release_train_fleet",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 3,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "CONSTRAINT_VALIDATION_LOCK",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "INDEX_LOCK_NO_CONCURRENT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT",
+      "TABLE_REWRITE_LOCK",
+      "UNBATCHED_BACKFILL"
+     ],
+     "pred_codes": [
+      "CONSTRAINT_VALIDATION_LOCK",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "INDEX_LOCK_NO_CONCURRENT",
+      "MISSING_ROLLBACK",
+      "UNBATCHED_BACKFILL"
+     ],
+     "tp": [
+      "CONSTRAINT_VALIDATION_LOCK",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "INDEX_LOCK_NO_CONCURRENT",
+      "MISSING_ROLLBACK",
+      "UNBATCHED_BACKFILL"
+     ],
+     "fp": [],
+     "fn": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "SELECT_STAR_DRIFT",
+      "TABLE_REWRITE_LOCK"
+     ],
+     "fam_tp": [
+      "operational_lock",
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [
+      "consumer_breakage"
+     ],
+     "severity_matches": [
+      "CONSTRAINT_VALIDATION_LOCK",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK",
+      "UNBATCHED_BACKFILL"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 5,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 45,
+     "wall_ms": 0.3,
+     "tokens": 633,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_09_drop_employment_type",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT"
+     ],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "tp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "fp": [],
+     "fn": [
+      "CROSS_SERVICE_UNCOORDINATED",
+      "SELECT_STAR_DRIFT"
+     ],
+     "fam_tp": [
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [
+      "consumer_breakage"
+     ],
+     "severity_matches": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.1,
+     "tokens": 466,
+     "cost_usd": 0.0
+    }
+   ],
+   "aggregate": {
+    "cases": 9,
+    "unsafe_approvals": 1,
+    "false_alarms_on_clean_cases": 0,
+    "strict": {
+     "precision": 1.0,
+     "recall": 0.52,
+     "f1": 0.684,
+     "tp": 13,
+     "fp": 0,
+     "fn": 12
+    },
+    "lenient_family": {
+     "precision": 1.0,
+     "recall": 0.533,
+     "f1": 0.696,
+     "tp": 8,
+     "fp": 0,
+     "fn": 7
+    },
+    "severity_agreement": 0.769,
+    "findings_total": 13,
+    "findings_with_evidence": 0,
+    "verified_plans": 0,
+    "cases_with_coverage_gaps": 3,
+    "declared_coverage_gaps": 0,
+    "gap_cases_cleared_without_signoff": 1,
+    "modelled_reviewer_minutes_total": 237,
+    "modelled_reviewer_minutes_per_case": 26.3,
+    "wall_ms_per_case": 0.2,
+    "tokens_total": 4468,
+    "cost_usd_total": 0.0
+   }
+  },
+  "baseline_prompt_with_schema": {
+   "per_case": [
+    {
+     "case_id": "holdout_01_service_level_not_null",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "NOT_NULL_NO_DEFAULT"
+     ],
+     "pred_codes": [
+      "NOT_NULL_NO_DEFAULT",
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [
+      "NOT_NULL_NO_DEFAULT"
+     ],
+     "fp": [
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [
+      "BREAKING_QUERY"
+     ],
+     "fam_tp": [
+      "consumer_breakage",
+      "data_integrity"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "NOT_NULL_NO_DEFAULT"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.4,
+     "tokens": 1097,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_02_composite_unique_invoices",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "INDEX_LOCK_NO_CONCURRENT",
+      "UNIQUE_VIOLATION_EXISTING_DATA"
+     ],
+     "pred_codes": [
+      "INDEX_LOCK_NO_CONCURRENT",
+      "UNIQUE_VIOLATION_EXISTING_DATA"
+     ],
+     "tp": [
+      "INDEX_LOCK_NO_CONCURRENT",
+      "UNIQUE_VIOLATION_EXISTING_DATA"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "data_integrity",
+      "operational_lock"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.1,
+     "tokens": 1108,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_03_rename_table_behind_view",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "tp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "fp": [],
+     "fn": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED"
+     ],
+     "fam_tp": [
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [
+      "consumer_breakage"
+     ],
+     "severity_matches": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.2,
+     "tokens": 1101,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_04_safe_additive_language",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [],
+     "fp": [
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [
+      "consumer_breakage"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": true,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.2,
+     "tokens": 1098,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_05_drop_status_check",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [
+      "INTEGRITY_CONSTRAINT_REMOVED"
+     ],
+     "pred_codes": [
+      "INTEGRITY_CONSTRAINT_REMOVED",
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [
+      "INTEGRITY_CONSTRAINT_REMOVED"
+     ],
+     "fp": [
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [],
+     "fam_tp": [
+      "data_integrity"
+     ],
+     "fam_fp": [
+      "consumer_breakage"
+     ],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 2,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 33,
+     "wall_ms": 0.1,
+     "tokens": 1120,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_06_audit_trigger",
+     "verdict": "APPROVE",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": true,
+     "gt_blocking": true,
+     "gt_codes": [
+      "TRIGGER_WRITE_AMPLIFICATION"
+     ],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [
+      "TRIGGER_WRITE_AMPLIFICATION"
+     ],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [
+      "TRIGGER_WRITE_AMPLIFICATION"
+     ],
+     "severity_matches": [],
+     "unsafe_approval": true,
+     "false_alarm_on_clean_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 25,
+     "wall_ms": 0.1,
+     "tokens": 1126,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_07_narrow_invoice_amount",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "TABLE_REWRITE_LOCK",
+      "TYPE_NARROWING_DATA_LOSS"
+     ],
+     "pred_codes": [
+      "TABLE_REWRITE_LOCK"
+     ],
+     "tp": [
+      "TABLE_REWRITE_LOCK"
+     ],
+     "fp": [],
+     "fn": [
+      "TYPE_NARROWING_DATA_LOSS"
+     ],
+     "fam_tp": [
+      "operational_lock"
+     ],
+     "fam_fp": [],
+     "fam_fn": [
+      "data_integrity"
+     ],
+     "severity_matches": [
+      "TABLE_REWRITE_LOCK"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 1,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 29,
+     "wall_ms": 0.2,
+     "tokens": 1073,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_08_release_train_fleet",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 3,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "CONSTRAINT_VALIDATION_LOCK",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "INDEX_LOCK_NO_CONCURRENT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT",
+      "TABLE_REWRITE_LOCK",
+      "UNBATCHED_BACKFILL"
+     ],
+     "pred_codes": [
+      "CONSTRAINT_VALIDATION_LOCK",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "INDEX_LOCK_NO_CONCURRENT",
+      "MISSING_ROLLBACK",
+      "UNBATCHED_BACKFILL",
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [
+      "CONSTRAINT_VALIDATION_LOCK",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "INDEX_LOCK_NO_CONCURRENT",
+      "MISSING_ROLLBACK",
+      "UNBATCHED_BACKFILL"
+     ],
+     "fp": [
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "SELECT_STAR_DRIFT",
+      "TABLE_REWRITE_LOCK"
+     ],
+     "fam_tp": [
+      "consumer_breakage",
+      "operational_lock",
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "CONSTRAINT_VALIDATION_LOCK",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK",
+      "UNBATCHED_BACKFILL"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 6,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 49,
+     "wall_ms": 0.2,
+     "tokens": 1269,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_09_drop_employment_type",
+     "verdict": "REQUEST_CHANGES",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT"
+     ],
+     "pred_codes": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK",
+      "VIEW_BREAKAGE"
+     ],
+     "tp": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "fp": [
+      "VIEW_BREAKAGE"
+     ],
+     "fn": [
+      "CROSS_SERVICE_UNCOORDINATED",
+      "SELECT_STAR_DRIFT"
+     ],
+     "fam_tp": [
+      "consumer_breakage",
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 3,
+     "evidenced_findings": 0,
+     "plan_verified": false,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 37,
+     "wall_ms": 0.1,
+     "tokens": 1101,
+     "cost_usd": 0.0
+    }
+   ],
+   "aggregate": {
+    "cases": 9,
+    "unsafe_approvals": 1,
+    "false_alarms_on_clean_cases": 1,
+    "strict": {
+     "precision": 0.737,
+     "recall": 0.56,
+     "f1": 0.636,
+     "tp": 14,
+     "fp": 5,
+     "fn": 11
+    },
+    "lenient_family": {
+     "precision": 0.857,
+     "recall": 0.8,
+     "f1": 0.828,
+     "tp": 12,
+     "fp": 2,
+     "fn": 3
+    },
+    "severity_agreement": 0.714,
+    "findings_total": 19,
+    "findings_with_evidence": 0,
+    "verified_plans": 0,
+    "cases_with_coverage_gaps": 3,
+    "declared_coverage_gaps": 0,
+    "gap_cases_cleared_without_signoff": 1,
+    "modelled_reviewer_minutes_total": 301,
+    "modelled_reviewer_minutes_per_case": 33.4,
+    "wall_ms_per_case": 0.2,
+    "tokens_total": 10093,
+    "cost_usd_total": 0.0
+   }
+  },
+  "agent_pipeline": {
+   "per_case": [
+    {
+     "case_id": "holdout_01_service_level_not_null",
+     "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "NOT_NULL_NO_DEFAULT"
+     ],
+     "pred_codes": [
+      "BREAKING_QUERY",
+      "NOT_NULL_NO_DEFAULT"
+     ],
+     "tp": [
+      "BREAKING_QUERY",
+      "NOT_NULL_NO_DEFAULT"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "consumer_breakage",
+      "data_integrity"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "BREAKING_QUERY",
+      "NOT_NULL_NO_DEFAULT"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 2,
+     "evidenced_findings": 2,
+     "plan_verified": true,
+     "human_gates": 1,
+     "modelled_reviewer_minutes": 8,
+     "wall_ms": 9.7,
+     "tokens": 1916,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_02_composite_unique_invoices",
+     "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "INDEX_LOCK_NO_CONCURRENT",
+      "UNIQUE_VIOLATION_EXISTING_DATA"
+     ],
+     "pred_codes": [
+      "INDEX_LOCK_NO_CONCURRENT",
+      "UNIQUE_VIOLATION_EXISTING_DATA"
+     ],
+     "tp": [
+      "INDEX_LOCK_NO_CONCURRENT",
+      "UNIQUE_VIOLATION_EXISTING_DATA"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "data_integrity",
+      "operational_lock"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "INDEX_LOCK_NO_CONCURRENT",
+      "UNIQUE_VIOLATION_EXISTING_DATA"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 2,
+     "evidenced_findings": 2,
+     "plan_verified": true,
+     "human_gates": 1,
+     "modelled_reviewer_minutes": 8,
+     "wall_ms": 8.9,
+     "tokens": 1711,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_03_rename_table_behind_view",
+     "verdict": "BLOCK",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "pred_codes": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "tp": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "consumer_breakage",
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "BREAKING_QUERY",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 5,
+     "evidenced_findings": 5,
+     "plan_verified": true,
+     "human_gates": 2,
+     "modelled_reviewer_minutes": 11,
+     "wall_ms": 9.1,
+     "tokens": 3176,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_04_safe_additive_language",
+     "verdict": "SAFE",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": true,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 9.2,
+     "tokens": 545,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_05_drop_status_check",
+     "verdict": "SAFE_WITH_PLAN",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": false,
+     "gt_codes": [
+      "INTEGRITY_CONSTRAINT_REMOVED"
+     ],
+     "pred_codes": [
+      "INTEGRITY_CONSTRAINT_REMOVED"
+     ],
+     "tp": [
+      "INTEGRITY_CONSTRAINT_REMOVED"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "data_integrity"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "INTEGRITY_CONSTRAINT_REMOVED"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 1,
+     "evidenced_findings": 1,
+     "plan_verified": true,
+     "human_gates": 1,
+     "modelled_reviewer_minutes": 8,
+     "wall_ms": 8.5,
+     "tokens": 1088,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_06_audit_trigger",
+     "verdict": "NEEDS_COVERAGE_SIGNOFF",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 1,
+     "coverage_signoff_required": true,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "TRIGGER_WRITE_AMPLIFICATION"
+     ],
+     "pred_codes": [],
+     "tp": [],
+     "fp": [],
+     "fn": [
+      "TRIGGER_WRITE_AMPLIFICATION"
+     ],
+     "fam_tp": [],
+     "fam_fp": [],
+     "fam_fn": [
+      "TRIGGER_WRITE_AMPLIFICATION"
+     ],
+     "severity_matches": [],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 0,
+     "evidenced_findings": 0,
+     "plan_verified": true,
+     "human_gates": 2,
+     "modelled_reviewer_minutes": 11,
+     "wall_ms": 8.8,
+     "tokens": 593,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_07_narrow_invoice_amount",
+     "verdict": "SAFE_WITH_PLAN",
+     "case_coverage_gaps": 0,
+     "declared_coverage_gaps": 0,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "TABLE_REWRITE_LOCK",
+      "TYPE_NARROWING_DATA_LOSS"
+     ],
+     "pred_codes": [
+      "TABLE_REWRITE_LOCK",
+      "TYPE_NARROWING_DATA_LOSS"
+     ],
+     "tp": [
+      "TABLE_REWRITE_LOCK",
+      "TYPE_NARROWING_DATA_LOSS"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "data_integrity",
+      "operational_lock"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "TABLE_REWRITE_LOCK"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 2,
+     "evidenced_findings": 2,
+     "plan_verified": true,
+     "human_gates": 0,
+     "modelled_reviewer_minutes": 5,
+     "wall_ms": 8.8,
+     "tokens": 1553,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_08_release_train_fleet",
+     "verdict": "BLOCK",
+     "case_coverage_gaps": 3,
+     "declared_coverage_gaps": 3,
+     "coverage_signoff_required": false,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "BREAKING_QUERY",
+      "CONSTRAINT_VALIDATION_LOCK",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "INDEX_LOCK_NO_CONCURRENT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT",
+      "TABLE_REWRITE_LOCK",
+      "UNBATCHED_BACKFILL"
+     ],
+     "pred_codes": [
+      "BREAKING_QUERY",
+      "CONSTRAINT_VALIDATION_LOCK",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "INDEX_LOCK_NO_CONCURRENT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT",
+      "TABLE_REWRITE_LOCK",
+      "UNBATCHED_BACKFILL"
+     ],
+     "tp": [
+      "BREAKING_QUERY",
+      "CONSTRAINT_VALIDATION_LOCK",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "INDEX_LOCK_NO_CONCURRENT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT",
+      "TABLE_REWRITE_LOCK",
+      "UNBATCHED_BACKFILL"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "consumer_breakage",
+      "operational_lock",
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "BREAKING_QUERY",
+      "CONSTRAINT_VALIDATION_LOCK",
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "INDEX_LOCK_NO_CONCURRENT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT",
+      "TABLE_REWRITE_LOCK",
+      "UNBATCHED_BACKFILL"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 10,
+     "evidenced_findings": 10,
+     "plan_verified": true,
+     "human_gates": 6,
+     "modelled_reviewer_minutes": 23,
+     "wall_ms": 10.4,
+     "tokens": 5838,
+     "cost_usd": 0.0
+    },
+    {
+     "case_id": "holdout_09_drop_employment_type",
+     "verdict": "NEEDS_COVERAGE_SIGNOFF",
+     "case_coverage_gaps": 1,
+     "declared_coverage_gaps": 1,
+     "coverage_signoff_required": true,
+     "gap_case_cleared_without_signoff": false,
+     "gt_blocking": true,
+     "gt_codes": [
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT"
+     ],
+     "pred_codes": [
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT"
+     ],
+     "tp": [
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT"
+     ],
+     "fp": [],
+     "fn": [],
+     "fam_tp": [
+      "consumer_breakage",
+      "process"
+     ],
+     "fam_fp": [],
+     "fam_fn": [],
+     "severity_matches": [
+      "CROSS_SERVICE_UNCOORDINATED",
+      "DESTRUCTIVE_NO_EXPAND_CONTRACT",
+      "MISSING_ROLLBACK",
+      "SELECT_STAR_DRIFT"
+     ],
+     "unsafe_approval": false,
+     "false_alarm_on_clean_case": false,
+     "findings": 4,
+     "evidenced_findings": 4,
+     "plan_verified": true,
+     "human_gates": 3,
+     "modelled_reviewer_minutes": 14,
+     "wall_ms": 9.7,
+     "tokens": 2674,
+     "cost_usd": 0.0
+    }
+   ],
+   "aggregate": {
+    "cases": 9,
+    "unsafe_approvals": 0,
+    "false_alarms_on_clean_cases": 0,
+    "strict": {
+     "precision": 1.0,
+     "recall": 0.96,
+     "f1": 0.98,
+     "tp": 24,
+     "fp": 0,
+     "fn": 1
+    },
+    "lenient_family": {
+     "precision": 1.0,
+     "recall": 0.933,
+     "f1": 0.966,
+     "tp": 14,
+     "fp": 0,
+     "fn": 1
+    },
+    "severity_agreement": 0.958,
+    "findings_total": 26,
+    "findings_with_evidence": 26,
+    "verified_plans": 9,
+    "cases_with_coverage_gaps": 3,
+    "declared_coverage_gaps": 5,
+    "gap_cases_cleared_without_signoff": 0,
+    "modelled_reviewer_minutes_total": 93,
+    "modelled_reviewer_minutes_per_case": 10.3,
+    "wall_ms_per_case": 9.2,
+    "tokens_total": 19094,
+    "cost_usd_total": 0.0
+   }
+  }
+ },
+ "agent_notes": {
+  "holdout_01_service_level_not_null": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  },
+  "holdout_02_composite_unique_invoices": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  },
+  "holdout_03_rename_table_behind_view": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  },
+  "holdout_04_safe_additive_language": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  },
+  "holdout_05_drop_status_check": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  },
+  "holdout_06_audit_trigger": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [
+    "op 1 (unsupported) not modelled structurally: CREATE TRIGGER trg_stop_status_audit AFTER UPDATE OF status "
+   ],
+   "coverage_ledger": [
+    {
+     "kind": "unmodelled_statement",
+     "object": "unknown",
+     "statement_index": 1,
+     "statement": "CREATE TRIGGER trg_stop_status_audit AFTER UPDATE OF status ON shipment_stops FOR EACH ROW EXECUTE FUNCTION log_stop_status_change()",
+     "why": "the parser produced no structural model for this statement, so no post-migration schema and no replay covers it",
+     "closes_with": "a reviewer confirms by hand what statement 1 does to unknown and to anything reading it",
+     "irreversible": false
+    }
+   ],
+   "verdict_capped_by_coverage": true
+  },
+  "holdout_07_narrow_invoice_amount": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [],
+   "verdict_capped_by_coverage": false
+  },
+  "holdout_08_release_train_fleet": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [
+    "op 5 (maintenance_rewrite) not modelled structurally: VACUUM FULL shipments"
+   ],
+   "coverage_ledger": [
+    {
+     "kind": "uncovered_object",
+     "object": "shipments.legacy_ref",
+     "statement_index": 2,
+     "statement": "ALTER TABLE shipments DROP COLUMN legacy_ref",
+     "why": "no statement in the 15-statement corpus references legacy_ref, so replay had nothing to run against it; that is silence, not a clean bill of health",
+     "closes_with": "a reviewer greps the real consumers for legacy_ref before phase 2",
+     "irreversible": false
+    },
+    {
+     "kind": "in_place_data_mutation",
+     "object": "shipment_stops.status",
+     "statement_index": 3,
+     "statement": "UPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed'",
+     "why": "rows that already exist in shipment_stops are rewritten; replay proves the corpus still executes, never that it still returns the same answer",
+     "closes_with": "a reviewer confirms which consumers of shipment_stops.status depend on the current values",
+     "irreversible": false
+    },
+    {
+     "kind": "unmodelled_statement",
+     "object": "shipments",
+     "statement_index": 5,
+     "statement": "VACUUM FULL shipments",
+     "why": "the parser produced no structural model for this statement, so no post-migration schema and no replay covers it",
+     "closes_with": "a reviewer confirms by hand what statement 5 does to shipments and to anything reading it",
+     "irreversible": false
+    }
+   ],
+   "verdict_capped_by_coverage": false
+  },
+  "holdout_09_drop_employment_type": {
+   "attempts": 1,
+   "escalated": false,
+   "coverage_gaps": [],
+   "coverage_ledger": [
+    {
+     "kind": "uncovered_object",
+     "object": "drivers.employment_type",
+     "statement_index": 0,
+     "statement": "ALTER TABLE drivers DROP COLUMN employment_type",
+     "why": "no statement in the 15-statement corpus references employment_type, so replay had nothing to run against it; that is silence, not a clean bill of health",
+     "closes_with": "a reviewer greps the real consumers for employment_type before phase 2",
+     "irreversible": false
+    }
+   ],
+   "verdict_capped_by_coverage": true
+  }
+ }
+}

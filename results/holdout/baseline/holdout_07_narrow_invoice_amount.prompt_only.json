@@ -1,0 +1,26 @@
+{
+ "case_id": "holdout_07_narrow_invoice_amount",
+ "variant": "prompt_only",
+ "verdict": "REQUEST_CHANGES",
+ "hazards": [
+  {
+   "code": "TABLE_REWRITE_LOCK",
+   "severity": "high",
+   "note": "A column type change rewrites the table under an exclusive lock.",
+   "evidence": [],
+   "source": "model"
+  }
+ ],
+ "review_text": "Verdict: REQUEST_CHANGES\n\n- [HIGH] TABLE_REWRITE_LOCK: A column type change rewrites the table under an exclusive lock.",
+ "model_usage": {
+  "provider": "scripted",
+  "model": "scripted-v1",
+  "calls": 1,
+  "tokens_in": 433,
+  "tokens_out": 29,
+  "cost_usd": 0.0
+ },
+ "wall_ms": 0.1,
+ "plan": null,
+ "plan_verified": false
+}

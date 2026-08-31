@@ -17,11 +17,15 @@ from sentinel.tools import shadow_db, sql_parse  # noqa: E402
 from sentinel.tools.incident_memory import IncidentMemory  # noqa: E402
 
 CASES = ROOT / "eval" / "cases"
+HOLDOUT = ROOT / "eval" / "holdout"
 INCIDENTS = ROOT / "memory" / "incidents.jsonl"
 
 
 def case(name: str) -> dict:
-    return json.loads((CASES / f"{name}.json").read_text())
+    path = CASES / f"{name}.json"
+    if not path.exists():
+        path = HOLDOUT / f"{name}.json"
+    return json.loads(path.read_text())
 
 
 def run(name: str, **kwargs):
@@ -417,3 +421,148 @@ class TestSubmissionText(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestHeldOutFixes(unittest.TestCase):
+    """v6. Both defects were found by the held-out set and neither is allowed back."""
+
+    SCHEMA = ("CREATE TABLE carrier_invoices (id SERIAL PRIMARY KEY, "
+              "amount NUMERIC(12,2) NOT NULL, country_code TEXT);")
+
+    def _ledger(self, migration: str, seed: dict, rows: int = 9_400_000):
+        schema = sql_parse.parse_schema(self.SCHEMA, {"carrier_invoices": rows})
+        ops = sql_parse.parse_migration(migration)
+        return coverage.ledger(ops, schema, [], seed=seed)
+
+    def test_numeric_precision_is_scanned_as_magnitude_not_string_length(self):
+        self.assertTrue(shadow_db.is_narrowing("NUMERIC(12,2)", "numeric(8,2)"))
+        self.assertEqual(shadow_db.offending_values([1250.0, 1_000_000.0], "numeric(8,2)"),
+                         [1_000_000.0])
+        self.assertEqual(shadow_db.offending_values([1250.0, 999_999.99], "numeric(8,2)"), [])
+
+    def test_clean_scan_over_a_small_fixture_is_a_declared_gap(self):
+        cov = self._ledger("ALTER TABLE carrier_invoices ALTER COLUMN amount TYPE numeric(8,2);",
+                           {"carrier_invoices": [{"amount": 1250.0}, {"amount": 24500.0}]})
+        gap = next(g for g in cov["gaps"] if g["kind"] == "fixture_bounded_value_scan")
+        self.assertEqual(gap["object"], "carrier_invoices.amount")
+        self.assertTrue(gap["irreversible"])
+        self.assertEqual(coverage.cap("SAFE_WITH_PLAN", cov)[0], "NEEDS_COVERAGE_SIGNOFF")
+
+    def test_a_fixture_that_already_shows_an_offender_opens_no_gap(self):
+        """The in-sample narrowing case must be unaffected: it has an offender in its fixture."""
+        cov = self._ledger("ALTER TABLE carrier_invoices ALTER COLUMN amount TYPE numeric(8,2);",
+                           {"carrier_invoices": [{"amount": 5_000_000.0}]})
+        self.assertNotIn("fixture_bounded_value_scan", [g["kind"] for g in cov["gaps"]])
+
+    def test_in_sample_narrowing_case_opens_no_new_gap(self):
+        r = run("case_08_narrowing_country_code")["report"]
+        self.assertNotIn("fixture_bounded_value_scan",
+                         [g["kind"] for g in r["coverage_ledger"]["gaps"]])
+        self.assertEqual(r["verdict"], "BLOCK")
+
+    def test_unmodelled_statement_names_its_relation_instead_of_unknown(self):
+        self.assertEqual(coverage.relation_hint(
+            "CREATE TRIGGER trg AFTER UPDATE OF status ON shipment_stops FOR EACH ROW "
+            "EXECUTE FUNCTION log()"), "shipment_stops")
+        self.assertIsNone(coverage.relation_hint("SELECT 1"))
+
+    def test_the_trigger_case_reports_the_object_and_flags_the_inference(self):
+        r = run("holdout_06_audit_trigger")["report"]
+        gap = next(g for g in r["coverage_ledger"]["gaps"]
+                   if g["kind"] == "unmodelled_statement")
+        self.assertEqual(gap["object"], "shipment_stops")
+        self.assertTrue(gap["object_inferred"])
+        self.assertEqual(r["verdict"], "NEEDS_COVERAGE_SIGNOFF")
+        self.assertEqual(r["counts"]["blocker"], 0, "a gap must never invent a hazard")
+
+
+class TestHeldOutSet(unittest.TestCase):
+    """The held-out world has to actually be a different world."""
+
+    def setUp(self):
+        self.cases = [json.loads(p.read_text()) for p in sorted(HOLDOUT.glob("*.json"))]
+
+    def test_nine_cases_on_a_schema_the_in_sample_set_does_not_contain(self):
+        self.assertEqual(len(self.cases), 9)
+        in_sample = case("case_01_rename_with_compat_view")
+        in_tables = set(sql_parse.parse_schema(in_sample["schema_sql"]).tables)
+        for c in self.cases:
+            self.assertNotEqual(c["schema_sql"], in_sample["schema_sql"])
+            out_tables = set(sql_parse.parse_schema(c["schema_sql"]).tables)
+            self.assertEqual(in_tables & out_tables, set(),
+                             "held-out and in-sample schemas must not share a table")
+            self.assertEqual(
+                {q["service"] for q in c["queries"]}
+                & {q["service"] for q in in_sample["queries"]}, set(),
+                "held-out and in-sample corpora must not share a service either")
+            self.assertTrue(c["ground_truth"]["hazards"] or not c["ground_truth"]["blocking"])
+            self.assertTrue(c["queries"] and c["seed"])
+
+    def test_one_label_is_deliberately_outside_the_shared_vocabulary(self):
+        from sentinel.hazards import HAZARDS
+        outside = {h["code"] for c in self.cases for h in c["ground_truth"]["hazards"]
+                   if h["code"] not in HAZARDS}
+        self.assertEqual(outside, {"TRIGGER_WRITE_AMPLIFICATION"})
+
+    def test_adding_a_hazardous_statement_never_makes_the_verdict_safer(self):
+        """The metamorphic invariant, kept as a test instead of a whole fuzzing harness."""
+        ladder = ["BLOCK", "NEEDS_COVERAGE_SIGNOFF", "SAFE_WITH_PLAN", "SAFE"]
+        base = case("holdout_04_safe_additive_language")
+        before = review(base, get_llm("scripted"), incidents_path=str(INCIDENTS),
+                        trace=False, run_id="metamorphic-a")["report"]["verdict"]
+        worse = json.loads(json.dumps(base))
+        worse["migration_sql"] += "CREATE INDEX idx_stops_status ON shipment_stops (status);\n"
+        after = review(worse, get_llm("scripted"), incidents_path=str(INCIDENTS),
+                       trace=False, run_id="metamorphic-b")["report"]["verdict"]
+        self.assertLessEqual(ladder.index(after), ladder.index(before),
+                             f"adding a lock hazard moved the verdict from {before} to {after}")
+
+
+class TestFreezeAttestation(unittest.TestCase):
+    """A held-out claim is only as good as the evidence the rules did not move."""
+
+    def setUp(self):
+        sys.path.insert(0, str(ROOT))
+        from tools import freeze_attest
+        self.fa = freeze_attest
+
+    def test_the_manifest_covers_the_whole_decision_tree(self):
+        snap = self.fa.snapshot()
+        self.assertTrue(snap)
+        self.assertTrue(all(k.startswith("sentinel/") for k in snap))
+        self.assertTrue(all(len(v) == 64 for v in snap.values()))
+
+    def test_verify_reports_a_state_and_only_ever_names_decision_files(self):
+        v = self.fa.verify()
+        self.assertIn(v["state"], ("CLEAN", "POST-FREEZE"))
+        for name in list(v["changed"]) + list(v["added"]) + list(v["removed"]):
+            self.assertTrue(name.startswith("sentinel/"))
+        self.assertIn("decision-code freeze:", self.fa.render(v))
+
+
+class TestGeneralizationMetrics(unittest.TestCase):
+    """The v6 metric exists because the v5 primary metric could not see holdout_07."""
+
+    def setUp(self):
+        sys.path.insert(0, str(ROOT))
+        from eval import run_holdout, scoring
+        self.rh, self.scoring = run_holdout, scoring
+
+    def test_a_staged_plan_over_a_blocking_migration_is_counted(self):
+        rows = [{"gt_blocking": True, "verdict": "SAFE_WITH_PLAN"},
+                {"gt_blocking": True, "verdict": "NEEDS_COVERAGE_SIGNOFF"},
+                {"gt_blocking": False, "verdict": "SAFE"}]
+        self.assertEqual(self.rh.clean_on_blocking(rows), (1, 2))
+
+    def test_the_scorer_flags_it_per_case(self):
+        c = case("holdout_07_narrow_invoice_amount")
+        row = self.scoring.score_case(c, {"verdict": "SAFE_WITH_PLAN", "hazards": [],
+                                          "plan": None, "plan_verified": False}, 0)
+        self.assertTrue(row["clean_verdict_on_blocking_case"])
+        self.assertFalse(row["unsafe_approval"],
+                         "the old primary metric is blind to this, which is the point")
+
+    def test_recall_excluding_the_unnameable_label_is_not_a_free_pass(self):
+        rows = [{"tp": ["BREAKING_QUERY"], "fn": ["TRIGGER_WRITE_AMPLIFICATION"]},
+                {"tp": [], "fn": ["MISSING_ROLLBACK"]}]
+        self.assertEqual(self.rh.recall_excluding_unnameable(rows), 0.5)

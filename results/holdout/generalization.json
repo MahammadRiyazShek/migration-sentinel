@@ -1,0 +1,257 @@
+{
+ "freeze": {
+  "state": "POST-FREEZE",
+  "changed": [
+   "sentinel/agents/risk_officer.py",
+   "sentinel/coverage.py",
+   "sentinel/tools/shadow_db.py"
+  ],
+  "added": [],
+  "removed": [],
+  "note": "v5 decision code, hashed before the held-out schema, cases or labels existed",
+  "frozen_files": 34
+ },
+ "in_sample": {
+  "baseline_prompt_only": {
+   "cases": 12,
+   "unsafe_approvals": 1,
+   "clean_on_blocking": 1,
+   "blocking_cases": 9,
+   "recall": 0.545,
+   "recall_excluding_unnameable": 0.545,
+   "precision": 0.947,
+   "f1": 0.692,
+   "severity_agreement": 0.611,
+   "false_alarms": 1,
+   "evidenced": "0/19",
+   "verified_plans": "0/12",
+   "declared_gaps": 0,
+   "gaps_cleared": "0/2",
+   "minutes": 29.7,
+   "cost_usd": 0.0
+  },
+  "baseline_prompt_with_schema": {
+   "cases": 12,
+   "unsafe_approvals": 1,
+   "clean_on_blocking": 1,
+   "blocking_cases": 9,
+   "recall": 0.606,
+   "recall_excluding_unnameable": 0.606,
+   "precision": 0.69,
+   "f1": 0.645,
+   "severity_agreement": 0.55,
+   "false_alarms": 1,
+   "evidenced": "0/29",
+   "verified_plans": "0/12",
+   "declared_gaps": 0,
+   "gaps_cleared": "0/2",
+   "minutes": 34.7,
+   "cost_usd": 0.0
+  },
+  "agent_pipeline": {
+   "cases": 12,
+   "unsafe_approvals": 0,
+   "clean_on_blocking": 0,
+   "blocking_cases": 9,
+   "recall": 0.97,
+   "recall_excluding_unnameable": 0.97,
+   "precision": 0.97,
+   "f1": 0.97,
+   "severity_agreement": 0.969,
+   "false_alarms": 0,
+   "evidenced": "35/35",
+   "verified_plans": "12/12",
+   "declared_gaps": 3,
+   "gaps_cleared": "0/2",
+   "minutes": 9.2,
+   "cost_usd": 0.0
+  }
+ },
+ "held_out": {
+  "baseline_prompt_only": {
+   "cases": 9,
+   "unsafe_approvals": 1,
+   "clean_on_blocking": 1,
+   "blocking_cases": 7,
+   "recall": 0.52,
+   "recall_excluding_unnameable": 0.542,
+   "precision": 1.0,
+   "f1": 0.684,
+   "severity_agreement": 0.769,
+   "false_alarms": 0,
+   "evidenced": "0/13",
+   "verified_plans": "0/9",
+   "declared_gaps": 0,
+   "gaps_cleared": "1/4",
+   "minutes": 26.3,
+   "cost_usd": 0.0
+  },
+  "baseline_prompt_with_schema": {
+   "cases": 9,
+   "unsafe_approvals": 1,
+   "clean_on_blocking": 1,
+   "blocking_cases": 7,
+   "recall": 0.56,
+   "recall_excluding_unnameable": 0.583,
+   "precision": 0.737,
+   "f1": 0.636,
+   "severity_agreement": 0.714,
+   "false_alarms": 1,
+   "evidenced": "0/19",
+   "verified_plans": "0/9",
+   "declared_gaps": 0,
+   "gaps_cleared": "1/4",
+   "minutes": 33.4,
+   "cost_usd": 0.0
+  },
+  "agent_pipeline": {
+   "cases": 9,
+   "unsafe_approvals": 0,
+   "clean_on_blocking": 0,
+   "blocking_cases": 7,
+   "recall": 0.96,
+   "recall_excluding_unnameable": 1.0,
+   "precision": 1.0,
+   "f1": 0.98,
+   "severity_agreement": 0.958,
+   "false_alarms": 0,
+   "evidenced": "26/26",
+   "verified_plans": "9/9",
+   "declared_gaps": 6,
+   "gaps_cleared": "0/4",
+   "minutes": 10.7,
+   "cost_usd": 0.0
+  },
+  "_rows": null,
+  "_notes": null,
+  "_invariance": {
+   "inv_reviews": 135,
+   "inv_changed": 0,
+   "inv_done": 126,
+   "inv_headlines": 0,
+   "inv_struct": 45,
+   "inv_fluent": 0,
+   "inv_cases": 9,
+   "inv_crashed": 9,
+   "inv_packets": "9/9"
+  }
+ },
+ "frozen_first_contact": {
+  "baseline_prompt_only": {
+   "cases": 9,
+   "unsafe_approvals": 1,
+   "clean_on_blocking": 1,
+   "blocking_cases": 7,
+   "recall": 0.52,
+   "recall_excluding_unnameable": 0.542,
+   "precision": 1.0,
+   "f1": 0.684,
+   "severity_agreement": 0.769,
+   "false_alarms": 0,
+   "evidenced": "0/13",
+   "verified_plans": "0/9",
+   "declared_gaps": 0,
+   "gaps_cleared": "1/3",
+   "minutes": 26.3,
+   "cost_usd": 0.0
+  },
+  "baseline_prompt_with_schema": {
+   "cases": 9,
+   "unsafe_approvals": 1,
+   "clean_on_blocking": 1,
+   "blocking_cases": 7,
+   "recall": 0.56,
+   "recall_excluding_unnameable": 0.583,
+   "precision": 0.737,
+   "f1": 0.636,
+   "severity_agreement": 0.714,
+   "false_alarms": 1,
+   "evidenced": "0/19",
+   "verified_plans": "0/9",
+   "declared_gaps": 0,
+   "gaps_cleared": "1/3",
+   "minutes": 33.4,
+   "cost_usd": 0.0
+  },
+  "agent_pipeline": {
+   "cases": 9,
+   "unsafe_approvals": 0,
+   "clean_on_blocking": 1,
+   "blocking_cases": 7,
+   "recall": 0.96,
+   "recall_excluding_unnameable": 1.0,
+   "precision": 1.0,
+   "f1": 0.98,
+   "severity_agreement": 0.958,
+   "false_alarms": 0,
+   "evidenced": "26/26",
+   "verified_plans": "9/9",
+   "declared_gaps": 5,
+   "gaps_cleared": "0/3",
+   "minutes": 10.3,
+   "cost_usd": 0.0
+  }
+ },
+ "unnameable_labels": [
+  "TRIGGER_WRITE_AMPLIFICATION"
+ ],
+ "gap_objects_named_unknown": {
+  "frozen": 1,
+  "current": 0
+ },
+ "invariance_held_out": {
+  "inv_reviews": 135,
+  "inv_changed": 0,
+  "inv_done": 126,
+  "inv_headlines": 0,
+  "inv_struct": 45,
+  "inv_fluent": 0,
+  "inv_cases": 9,
+  "inv_crashed": 9,
+  "inv_packets": "9/9"
+ },
+ "ablation_held_out": {
+  "full": {
+   "unsafe_approvals": 0,
+   "recall": 0.96,
+   "clean_on_blocking": 0,
+   "gap_cases_cleared_without_signoff": 0,
+   "minutes": 10.7
+  },
+  "no_replay": {
+   "unsafe_approvals": 0,
+   "recall": 0.56,
+   "clean_on_blocking": 1,
+   "gap_cases_cleared_without_signoff": 0,
+   "minutes": 22.8
+  },
+  "no_static": {
+   "unsafe_approvals": 0,
+   "recall": 0.32,
+   "clean_on_blocking": 0,
+   "gap_cases_cleared_without_signoff": 0,
+   "minutes": 10.0
+  },
+  "no_memory": {
+   "unsafe_approvals": 0,
+   "recall": 0.96,
+   "clean_on_blocking": 0,
+   "gap_cases_cleared_without_signoff": 0,
+   "minutes": 10.7
+  },
+  "no_verify": {
+   "unsafe_approvals": 0,
+   "recall": 0.96,
+   "clean_on_blocking": 0,
+   "gap_cases_cleared_without_signoff": 0,
+   "minutes": 22.8
+  },
+  "no_coverage": {
+   "unsafe_approvals": 1,
+   "recall": 0.96,
+   "clean_on_blocking": 3,
+   "gap_cases_cleared_without_signoff": 3,
+   "minutes": 8.7
+  }
+ }
+}

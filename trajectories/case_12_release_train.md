@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.7 ms)
+**tool** `schema.parse` (1.15 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.21 ms)
+**tool** `migration.parse` (0.32 ms)
 
 ```json
 {
@@ -148,7 +148,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.09 ms)
+**tool** `schema.apply_ops` (0.15 ms)
 
 ```json
 {
@@ -265,7 +265,7 @@ _note (cartographer)_: Some statements could not be modelled structurally; they 
 
 </details>
 
-**tool** `corpus.dependents` (0.14 ms)
+**tool** `corpus.dependents` (0.25 ms)
 
 ```json
 {
@@ -395,7 +395,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.05 ms)
 
 ```json
 {
@@ -465,7 +465,7 @@ _tool responded_
 21
 ```
 
-**tool** `shadow.replay` (3.05 ms)
+**tool** `shadow.replay` (4.71 ms)
 
 ```json
 {
@@ -671,7 +671,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -693,7 +693,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -715,7 +715,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -757,7 +757,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -817,7 +817,7 @@ _tool responded_
 ]
 ```
 
-**tool** `coverage.ledger` (0.16 ms)
+**tool** `coverage.ledger` (0.34 ms)
 
 ```json
 {
@@ -882,6 +882,7 @@ _tool responded_
   {
    "kind": "in_place_data_mutation",
    "object": "invoices.status",
+   "object_inferred": false,
    "statement_index": 5,
    "statement": "UPDATE invoices SET status = 'open' WHERE status = 'draft'",
    "why": "rows that already exist in invoices are rewritten; replay proves the corpus still executes, never that it still returns ...",
@@ -891,6 +892,7 @@ _tool responded_
   {
    "kind": "unmodelled_statement",
    "object": "invoices",
+   "object_inferred": false,
    "statement_index": 6,
    "statement": "CLUSTER invoices USING idx_invoices_customer",
    "why": "the parser produced no structural model for this statement, so no post-migration schema and no replay covers it",
@@ -1096,7 +1098,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.13 ms)
+**tool** `migration.parse` (0.2 ms)
 
 ```json
 {
@@ -1167,7 +1169,7 @@ _tool responded_
 ]
 ```
 
-**tool** `schema.apply_ops` (0.07 ms)
+**tool** `schema.apply_ops` (0.12 ms)
 
 ```json
 {
@@ -1232,7 +1234,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (3.01 ms)
+**tool** `shadow.replay` (4.57 ms)
 
 ```json
 {
