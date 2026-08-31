@@ -195,7 +195,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 1.08,
+   "ms": 1.05,
    "result_summary": "Schema"
   },
   {
@@ -204,7 +204,7 @@
    "args": {
     "sql": "CREATE TABLE stop_status_audit (\n  id SERIAL PRIMARY KEY,\n  stop_id INTEGER NOT NULL,\n  old_status TEXT,\n  new_status TEXT,\n  changed_at TIMESTAMPTZ NOT NULL\n);\nCREATE TRIGGER trg_stop_status_audit AFTER UPDATE OF status ON shipment_stops\n  FOR EACH ROW EXECUTE FUNCTION log_stop_status_change();\n"
    },
-   "ms": 0.15,
+   "ms": 0.16,
    "result_summary": [
     {
      "kind": "create_table",
@@ -252,7 +252,7 @@
      }
     ]
    },
-   "ms": 0.13,
+   "ms": 0.12,
    "result_summary": {
     "lexed_statements": 2,
     "ops": 2,
@@ -293,7 +293,7 @@
      }
     ]
    },
-   "ms": 0.1,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     [
@@ -386,7 +386,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.14,
    "result_summary": []
   },
   {
@@ -741,7 +741,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.34,
+   "ms": 3.47,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1114,7 +1114,7 @@
      "clean": true
     }
    },
-   "ms": 0.19,
+   "ms": 0.2,
    "result_summary": {
     "gaps": [
      {
@@ -1144,7 +1144,7 @@
    "args": {
     "sql": "CREATE TABLE stop_status_audit ( id SERIAL PRIMARY KEY, stop_id INTEGER NOT NULL, old_status TEXT, new_status TEXT, changed_at TIMESTAMPTZ NOT NULL );"
    },
-   "ms": 0.12,
+   "ms": 0.13,
    "result_summary": [
     {
      "kind": "create_table",
@@ -1176,7 +1176,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -1517,7 +1517,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.23,
+   "ms": 3.28,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1876,7 +1876,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 0.41,
+   "ms": 0.45,
    "result_summary": {
     "statements_audited": 1,
     "scripts": {
@@ -1914,7 +1914,7 @@
   "tokens_out": 78,
   "cost_usd": 0.0
  },
- "wall_ms": 9.7,
+ "wall_ms": 9.9,
  "severity_order": [
   "low",
   "medium",

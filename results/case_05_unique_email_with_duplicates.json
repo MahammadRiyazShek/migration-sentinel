@@ -646,7 +646,7 @@
      }
     ]
    },
-   "ms": 0.13,
+   "ms": 0.09,
    "result_summary": 17
   },
   {
@@ -875,7 +875,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.64,
+   "ms": 2.61,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -942,7 +942,7 @@
     "hazard_code": "INDEX_LOCK_NO_CONCURRENT",
     "table": "customers"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     [
@@ -1479,7 +1479,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.58,
+   "ms": 2.51,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1730,7 +1730,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 5.66,
+   "ms": 5.74,
    "result_summary": {
     "statements_audited": 3,
     "scripts": {
@@ -1791,7 +1791,7 @@
   "tokens_out": 221,
   "cost_usd": 0.0
  },
- "wall_ms": 13.2,
+ "wall_ms": 13.1,
  "severity_order": [
   "low",
   "medium",

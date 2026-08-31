@@ -175,7 +175,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.83,
+   "ms": 0.88,
    "result_summary": "Schema"
   },
   {
@@ -565,7 +565,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.37,
+   "ms": 3.27,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -647,7 +647,7 @@
      "company_name"
     ]
    },
-   "ms": 0.13,
+   "ms": 0.16,
    "result_summary": []
   },
   {
@@ -885,7 +885,7 @@
      "clean": true
     }
    },
-   "ms": 0.25,
+   "ms": 0.23,
    "result_summary": {
     "gaps": [
      {
@@ -1172,7 +1172,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.91,
+   "ms": 2.85,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1416,7 +1416,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 0.25,
+   "ms": 0.24,
    "result_summary": {
     "statements_audited": 1,
     "scripts": {
@@ -1454,7 +1454,7 @@
   "tokens_out": 78,
   "cost_usd": 0.0
  },
- "wall_ms": 8.7,
+ "wall_ms": 8.6,
  "severity_order": [
   "low",
   "medium",

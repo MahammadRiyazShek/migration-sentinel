@@ -18,13 +18,39 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CLAIMS: list[tuple[str, bool, str]] = []
 
 
+# A judge who runs `make clean` before `make eval` used to get a bare
+# FileNotFoundError traceback from the one command the docs tell them to run first.
+# The evidence is committed, so this only fires on a deliberately emptied tree - but a
+# reproducibility tool that dies without saying which command refills the file is a
+# reproducibility bug of its own.
+REFILL = {
+    "results/evaluation.json": "python3 eval/run_eval.py --ablations",
+    "results/ablation.json": "python3 eval/run_eval.py --ablations",
+    "results/holdout/decision_code_manifest.json": "python3 eval/run_holdout.py --ablations",
+}
+
+
+def read_json(rel: str) -> dict:
+    """Load a results file, or explain exactly which command regenerates it."""
+    path = ROOT / rel
+    if not path.exists():
+        sys.stderr.write(
+            f"missing evidence: {rel}\n"
+            f"  this file is committed, so an empty results/ means it was cleaned.\n"
+            f"  regenerate it with:  {REFILL.get(rel, 'make eval')}\n"
+            f"  or restore it with:  git checkout -- results/\n"
+        )
+        raise SystemExit(2)
+    return json.loads(path.read_text())
+
+
 def claim(text: str, ok: bool, got: object) -> None:
     CLAIMS.append((text, bool(ok), str(got)))
 
 
 def main() -> int:
-    ev = json.loads((ROOT / "results" / "evaluation.json").read_text())
-    ab = json.loads((ROOT / "results" / "ablation.json").read_text())
+    ev = read_json("results/evaluation.json")
+    ab = read_json("results/ablation.json")
     arms = ev["arms"]
     S = arms["agent_pipeline"]["aggregate"]
     A = arms["baseline_prompt_only"]["aggregate"]
@@ -152,8 +178,7 @@ def main() -> int:
         HA = gen["held_out"]["baseline_prompt_only"]
         F = gen["frozen_first_contact"]["agent_pipeline"]
         hab = gen["ablation_held_out"]
-        man = json.loads((ROOT / "results" / "holdout"
-                          / "decision_code_manifest.json").read_text())
+        man = read_json("results/holdout/decision_code_manifest.json")
 
         claim("9 held-out cases on a second schema, same three arms",
               H["cases"] == HB["cases"] == HA["cases"] == 9, H["cases"])

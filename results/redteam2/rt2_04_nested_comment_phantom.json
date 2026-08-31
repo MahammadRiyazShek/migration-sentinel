@@ -275,7 +275,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.87,
+   "ms": 0.86,
    "result_summary": "Schema"
   },
   {
@@ -284,7 +284,7 @@
    "args": {
     "sql": "/* superseded by 2026_02_02_tax_rate_v2:\n   /* original attempt */ ALTER TABLE invoices DROP COLUMN tax_rate;\n*/\nCREATE INDEX CONCURRENTLY idx_invoices_status ON invoices (status);\n"
    },
-   "ms": 0.14,
+   "ms": 0.17,
    "result_summary": [
     {
      "kind": "create_index",
@@ -860,7 +860,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.94,
+   "ms": 3.19,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1114,7 +1114,7 @@
      "clean": true
     }
    },
-   "ms": 0.17,
+   "ms": 0.14,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1403,7 +1403,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.92,
+   "ms": 3.05,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1647,7 +1647,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.25,
+   "ms": 3.36,
    "result_summary": {
     "statements_audited": 2,
     "scripts": {
@@ -1697,7 +1697,7 @@
   "tokens_out": 35,
   "cost_usd": 0.0
  },
- "wall_ms": 11.3,
+ "wall_ms": 11.9,
  "severity_order": [
   "low",
   "medium",

@@ -910,7 +910,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 1.04,
+   "ms": 1.08,
    "result_summary": "Schema"
   },
   {
@@ -1158,7 +1158,7 @@
      }
     ]
    },
-   "ms": 0.25,
+   "ms": 0.23,
    "result_summary": [
     "Schema",
     [
@@ -1301,7 +1301,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.16,
+   "ms": 0.19,
    "result_summary": [
     {
      "query_id": "q_dispatch_create",
@@ -1876,7 +1876,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.36,
+   "ms": 3.35,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2561,7 +2561,7 @@
    "args": {
     "sql": "ALTER TABLE \"drivers\" ADD COLUMN \"phone_e164\" TEXT;\nUPDATE \"drivers\" SET \"phone_e164\" = \"phone\" WHERE \"phone_e164\" IS NULL AND \"id\" IN (SELECT \"id\" FROM \"drivers\" WHERE \"phone_e164\" IS NULL LIMIT 5000);\nCREATE INDEX CONCURRENTLY \"idx_geofence_events_shipment\" ON \"geofence_events\" (\"shipment_id\");\nUPDATE shipment_stops SET status = 'skipped' WHERE status = 'missed' AND \"id\" IN (SELECT \"id\" FROM \"sh..."
    },
-   "ms": 0.25,
+   "ms": 0.28,
    "result_summary": [
     {
      "kind": "add_column",
@@ -3096,7 +3096,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.37,
+   "ms": 3.4,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -3541,7 +3541,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 7.79,
+   "ms": 7.8,
    "result_summary": {
     "statements_audited": 11,
     "scripts": {

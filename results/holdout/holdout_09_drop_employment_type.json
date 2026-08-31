@@ -353,7 +353,7 @@
      "geofence_events": 1200000000
     }
    },
-   "ms": 1.05,
+   "ms": 1.1,
    "result_summary": "Schema"
   },
   {
@@ -421,7 +421,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.07,
    "result_summary": [
     "Schema",
     []
@@ -889,7 +889,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.39,
+   "ms": 3.4,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1361,7 +1361,7 @@
      "clean": true
     }
    },
-   "ms": 0.17,
+   "ms": 0.21,
    "result_summary": {
     "gaps": [
      {
@@ -1729,7 +1729,7 @@
      "...+7 more"
     ]
    },
-   "ms": 3.59,
+   "ms": 3.57,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2096,7 +2096,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.56,
+   "ms": 3.58,
    "result_summary": {
     "statements_audited": 1,
     "scripts": {
@@ -2154,7 +2154,7 @@
   "tokens_out": 386,
   "cost_usd": 0.0
  },
- "wall_ms": 13.2,
+ "wall_ms": 13.4,
  "severity_order": [
   "low",
   "medium",

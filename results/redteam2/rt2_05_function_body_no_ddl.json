@@ -298,7 +298,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.87,
+   "ms": 0.85,
    "result_summary": "Schema"
   },
   {
@@ -307,7 +307,7 @@
    "args": {
     "sql": "ALTER TABLE invoices ADD COLUMN dunning_stamped_at TIMESTAMPTZ;\nCREATE OR REPLACE FUNCTION stamp_dunning() RETURNS trigger AS $fn$\nBEGIN\n  NEW.dunning_stamped_at := now();\n  RETURN NEW;\nEND;\n$fn$ LANGUAGE plpgsql;\n"
    },
-   "ms": 0.13,
+   "ms": 0.14,
    "result_summary": [
     {
      "kind": "add_column",
@@ -371,7 +371,7 @@
      }
     ]
    },
-   "ms": 0.17,
+   "ms": 0.2,
    "result_summary": {
     "lexed_statements": 2,
     "ops": 2,
@@ -558,7 +558,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.16,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -969,7 +969,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.96,
+   "ms": 3.11,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1571,7 +1571,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.8,
+   "ms": 2.89,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1818,7 +1818,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.48,
+   "ms": 3.77,
    "result_summary": {
     "statements_audited": 2,
     "scripts": {
@@ -1868,7 +1868,7 @@
   "tokens_out": 78,
   "cost_usd": 0.0
  },
- "wall_ms": 11.7,
+ "wall_ms": 12.3,
  "severity_order": [
   "low",
   "medium",

@@ -209,7 +209,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.86,
+   "ms": 0.83,
    "result_summary": "Schema"
   },
   {
@@ -250,7 +250,7 @@
      }
     ]
    },
-   "ms": 0.04,
+   "ms": 0.05,
    "result_summary": {
     "lexed_statements": 1,
     "ops": 1,
@@ -599,7 +599,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.65,
+   "ms": 3.41,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -963,7 +963,7 @@
      "clean": true
     }
    },
-   "ms": 0.31,
+   "ms": 0.28,
    "result_summary": {
     "gaps": [],
     "gap_kinds": [],
@@ -1204,7 +1204,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.12,
+   "ms": 2.93,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1450,7 +1450,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.36,
+   "ms": 3.33,
    "result_summary": {
     "statements_audited": 1,
     "scripts": {
@@ -1508,7 +1508,7 @@
   "tokens_out": 131,
   "cost_usd": 0.0
  },
- "wall_ms": 13.1,
+ "wall_ms": 12.7,
  "severity_order": [
   "low",
   "medium",

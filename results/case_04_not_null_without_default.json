@@ -502,7 +502,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.78,
+   "ms": 0.84,
    "result_summary": "Schema"
   },
   {
@@ -671,7 +671,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.11,
+   "ms": 0.14,
    "result_summary": [
     {
      "query_id": "q_web_profile",
@@ -1029,7 +1029,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.76,
+   "ms": 2.64,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1183,7 +1183,7 @@
     "hazard_code": "NOT_NULL_NO_DEFAULT",
     "table": "customers"
    },
-   "ms": 0.0,
+   "ms": 0.01,
    "result_summary": [
     0,
     []
@@ -1493,7 +1493,7 @@
      }
     ]
    },
-   "ms": 0.05,
+   "ms": 0.08,
    "result_summary": [
     "Schema",
     []
@@ -1723,7 +1723,7 @@
      "...+6 more"
     ]
    },
-   "ms": 2.75,
+   "ms": 2.5,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -2038,7 +2038,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 3.09,
+   "ms": 3.03,
    "result_summary": {
     "statements_audited": 2,
     "scripts": {
@@ -2102,7 +2102,7 @@
   "tokens_out": 328,
   "cost_usd": 0.0
  },
- "wall_ms": 10.9,
+ "wall_ms": 10.7,
  "severity_order": [
   "low",
   "medium",

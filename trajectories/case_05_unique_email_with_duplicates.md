@@ -318,7 +318,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.13 ms)
+**tool** `corpus.blast_score` (0.09 ms)
 
 ```json
 {
@@ -391,7 +391,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (2.64 ms)
+**tool** `shadow.replay` (2.61 ms)
 
 ```json
 {
@@ -602,7 +602,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.0 ms)
+**tool** `memory.escalation` (0.01 ms)
 
 ```json
 {
@@ -856,7 +856,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.58 ms)
+**tool** `shadow.replay` (2.51 ms)
 
 ```json
 {
@@ -956,7 +956,7 @@ _tool responded_
 }
 ```
 
-**tool** `plan.audit` (5.66 ms)
+**tool** `plan.audit` (5.74 ms)
 
 ```json
 {

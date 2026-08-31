@@ -319,7 +319,7 @@
      "usage_events": 900000000
     }
    },
-   "ms": 0.83,
+   "ms": 0.89,
    "result_summary": "Schema"
   },
   {
@@ -488,7 +488,7 @@
     ],
     "schema": "Schema"
    },
-   "ms": 0.13,
+   "ms": 0.16,
    "result_summary": [
     {
      "query_id": "q_billing_invoice_create",
@@ -884,7 +884,7 @@
      "...+9 more"
     ]
    },
-   "ms": 3.44,
+   "ms": 3.38,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1458,7 +1458,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.87,
+   "ms": 5.15,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1480,7 +1480,7 @@
    "args": {
     "sql": "UPDATE invoices SET status = 'open WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate AND \"id\" IN (SELECT \"id\" FROM \"invoices\" WHERE id = 1; ALTER TABLE invoices DROP COLUMN tax_rate LIMIT 5000);"
    },
-   "ms": 0.08,
+   "ms": 0.13,
    "result_summary": [
     {
      "kind": "dml_update",
@@ -1514,7 +1514,7 @@
      }
     ]
    },
-   "ms": 0.06,
+   "ms": 0.12,
    "result_summary": [
     "Schema",
     []
@@ -1742,7 +1742,7 @@
      "...+9 more"
     ]
    },
-   "ms": 2.9,
+   "ms": 3.46,
    "result_summary": {
     "materialised": true,
     "schema_errors": [],
@@ -1995,7 +1995,7 @@
     },
     "replay_tool": "function"
    },
-   "ms": 0.36,
+   "ms": 0.37,
    "result_summary": {
     "statements_audited": 1,
     "scripts": {
@@ -2050,7 +2050,7 @@
   "tokens_out": 172,
   "cost_usd": 0.0
  },
- "wall_ms": 12.3,
+ "wall_ms": 15.4,
  "severity_order": [
   "low",
   "medium",

@@ -26,7 +26,7 @@
 
 </details>
 
-**tool** `schema.parse` (0.87 ms)
+**tool** `schema.parse` (0.85 ms)
 
 ```json
 {
@@ -49,7 +49,7 @@ _tool responded_
 "Schema"
 ```
 
-**tool** `migration.parse` (0.08 ms)
+**tool** `migration.parse` (0.09 ms)
 
 ```json
 {
@@ -221,7 +221,7 @@ _tool responded_
 
 </details>
 
-**tool** `corpus.dependents` (0.18 ms)
+**tool** `corpus.dependents` (0.19 ms)
 
 ```json
 {
@@ -339,7 +339,7 @@ _tool responded_
 ]
 ```
 
-**tool** `corpus.blast_score` (0.03 ms)
+**tool** `corpus.blast_score` (0.02 ms)
 
 ```json
 {
@@ -411,7 +411,7 @@ _tool responded_
 17
 ```
 
-**tool** `shadow.replay` (3.34 ms)
+**tool** `shadow.replay` (3.38 ms)
 
 ```json
 {
@@ -775,7 +775,7 @@ _tool responded_
 ]
 ```
 
-**tool** `memory.escalation` (0.01 ms)
+**tool** `memory.escalation` (0.0 ms)
 
 ```json
 {
@@ -1026,7 +1026,7 @@ _tool responded_
 
 </details>
 
-**tool** `migration.parse` (0.15 ms)
+**tool** `migration.parse` (0.16 ms)
 
 ```json
 {
@@ -1136,7 +1136,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.77 ms)
+**tool** `shadow.replay` (2.72 ms)
 
 ```json
 {
@@ -1516,7 +1516,7 @@ _tool responded_
 ]
 ```
 
-**tool** `shadow.replay` (2.69 ms)
+**tool** `shadow.replay` (2.76 ms)
 
 ```json
 {
@@ -1741,7 +1741,7 @@ _tool responded_
 }
 ```
 
-**tool** `plan.audit` (6.22 ms)
+**tool** `plan.audit` (6.0 ms)
 
 ```json
 {
